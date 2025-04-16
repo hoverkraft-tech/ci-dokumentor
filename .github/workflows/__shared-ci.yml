@@ -1,0 +1,31 @@
+name: Common Continuous Integration tasks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  packages: read
+  security-events: write
+  statuses: write
+  id-token: write
+
+jobs:
+  linter:
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@198d391bd7046a3c8ca503d3387ad9c5ba8f9f29 # 0.22.0
+    with:
+      linter-env: |
+        FILTER_REGEX_EXCLUDE=dist/**/*
+        VALIDATE_JSCPD=false
+        VALIDATE_TYPESCRIPT_STANDARD=false
+        VALIDATE_TYPESCRIPT_ES=false
+        VALIDATE_TYPESCRIPT_PRETTIER=false
+        VALIDATE_JAVASCRIPT_ES=false
+        VALIDATE_JAVASCRIPT_STANDARD=false
+
+  nodejs:
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@0c281f43dd49fcdec089c67ee99819620d634046 # 0.10.0
+    permissions:
+      id-token: write
+      security-events: write
+      contents: read

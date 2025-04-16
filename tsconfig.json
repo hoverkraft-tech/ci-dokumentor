@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/github-actions"
+    },
+    {
+      "path": "./packages/cli"
+    },
+    {
+      "path": "./packages/core"
+    }
+  ]
+}
