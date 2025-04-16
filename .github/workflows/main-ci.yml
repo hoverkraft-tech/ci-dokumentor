@@ -1,0 +1,56 @@
+name: Internal - Main - Continuous Integration
+
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+
+  workflow_dispatch:
+
+  schedule:
+    - cron: '25 8 * * 1'
+
+permissions:
+  contents: read
+  packages: read
+  security-events: write
+  statuses: write
+  # FIXME: This is a workaround for having workflow ref. See https://github.com/orgs/community/discussions/38659
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/__shared-ci.yml
+    secrets: inherit
+
+  release:
+    needs: ci
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: bitflight-devops/github-action-readme-generator@f750ff0ac8a4b68a3c2d622cc50a5ad20bcebaa1 # v1.8.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+
+      - uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
+        id: generate-token
+        with:
+          app-id: ${{ vars.CI_BOT_APP_ID }}
+          private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
+
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@198d391bd7046a3c8ca503d3387ad9c5ba8f9f29 # 0.22.0
+        with:
+          github-token: ${{ steps.generate-token.outputs.token }}
+          branch: docs/actions-workflows-documentation-update
+          title: 'docs: update actions and workflows documentation'
+          body: Update actions and workflows documentation
+          commit-message: |
+            docs: update actions and workflows documentation
+
+            [skip ci]
