@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@198d391bd7046a3c8ca503d3387ad9c5ba8f9f29 # 0.22.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@95664be4ec235bfc221c4356c7153cbab3fb8f93 # 0.22.3
     with:
       linter-env: |
         FILTER_REGEX_EXCLUDE=dist/**/*
@@ -24,7 +24,7 @@ jobs:
         VALIDATE_JAVASCRIPT_STANDARD=false
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@0c281f43dd49fcdec089c67ee99819620d634046 # 0.10.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@5c1010a9146952f724730bf79ba8e2e40ba8e474 # 0.11.0
     permissions:
       id-token: write
       security-events: write
