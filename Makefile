@@ -16,15 +16,6 @@ lint-fix: ## Execute linting and fix
 		-e FIX_MARKDOWN_PRETTIER=true \
 		-e FIX_NATURAL_LANGUAGE=true)
 
-test-build-application: ## Build the test application image
-	@docker buildx build \
-		--push --platform linux/amd64,linux/arm64 \
-		--target prod \
-		-t ghcr.io/hoverkraft-tech/ci-github-container/application-test:0.1.0 ./tests/application
-
-test-ct-install: ## Run ct install to install the test application
-	@ct install --config ct.yaml --helm-extra-set-args '--set=image.tag=0.1.0'
-
 define run_linter
 	DEFAULT_WORKSPACE="$(CURDIR)"; \
 	LINTER_IMAGE="linter:latest"; \

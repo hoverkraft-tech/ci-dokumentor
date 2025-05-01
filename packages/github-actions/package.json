@@ -1,5 +1,5 @@
 {
-  "name": "@ci-documentor/github-actions",
+  "name": "@ci-dokumentor/github-actions",
   "version": "0.0.1",
   "private": true,
   "type": "module",
