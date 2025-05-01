@@ -1,3 +1,3 @@
-import { GeneratorAdapter } from '@ci-documentor/core/src/generator.adapter.js';
+import { GeneratorAdapter } from '@ci-dokumentor/core/src/generator.adapter.js';
 
 export class GitHubActionsGenerator implements GeneratorAdapter {}
