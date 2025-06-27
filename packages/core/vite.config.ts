@@ -38,6 +38,8 @@ export default defineConfig(() => ({
       // External packages that should not be bundled into your library.
       external: [],
     },
+    target: 'node20', // Specify Node.js version target
+    ssr: true
   },
   test: {
     watch: false,
