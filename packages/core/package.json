@@ -15,5 +15,7 @@
       "default": "./dist/index.js"
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "inversify": "^7.5.2"
+  }
 }

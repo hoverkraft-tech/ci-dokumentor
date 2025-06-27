@@ -1,0 +1,348 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentation > should generate complete documentation for a GitHub Action > github-action-documentation 1`] = `
+#
+<img src=".github/ghadocs/branding.svg"
+     width="60px"
+     align="center"
+     alt="branding<icon:upload-cloud color:blue"
+>
+GitHub Action: Build and Deploy
+[![Release](undefined)](https://img.shields.io/github/v/release/{owner}/{repo}?display_name=tag&sort=semver&logo=github&style=flat-square)[![Release by date](undefined)](https://img.shields.io/github/release-date/{owner}/{repo}?display_name=tag&sort=semver&logo=github&style=flat-square) [![Last Commit](undefined)](https://img.shields.io/github/last-commit/{owner}/{repo}?logo=github&style=flat-square) [![Open Issues](undefined)](https://img.shields.io/github/issues/{owner}/{repo}?logo=github&style=flat-square) [![Downloads](undefined)](https://img.shields.io/github/downloads/{owner}/{repo}/total?logo=github&style=flat-square)
+Builds the application and deploys it to the specified environment
+\`\`\`yaml
+- uses: hoverkraft-tech/ci-github-container@0.25.0
+  with:
+    # Description: Target environment (staging, production)
+    environment: ""
+
+    # Description: Version to deploy
+    #
+    # Default: latest
+    version: ""
+
+    # Description: Run in dry-run mode
+    #
+    # Default: false
+    dry-run: ""
+
+    # Description: Path to configuration file
+    #
+    # Default: config/deploy.yml
+    config-file: ""
+
+\`\`\`
+| **Input** | **Description** | **Default** | **Required** |
+| --- | --- | --- | --- |
+| \`environment\` | Target environment (staging, production) | \`\` | **true** |
+| \`version\` | Version to deploy | \`latest\` | **false** |
+| \`dry-run\` | Run in dry-run mode | \`false\` | **false** |
+| \`config-file\` | Path to configuration file | \`config/deploy.yml\` | **false** |
+| **Output** | **Description** |
+| --- | --- |
+| \`deployment-url\` | URL of the deployed application |
+| \`build-artifacts\` | Path to build artifacts |
+| \`deployment-status\` | Status of the deployment (success/failure) |
+## Examples
+### Basic Usage
+\`\`\`yaml
+- name: Run Build and Deploy
+  uses: owner/repo@v1
+  with:
+    environment: example-value
+    version: latest
+    dry-run: false
+\`\`\`
+### Advanced Usage
+\`\`\`yaml
+- name: Advanced Build and Deploy
+  uses: owner/repo@v1
+  with:
+    environment: custom-value
+    version: latest
+    dry-run: false
+    config-file: config/deploy.yml
+\`\`\`
+### Using Outputs
+\`\`\`yaml
+- name: Use Build and Deploy
+  id: my-action
+  uses: owner/repo@v1
+
+- name: Use outputs
+  run: |
+    echo "Output: \${{ steps.my-action.outputs.deployment-url }}"
+\`\`\`
+## Contributing
+We welcome contributions! Here's how you can help:
+
+1. Fork the repository
+2. Create a feature branch (\`git checkout -b feature/amazing-feature\`)
+3. Make your changes
+4. Write or update tests
+5. Commit your changes (\`git commit -m 'Add amazing feature'\`)
+6. Push to the branch (\`git push origin feature/amazing-feature\`)
+7. Open a Pull Request
+
+Please make sure to:
+- Follow the existing code style
+- Add tests for new functionality
+- Update documentation as needed
+- Keep commits atomic and descriptive
+
+### Development Workflow
+1. Clone the repository
+2. Install dependencies
+3. Make your changes
+4. Test your changes
+5. Submit a pull request
+\`\`\`markdown
+# Development Setup
+
+\`\`\`bash
+# Clone the repository
+git clone https://github.com/owner/repo.git
+cd repo
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build the project
+npm run build
+\`\`\`
+\`\`\`
+## Security
+\`\`\`markdown
+## Security Policy
+
+We take the security of our software seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+
+### Reporting Security Vulnerabilities
+
+**Please do not report security vulnerabilities through public GitHub issues.**
+
+Instead, please send an email to security@example.com. You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
+
+Please include the requested information listed below (as much as you can provide) to help us better understand the nature and scope of the possible issue:
+
+- Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
+- Full paths of source file(s) related to the manifestation of the issue
+- The location of the affected source code (tag/branch/commit or direct URL)
+- Any special configuration required to reproduce the issue
+- Step-by-step instructions to reproduce the issue
+- Proof-of-concept or exploit code (if possible)
+- Impact of the issue, including how an attacker might exploit the issue
+
+This information will help us triage your report more quickly.
+\`\`\`
+### Security Best Practices
+- Always use the latest version of the action/workflow
+- Pin action versions to specific commits for production use
+- Review and audit third-party actions before use
+- Use secrets management for sensitive data
+- Limit permissions using the principle of least privilege
+- Regularly update dependencies and review security advisories
+\`\`\`markdown
+### Security Considerations for Actions
+
+- Always validate inputs to prevent injection attacks
+- Use \`inputs\` instead of environment variables for sensitive data
+- Be cautious with \`shell\` actions that execute user input
+- Review permissions required by the action
+\`\`\`
+## License
+This project is licensed under the MIT License.
+
+Copyright © 2025 CI Team
+
+See the [LICENSE](LICENSE) file for full license text.
+
+---
+<div align="center">
+  Made with ❤️ by CI Team
+</div>
+`;
+
+exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentation > should generate documentation for a CI/CD workflow > workflow-documentation 1`] = `
+# GitHub Workflow: CI/CD Pipeline
+## Jobs
+| Job | Runs On | Steps | Dependencies |
+| --- | --- | --- | --- |
+| \`test\` | ubuntu-latest | 5 | None |
+| \`build\` | ubuntu-latest | 5 | test |
+| \`deploy\` | ubuntu-latest | 1 | build |
+### Job: test
+**Name: **Run Tests
+**Runs on: **ubuntu-latest
+**Matrix strategy: **Yes
+
+**Steps:**
+1. Checkout code
+2. Setup Node.js
+3. Install dependencies
+4. Run tests
+5. Upload coverage
+
+### Job: build
+**Name: **Build Application
+**Runs on: **ubuntu-latest
+**Depends on: **test
+
+**Steps:**
+1. Checkout code
+2. Setup Docker Buildx
+3. Login to Container Registry
+4. Extract metadata
+5. Build and push
+
+### Job: deploy
+**Name: **Deploy to Environment
+**Runs on: **ubuntu-latest
+**Depends on: **build
+**Environment: **production
+
+**Steps:**
+1. Deploy application
+## Environment & Secrets
+### Environment Variables
+| Variable | Description | Default Value |
+| --- | --- | --- |
+| \`NODE_VERSION\` | Environment variable | \`18\` |
+| \`REGISTRY\` | Environment variable | \`ghcr.io\` |
+## Examples
+### Basic Workflow
+\`\`\`yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+      - name: Install dependencies
+        run: npm ci
+\`\`\`
+### Multi-Job Workflow
+\`\`\`yaml
+name: CI/CD Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: test task
+        run: echo "Running test"
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build task
+        run: echo "Running build"
+\`\`\`
+## Contributing
+We welcome contributions! Here's how you can help:
+
+1. Fork the repository
+2. Create a feature branch (\`git checkout -b feature/amazing-feature\`)
+3. Make your changes
+4. Write or update tests
+5. Commit your changes (\`git commit -m 'Add amazing feature'\`)
+6. Push to the branch (\`git push origin feature/amazing-feature\`)
+7. Open a Pull Request
+
+Please make sure to:
+- Follow the existing code style
+- Add tests for new functionality
+- Update documentation as needed
+- Keep commits atomic and descriptive
+
+### Development Workflow
+1. Clone the repository
+2. Install dependencies
+3. Make your changes
+4. Test your changes
+5. Submit a pull request
+\`\`\`markdown
+# Development Setup
+
+\`\`\`bash
+# Clone the repository
+git clone https://github.com/owner/repo.git
+cd repo
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build the project
+npm run build
+\`\`\`
+\`\`\`
+## Security
+\`\`\`markdown
+## Security Policy
+
+We take the security of our software seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+
+### Reporting Security Vulnerabilities
+
+**Please do not report security vulnerabilities through public GitHub issues.**
+
+Instead, please send an email to security@example.com. You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
+
+Please include the requested information listed below (as much as you can provide) to help us better understand the nature and scope of the possible issue:
+
+- Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
+- Full paths of source file(s) related to the manifestation of the issue
+- The location of the affected source code (tag/branch/commit or direct URL)
+- Any special configuration required to reproduce the issue
+- Step-by-step instructions to reproduce the issue
+- Proof-of-concept or exploit code (if possible)
+- Impact of the issue, including how an attacker might exploit the issue
+
+This information will help us triage your report more quickly.
+\`\`\`
+### Security Best Practices
+- Always use the latest version of the action/workflow
+- Pin action versions to specific commits for production use
+- Review and audit third-party actions before use
+- Use secrets management for sensitive data
+- Limit permissions using the principle of least privilege
+- Regularly update dependencies and review security advisories
+\`\`\`markdown
+### Security Considerations for Workflows
+
+- Use \`permissions\` to limit what the workflow can access
+- Be careful with \`pull_request_target\` triggers
+- Validate external inputs and dependencies
+- Use environment protection rules for production deployments
+\`\`\`
+## License
+This project is licensed under the MIT License.
+
+Copyright © 2025 Your Name
+
+See the [LICENSE](LICENSE) file for full license text.
+
+---
+<div align="center">
+  Made with ❤️ by Your Name
+</div>
+`;

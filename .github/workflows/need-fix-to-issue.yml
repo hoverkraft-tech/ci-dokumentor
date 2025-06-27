@@ -20,6 +20,10 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   main:
     uses: hoverkraft-tech/ci-github-common/.github/workflows/need-fix-to-issue.yml@95664be4ec235bfc221c4356c7153cbab3fb8f93 # 0.22.3

@@ -1,12 +1,14 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 import * as path from 'path';
 
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/packages/github-actions',
   plugins: [
+    nxCopyAssetsPlugin(['*.md', 'package.json']),
     dts({
       entryRoot: 'src',
       tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
@@ -38,6 +40,8 @@ export default defineConfig(() => ({
       // External packages that should not be bundled into your library.
       external: [],
     },
+    target: 'node20', // Specify Node.js version target
+    ssr: true, // Server-side rendering mode for Node.js
   },
   test: {
     watch: false,
@@ -49,5 +53,8 @@ export default defineConfig(() => ({
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
     },
+    snapshotSerializers: [
+      'jest-serializer-html',
+    ],
   },
 }));
