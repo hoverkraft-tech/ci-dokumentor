@@ -120,7 +120,7 @@ describe('MarkdownFormatterAdapter', () => {
             const result = adapter.center(input);
 
             // Assert
-            expect(result.toString()).toBe('<div align="center">\n\nCentered Text\n\n</div>');
+            expect(result.toString()).toBe('<!-- markdownlint-disable-next-line first-line-heading --><div align="center">\n\nCentered Text\n\n</div>');
         });
 
         it('should handle empty string input', () => {
@@ -131,7 +131,7 @@ describe('MarkdownFormatterAdapter', () => {
             const result = adapter.center(input);
 
             // Assert
-            expect(result.toString()).toBe('<div align="center">\n\n\n\n</div>');
+            expect(result.toString()).toBe('<!-- markdownlint-disable-next-line first-line-heading --><div align="center">\n\n\n\n</div>');
         });
 
         it('should handle multi-line text', () => {
@@ -142,7 +142,7 @@ describe('MarkdownFormatterAdapter', () => {
             const result = adapter.center(input);
 
             // Assert
-            expect(result.toString()).toBe('<div align="center">\n\nLine 1\nLine 2\n\n</div>');
+            expect(result.toString()).toBe('<!-- markdownlint-disable-next-line first-line-heading --><div align="center">\n\nLine 1\nLine 2\n\n</div>');
         });
     });
 
@@ -445,7 +445,7 @@ describe('MarkdownFormatterAdapter', () => {
             const url = 'https://example.com/image.png';
 
             // Act
-            const result = adapter.image(altText, url);
+            const result = adapter.image(url, altText,);
 
             // Assert
             expect(result.toString()).toBe('![Alternative Text](https://example.com/image.png)');
@@ -458,7 +458,7 @@ describe('MarkdownFormatterAdapter', () => {
             const options = { width: '300px' };
 
             // Act
-            const result = adapter.image(altText, url, options);
+            const result = adapter.image(url, altText, options);
 
             // Assert
             expect(result.toString()).toBe('<img src="https://example.com/image.png" width="300px" alt="Alternative Text" />');
@@ -471,7 +471,7 @@ describe('MarkdownFormatterAdapter', () => {
             const options = { align: 'center' };
 
             // Act
-            const result = adapter.image(altText, url, options);
+            const result = adapter.image(url, altText, options);
 
             // Assert
             expect(result.toString()).toBe('<img src="https://example.com/image.png" align="center" alt="Alternative Text" />');
@@ -484,7 +484,7 @@ describe('MarkdownFormatterAdapter', () => {
             const options = { width: '300px', align: 'center' };
 
             // Act
-            const result = adapter.image(altText, url, options);
+            const result = adapter.image(url, altText, options);
 
             // Assert
             expect(result.toString()).toBe('<img src="https://example.com/image.png" width="300px" align="center" alt="Alternative Text" />');
@@ -496,7 +496,7 @@ describe('MarkdownFormatterAdapter', () => {
             const url = 'https://example.com/image.png';
 
             // Act
-            const result = adapter.image(altText, url);
+            const result = adapter.image(url, altText,);
 
             // Assert
             expect(result.toString()).toBe('![](https://example.com/image.png)');

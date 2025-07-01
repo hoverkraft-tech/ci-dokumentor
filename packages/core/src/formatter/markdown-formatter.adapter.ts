@@ -12,7 +12,9 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     }
 
     center(input: Buffer): Buffer {
-        return Buffer.from(`<div align="center">\n\n${input.toString()}\n\n</div>`);
+        return Buffer.from(
+            `<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\n${input.toString()}\n\n</div>`
+        );
     }
 
     comment(input: Buffer): Buffer {
@@ -44,7 +46,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         return Buffer.from(`[${text.toString()}](${url})`);
     }
 
-    image(altText: Buffer, url: string, options?: { width?: string; align?: string }): Buffer {
+    image(url: string, altText: Buffer, options?: { width?: string; align?: string }): Buffer {
         if (options?.width || options?.align) {
             // Use HTML img tag for advanced formatting
             const attributes = [];

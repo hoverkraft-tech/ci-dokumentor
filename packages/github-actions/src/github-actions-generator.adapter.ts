@@ -2,6 +2,7 @@ import { GeneratorAdapter, OutputAdapter, SECTION_GENERATOR_ADAPTER_IDENTIFIER, 
 import { inject, multiInject } from 'inversify';
 import { GitHubAction, GitHubActionsParser, GitHubWorkflow } from './github-actions-parser.js';
 import { dirname, join } from 'node:path';
+import { GitHubRepositoryService } from './repository/github-repository.service.js';
 
 /**
  * GitHub Actions generator adapter.
@@ -12,6 +13,8 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     constructor(
         @inject(GitHubActionsParser)
         public readonly gitHubActionsParser: GitHubActionsParser,
+        @inject(GitHubRepositoryService)
+        private readonly gitHubRepositoryService: GitHubRepositoryService,
         @multiInject(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
         private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubAction | GitHubWorkflow>[],
     ) { }
@@ -49,13 +52,18 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
 
     async generateDocumentation(source: string, formatterAdapter: FormatterAdapter, outputAdapter: OutputAdapter): Promise<void> {
         const gitHubActionOrWorkflow = this.gitHubActionsParser.parseFile(source);
+        const repository = await this.gitHubRepositoryService.getRepository();
 
         for (const sectionGeneratorAdapter of this.sectionGeneratorAdapters) {
-            const sectionContent = sectionGeneratorAdapter.generateSection(formatterAdapter, gitHubActionOrWorkflow);
+            const sectionContent = sectionGeneratorAdapter.generateSection(formatterAdapter, gitHubActionOrWorkflow, repository);
 
             await outputAdapter.writeSection(
                 sectionGeneratorAdapter.getSectionIdentifier(),
-                sectionContent,
+                Buffer.concat([
+                    sectionContent,
+                    formatterAdapter.lineBreak(),
+                    formatterAdapter.lineBreak()
+                ]),
             );
         }
     }

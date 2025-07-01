@@ -1,13 +1,14 @@
+import { GitHubRepository } from "../repository/github-repository.service.js";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
-export class UsageSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Quickstart;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
         // Only generate usage section for GitHub Actions
         if (!('runs' in manifest)) {
             return Buffer.from('');
@@ -19,7 +20,7 @@ export class UsageSectionGenerator implements GitHubActionsSectionGeneratorAdapt
 
     private generateUsageExample(manifest: GitHubAction): string {
         // Generate example with inputs
-        let usageYaml = `- uses: hoverkraft-tech/ci-github-container@0.25.0\n  with:`;
+        let usageYaml = `---\n- uses: hoverkraft-tech/ci-github-container@0.25.0\n  with:`;
 
         if (manifest.inputs && Object.keys(manifest.inputs).length > 0) {
             Object.entries(manifest.inputs).forEach(([inputName, input]) => {

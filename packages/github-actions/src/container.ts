@@ -1,5 +1,4 @@
-import { Container as InversifyContainer } from 'inversify';
-import { SECTION_GENERATOR_ADAPTER_IDENTIFIER, initContainer as coreInitContainer } from '@ci-dokumentor/core';
+import { Container, SECTION_GENERATOR_ADAPTER_IDENTIFIER, GENERATOR_ADAPTER_IDENTIFIER, initContainer as coreInitContainer } from '@ci-dokumentor/core';
 import { GitHubActionsParser } from './github-actions-parser.js';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 
@@ -17,22 +16,30 @@ import { JobsSectionGenerator } from './section/jobs-section-generator.adapter.j
 import { ContributingSectionGenerator } from './section/contributing-section-generator.adapter.js';
 import { SecuritySectionGenerator } from './section/security-section-generator.adapter.js';
 import { LicenseSectionGenerator } from './section/license-section-generator.adapter.js';
-export type Container = InversifyContainer;
+import { GitHubRepositoryService } from './repository/github-repository.service.js';
 
 let container: Container | null = null;
 
-export function initContainer(): Container {
+export function initContainer(baseContainer: Container | undefined = undefined): Container {
     if (container) {
         return container;
     }
 
-    container = coreInitContainer();
+    if (baseContainer) {
+        container = baseContainer;
+    } else {
+        container = coreInitContainer();
+    }
+
+    // Services
+    container.bind(GitHubRepositoryService).toSelf().inSingletonScope();
 
     // Bind parser
     container.bind(GitHubActionsParser).toSelf().inSingletonScope();
 
     // Bind generator
     container.bind(GitHubActionsGeneratorAdapter).toSelf().inSingletonScope();
+    container.bind(GENERATOR_ADAPTER_IDENTIFIER).to(GitHubActionsGeneratorAdapter);
 
     // Bind section generators
     container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(HeaderSectionGenerator);

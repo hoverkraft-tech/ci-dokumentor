@@ -1,4 +1,5 @@
 import { FormatterAdapter } from "src/formatter/formatter.adapter.js";
+import { Repository } from "../repository/repository.service.js";
 
 export const SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol("SectionGeneratorAdapter");
 
@@ -20,5 +21,5 @@ export enum SectionIdentifier {
 export interface SectionGeneratorAdapter<TManifest> {
     getSectionIdentifier(): SectionIdentifier;
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: TManifest): Buffer;
+    generateSection(formatterAdapter: FormatterAdapter, manifest: TManifest, repository: Repository): Buffer;
 }

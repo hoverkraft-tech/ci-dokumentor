@@ -16,6 +16,8 @@
     }
   },
   "dependencies": {
-    "inversify": "^7.5.2"
+    "git-url-parse": "^16.1.0",
+    "inversify": "^7.5.2",
+    "simple-git": "^3.28.0"
   }
 }
