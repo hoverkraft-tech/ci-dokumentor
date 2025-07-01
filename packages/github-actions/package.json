@@ -18,9 +18,6 @@
   "dependencies": {
     "inversify": "^7.5.2",
     "yaml": "^2.8.0",
-    "@ci-dokumentor/core": "0.0.1"
-  },
-  "devDependencies": {
     "@ci-dokumentor/core": "workspace:*"
   }
 }

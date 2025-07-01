@@ -25,18 +25,18 @@ export default defineConfig(() => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-    lib: {
-      // Could also be a dictionary or array of multiple entry points.
-      entry: 'src/index.ts',
-      name: '@ci-dokumentor/cli',
-      fileName: 'index',
-      // Change this to the formats you want to support.
-      // Don't forget to update your package.json as well.
-      formats: ['es' as const],
-    },
     rollupOptions: {
+      // Multiple entry points for library and CLI binary
+      input: {
+        index: 'src/index.ts',
+        'bin/ci-dokumentor': 'src/bin/ci-dokumentor.ts'
+      },
+      output: {
+        entryFileNames: '[name].js',
+        format: 'es' as const
+      },
       // External packages that should not be bundled into your library.
-      external: [],
+      external: [], // Bundle everything for standalone binary
     },
     target: 'node20', // Specify Node.js version target
     ssr: true, // Server-side rendering mode for Node.js

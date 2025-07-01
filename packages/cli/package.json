@@ -1,11 +1,15 @@
 {
   "name": "@ci-dokumentor/cli",
+  "description": "Command Line Interface for CI Dokumentor",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "ci-dokumentor": "./dist/bin/ci-dokumentor.js"
+  },
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -15,5 +19,11 @@
       "default": "./dist/index.js"
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "@ci-dokumentor/core": "workspace:*",
+    "@ci-dokumentor/github-actions": "workspace:*",
+    "commander": "^12.1.0",
+    "inversify": "^7.5.2",
+    "reflect-metadata": "^0.2.2"
+  }
 }

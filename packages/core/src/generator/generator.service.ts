@@ -1,9 +1,10 @@
 import { GENERATOR_ADAPTER_IDENTIFIER, GeneratorAdapter } from './generator.adapter.js';
 import { FileOutputAdapter } from '../output/file-output.adapter.js';
-import { inject, multiInject } from 'inversify';
+import { inject, injectable, multiInject } from 'inversify';
 import { FormatterService } from '../formatter/formatter.service.js';
 
 
+@injectable()
 export class GeneratorService {
   constructor(
     @inject(FormatterService) private readonly formatterService: FormatterService,
