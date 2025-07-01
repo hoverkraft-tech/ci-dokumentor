@@ -1,4 +1,5 @@
 import { FormatterAdapter } from "src/formatter/formatter.adapter.js";
+import { Repository } from "../repository/repository.service.js";
 
 export const SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol("SectionGeneratorAdapter");
 
@@ -7,10 +8,10 @@ export enum SectionIdentifier {
     Badges = "badges",         // Shields.io, marketplace, pipeline badges
     Overview = "overview",       // One-sentence value proposition
     Contents = "contents",       // Table of contents
-    Quickstart = "quickstart",     // Copy-paste snippet
+    Usage = "usage",     // Quickstart / usage examples
     Inputs = "inputs",         // Inputs / parameters
     Outputs = "outputs",        // Outputs / artefacts
-    Secrets = "secrets",        // Environment variables & secrets
+    Secrets = "secrets",        // secrets / environment variables
     Examples = "examples",       // Usage examples
     Contributing = "contributing",   // Dev workflow & how to help
     Security = "security",       // Vulnerability disclosure policy
@@ -20,5 +21,5 @@ export enum SectionIdentifier {
 export interface SectionGeneratorAdapter<TManifest> {
     getSectionIdentifier(): SectionIdentifier;
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: TManifest): Buffer;
+    generateSection(formatterAdapter: FormatterAdapter, manifest: TManifest, repository: Repository): Buffer;
 }

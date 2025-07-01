@@ -1,48 +1,54 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentation > should generate complete documentation for a GitHub Action > github-action-documentation 1`] = `
-#
-<img src=".github/ghadocs/branding.svg"
-     width="60px"
-     align="center"
-     alt="branding<icon:upload-cloud color:blue"
->
-GitHub Action: Build and Deploy
-[![Release](undefined)](https://img.shields.io/github/v/release/{owner}/{repo}?display_name=tag&sort=semver&logo=github&style=flat-square)[![Release by date](undefined)](https://img.shields.io/github/release-date/{owner}/{repo}?display_name=tag&sort=semver&logo=github&style=flat-square) [![Last Commit](undefined)](https://img.shields.io/github/last-commit/{owner}/{repo}?logo=github&style=flat-square) [![Open Issues](undefined)](https://img.shields.io/github/issues/{owner}/{repo}?logo=github&style=flat-square) [![Downloads](undefined)](https://img.shields.io/github/downloads/{owner}/{repo}/total?logo=github&style=flat-square)
+<div align="center">
+  <img src="https://example.com/logo.png"
+       width="60px"
+       align="center"
+       alt="Build and Deploy"
+  >
+  # ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItdXBsb2FkLWNsb3VkIiBjb2xvcj0iYmx1ZSI+PHBvbHlsaW5lIHBvaW50cz0iMTYgMTYgMTIgMTIgOCAxNiI+PC9wb2x5bGluZT48bGluZSB4MT0iMTIiIHkxPSIxMiIgeDI9IjEyIiB5Mj0iMjEiPjwvbGluZT48cGF0aCBkPSJNMjAuMzkgMTguMzlBNSA1IDAgMCAwIDE4IDloLTEuMjZBOCA4IDAgMSAwIDMgMTYuMyI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjE2IDE2IDEyIDEyIDggMTYiPjwvcG9seWxpbmU+PC9zdmc+) GitHub Action: Build and Deploy
+</div>
+[![Marketplace](https://img.shields.io/badge/Marketplace-build--and--deploy-blue?logo=github-actions)](https://github.com/marketplace/actions/build-and-deploy)
+[![Release](https://img.shields.io/github/v/release/test-owner/test-action)](https://github.com/test-owner/test-action/releases)
+[![License](https://img.shields.io/github/license/test-owner/test-action)](https://img.shields.io/github/license/test-owner/test-action)
+[![Stars](https://img.shields.io/github/stars/test-owner/test-action?style=social)](https://img.shields.io/github/stars/test-owner/test-action?style=social)
+## Overview
 Builds the application and deploys it to the specified environment
+## Usage
 \`\`\`yaml
-- uses: hoverkraft-tech/ci-github-container@0.25.0
+- uses: test-owner/test-action/test
   with:
-    # Description: Target environment (staging, production)
+    # Target environment (staging, production)
+    # This input is required.
     environment: ""
 
-    # Description: Version to deploy
-    #
-    # Default: latest
-    version: ""
+    # Version to deploy
+    # Default: \`latest\`
+    version: latest
 
-    # Description: Run in dry-run mode
-    #
-    # Default: false
-    dry-run: ""
+    # Run in dry-run mode
+    # Default: \`false\`
+    dry-run: "false"
 
-    # Description: Path to configuration file
-    #
-    # Default: config/deploy.yml
-    config-file: ""
+    # Path to configuration file
+    # Default: \`config/deploy.yml\`
+    config-file: config/deploy.yml
 
 \`\`\`
-| **Input** | **Description** | **Default** | **Required** |
+## Inputs
+| **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |
-| \`environment\` | Target environment (staging, production) | \`\` | **true** |
-| \`version\` | Version to deploy | \`latest\` | **false** |
-| \`dry-run\` | Run in dry-run mode | \`false\` | **false** |
-| \`config-file\` | Path to configuration file | \`config/deploy.yml\` | **false** |
+| **\`environment\`** | Target environment (staging, production) | **true** | \`\` |
+| **\`version\`** | Version to deploy | **false** | \`latest\` |
+| **\`dry-run\`** | Run in dry-run mode | **false** | \`false\` |
+| **\`config-file\`** | Path to configuration file | **false** | \`config/deploy.yml\` |
+## Outputs
 | **Output** | **Description** |
 | --- | --- |
-| \`deployment-url\` | URL of the deployed application |
-| \`build-artifacts\` | Path to build artifacts |
-| \`deployment-status\` | Status of the deployment (success/failure) |
+| **\`deployment-url\`** | URL of the deployed application |
+| **\`build-artifacts\`** | Path to build artifacts |
+| **\`deployment-status\`** | Status of the deployment (success/failure) |
 ## Examples
 ### Basic Usage
 \`\`\`yaml
@@ -101,8 +107,8 @@ Please make sure to:
 
 \`\`\`bash
 # Clone the repository
-git clone https://github.com/owner/repo.git
-cd repo
+git clone https://github.com/test-owner/test-action.git
+cd test-owner/test-action
 
 # Install dependencies
 npm install
@@ -167,7 +173,17 @@ See the [LICENSE](LICENSE) file for full license text.
 `;
 
 exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentation > should generate documentation for a CI/CD workflow > workflow-documentation 1`] = `
-# GitHub Workflow: CI/CD Pipeline
+<div align="center">
+  <img src="https://example.com/logo.png"
+       width="60px"
+       align="center"
+       alt="CI/CD Pipeline"
+  >
+  # GitHub Workflow: CI/CD Pipeline
+</div>
+[![Release](https://img.shields.io/github/v/release/test-owner/test-action)](https://github.com/test-owner/test-action/releases)
+[![License](https://img.shields.io/github/license/test-owner/test-action)](https://img.shields.io/github/license/test-owner/test-action)
+[![Stars](https://img.shields.io/github/stars/test-owner/test-action?style=social)](https://img.shields.io/github/stars/test-owner/test-action?style=social)
 ## Jobs
 | Job | Runs On | Steps | Dependencies |
 | --- | --- | --- | --- |
@@ -206,12 +222,44 @@ exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentati
 
 **Steps:**
 1. Deploy application
-## Environment & Secrets
-### Environment Variables
-| Variable | Description | Default Value |
+## Usage
+\`\`\`yaml
+name: CI/CD Pipeline
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: 0 2 * * 1
+jobs:
+  ci-cd.yml:
+    uses: test-owner/test-action/test/.github/workflows/ci-cd.yml
+    with:
+      # Deployment environment
+      # This input is required.
+      # Default: \`staging\`
+      # Options:
+      # - \`staging\`
+      # - \`production\`
+      environment: staging
+
+\`\`\`
+## Inputs
+| **Input** | **Description** | **Required** | **Type** | **Default** |
+| --- | --- | --- | --- | --- |
+| **\`environment\`** | Deployment environment | **true** | **choice** | \`staging\` |
+|  | Options: \`staging\`, \`production\` |  |  |  |
+## Outputs
+| **Output** | **Description** |
+| --- | --- |
+## Secrets
+| **Secret** | **Description** | **Required** |
 | --- | --- | --- |
-| \`NODE_VERSION\` | Environment variable | \`18\` |
-| \`REGISTRY\` | Environment variable | \`ghcr.io\` |
+| **\`environment\`** | Deployment environment | **true** |
 ## Examples
 ### Basic Workflow
 \`\`\`yaml
@@ -282,8 +330,8 @@ Please make sure to:
 
 \`\`\`bash
 # Clone the repository
-git clone https://github.com/owner/repo.git
-cd repo
+git clone https://github.com/test-owner/test-action.git
+cd test-owner/test-action
 
 # Install dependencies
 npm install

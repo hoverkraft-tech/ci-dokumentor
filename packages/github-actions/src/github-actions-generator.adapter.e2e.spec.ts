@@ -1,30 +1,45 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 import {
   FormatterAdapter,
   FileOutputAdapter,
-  MarkdownFormatterAdapter
+  MarkdownFormatterAdapter,
 } from '@ci-dokumentor/core';
 import { initContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
+import { GitHubRepository, GitHubRepositoryService } from './repository/github-repository.service.js';
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let formatterAdapter: FormatterAdapter;
   let gitHubActionsGeneratorAdapter: GitHubActionsGeneratorAdapter;
+  let gitHubRepositoryService: GitHubRepositoryService;
 
   beforeEach(async () => {
     // Use real dependencies from the container
     const container = initContainer();
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
-
+    gitHubRepositoryService = container.get(GitHubRepositoryService);
     gitHubActionsGeneratorAdapter = container.get(GitHubActionsGeneratorAdapter);
+
+    // Mock the repository service to return consistent test data
+    const mockRepository: GitHubRepository = {
+      url: 'https://github.com/test-owner/test-action',
+      name: 'test-action',
+      owner: 'test-owner',
+      fullName: 'test-owner/test-action',
+      logo: 'https://example.com/logo.png',
+    };
+
+    vi.spyOn(gitHubRepositoryService, 'getRepository').mockResolvedValue(mockRepository);
   });
 
   afterEach(() => {
     // Restore real file system
     mockFs.restore();
+    // Restore all mocks
+    vi.restoreAllMocks();
   });
 
   describe('generateDocumentation', () => {

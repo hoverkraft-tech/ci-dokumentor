@@ -16,11 +16,13 @@
     }
   },
   "dependencies": {
+    "@ci-dokumentor/core": "workspace:*",
+    "@octokit/graphql": "^9.0.1",
+    "feather-icons": "^4.29.2",
     "inversify": "^7.5.2",
-    "yaml": "^2.8.0",
-    "@ci-dokumentor/core": "0.0.1"
+    "yaml": "^2.8.0"
   },
   "devDependencies": {
-    "@ci-dokumentor/core": "workspace:*"
+    "@types/feather-icons": "^4.29.4"
   }
 }

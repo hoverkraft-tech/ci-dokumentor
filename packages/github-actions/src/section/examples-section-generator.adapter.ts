@@ -1,13 +1,14 @@
+import { GitHubRepository } from "../repository/github-repository.service.js";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
-export class ExamplesSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Examples;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
         let content = Buffer.from('');
 
         if ('runs' in manifest) {

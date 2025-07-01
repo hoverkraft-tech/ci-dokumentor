@@ -1,11 +1,20 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mockFs from 'mock-fs';
 import { GitHubActionsParser, GitHubAction, GitHubWorkflow } from './github-actions-parser.js';
+import { GitHubRepository } from './repository/github-repository.service.js';
 
 describe('GitHubActionsParser', () => {
+    let githubRepository: GitHubRepository;
     let parser: GitHubActionsParser;
 
     beforeEach(() => {
+        githubRepository = {
+            owner: 'test-owner',
+            name: 'test-repo',
+            url: 'https://github.com/test-owner/test-repo',
+            fullName: 'test-owner/test-repo',
+        };
+
         parser = new GitHubActionsParser();
     });
 
@@ -49,10 +58,11 @@ runs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/action.yml') as GitHubAction;
+                const result = parser.parseFile('/test/action.yml', githubRepository) as GitHubAction;
 
                 // Assert
                 expect(result).toBeDefined();
+                expect(result.usesName).toBe('test-owner/test-repo/test');
                 expect(result.name).toBe('Test Action');
                 expect(result.description).toBe('A test GitHub Action');
                 expect(result.author).toBe('Test Author');
@@ -108,10 +118,11 @@ jobs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/.github/workflows/workflow.yml') as GitHubWorkflow;
+                const result = parser.parseFile('/test/.github/workflows/workflow.yml', githubRepository) as GitHubWorkflow;
 
                 // Assert
                 expect(result).toBeDefined();
+                expect(result.usesName).toBe('test-owner/test-repo/test/.github/workflows/workflow.yml');
                 expect(result.name).toBe('Test Workflow');
 
             });
@@ -136,7 +147,7 @@ jobs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/.github/workflows/workflow-test.yml') as GitHubWorkflow;
+                const result = parser.parseFile('/test/.github/workflows/workflow-test.yml', githubRepository) as GitHubWorkflow;
 
                 // Assert
                 expect(result).toBeDefined();
@@ -149,53 +160,70 @@ jobs:
                 // Arrange
                 mockFs({
                     '/test': {
-                        'invalid.yml': `invalid: yaml: content`
+                        '.github': {
+                            'workflows': {
+                                'invalid.yml': `invalid: yaml: content`
+                            }
+                        }
                     }
                 });
 
                 // Act & Assert
-                expect(() => parser.parseFile('/test/invalid.yml')).toThrow();
+                expect(() => parser.parseFile('/test/.github/workflows/invalid.yml', githubRepository)).toThrow();
             });
 
             it('should throw error for empty file', async () => {
                 // Arrange
                 mockFs({
                     '/test': {
-                        'empty.yml': ''
+                        '.github': {
+                            'workflows': {
+                                'empty.yml': ''
+                            }
+                        }
                     }
                 });
 
                 // Act & Assert
-                expect(() => parser.parseFile('/test/empty.yml')).toThrow('Unsupported source file');
+                expect(() => parser.parseFile('/test/.github/workflows/empty.yml', githubRepository)).toThrow('Unsupported source file');
             });
 
             it('should throw error for plain text when parseable as YAML', async () => {
                 // Arrange
                 mockFs({
                     '/test': {
-                        'plain-text.yml': `This is not a YAML file`
+                        '.github': {
+                            'workflows': {
+                                'plain-text.yml': `This is not a YAML file`
+                            }
+                        }
                     }
                 });
 
                 // Act & Assert
                 expect(
-                    () => parser.parseFile('/test/plain-text.yml')
-                ).toThrow("Unsupported GitHub Actions file format: /test/plain-text.yml");
+                    () => parser.parseFile('/test/.github/workflows/plain-text.yml', githubRepository)
+                ).toThrow("Unsupported GitHub Actions file format: /test/.github/workflows/plain-text.yml");
             });
 
             it('should throw error for valid YAML but unsupported structure', async () => {
                 // Arrange
                 mockFs({
                     '/test': {
-                        'object-without-required-fields.yml': `someField: value
+                        '.github': {
+                            'workflows': {
+                                'object-without-required-fields.yml': `someField: value
 anotherField: 123
-`                    }
+`
+                            }
+                        }
+                    }
                 });
 
                 // Act & Assert
                 expect(
-                    () => parser.parseFile("/test/object-without-required-fields.yml")
-                ).toThrow('Unsupported GitHub Actions file format: /test/object-without-required-fields.yml');
+                    () => parser.parseFile("/test/.github/workflows/object-without-required-fields.yml", githubRepository)
+                ).toThrow('Unsupported GitHub Actions file format: /test/.github/workflows/object-without-required-fields.yml');
             });
         });
 
@@ -213,7 +241,7 @@ runs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/action.yml');
+                const result = parser.parseFile('/test/action.yml', githubRepository);
 
                 // Assert
                 expect(result).toBeDefined();
@@ -226,7 +254,9 @@ runs:
                 // Arrange
                 mockFs({
                     '/test': {
-                        'workflow.yml': `name: Test Workflow
+                        '.github': {
+                            'workflows': {
+                                'workflow.yml': `name: Test Workflow
 on: push
 jobs:
   build:
@@ -235,11 +265,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 `
+                            }
+                        }
                     }
                 });
 
                 // Act
-                const result = parser.parseFile('/test/workflow.yml');
+                const result = parser.parseFile('/test/.github/workflows/workflow.yml', githubRepository);
 
                 // Assert
                 expect(result).toBeDefined();

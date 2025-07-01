@@ -120,7 +120,7 @@ describe('MarkdownFormatterAdapter', () => {
             const result = adapter.center(input);
 
             // Assert
-            expect(result.toString()).toBe('<div align="center">\n\nCentered Text\n\n</div>');
+            expect(result.toString()).toBe('<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\nCentered Text\n\n</div>');
         });
 
         it('should handle empty string input', () => {
@@ -131,7 +131,7 @@ describe('MarkdownFormatterAdapter', () => {
             const result = adapter.center(input);
 
             // Assert
-            expect(result.toString()).toBe('<div align="center">\n\n\n\n</div>');
+            expect(result.toString()).toBe('<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\n\n\n</div>');
         });
 
         it('should handle multi-line text', () => {
@@ -142,7 +142,7 @@ describe('MarkdownFormatterAdapter', () => {
             const result = adapter.center(input);
 
             // Assert
-            expect(result.toString()).toBe('<div align="center">\n\nLine 1\nLine 2\n\n</div>');
+            expect(result.toString()).toBe('<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\nLine 1\nLine 2\n\n</div>');
         });
     });
 
@@ -445,7 +445,7 @@ describe('MarkdownFormatterAdapter', () => {
             const url = 'https://example.com/image.png';
 
             // Act
-            const result = adapter.image(altText, url);
+            const result = adapter.image(url, altText,);
 
             // Assert
             expect(result.toString()).toBe('![Alternative Text](https://example.com/image.png)');
@@ -458,7 +458,7 @@ describe('MarkdownFormatterAdapter', () => {
             const options = { width: '300px' };
 
             // Act
-            const result = adapter.image(altText, url, options);
+            const result = adapter.image(url, altText, options);
 
             // Assert
             expect(result.toString()).toBe('<img src="https://example.com/image.png" width="300px" alt="Alternative Text" />');
@@ -471,7 +471,7 @@ describe('MarkdownFormatterAdapter', () => {
             const options = { align: 'center' };
 
             // Act
-            const result = adapter.image(altText, url, options);
+            const result = adapter.image(url, altText, options);
 
             // Assert
             expect(result.toString()).toBe('<img src="https://example.com/image.png" align="center" alt="Alternative Text" />');
@@ -484,7 +484,7 @@ describe('MarkdownFormatterAdapter', () => {
             const options = { width: '300px', align: 'center' };
 
             // Act
-            const result = adapter.image(altText, url, options);
+            const result = adapter.image(url, altText, options);
 
             // Assert
             expect(result.toString()).toBe('<img src="https://example.com/image.png" width="300px" align="center" alt="Alternative Text" />');
@@ -496,7 +496,7 @@ describe('MarkdownFormatterAdapter', () => {
             const url = 'https://example.com/image.png';
 
             // Act
-            const result = adapter.image(altText, url);
+            const result = adapter.image(url, altText,);
 
             // Assert
             expect(result.toString()).toBe('![](https://example.com/image.png)');
@@ -601,7 +601,7 @@ describe('MarkdownFormatterAdapter', () => {
             const result = adapter.table(headers, rows);
 
             // Assert
-            expect(result.toString()).toBe('|  |\n|  |\n');
+            expect(result.toString()).toBe('|  |\n|  |');
         });
 
         it('should handle table with only headers', () => {
@@ -615,7 +615,7 @@ describe('MarkdownFormatterAdapter', () => {
             // Assert
             expect(result.toString()).toBe(
                 '| Column 1 | Column 2 |\n' +
-                '| --- | --- |\n'
+                '| --- | --- |'
             );
         });
 
@@ -634,6 +634,86 @@ describe('MarkdownFormatterAdapter', () => {
                 '| Name | Description |\n' +
                 '| --- | --- |\n' +
                 '| Item "A" | Description with & symbols! |'
+            );
+        });
+
+        it('should handle multiline content in table cells', () => {
+            // Arrange
+            const headers = [Buffer.from('Name'), Buffer.from('Description')];
+            const rows = [
+                [Buffer.from('John\nDoe'), Buffer.from('A person with\nmultiple lines\nof description')]
+            ];
+
+            // Act
+            const result = adapter.table(headers, rows);
+
+            // Assert
+            expect(result.toString()).toBe(
+                '| Name | Description |\n' +
+                '| --- | --- |\n' +
+                '| John | A person with |\n' +
+                '| Doe | multiple lines |\n' +
+                '|  | of description |'
+            );
+        });
+
+        it('should escape pipe characters in table cells', () => {
+            // Arrange
+            const headers = [Buffer.from('Code'), Buffer.from('Output')];
+            const rows = [
+                [Buffer.from('if (a | b)'), Buffer.from('result: true | false')]
+            ];
+
+            // Act
+            const result = adapter.table(headers, rows);
+
+            // Assert
+            expect(result.toString()).toBe(
+                '| Code | Output |\n' +
+                '| --- | --- |\n' +
+                '| if (a \\| b) | result: true \\| false |'
+            );
+        });
+
+        it('should use Markdown table format when headers contain multiline content', () => {
+            // Arrange
+            const headers = [Buffer.from('Multi\nLine\nHeader'), Buffer.from('Description')];
+            const rows = [
+                [Buffer.from('Value'), Buffer.from('Single line content')]
+            ];
+
+            // Act
+            const result = adapter.table(headers, rows);
+
+            // Assert
+            expect(result.toString()).toBe(
+                '| Multi | Description |\n' +
+                '| --- | --- |\n' +
+                '| Line |  |\n' +
+                '| Header |  |\n' +
+                '| Value | Single line content |'
+            );
+        });
+
+        it('should handle mixed single-line and multiline content', () => {
+            // Arrange
+            const headers = [Buffer.from('Name'), Buffer.from('Status'), Buffer.from('Notes')];
+            const rows = [
+                [Buffer.from('John'), Buffer.from('Active'), Buffer.from('Single line note')],
+                [Buffer.from('Jane\nSmith'), Buffer.from('Pending\nReview'), Buffer.from('This is a\nmultiline note\nwith details')]
+            ];
+
+            // Act
+            const result = adapter.table(headers, rows);
+
+            // Assert
+            expect(result.toString()).toBe(
+                '| Name | Status | Notes |\n' +
+                '| --- | --- | --- |\n' +
+                '| John | Active | Single line note |\n' +
+                '| Jane | Pending | This is a |\n' +
+                '| Smith | Review | multiline note |\n' +
+                '|  |  | with details |'
             );
         });
     });

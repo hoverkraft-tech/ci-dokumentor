@@ -12,7 +12,9 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     }
 
     center(input: Buffer): Buffer {
-        return Buffer.from(`<div align="center">\n\n${input.toString()}\n\n</div>`);
+        return Buffer.from(
+            `<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\n${input.toString()}\n\n</div>`
+        );
     }
 
     comment(input: Buffer): Buffer {
@@ -44,7 +46,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         return Buffer.from(`[${text.toString()}](${url})`);
     }
 
-    image(altText: Buffer, url: string, options?: { width?: string; align?: string }): Buffer {
+    image(url: string, altText: Buffer, options?: { width?: string; align?: string }): Buffer {
         if (options?.width || options?.align) {
             // Use HTML img tag for advanced formatting
             const attributes = [];
@@ -66,13 +68,48 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     }
 
     table(headers: Buffer[], rows: Buffer[][]): Buffer {
-        const headerRow = `| ${headers.map(h => h.toString()).join(' | ')} |`;
-        const separatorRow = `| ${headers.map(() => '---').join(' | ')} |`;
-        const dataRows = rows.map(row =>
-            `| ${row.map(cell => cell.toString()).join(' | ')} |`
-        ).join('\n');
+        const normalizeCell = (cell: Buffer): string => {
+            return cell.toString().replace(/\|/g, '\\|');
+        };
 
-        return Buffer.from(`${headerRow}\n${separatorRow}\n${dataRows}`);
+        const splitMultilineCell = (cell: Buffer): string[] => {
+            return cell.toString().split('\n');
+        };
+
+        let result = '';
+
+        // Handle multiline content with additional rows
+        const headerLines = headers.map(splitMultilineCell);
+        const maxHeaderLines = Math.max(...headerLines.map(lines => lines.length));
+
+        // First header row (main headers)
+        const mainHeaderRow = `| ${headers.map(h => normalizeCell(Buffer.from(splitMultilineCell(h)[0] || ''))).join(' | ')} |`;
+        const separatorRow = `| ${headers.map(() => '---').join(' | ')} |`;
+        result += `${mainHeaderRow}\n${separatorRow}\n`;
+
+        // Additional header rows if multiline headers exist
+        for (let lineIndex = 1; lineIndex < maxHeaderLines; lineIndex++) {
+            const additionalHeaderCells = headerLines.map(lines => normalizeCell(Buffer.from(lines[lineIndex] || '')));
+            result += `| ${additionalHeaderCells.join(' | ')} |\n`;
+        }
+
+        // Process data rows
+        rows.forEach(row => {
+            const cellLines = row.map(splitMultilineCell);
+            const maxLines = Math.max(...cellLines.map(lines => lines.length));
+
+            // First line of the row (main content)
+            const mainRowCells = cellLines.map(lines => normalizeCell(Buffer.from(lines[0] || '')));
+            result += `| ${mainRowCells.join(' | ')} |\n`;
+
+            // Additional lines for multiline content
+            for (let lineIndex = 1; lineIndex < maxLines; lineIndex++) {
+                const additionalCells = cellLines.map(lines => normalizeCell(Buffer.from(lines[lineIndex] || '')));
+                result += `| ${additionalCells.join(' | ')} |\n`;
+            }
+        });
+
+        return Buffer.from(result.trimEnd());
     }
 
     badge(label: string, url: string): Buffer {

@@ -1,45 +1,70 @@
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import { GitHubRepository } from "../repository/github-repository.service.js";
+import { GitHubAction, GitHubActionOutput, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
-export class OutputsSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+type OutputsTable = {
+    headers: Buffer[];
+    rows: Buffer[][];
+}
+
+export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Outputs;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
-        // Generate outputs section for GitHub Actions
-        if (!('runs' in manifest) || !manifest.outputs || Object.keys(manifest.outputs).length === 0) {
-            return Buffer.from('');
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+        let table: OutputsTable;
+
+        if (this.isGitHubAction(manifest)) {
+            table = this.generateActionOutputsTable(formatterAdapter, manifest);
+        } else if (this.isGitHubWorkflow(manifest)) {
+            // GitHub Workflows don't have outputs at the workflow level for reusable workflows
+            // They can only have outputs at the job level, which is not supported by this generator
+            table = this.generateEmptyOutputsTable();
+        } else {
+            throw new Error("Unsupported manifest type for OutputsSectionGenerator");
         }
 
+        return Buffer.concat(
+            [
+                formatterAdapter.heading(Buffer.from('Outputs'), 2),
+                formatterAdapter.lineBreak(),
+                formatterAdapter.table(table.headers, table.rows)
+            ]
+        );
+    }
+
+    private generateActionOutputsTable(formatterAdapter: FormatterAdapter, manifest: GitHubAction): OutputsTable {
         const headers = [
             Buffer.from('**Output**'),
-            Buffer.from('**Description**')
+            Buffer.from('**Description**'),
         ];
 
-        const rows = Object.entries(manifest.outputs).map(([name, output]) => {
-            // Process multiline descriptions similar to inputs
-            let description = output.description || 'No description provided';
-            const lines = description.split(/\n|<br\s*\/?>/);
-            const shortDescription = lines[0].trim();
-
-            // Add continuation if there are more lines
-            if (lines.length > 1) {
-                const additionalInfo = lines.slice(1).filter((line: string) => line.trim()).join('<br />');
-                if (additionalInfo) {
-                    description = shortDescription + '<br />' + additionalInfo;
-                }
-            } else {
-                description = shortDescription;
-            }
-
+        const rows = Object.entries(manifest.outputs || {}).map(([name, output]) => {
             return [
-                formatterAdapter.inlineCode(Buffer.from(name)),
-                Buffer.from(description)
+                this.getOutputName(name, formatterAdapter),
+                this.getOutputDescription(output),
             ];
         });
 
-        return formatterAdapter.table(headers, rows);
+        return { headers, rows };
+    }
+
+    private generateEmptyOutputsTable(): OutputsTable {
+        const headers = [
+            Buffer.from('**Output**'),
+            Buffer.from('**Description**'),
+        ];
+
+        return { headers, rows: [] };
+    }
+
+    private getOutputName(name: string, formatterAdapter: FormatterAdapter): Buffer {
+        return formatterAdapter.bold(formatterAdapter.inlineCode(Buffer.from(name)));
+    }
+
+    private getOutputDescription(output: GitHubActionOutput): Buffer {
+        return Buffer.from(output.description || '');
     }
 }

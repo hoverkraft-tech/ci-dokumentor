@@ -1,3 +1,4 @@
+import { GitHubRepository } from "../repository/github-repository.service.js";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
@@ -5,65 +6,82 @@ import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 type Badge = { label: string; url: string; };
 type LinkedBadge = { url: string; badge: Badge; };
 
-export class BadgesSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Badges;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
-        if (!this.isGitHubAction(manifest)) {
-            return Buffer.from('');
-        }
-
-        const linkedBadges = this.getAllBadges(manifest);
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+        const linkedBadges = this.getAllBadges(manifest, repository);
         return this.formatBadgeCollection(linkedBadges, formatterAdapter);
     }
 
-    private isGitHubAction(manifest: GitHubAction | GitHubWorkflow): boolean {
-        return 'runs' in manifest;
-    }
-
-    private getAllBadges(manifest: GitHubAction | GitHubWorkflow): LinkedBadge[] {
+    private getAllBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
         return [
-            this.getReleaseBadge(manifest),
-            this.getReleaseDateBadge(manifest),
-            this.getLastCommitBadge(manifest),
-            this.getOpenIssuesBadge(manifest),
-            this.getDownloadsBadge(manifest)
+            ...this.getDistributionBadges(manifest, repository),
+            ...this.getBuildQualityBadges(manifest, repository),
+            ...this.getSecurityBadges(manifest, repository),
+            ...this.getComplianceBadges(manifest, repository),
+            ...this.getCommunityBadges(manifest, repository),
         ];
     }
 
-    private getReleaseBadge(manifest: GitHubAction | GitHubWorkflow): LinkedBadge {
-        const badgeUrl = 'https://img.shields.io/github/v/release/{owner}/{repo}?display_name=tag&sort=semver&logo=github&style=flat-square';
-        const releaseUrl = 'https://github.com/{owner}/{repo}/releases/latest';
+    private getDistributionBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+        const actionName = manifest.name.toLowerCase().replace(/\s+/g, '-');
+        const badges = [
+            {
+                url: `${repository.url}/releases`,
+                badge: {
+                    label: 'Release',
+                    url: `https://img.shields.io/github/v/release/${repository.fullName}`
+                }
+            }
+        ];
 
-        return { url: badgeUrl, badge: { label: 'Release', message: 'Latest Release', color: 'blue' } };
+        if (this.isGitHubAction(manifest)) {
+            const badgeName = `Marketplace-${actionName.replace(/-/g, '--')}`;
+            badges.unshift({
+                url: `https://github.com/marketplace/actions/${actionName}`,
+                badge: {
+                    label: 'Marketplace',
+                    url: `https://img.shields.io/badge/${badgeName}-blue?logo=github-actions`
+                }
+            });
+        }
+
+        return badges;
     }
 
-    private getReleaseDateBadge(manifest: GitHubAction | GitHubWorkflow): LinkedBadge {
-        const badgeUrl = 'https://img.shields.io/github/release-date/{owner}/{repo}?display_name=tag&sort=semver&logo=github&style=flat-square';
-        const releaseUrl = 'https://github.com/{owner}/{repo}/releases/latest';
-
-        return { url: badgeUrl, badge: { label: 'Release by date', message: 'Latest Release Date', color: 'blue' } };
+    private getBuildQualityBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+        return [];
     }
 
-    private getLastCommitBadge(manifest: GitHubAction | GitHubWorkflow): LinkedBadge {
-        const badgeUrl = 'https://img.shields.io/github/last-commit/{owner}/{repo}?logo=github&style=flat-square';
-
-        return { url: badgeUrl, badge: { label: 'Last Commit', message: 'Latest Commit', color: 'blue' } };
+    private getSecurityBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+        return [];
     }
 
-    private getOpenIssuesBadge(manifest: GitHubAction | GitHubWorkflow): LinkedBadge {
-        const badgeUrl = 'https://img.shields.io/github/issues/{owner}/{repo}?logo=github&style=flat-square';
-        const issuesUrl = 'https://github.com/{owner}/{repo}/issues';
-
-        return { url: badgeUrl, badge: { label: 'Open Issues', message: 'Open Issues', color: 'blue' } };
+    private getComplianceBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+        return [
+            {
+                url: `https://img.shields.io/github/license/${repository.fullName}`,
+                badge: {
+                    label: 'License',
+                    url: `https://img.shields.io/github/license/${repository.fullName}`
+                }
+            }
+        ];
     }
 
-    private getDownloadsBadge(manifest: GitHubAction | GitHubWorkflow): LinkedBadge {
-        const badgeUrl = 'https://img.shields.io/github/downloads/{owner}/{repo}/total?logo=github&style=flat-square';
-
-        return { url: badgeUrl, badge: { label: 'Downloads', message: 'Total Downloads', color: 'blue' } };
+    private getCommunityBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+        return [
+            {
+                url: `https://img.shields.io/github/stars/${repository.fullName}?style=social`,
+                badge: {
+                    label: 'Stars',
+                    url: `https://img.shields.io/github/stars/${repository.fullName}?style=social`
+                }
+            }
+        ];
     }
 
     private formatBadgeCollection(linkedBadges: LinkedBadge[], formatterAdapter: FormatterAdapter): Buffer {
@@ -78,7 +96,7 @@ export class BadgesSectionGenerator implements GitHubActionsSectionGeneratorAdap
                     linkedBadge.badge.url,
                 ), linkedBadge.url);
             if (index === 0) return badgeBuffer;
-            return Buffer.concat([acc, badgeBuffer, Buffer.from(' ')]);
+            return Buffer.concat([acc, Buffer.from('\n'), badgeBuffer]);
         }, Buffer.from(''));
     }
 }

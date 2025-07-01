@@ -1,49 +1,107 @@
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import { GitHubRepository } from "../repository/github-repository.service.js";
+import { GitHubAction, GitHubActionInput, GitHubWorkflow, GitHubWorkflowInput } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
-export class InputsSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+type InputsTable = {
+    headers: Buffer[];
+    rows: Buffer[][];
+}
+
+export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Inputs;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
-        // Only generate inputs section for GitHub Actions
-        if (!('runs' in manifest) || !manifest.inputs || Object.keys(manifest.inputs).length === 0) {
-            return Buffer.from('');
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+        let table: InputsTable;
+
+        if (this.isGitHubAction(manifest)) {
+            table = this.generateActionInputsTable(formatterAdapter, manifest);
+        } else if (this.isGitHubWorkflow(manifest)) {
+            table = this.generateWorkflowInputsTable(formatterAdapter, manifest);
+        } else {
+            throw new Error("Unsupported manifest type for InputsSectionGenerator");
         }
 
+
+        return Buffer.concat(
+            [
+                formatterAdapter.heading(Buffer.from('Inputs'), 2),
+                formatterAdapter.lineBreak(),
+                formatterAdapter.table(table.headers, table.rows)
+            ]
+        );
+    }
+
+    private generateActionInputsTable(formatterAdapter: FormatterAdapter, manifest: GitHubAction): InputsTable {
         const headers = [
             Buffer.from('**Input**'),
             Buffer.from('**Description**'),
+            Buffer.from('**Required**'),
             Buffer.from('**Default**'),
-            Buffer.from('**Required**')
         ];
 
-        const rows = Object.entries(manifest.inputs).map(([name, input]) => {
-            // Process multiline descriptions - take first line or split at <br />
-            let description = input.description || 'No description provided';
-            const lines = description.split(/\n|<br\s*\/?>/);
-            const shortDescription = lines[0].trim();
-
-            // Add continuation if there are more lines
-            if (lines.length > 1) {
-                const additionalInfo = lines.slice(1).filter(line => line.trim()).join('<br />');
-                if (additionalInfo) {
-                    description = shortDescription + '<br />' + additionalInfo;
-                }
-            } else {
-                description = shortDescription;
-            }
-
+        const rows = Object.entries(manifest.inputs || {}).map(([name, input]) => {
             return [
-                formatterAdapter.inlineCode(Buffer.from(name)),
-                Buffer.from(description),
-                formatterAdapter.inlineCode(Buffer.from(input.default || '')),
-                Buffer.from(input.required ? '**true**' : '**false**')
+                this.getInputName(name, formatterAdapter),
+                this.getInputDescription(input),
+                this.getInputRequired(input, formatterAdapter),
+                this.getInputDefault(input, formatterAdapter),
             ];
         });
 
-        return formatterAdapter.table(headers, rows);
+        return { headers, rows };
+    }
+
+    private generateWorkflowInputsTable(formatterAdapter: FormatterAdapter, manifest: GitHubWorkflow): InputsTable {
+        const headers = [
+            Buffer.from('**Input**'),
+            Buffer.from('**Description**'),
+            Buffer.from('**Required**'),
+            Buffer.from('**Type**'),
+            Buffer.from('**Default**'),
+        ];
+
+        const rows = Object.entries(manifest.on?.workflow_dispatch?.inputs || {}).map(([name, input]) => {
+            return [
+                this.getInputName(name, formatterAdapter),
+                this.getInputDescription(input),
+                this.getInputRequired(input, formatterAdapter),
+                this.getInputType(input, formatterAdapter),
+                this.getInputDefault(input, formatterAdapter),
+            ];
+        });
+
+        return { headers, rows };
+    }
+
+    private getInputName(name: string, formatterAdapter: FormatterAdapter): Buffer {
+        return formatterAdapter.bold(formatterAdapter.inlineCode(Buffer.from(name)));
+    }
+
+    private getInputDescription(input: GitHubActionInput | GitHubWorkflowInput): Buffer {
+        let description = input.description || '';
+
+        if ((input as GitHubWorkflowInput).options) {
+            const options = (input as GitHubWorkflowInput).options;
+            if (options && options.length > 0) {
+                description += `\nOptions: ${options.map(option => `\`${option}\``).join(', ')}`;
+            }
+        }
+
+        return Buffer.from(description);
+    }
+
+    private getInputDefault(input: GitHubActionInput | GitHubWorkflowInput, formatterAdapter: FormatterAdapter): Buffer {
+        return formatterAdapter.inlineCode(Buffer.from(input.default || ''));
+    }
+
+    private getInputRequired(input: GitHubActionInput | GitHubWorkflowInput, formatterAdapter: FormatterAdapter): Buffer {
+        return formatterAdapter.bold(Buffer.from(input.required ? 'true' : 'false'));
+    }
+
+    private getInputType(input: GitHubWorkflowInput, formatterAdapter: FormatterAdapter): Buffer {
+        return formatterAdapter.bold(Buffer.from(input.type));
     }
 }

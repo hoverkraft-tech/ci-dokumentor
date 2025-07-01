@@ -23,7 +23,7 @@ export interface FormatterAdapter {
 
     link(text: Buffer, url: string): Buffer;
 
-    image(altText: Buffer, url: string, options?: { width?: string; align?: string }): Buffer;
+    image(url: string, altText: Buffer, options?: { width?: string; align?: string }): Buffer;
 
     list(items: Buffer[], ordered?: boolean): Buffer;
 

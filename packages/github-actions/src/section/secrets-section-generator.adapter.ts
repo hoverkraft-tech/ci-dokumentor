@@ -1,113 +1,66 @@
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import { GitHubRepository } from "../repository/github-repository.service.js";
+import { GitHubAction, GitHubWorkflow, GitHubWorkflowInput } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
-export class SecretsSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+type SecretsTable = {
+    headers: Buffer[];
+    rows: Buffer[][];
+}
+
+export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Secrets;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
-        const envVars: Record<string, string> = {};
-        const secrets: Record<string, string> = {};
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
 
-        // Extract environment variables and secrets from different sources
-        if ('runs' in manifest) {
-            // GitHub Action
-            if (manifest.runs.steps) {
-                manifest.runs.steps.forEach(step => {
-                    if (step.env) {
-                        Object.assign(envVars, step.env);
-                    }
-                });
-            }
-        } else {
-            // GitHub Workflow
-            if (manifest.env) {
-                Object.assign(envVars, manifest.env);
-            }
 
-            // Extract from jobs
-            Object.values(manifest.jobs).forEach(job => {
-                if (job.env) {
-                    Object.assign(envVars, job.env);
-                }
-                if (job.steps) {
-                    job.steps.forEach(step => {
-                        if (step.env) {
-                            Object.assign(envVars, step.env);
-                        }
-                    });
-                }
-            });
+        if (this.isGitHubAction(manifest)) {
+            return Buffer.from("");
+        }
+        if (!this.isGitHubWorkflow(manifest)) {
+            throw new Error("Unsupported manifest type for InputsSectionGenerator");
         }
 
-        // Identify secrets (typically start with ${{ secrets. or contain SECRET)
-        Object.entries(envVars).forEach(([key, value]) => {
-            if (typeof value === 'string' && (value.includes('secrets.') || key.toUpperCase().includes('SECRET') || key.toUpperCase().includes('TOKEN'))) {
-                secrets[key] = value;
-            } else {
-                envVars[key] = value;
-            }
+        const table = this.generateWorkflowSecretsTable(formatterAdapter, manifest);
+
+        return Buffer.concat(
+            [
+                formatterAdapter.heading(Buffer.from('Secrets'), 2),
+                formatterAdapter.lineBreak(),
+                formatterAdapter.table(table.headers, table.rows)
+            ]
+        );
+    }
+
+    private generateWorkflowSecretsTable(formatterAdapter: FormatterAdapter, manifest: GitHubWorkflow): SecretsTable {
+        const headers = [
+            Buffer.from('**Secret**'),
+            Buffer.from('**Description**'),
+            Buffer.from('**Required**'),
+        ];
+
+        const rows = Object.entries(manifest.on?.workflow_dispatch?.inputs || {}).map(([name, input]) => {
+            return [
+                this.getSecretName(name, formatterAdapter),
+                this.getSecretDescription(input),
+                this.getSecretRequired(input, formatterAdapter),
+            ];
         });
 
-        let content = Buffer.from('');
+        return { headers, rows };
+    }
 
-        // Environment Variables section
-        if (Object.keys(envVars).length > 0) {
-            const envHeaders = [
-                Buffer.from('Variable'),
-                Buffer.from('Description'),
-                Buffer.from('Default Value')
-            ];
+    private getSecretName(name: string, formatterAdapter: FormatterAdapter): Buffer {
+        return formatterAdapter.bold(formatterAdapter.inlineCode(Buffer.from(name)));
+    }
 
-            const envRows = Object.entries(envVars).map(([name, value]) => [
-                formatterAdapter.inlineCode(Buffer.from(name)),
-                Buffer.from('Environment variable'),
-                formatterAdapter.inlineCode(Buffer.from(String(value)))
-            ]);
+    private getSecretDescription(secret: GitHubWorkflowInput): Buffer {
+        return Buffer.from(secret.description || '');
+    }
 
-            content = Buffer.concat([
-                content,
-                formatterAdapter.heading(Buffer.from('Environment Variables'), 3),
-                formatterAdapter.lineBreak(),
-                formatterAdapter.table(envHeaders, envRows),
-                formatterAdapter.lineBreak()
-            ]);
-        }
-
-        // Secrets section
-        if (Object.keys(secrets).length > 0) {
-            const secretHeaders = [
-                Buffer.from('Secret'),
-                Buffer.from('Description'),
-                Buffer.from('Required')
-            ];
-
-            const secretRows = Object.entries(secrets).map(([name, value]) => [
-                formatterAdapter.inlineCode(Buffer.from(name)),
-                Buffer.from('Secret value'),
-                Buffer.from('Yes')
-            ]);
-
-            content = Buffer.concat([
-                content,
-                formatterAdapter.heading(Buffer.from('Secrets'), 3),
-                formatterAdapter.lineBreak(),
-                formatterAdapter.table(secretHeaders, secretRows),
-                formatterAdapter.lineBreak()
-            ]);
-        }
-
-        if (content.length === 0) {
-            return Buffer.from('');
-        }
-
-        return Buffer.concat([
-            formatterAdapter.heading(Buffer.from('Environment & Secrets'), 2),
-            formatterAdapter.lineBreak(),
-            content,
-            formatterAdapter.lineBreak()
-        ]);
+    private getSecretRequired(secret: GitHubWorkflowInput, formatterAdapter: FormatterAdapter): Buffer {
+        return formatterAdapter.bold(Buffer.from(secret.required ? 'true' : 'false'));
     }
 }

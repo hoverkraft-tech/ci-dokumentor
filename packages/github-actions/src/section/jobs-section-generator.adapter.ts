@@ -1,13 +1,14 @@
+import { GitHubRepository } from "../repository/github-repository.service.js";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
-export class JobsSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+export class JobsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Contents; // Reusing Contents identifier for Jobs
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
         // Only generate for workflows
         if ('runs' in manifest) {
             return Buffer.from('');

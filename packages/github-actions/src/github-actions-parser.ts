@@ -1,13 +1,15 @@
 import { readFileSync } from 'node:fs';
-import { basename, extname } from 'node:path';
+import { basename, dirname, extname, join } from 'node:path';
 import { parse } from 'yaml'
+import { GitHubRepository } from './repository/github-repository.service.js';
+
+
+// See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-action.json
 
 export type GitHubActionInput = {
     description?: string;
     required?: boolean;
     default?: string;
-    type?: 'string' | 'number' | 'boolean' | 'choice';
-    options?: string[];
 };
 
 export type GitHubActionOutput = {
@@ -16,6 +18,7 @@ export type GitHubActionOutput = {
 };
 
 export type GitHubAction = {
+    usesName: string; // e.g., 'hoverkraft-tech/compose-action'
     name: string;
     description?: string;
     author?: string;
@@ -30,9 +33,35 @@ export type GitHubAction = {
     };
 };
 
+
+// See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-workflow.json
+
 export type GitHubWorkflow = {
+    usesName: string; // e.g., 'hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml'
     name: string
-    on: Record<string, any>; // Event triggers
+    on: {
+        [key: string]: unknown;
+        workflow_dispatch?: GitHubWorkflowDispatchEvent
+    }; // Event triggers
+    permissions?: Record<string, string>; // Permissions for the workflow
+};
+
+export type GitHubWorkflowDispatchEvent = {
+    inputs?: Record<string, GitHubWorkflowInput>;
+    secrets?: Record<string, GitHubWorkflowSecrets>;
+};
+
+export type GitHubWorkflowInput = {
+    description: string;
+    required?: boolean;
+    default?: string;
+    type: string;
+    options?: string[];
+};
+
+export type GitHubWorkflowSecrets = {
+    description?: string;
+    required?: boolean;
 };
 
 export class GitHubActionsParser {
@@ -46,7 +75,7 @@ export class GitHubActionsParser {
         return source.includes('.github/workflows/');
     }
 
-    parseFile(source: string): GitHubAction | GitHubWorkflow {
+    parseFile(source: string, repository: GitHubRepository): GitHubAction | GitHubWorkflow {
         const parsed = parse(readFileSync(source, 'utf8'));
         if (!parsed) {
             throw new Error(`Unsupported source file: ${source}`);
@@ -66,6 +95,8 @@ export class GitHubActionsParser {
             parsed.name = pascalCaseName;
         }
 
+        parsed.usesName = this.getUsesName(source, repository);
+
         if (this.isGitHubAction(parsed)) {
             return parsed as GitHubAction;
         }
@@ -75,6 +106,20 @@ export class GitHubActionsParser {
         }
 
         throw new Error(`Unsupported GitHub Actions file format: ${source}`);
+    }
+
+    private getUsesName(source: string, repository: GitHubRepository): string {
+        // For GitHub Actions, the usesName is typically the repository name
+        if (this.isGitHubActionFile(source)) {
+            return join(repository.owner, repository.name, dirname(source));
+        }
+
+        // For GitHub Workflows, the usesName is the workflow file path
+        if (this.isGitHubWorkflowFile(source)) {
+            return join(repository.owner, repository.name, source);
+        }
+
+        throw new Error(`Unsupported source file: ${source}`);
     }
 
     private isGitHubAction(parsed: any): parsed is GitHubAction {
@@ -89,4 +134,6 @@ export class GitHubActionsParser {
         return 'name' in parsed && typeof parsed.name === 'string' &&
             'on' in parsed && (typeof parsed.on === 'object' || Array.isArray(parsed.on) || typeof parsed.on === 'string');
     }
+
+
 }

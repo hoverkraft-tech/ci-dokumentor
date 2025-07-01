@@ -1,13 +1,14 @@
+import { GitHubRepository } from "../repository/github-repository.service.js";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
-export class ContributingSectionGenerator implements GitHubActionsSectionGeneratorAdapter {
+export class ContributingSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
     getSectionIdentifier(): SectionIdentifier {
         return SectionIdentifier.Contributing;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
         const contributingText = `We welcome contributions! Here's how you can help:
 
 1. Fork the repository
@@ -36,8 +37,8 @@ Please make sure to:
 
 \`\`\`bash
 # Clone the repository
-git clone https://github.com/owner/repo.git
-cd repo
+git clone ${repository.url}.git
+cd ${repository.fullName}
 
 # Install dependencies
 npm install
