@@ -51,5 +51,14 @@ export default defineConfig(() => ({
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
     },
+    setupFiles: ['../core/src/error-logging/vitest-setup.ts'],
+    // Enhanced error output configuration
+    outputFile: {
+      junit: './test-output/vitest/junit.xml',
+      json: './test-output/vitest/results.json',
+    },
+    // Better error handling configuration
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 }));

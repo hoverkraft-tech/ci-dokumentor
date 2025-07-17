@@ -7,6 +7,9 @@
     "lint": "nx run-many --target=lint --all --parallel",
     "test": "nx run-many --target=test --all --parallel",
     "test:ci": "nx run-many --target=test --all --parallel --coverage.all",
+    "test:ci:enhanced": "node scripts/run-ci-tests.mjs",
+    "test:demo": "node scripts/demo-error-logging.mjs",
+    "test:failing": "node scripts/test-failing-cli.mjs",
     "all": "pnpm run build && pnpm run lint --fix && pnpm run test:ci"
   },
   "private": true,

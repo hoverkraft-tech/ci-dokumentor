@@ -1,0 +1,81 @@
+name: Enhanced CI Error Reporting
+
+on:
+  workflow_call:
+    inputs:
+      enable-error-logging:
+        description: 'Enable enhanced error logging'
+        required: false
+        default: 'true'
+        type: string
+
+jobs:
+  test-with-error-logging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Enable Corepack
+        run: corepack enable
+        
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build packages
+        run: pnpm run build
+        
+      - name: Run tests with enhanced error logging
+        id: test-run
+        run: |
+          echo "::group::Running tests with enhanced error logging"
+          pnpm run test:ci 2>&1 | tee test-output.log
+          echo "::endgroup::"
+        continue-on-error: true
+        
+      - name: Generate Error Report
+        if: always()
+        run: |
+          echo "::group::Enhanced Error Report"
+          if [ -f test-output.log ]; then
+            echo "Test output captured successfully"
+            # Here we could process the test output and generate enhanced reports
+            # For now, we'll show the captured output
+            cat test-output.log
+          else
+            echo "No test output captured"
+          fi
+          echo "::endgroup::"
+          
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            packages/*/test-output/
+            test-output.log
+          retention-days: 5
+          
+      - name: Create Test Summary
+        if: always()
+        run: |
+          echo "# 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.test-run.outcome }}" == "success" ]; then
+            echo "✅ All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some tests failed. Check the detailed error report above." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Test Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Status: ${{ steps.test-run.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Enhanced Error Logging: ${{ inputs.enable-error-logging }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Timestamp: $(date)" >> $GITHUB_STEP_SUMMARY

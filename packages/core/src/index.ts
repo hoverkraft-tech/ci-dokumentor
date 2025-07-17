@@ -12,3 +12,6 @@ export * from './container.js';
 
 export { GENERATOR_ADAPTER_IDENTIFIER } from './generator/generator.adapter.js';
 export { SECTION_GENERATOR_ADAPTER_IDENTIFIER } from './generator/section-generator.adapter.js';
+
+// Error logging utilities
+export * from './error-logging/index.js';

@@ -1,0 +1,35 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/home/runner/work/ci-dokumentor/ci-dokumentor/packages/cli[39m
+
+ [31m❯[39m src/lib/cli.spec.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 15[2mms[22m[39m
+[31m   [31m×[31m CLI[2m > [22mcli function[2m > [22mshould create and run CLI application[39m[32m 14[2mms[22m[39m
+[31m     → Cannot read properties of undefined (reading '_executableHandler')[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/lib/cli.spec.ts[2m > [22mCLI[2m > [22mcli function[2m > [22mshould create and run CLI application
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading '_executableHandler')[39m
+[90m [2m❯[22m ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1262:22[22m[39m
+[90m [2m❯[22m Command._chainOrCall ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1386:12[22m[39m
+[90m [2m❯[22m Command._dispatchSubcommand ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1261:25[22m[39m
+[90m [2m❯[22m Command._dispatchHelpCommand ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1288:17[22m[39m
+[90m [2m❯[22m Command._parseCommand ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1463:19[22m[39m
+[90m [2m❯[22m Command.parseAsync ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1092:16[22m[39m
+[36m [2m❯[22m CliApplication.run src/lib/application/cli-application.ts:[2m27:28[22m[39m
+    [90m 25| [39m     */[39m
+    [90m 26| [39m    [35masync[39m [34mrun[39m(args[33m?[39m[33m:[39m string[])[33m:[39m [33mPromise[39m[33m<[39m[35mvoid[39m[33m>[39m {
+    [90m 27| [39m        [35mawait[39m [35mthis[39m[33m.[39mprogram[33m.[39m[34mparseAsync[39m(args)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 28| [39m    }
+    [90m 29| [39m
+[90m [2m❯[22m cli src/lib/cli.ts:[2m11:17[22m[39m
+[90m [2m❯[22m src/lib/cli.spec.ts:[2m44:13[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 17:56:20
+[2m   Duration [22m 661ms[2m (transform 222ms, setup 39ms, collect 359ms, tests 15ms, environment 0ms, prepare 69ms)[22m
+
