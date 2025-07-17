@@ -1,0 +1,281 @@
+
+> @ci-dokumentor/source@0.0.0 test:ci /home/runner/work/ci-dokumentor/ci-dokumentor
+> nx run-many --target=test --all --parallel --coverage.all
+
+
+ NX   Running target test for 3 projects and 2 tasks they depend on:
+
+- @ci-dokumentor/github-actions
+- @ci-dokumentor/core
+- @ci-dokumentor/cli
+
+With additional flags:
+  --coverage={"all":true}
+
+
+
+::group::🔁 > nx run @ci-dokumentor/core:build  [local cache]
+
+> vite build
+
+[36mvite v6.3.5 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+[32m✓[39m 16 modules transformed.
+rendering chunks...
+[32m
+[36m[vite:dts][32m Start generate declaration files...[39m
+[2mdist/[22m[36mindex.js  [39m[1m[2m17.43 kB[22m[1m[22m
+[32m[36m[vite:dts][32m Declaration files built in 2055ms.
+[39m
+[32m✓ built in 2.20s[39m
+::endgroup::
+::group::🔁 > nx run @ci-dokumentor/core:test --coverage.all  [local cache]
+
+> vitest --coverage.all
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/home/runner/work/ci-dokumentor/ci-dokumentor/packages/core[39m
+
+ [32m✓[39m src/formatter/markdown-formatter.adapter.spec.ts [2m([22m[2m67 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/formatter/formatter.service.spec.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/output/file-output.adapter.spec.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/error-logging/test-error-capture.spec.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/error-logging/error-logger.spec.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/repository/repository.service.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m128 passed[39m[22m[90m (128)[39m
+[2m   Start at [22m 18:07:40
+[2m   Duration [22m 1.38s[2m (transform 495ms, setup 249ms, collect 740ms, tests 269ms, environment 1ms, prepare 976ms)[22m
+
+::endgroup::
+::group::🔁 > nx run @ci-dokumentor/github-actions:build  [local cache]
+
+> vite build
+
+[36mvite v6.3.5 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+[32m✓[39m 52 modules transformed.
+rendering chunks...
+[32m
+[36m[vite:dts][32m Start generate declaration files...[39m
+[96msrc/section/examples-section-generator.adapter.ts[0m:[93m44[0m:[93m55[0m - [91merror[0m[90m TS2339: [0mProperty 'type' does not exist on type 'GitHubActionInput'.
+
+[7m44[0m                 const value = input.default || (input.type === 'boolean' ? 'true' : 'example-value');
+[7m  [0m [91m                                                      ~~~~[0m
+[96msrc/section/examples-section-generator.adapter.ts[0m:[93m63[0m:[93m55[0m - [91merror[0m[90m TS2339: [0mProperty 'type' does not exist on type 'GitHubActionInput'.
+
+[7m63[0m                 const value = input.default || (input.type === 'boolean' ? 'false' : 'custom-value');
+[7m  [0m [91m                                                      ~~~~[0m
+[96msrc/section/examples-section-generator.adapter.ts[0m:[93m100[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'jobs' does not exist on type 'GitHubWorkflow'.
+
+[7m100[0m         const jobNames = Object.keys(workflow.jobs);
+[7m   [0m [91m                                              ~~~~[0m
+[96msrc/section/examples-section-generator.adapter.ts[0m:[93m101[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'jobs' does not exist on type 'GitHubWorkflow'.
+
+[7m101[0m         const firstJob = workflow.jobs[jobNames[0]];
+[7m   [0m [91m                                  ~~~~[0m
+[96msrc/section/examples-section-generator.adapter.ts[0m:[93m117[0m:[93m48[0m - [91merror[0m[90m TS7006: [0mParameter 'step' implicitly has an 'any' type.
+
+[7m117[0m             firstJob.steps.slice(0, 3).forEach(step => {
+[7m   [0m [91m                                               ~~~~[0m
+[96msrc/section/examples-section-generator.adapter.ts[0m:[93m148[0m:[93m38[0m - [91merror[0m[90m TS2339: [0mProperty 'jobs' does not exist on type 'GitHubWorkflow'.
+
+[7m148[0m                 const job = workflow.jobs[jobName];
+[7m   [0m [91m                                     ~~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m18[0m:[93m52[0m - [91merror[0m[90m TS2339: [0mProperty 'jobs' does not exist on type 'GitHubWorkflow'.
+
+[7m18[0m         const jobEntries = Object.entries(workflow.jobs);
+[7m  [0m [91m                                                   ~~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m32[0m:[93m42[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m32[0m             const runsOn = Array.isArray(job['runs-on']) ? job['runs-on'].join(', ') : job['runs-on'];
+[7m  [0m [91m                                         ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m32[0m:[93m60[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m32[0m             const runsOn = Array.isArray(job['runs-on']) ? job['runs-on'].join(', ') : job['runs-on'];
+[7m  [0m [91m                                                           ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m32[0m:[93m88[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m32[0m             const runsOn = Array.isArray(job['runs-on']) ? job['runs-on'].join(', ') : job['runs-on'];
+[7m  [0m [91m                                                                                       ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m33[0m:[93m31[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m33[0m             const stepCount = job.steps ? job.steps.length.toString() : '0';
+[7m  [0m [91m                              ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m33[0m:[93m43[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m33[0m             const stepCount = job.steps ? job.steps.length.toString() : '0';
+[7m  [0m [91m                                          ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m34[0m:[93m34[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m34[0m             const dependencies = job.needs ? (Array.isArray(job.needs) ? job.needs.join(', ') : job.needs) : 'None';
+[7m  [0m [91m                                 ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m34[0m:[93m61[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m34[0m             const dependencies = job.needs ? (Array.isArray(job.needs) ? job.needs.join(', ') : job.needs) : 'None';
+[7m  [0m [91m                                                            ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m34[0m:[93m74[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m34[0m             const dependencies = job.needs ? (Array.isArray(job.needs) ? job.needs.join(', ') : job.needs) : 'None';
+[7m  [0m [91m                                                                         ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m34[0m:[93m97[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m34[0m             const dependencies = job.needs ? (Array.isArray(job.needs) ? job.needs.join(', ') : job.needs) : 'None';
+[7m  [0m [91m                                                                                                ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m56[0m:[93m17[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m56[0m             if (job.name) {
+[7m  [0m [91m                ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m60[0m:[93m33[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m60[0m                     Buffer.from(job.name),
+[7m  [0m [91m                                ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m68[0m:[93m43[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m68[0m                 Buffer.from(Array.isArray(job['runs-on']) ? job['runs-on'].join(', ') : job['runs-on']),
+[7m  [0m [91m                                          ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m68[0m:[93m61[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m68[0m                 Buffer.from(Array.isArray(job['runs-on']) ? job['runs-on'].join(', ') : job['runs-on']),
+[7m  [0m [91m                                                            ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m68[0m:[93m89[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m68[0m                 Buffer.from(Array.isArray(job['runs-on']) ? job['runs-on'].join(', ') : job['runs-on']),
+[7m  [0m [91m                                                                                        ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m72[0m:[93m17[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m72[0m             if (job.needs) {
+[7m  [0m [91m                ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m76[0m:[93m47[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m76[0m                     Buffer.from(Array.isArray(job.needs) ? job.needs.join(', ') : job.needs),
+[7m  [0m [91m                                              ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m76[0m:[93m60[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m76[0m                     Buffer.from(Array.isArray(job.needs) ? job.needs.join(', ') : job.needs),
+[7m  [0m [91m                                                           ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m76[0m:[93m83[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m76[0m                     Buffer.from(Array.isArray(job.needs) ? job.needs.join(', ') : job.needs),
+[7m  [0m [91m                                                                                  ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m81[0m:[93m17[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m81[0m             if (job.strategy?.matrix) {
+[7m  [0m [91m                ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m90[0m:[93m17[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m90[0m             if (job.environment) {
+[7m  [0m [91m                ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m91[0m:[93m40[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m91[0m                 const envName = typeof job.environment === 'string' ? job.environment : job.environment.name;
+[7m  [0m [91m                                       ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m91[0m:[93m71[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m91[0m                 const envName = typeof job.environment === 'string' ? job.environment : job.environment.name;
+[7m  [0m [91m                                                                      ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m91[0m:[93m89[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m91[0m                 const envName = typeof job.environment === 'string' ? job.environment : job.environment.name;
+[7m  [0m [91m                                                                                        ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m101[0m:[93m17[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m101[0m             if (job.steps && job.steps.length > 0) {
+[7m   [0m [91m                ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m101[0m:[93m30[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m101[0m             if (job.steps && job.steps.length > 0) {
+[7m   [0m [91m                             ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m109[0m:[93m35[0m - [91merror[0m[90m TS18046: [0m'job' is of type 'unknown'.
+
+[7m109[0m                 const stepItems = job.steps.map((step, index) => {
+[7m   [0m [91m                                  ~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m109[0m:[93m50[0m - [91merror[0m[90m TS7006: [0mParameter 'step' implicitly has an 'any' type.
+
+[7m109[0m                 const stepItems = job.steps.map((step, index) => {
+[7m   [0m [91m                                                 ~~~~[0m
+[96msrc/section/jobs-section-generator.adapter.ts[0m:[93m109[0m:[93m56[0m - [91merror[0m[90m TS7006: [0mParameter 'index' implicitly has an 'any' type.
+
+[7m109[0m                 const stepItems = job.steps.map((step, index) => {
+[7m   [0m [91m                                                       ~~~~~[0m
+
+
+[2mdist/README.md[22m
+
+[2mdist/package.json[22m
+[2mdist/[22m[36mindex.js  [39m[1m[2m230.89 kB[22m[1m[22m
+[32m[36m[vite:dts][32m Declaration files built in 3346ms.
+[39m
+[32m✓ built in 4.02s[39m
+::endgroup::
+::group::🔁 > nx run @ci-dokumentor/github-actions:test --coverage.all  [local cache]
+
+> vitest --coverage.all
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/home/runner/work/ci-dokumentor/ci-dokumentor/packages/github-actions[39m
+
+ [32m✓[39m src/section/header-section-generator.adapter.spec.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/section/inputs-section-generator.adapter.spec.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/section/usage-section-generator.adapter.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/github-actions-parser.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m src/section/outputs-section-generator.adapter.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/github-actions-generator.adapter.e2e.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 211[2mms[22m[39m
+ [32m✓[39m src/section/badges-section-generator.adapter.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[32m65 passed[39m[22m[90m (65)[39m
+[2m   Start at [22m 18:07:43
+[2m   Duration [22m 2.78s[2m (transform 789ms, setup 266ms, collect 3.40s, tests 386ms, environment 2ms, prepare 1.34s)[22m
+
+::endgroup::
+::group::❌ > nx run @ci-dokumentor/cli:test --coverage.all
+
+> vitest --coverage.all
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/home/runner/work/ci-dokumentor/ci-dokumentor/packages/cli[39m
+
+ [31m❯[39m src/lib/cli.spec.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 15[2mms[22m[39m
+[31m   [31m×[31m CLI[2m > [22mcli function[2m > [22mshould create and run CLI application[39m[32m 14[2mms[22m[39m
+[31m     → Cannot read properties of undefined (reading '_executableHandler')[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/lib/cli.spec.ts[2m > [22mCLI[2m > [22mcli function[2m > [22mshould create and run CLI application
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading '_executableHandler')[39m
+[90m [2m❯[22m ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1262:22[22m[39m
+[90m [2m❯[22m Command._chainOrCall ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1386:12[22m[39m
+[90m [2m❯[22m Command._dispatchSubcommand ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1261:25[22m[39m
+[90m [2m❯[22m Command._dispatchHelpCommand ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1288:17[22m[39m
+[90m [2m❯[22m Command._parseCommand ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1463:19[22m[39m
+[90m [2m❯[22m Command.parseAsync ../../node_modules/.pnpm/commander@12.1.0/node_modules/commander/lib/command.js:[2m1092:16[22m[39m
+[36m [2m❯[22m CliApplication.run src/lib/application/cli-application.ts:[2m27:28[22m[39m
+    [90m 25| [39m     */[39m
+    [90m 26| [39m    [35masync[39m [34mrun[39m(args[33m?[39m[33m:[39m string[])[33m:[39m [33mPromise[39m[33m<[39m[35mvoid[39m[33m>[39m {
+    [90m 27| [39m        [35mawait[39m [35mthis[39m[33m.[39mprogram[33m.[39m[34mparseAsync[39m(args)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 28| [39m    }
+    [90m 29| [39m
+[90m [2m❯[22m cli src/lib/cli.ts:[2m11:17[22m[39m
+[90m [2m❯[22m src/lib/cli.spec.ts:[2m44:13[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 18:10:19
+[2m   Duration [22m 651ms[2m (transform 214ms, setup 34ms, collect 354ms, tests 15ms, environment 0ms, prepare 66ms)[22m
+
+::endgroup::
+
+
+ NX   Running target test for 3 projects and 2 tasks they depend on failed
+
+Failed tasks:
+
+- @ci-dokumentor/cli:test
+
+ ELIFECYCLE  Command failed with exit code 1.
