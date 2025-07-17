@@ -30,3 +30,134 @@ jobs:
       id-token: write
       security-events: write
       contents: read
+
+  # Enhanced error reporting for test failures
+  test-with-enhanced-errors:
+    runs-on: ubuntu-latest
+    needs: linter
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Enable Corepack
+        run: corepack enable
+        
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build packages
+        run: pnpm run build
+        
+      - name: Run tests with enhanced error reporting
+        id: test-run
+        run: |
+          echo "::group::🧪 Running tests with enhanced error reporting"
+          set +e  # Don't exit immediately on error
+          pnpm run test:ci 2>&1 | tee test-output.log
+          TEST_EXIT_CODE=$?
+          echo "::endgroup::"
+          exit $TEST_EXIT_CODE
+        continue-on-error: true
+        
+      - name: Process and Display Test Results
+        if: always()
+        run: |
+          echo "::group::📊 Enhanced Error Analysis"
+          
+          if [ "${{ steps.test-run.outcome }}" == "success" ]; then
+            echo "✅ All tests passed successfully!"
+          else
+            echo "❌ Tests failed. Analyzing error details..."
+            echo ""
+            
+            # Extract and display failed tests
+            if [ -f test-output.log ]; then
+              echo "📋 **Failed Test Summary:**"
+              echo ""
+              
+              # Extract failed test information
+              grep -E "FAIL|Failed Tests|❯.*failed|×.*failed" test-output.log | head -20
+              echo ""
+              
+              # Extract specific error details
+              echo "🔍 **Error Details:**"
+              echo ""
+              
+              # Show detailed error information
+              grep -A 20 -B 5 "TypeError\|Error\|Failed" test-output.log | head -50
+              echo ""
+              
+              # Show stack trace information
+              echo "📍 **Stack Trace:**"
+              echo ""
+              grep -E "❯.*\.ts:|❯.*\.js:" test-output.log | head -10
+              
+              echo ""
+              echo "📁 **Full Test Output (last 100 lines):**"
+              echo ""
+              tail -100 test-output.log
+            else
+              echo "⚠️ No test output captured"
+            fi
+          fi
+          
+          echo "::endgroup::"
+          
+      - name: Upload Detailed Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enhanced-test-results
+          path: |
+            test-output.log
+            packages/*/test-output/
+          retention-days: 5
+          
+      - name: Create GitHub Test Summary
+        if: always()
+        run: |
+          echo "# 🧪 Enhanced Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.test-run.outcome }}" == "success" ]; then
+            echo "✅ **All tests passed successfully!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Tests failed with detailed error information**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            if [ -f test-output.log ]; then
+              echo "## 📋 Failed Tests" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              grep -E "FAIL|Failed Tests|❯.*failed|×.*failed" test-output.log | head -10 >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              echo "## 🔍 Error Details" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              grep -A 10 -B 2 "TypeError\|Error" test-output.log | head -30 >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              echo "## 📍 Stack Trace" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              grep -E "❯.*\.ts:|❯.*\.js:" test-output.log | head -10 >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Test Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Status: ${{ steps.test-run.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Enhanced Error Reporting: Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "- Timestamp: $(date)" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Fail job if tests failed
+        if: steps.test-run.outcome == 'failure'
+        run: |
+          echo "::error::Tests failed with detailed error information shown above"
+          exit 1
