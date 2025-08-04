@@ -81,7 +81,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
             return undefined;
         }
 
-        let inputsUsageDocument = new Document({});
+        const inputsUsageDocument = new Document({});
 
         // Process inputs using the dedicated method
         const processedInputs: Record<string, unknown> = {};
