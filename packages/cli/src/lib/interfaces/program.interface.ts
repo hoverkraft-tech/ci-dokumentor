@@ -1,4 +1,4 @@
-import { Command } from "./command.interface.js";
+import { Command as CommanderCommand } from 'commander';
 
 export const PROGRAM_IDENTIFIER = Symbol("Program");
 
@@ -26,7 +26,7 @@ export interface Program {
     /**
      * Add a command to the program
      */
-    addCommand(command: Command): this;
+    addCommand(command: CommanderCommand): this;
 
     /**
      * Show help after an error occurs

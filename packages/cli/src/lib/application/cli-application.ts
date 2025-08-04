@@ -1,21 +1,24 @@
 import { inject, injectable, multiInject } from 'inversify';
+import { Command as CommanderCommand } from 'commander';
 import { COMMAND_IDENTIFIER, type Command } from '../interfaces/command.interface.js';
 import { LOGGER_IDENTIFIER, type Logger } from '../interfaces/logger.interface.js';
 import { PACKAGE_SERVICE_IDENTIFIER, type PackageService } from '../interfaces/package-service.interface.js';
-import { PROGRAM_IDENTIFIER, type Program } from '../interfaces/program.interface.js';
 
 /**
  * Main CLI application class that orchestrates command execution
- * Uses dependency injection to get commands directly via multiInject
+ * Creates its own Commander.js program instance to avoid DI issues
  */
 @injectable()
 export class CliApplication {
+    private program: CommanderCommand;
+
     constructor(
-        @inject(PROGRAM_IDENTIFIER) private readonly program: Program,
         @multiInject(COMMAND_IDENTIFIER) private readonly commands: Command[],
         @inject(PACKAGE_SERVICE_IDENTIFIER) private readonly packageService: PackageService,
         @inject(LOGGER_IDENTIFIER) private readonly logger: Logger
     ) {
+        // Create Commander.js program directly to avoid DI issues
+        this.program = new CommanderCommand();
         this.setupProgram();
         this.registerCommands();
     }

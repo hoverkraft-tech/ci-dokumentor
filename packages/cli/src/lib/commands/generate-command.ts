@@ -1,20 +1,18 @@
 import { inject, injectable } from 'inversify';
 import { Command as CommanderCommand } from 'commander';
-import { BaseCommand } from './base-command.js';
+import type { Command } from '../interfaces/command.interface.js';
 import { GenerateDocumentationUseCase } from '../usecases/generate-documentation.usecase.js';
 
 /**
  * Generate command implementation that creates a configured Commander Command
- * Uses composition instead of inheritance to avoid DI conflicts
+ * Uses composition and minimal DI to avoid conflicts with Commander.js
  */
 @injectable()
-export class GenerateCommand extends BaseCommand {
+export class GenerateCommand implements Command {
     constructor(
         @inject(GenerateDocumentationUseCase)
         private readonly generateDocumentationUseCase: GenerateDocumentationUseCase
-    ) {
-        super();
-    }
+    ) {}
 
     /**
      * Create and configure a Commander command instance
