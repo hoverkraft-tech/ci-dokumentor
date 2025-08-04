@@ -1,15 +1,15 @@
-import { Command as CommanderCommander } from 'commander';
+import { Command as CommanderCommand } from 'commander';
 
 export const COMMAND_IDENTIFIER = Symbol("Command");
 
 /**
  * Command interface
- * Commands should be self-configuring and call dedicated use cases
+ * Commands should be self-configuring and return a configured Commander command
  */
-export interface Command extends CommanderCommander {
+export interface Command {
     /**
-     * Configure the command with name, description, options, and action
+     * Create and configure a Commander command
      * This method should set up the command using Commander.js methods
      */
-    configure(): this;
+    createCommand(): CommanderCommand;
 }

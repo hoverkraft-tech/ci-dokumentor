@@ -47,15 +47,15 @@ export class CliApplication {
 
     /**
      * Register all available commands using addCommand
-     * Commands are self-configured through their configure() method
+     * Commands create their own Commander command instances which are properly initialized
      */
     private registerCommands(): void {
         this.commands.forEach(command => {
-            // Configure the command (this sets up name, description, options, action)
-            command.configure();
+            // Create a properly initialized Commander command instance
+            const commanderCommand = command.createCommand();
 
             // Add the configured command to the main program
-            this.program.addCommand(command);
+            this.program.addCommand(commanderCommand);
         });
     }
 }
