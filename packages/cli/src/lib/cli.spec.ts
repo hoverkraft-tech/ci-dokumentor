@@ -4,6 +4,7 @@ import { cli } from './cli.js';
 describe('CLI', () => {
   const originalArgv = process.argv.slice();
   let consoleLogSpy: MockInstance<typeof console.log>;
+  let consoleErrorSpy: MockInstance<typeof console.error>;
   let processExitSpy: MockInstance<typeof process.exit>;
 
   beforeEach(() => {
@@ -13,6 +14,10 @@ describe('CLI', () => {
     // Mock console.log to capture output
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
       // Mock implementation - intentionally empty
+    });
+
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      // Mock implementation - intentionally empty  
     });
 
     const processExitMock = (() => {
@@ -32,14 +37,15 @@ describe('CLI', () => {
   describe('cli function', () => {
     it('should create and run CLI application', async () => {
       // Arrange
-      // Mock process.argv to simulate version command instead of help
-      process.argv = ['node', 'ci-dokumentor', '--version'];
+      // Mock process.argv to simulate help command
+      process.argv = ['node', 'ci-dokumentor', 'help'];
 
       // Act
       await cli();
 
-      // Assert - version output goes to console.log via writeOut configuration
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('0.0.1'));
+      // Assert
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
 
