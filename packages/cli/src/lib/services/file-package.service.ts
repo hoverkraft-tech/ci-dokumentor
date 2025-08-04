@@ -1,4 +1,3 @@
-import { injectable } from 'inversify';
 import { existsSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -7,7 +6,6 @@ import type { PackageInfo, PackageService } from '../interfaces/package-service.
 /**
  * Package service implementation that reads package.json
  */
-@injectable()
 export class FilePackageService implements PackageService {
     private packageInfo: PackageInfo | null = null;
 

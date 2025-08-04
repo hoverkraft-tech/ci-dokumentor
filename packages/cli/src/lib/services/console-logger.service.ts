@@ -1,11 +1,9 @@
-import { injectable } from 'inversify';
 import type { Logger } from '../interfaces/logger.interface.js';
 
 /**
  * Console logger implementation
  * Provides structured logging with different levels and formatting
  */
-@injectable()
 export class ConsoleLogger implements Logger {
 
     /**
