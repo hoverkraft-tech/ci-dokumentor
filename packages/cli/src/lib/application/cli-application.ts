@@ -1,23 +1,21 @@
-import { inject, injectable } from 'inversify';
-import { Command } from 'commander';
+import { inject, injectable, multiInject } from 'inversify';
+import { COMMAND_IDENTIFIER, type Command } from '../interfaces/command.interface.js';
 import { LOGGER_IDENTIFIER, type Logger } from '../interfaces/logger.interface.js';
 import { PACKAGE_SERVICE_IDENTIFIER, type PackageService } from '../interfaces/package-service.interface.js';
-import { GenerateDocumentationUseCase } from '../usecases/generate-documentation.usecase.js';
+import { PROGRAM_IDENTIFIER, type Program } from '../interfaces/program.interface.js';
 
 /**
  * Main CLI application class that orchestrates command execution
- * Simplified approach without program dependency injection
+ * Uses dependency injection to get commands directly via multiInject
  */
 @injectable()
 export class CliApplication {
-    private readonly program: Command;
-
     constructor(
+        @inject(PROGRAM_IDENTIFIER) private readonly program: Program,
+        @multiInject(COMMAND_IDENTIFIER) private readonly commands: Command[],
         @inject(PACKAGE_SERVICE_IDENTIFIER) private readonly packageService: PackageService,
-        @inject(LOGGER_IDENTIFIER) private readonly logger: Logger,
-        @inject(GenerateDocumentationUseCase) private readonly generateDocumentationUseCase: GenerateDocumentationUseCase
+        @inject(LOGGER_IDENTIFIER) private readonly logger: Logger
     ) {
-        this.program = new Command();
         this.setupProgram();
         this.registerCommands();
     }
@@ -26,7 +24,7 @@ export class CliApplication {
      * Run the CLI application with the provided arguments
      */
     async run(args?: string[]): Promise<void> {
-        await this.program.parseAsync(args || process.argv);
+        await this.program.parseAsync(args);
     }
 
     /**
@@ -48,24 +46,16 @@ export class CliApplication {
     }
 
     /**
-     * Register all available commands manually
+     * Register all available commands using addCommand
+     * Commands are self-configured through their configure() method
      */
     private registerCommands(): void {
-        // Create generate command manually
-        const generateCommand = new Command('generate')
-            .alias('gen')
-            .description('Generate documentation from CI/CD configuration files')
-            .option('-s, --source <dir>', 'Source directory containing CI/CD files', '.')
-            .option('-o, --output <dir>', 'Output directory for generated documentation', './docs')
-            .option('-t, --type <type>', 'Type of CI/CD system', 'github-actions')
-            .action(async (options) => {
-                await this.generateDocumentationUseCase.execute({
-                    source: options.source,
-                    output: options.output,
-                    type: options.type
-                });
-            });
+        this.commands.forEach(command => {
+            // Configure the command (this sets up name, description, options, action)
+            command.configure();
 
-        this.program.addCommand(generateCommand);
+            // Add the configured command to the main program
+            this.program.addCommand(command);
+        });
     }
 }
