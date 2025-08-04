@@ -24,7 +24,11 @@ export class CliApplication {
      * Run the CLI application with the provided arguments
      */
     async run(args?: string[]): Promise<void> {
-        await this.program.parseAsync(args);
+        if (args && args.length) {
+            await this.program.parseAsync(args, { from: 'user' });
+        } else {
+          await this.program.parseAsync();
+        }
     }
 
     /**
