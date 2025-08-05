@@ -14,13 +14,17 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
      * Checks if the repository is hosted on GitHub
      */
     async supports(): Promise<boolean> {
-        // First check if the git repository provider supports the context
-        if (!(await this.gitRepositoryService.supports())) {
+        try {
+            // First check if the git repository provider supports the context
+            if (!(await this.gitRepositoryService.supports())) {
+                return false;
+            }
+            
+            const parsedUrl = await this.gitRepositoryService.getRemoteParsedUrl();
+            return parsedUrl.source === 'github.com';
+        } catch {
             return false;
         }
-        
-        const parsedUrl = await this.gitRepositoryService.getRemoteParsedUrl();
-        return parsedUrl.source === 'github.com';
     }
 
     async getRepository(): Promise<Repository> {

@@ -1,5 +1,5 @@
 import { Repository } from "@ci-dokumentor/core";
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import { GitHubAction, GitHubWorkflow, GitHubWorkflowJob } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 
@@ -47,7 +47,7 @@ export class JobsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
         ]);
 
         // Add detailed job descriptions
-        jobEntries.forEach(([jobName, job]) => {
+        jobEntries.forEach(([jobName, job]: [string, GitHubWorkflowJob]) => {
             let jobDetails = Buffer.concat([
                 formatterAdapter.heading(Buffer.from(`Job: ${jobName}`), 3),
                 formatterAdapter.lineBreak()

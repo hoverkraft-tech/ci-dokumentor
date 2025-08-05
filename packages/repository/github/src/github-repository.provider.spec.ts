@@ -25,6 +25,7 @@ describe('GitHubRepositoryProvider', () => {
     describe('supports', () => {
         it('should return true for GitHub HTTPS URL', async () => {
             // Arrange
+            mockGitRepositoryService.supports.mockResolvedValue(true);
             const mockParsedUrl = {
                 source: 'github.com',
                 owner: 'owner',
@@ -41,6 +42,7 @@ describe('GitHubRepositoryProvider', () => {
 
         it('should return true for GitHub SSH URL', async () => {
             // Arrange
+            mockGitRepositoryService.supports.mockResolvedValue(true);
             const mockParsedUrl = {
                 source: 'github.com',
                 owner: 'owner',
@@ -57,6 +59,7 @@ describe('GitHubRepositoryProvider', () => {
 
         it('should return false for GitLab URL', async () => {
             // Arrange
+            mockGitRepositoryService.supports.mockResolvedValue(true);
             const mockParsedUrl = {
                 source: 'gitlab.com',
                 owner: 'owner',
@@ -73,6 +76,7 @@ describe('GitHubRepositoryProvider', () => {
 
         it('should return false for Bitbucket URL', async () => {
             // Arrange
+            mockGitRepositoryService.supports.mockResolvedValue(true);
             const mockParsedUrl = {
                 source: 'bitbucket.org',
                 owner: 'owner',
@@ -89,6 +93,7 @@ describe('GitHubRepositoryProvider', () => {
 
         it('should return false when getRemoteParsedUrl throws an error', async () => {
             // Arrange
+            mockGitRepositoryService.supports.mockResolvedValue(true);
             mockGitRepositoryService.getRemoteParsedUrl.mockRejectedValue(new Error('Git error'));
 
             // Act
@@ -96,6 +101,18 @@ describe('GitHubRepositoryProvider', () => {
 
             // Assert
             expect(result).toBe(false);
+        });
+
+        it('should return false when git repository provider does not support the context', async () => {
+            // Arrange
+            mockGitRepositoryService.supports.mockResolvedValue(false);
+
+            // Act
+            const result = await gitHubRepositoryProvider.supports();
+
+            // Assert
+            expect(result).toBe(false);
+            expect(mockGitRepositoryService.getRemoteParsedUrl).not.toHaveBeenCalled();
         });
     });
 

@@ -37,6 +37,24 @@ export type GitHubAction = {
 
 // See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-workflow.json
 
+export type GitHubWorkflowJob = {
+    name?: string;
+    'runs-on': string | string[];
+    needs?: string | string[];
+    strategy?: {
+        matrix?: Record<string, unknown>;
+    };
+    environment?: string | { name: string };
+    steps?: Array<{
+        name?: string;
+        uses?: string;
+        run?: string;
+        with?: Record<string, unknown>;
+        env?: Record<string, string>;
+        if?: string;
+    }>;
+};
+
 export type GitHubWorkflow = {
     usesName: string; // e.g., 'hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml'
     name: string
@@ -45,7 +63,7 @@ export type GitHubWorkflow = {
         workflow_dispatch?: GitHubWorkflowDispatchEvent
     }; // Event triggers
     permissions?: Record<string, string>; // Permissions for the workflow
-    jobs?: Record<string, unknown>; // Jobs in the workflow
+    jobs: Record<string, GitHubWorkflowJob>; // Jobs in the workflow
 };
 
 export type GitHubWorkflowDispatchEvent = {

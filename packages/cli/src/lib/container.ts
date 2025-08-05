@@ -2,6 +2,8 @@ import 'reflect-metadata';
 import { Command as CommanderCommand } from 'commander';
 import { type Container, initContainer as coreInitContainer } from '@ci-dokumentor/core';
 import { initContainer as gitHubActionsInitContainer } from '@ci-dokumentor/cicd-github-actions';
+import { initContainer as gitRepositoryInitContainer } from '@ci-dokumentor/repository-git';
+import { initContainer as gitHubRepositoryInitContainer } from '@ci-dokumentor/repository-github';
 import { COMMAND_IDENTIFIER, type Command } from './interfaces/command.interface.js';
 import { LOGGER_IDENTIFIER, type Logger } from './interfaces/logger.interface.js';
 import { PACKAGE_SERVICE_IDENTIFIER, type PackageService } from './interfaces/package-service.interface.js';
@@ -32,6 +34,10 @@ export function initContainer(): Container {
     // Initialize the core container
     // This allows us to use the core services and types
     container = coreInitContainer();
+
+    // Initialize repository providers - git and github separately to allow multiple providers
+    gitRepositoryInitContainer(container);
+    gitHubRepositoryInitContainer(container);
 
     // Initialize GitHub Actions specific bindings
     gitHubActionsInitContainer(container);
