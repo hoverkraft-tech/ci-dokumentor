@@ -172,7 +172,7 @@ importers:
       '@ci-dokumentor/core':
         specifier: workspace:*
         version: link:../../core
-      '@ci-dokumentor/repository-basic':
+      '@ci-dokumentor/repository-git':
         specifier: workspace:*
         version: link:../basic
       '@octokit/graphql':

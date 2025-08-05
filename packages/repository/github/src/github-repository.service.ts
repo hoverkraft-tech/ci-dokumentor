@@ -1,5 +1,5 @@
 import { Repository, RepositoryProvider } from "@ci-dokumentor/core";
-import { BasicRepositoryService } from "@ci-dokumentor/repository-basic";
+import { BasicRepositoryService } from "@ci-dokumentor/repository-git";
 import { existsSync } from "node:fs";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
 import { injectable, inject } from "inversify";

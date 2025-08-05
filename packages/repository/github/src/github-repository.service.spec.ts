@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitHubRepositoryService } from './github-repository.service.js';
-import { BasicRepositoryService } from '@ci-dokumentor/repository-basic';
+import { BasicRepositoryService } from '@ci-dokumentor/repository-git';
 import { simpleGit } from 'simple-git';
 
 // Mock the simple-git module
 vi.mock('simple-git');
 
 // Mock the BasicRepositoryService
-vi.mock('@ci-dokumentor/repository-basic', () => ({
+vi.mock('@ci-dokumentor/repository-git', () => ({
     BasicRepositoryService: vi.fn()
 }));
 
