@@ -1,5 +1,6 @@
-// Re-export from repository platforms
-export * from '@ci-dokumentor/repository-platforms-github';
+// Re-export types and classes from repository platforms
+export { GitHubRepositoryService } from '@ci-dokumentor/repository-platforms-github';
+export type { GitHubRepository } from '@ci-dokumentor/repository-platforms-github';
 
 // Re-export from CI/CD platforms  
 export * from '@ci-dokumentor/cicd-platforms-github-actions';
