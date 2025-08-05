@@ -117,12 +117,15 @@ importers:
 
   packages/cli:
     dependencies:
+      '@ci-dokumentor/cicd-github-actions':
+        specifier: workspace:*
+        version: link:../cicd/github-actions
       '@ci-dokumentor/core':
         specifier: workspace:*
         version: link:../core
-      '@ci-dokumentor/github-actions':
+      '@ci-dokumentor/repository-github':
         specifier: workspace:*
-        version: link:../github-actions
+        version: link:../repository/github
       commander:
         specifier: ^14.0.0
         version: 14.0.0
@@ -144,18 +147,6 @@ importers:
       simple-git:
         specifier: ^3.28.0
         version: 3.28.0
-
-  packages/github-actions:
-    dependencies:
-      '@ci-dokumentor/cicd-github-actions':
-        specifier: workspace:*
-        version: link:../cicd/github-actions
-      '@ci-dokumentor/core':
-        specifier: workspace:*
-        version: link:../core
-      '@ci-dokumentor/repository-github':
-        specifier: workspace:*
-        version: link:../repository/github
 
   packages/repository/github:
     dependencies:

@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Command as CommanderCommand } from 'commander';
 import { type Container, initContainer as coreInitContainer } from '@ci-dokumentor/core';
-import { initContainer as gitHubActionsInitContainer } from '@ci-dokumentor/github-actions';
+import { initContainer as gitHubActionsInitContainer } from '@ci-dokumentor/cicd-github-actions';
 import { COMMAND_IDENTIFIER, type Command } from './interfaces/command.interface.js';
 import { LOGGER_IDENTIFIER, type Logger } from './interfaces/logger.interface.js';
 import { PACKAGE_SERVICE_IDENTIFIER, type PackageService } from './interfaces/package-service.interface.js';
@@ -13,6 +13,13 @@ import { ConsoleLogger } from './services/console-logger.service.js';
 import { FilePackageService } from './services/file-package.service.js';
 
 let container: Container | null = null;
+
+/**
+ * Resets the container singleton for testing purposes
+ */
+export function resetContainer(): void {
+    container = null;
+}
 
 /**
  * Creates and configures the dependency injection container

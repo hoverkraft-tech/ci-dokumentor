@@ -20,13 +20,19 @@ import { LicenseSectionGenerator } from './section/license-section-generator.ada
 
 let container: Container | null = null;
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-    if (container) {
-        return container;
-    }
+export function resetContainer(): void {
+    container = null;
+}
 
+export function initContainer(baseContainer: Container | undefined = undefined): Container {
     if (baseContainer) {
+        // When a base container is provided, always use it and set it as our singleton
         container = baseContainer;
+        // Initialize repository container with the base container 
+        initRepositoryContainer(container);
+    } else if (container) {
+        // Only return existing singleton if no base container is provided
+        return container;
     } else {
         // Initialize with repository platforms container
         container = initRepositoryContainer();

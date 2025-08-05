@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
-    "@ci-dokumentor/github-actions": "workspace:*",
+    "@ci-dokumentor/cicd-github-actions": "workspace:*",
+    "@ci-dokumentor/repository-github": "workspace:*",
     "commander": "^14.0.0",
     "inversify": "^7.5.2",
     "reflect-metadata": "^0.2.2"

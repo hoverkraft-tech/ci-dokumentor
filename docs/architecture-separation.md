@@ -13,34 +13,33 @@ The codebase has been refactored to separate:
 ```
 packages/
 ├── core/                              # Core abstractions and base services
-├── repository-platforms/
+├── repository/
 │   └── github/                        # GitHub repository platform
-├── cicd-platforms/
+├── cicd/
 │   └── github-actions/                # GitHub Actions CI/CD platform
-├── github-actions/                    # Convenience wrapper package
 └── cli/                               # CLI application
 ```
 
 ## Repository Platforms
 
-Located in `packages/repository-platforms/`, these packages handle:
+Located in `packages/repository/`, these packages handle:
 - Repository information extraction
 - Platform-specific metadata (logos, descriptions, etc.)
 - Repository URL parsing and validation
 
-### GitHub Repository Platform (`packages/repository-platforms/github/`)
+### GitHub Repository Platform (`packages/repository/github/`)
 
 - **GitHubRepositoryService**: Extends the core RepositoryService with GitHub-specific features
 - **GitHubRepository**: Type extending Repository with GitHub-specific properties (logo)
 
 ## CI/CD Platforms
 
-Located in `packages/cicd-platforms/`, these packages handle:
+Located in `packages/cicd/`, these packages handle:
 - CI/CD manifest parsing (action.yml, workflow files)
 - Documentation generation for CI/CD workflows
 - Platform-specific section generators
 
-### GitHub Actions CI/CD Platform (`packages/cicd-platforms/github-actions/`)
+### GitHub Actions CI/CD Platform (`packages/cicd/github-actions/`)
 
 - **GitHubActionsParser**: Parses GitHub Actions and workflow files
 - **GitHubActionsGeneratorAdapter**: Generates documentation for GitHub Actions
@@ -61,13 +60,10 @@ Each package provides its own container initialization:
 
 ```typescript
 // Repository platform
-import { initContainer } from '@ci-dokumentor/repository-platforms-github';
+import { initContainer } from '@ci-dokumentor/repository-github';
 
-// CI/CD platform (includes repository platform)
-import { initContainer } from '@ci-dokumentor/cicd-platforms-github-actions';
-
-// Combined convenience package
-import { initGitHubActionsContainer } from '@ci-dokumentor/github-actions';
+// CI/CD platform (includes repository platform dependencies)
+import { initContainer } from '@ci-dokumentor/cicd-github-actions';
 ```
 
 ## Benefits

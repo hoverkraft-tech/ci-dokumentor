@@ -4,9 +4,6 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/github-actions"
-    },
-    {
       "path": "./packages/cli"
     },
     {
