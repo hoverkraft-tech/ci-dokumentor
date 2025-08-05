@@ -1,5 +1,5 @@
 {
-  "name": "@ci-dokumentor/github-actions",
+  "name": "@ci-dokumentor/cicd-platforms-github-actions",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -18,6 +18,11 @@
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/repository-platforms-github": "workspace:*",
-    "@ci-dokumentor/cicd-platforms-github-actions": "workspace:*"
+    "feather-icons": "^4.29.2",
+    "inversify": "^7.5.2",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/feather-icons": "^4.29.4"
   }
 }

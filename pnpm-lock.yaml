@@ -93,6 +93,28 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@18.16.9)(@vitest/ui@3.2.4)(jiti@2.4.2)(jsdom@22.1.0)(yaml@2.8.0)
 
+  packages/cicd-platforms/github-actions:
+    dependencies:
+      '@ci-dokumentor/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@ci-dokumentor/repository-platforms-github':
+        specifier: workspace:*
+        version: link:../../repository-platforms/github
+      feather-icons:
+        specifier: ^4.29.2
+        version: 4.29.2
+      inversify:
+        specifier: ^7.5.2
+        version: 7.7.0(reflect-metadata@0.2.2)
+      yaml:
+        specifier: ^2.8.0
+        version: 2.8.0
+    devDependencies:
+      '@types/feather-icons':
+        specifier: ^4.29.4
+        version: 4.29.4
+
   packages/cli:
     dependencies:
       '@ci-dokumentor/core':
@@ -125,25 +147,27 @@ importers:
 
   packages/github-actions:
     dependencies:
+      '@ci-dokumentor/cicd-platforms-github-actions':
+        specifier: workspace:*
+        version: link:../cicd-platforms/github-actions
       '@ci-dokumentor/core':
         specifier: workspace:*
         version: link:../core
+      '@ci-dokumentor/repository-platforms-github':
+        specifier: workspace:*
+        version: link:../repository-platforms/github
+
+  packages/repository-platforms/github:
+    dependencies:
+      '@ci-dokumentor/core':
+        specifier: workspace:*
+        version: link:../../core
       '@octokit/graphql':
         specifier: ^9.0.1
         version: 9.0.1
-      feather-icons:
-        specifier: ^4.29.2
-        version: 4.29.2
       inversify:
         specifier: ^7.5.2
         version: 7.7.0(reflect-metadata@0.2.2)
-      yaml:
-        specifier: ^2.8.0
-        version: 2.8.0
-    devDependencies:
-      '@types/feather-icons':
-        specifier: ^4.29.4
-        version: 4.29.4
 
 packages:
 

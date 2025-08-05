@@ -8,7 +8,7 @@ import {
 import { initContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
-import { GitHubRepository, GitHubRepositoryService } from './repository/github-repository.service.js';
+import { GitHubRepository, GitHubRepositoryService } from '@ci-dokumentor/repository-platforms-github';
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let formatterAdapter: FormatterAdapter;

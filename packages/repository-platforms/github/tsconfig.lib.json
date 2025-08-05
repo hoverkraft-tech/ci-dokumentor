@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "src",
@@ -12,13 +12,7 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../core/tsconfig.lib.json"
-    },
-    {
-      "path": "../repository-platforms/github/tsconfig.lib.json"
-    },
-    {
-      "path": "../cicd-platforms/github-actions/tsconfig.lib.json"
+      "path": "../../core/tsconfig.lib.json"
     }
   ],
   "exclude": [

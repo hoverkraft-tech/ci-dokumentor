@@ -1,5 +1,5 @@
 {
-  "name": "@ci-dokumentor/github-actions",
+  "name": "@ci-dokumentor/repository-platforms-github",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
-    "@ci-dokumentor/repository-platforms-github": "workspace:*",
-    "@ci-dokumentor/cicd-platforms-github-actions": "workspace:*"
+    "@octokit/graphql": "^9.0.1",
+    "inversify": "^7.5.2"
   }
 }

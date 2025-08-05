@@ -2,7 +2,7 @@ import { GeneratorAdapter, OutputAdapter, SECTION_GENERATOR_ADAPTER_IDENTIFIER, 
 import { inject, multiInject } from 'inversify';
 import { GitHubAction, GitHubActionsParser, GitHubWorkflow } from './github-actions-parser.js';
 import { dirname, join } from 'node:path';
-import { GitHubRepositoryService } from './repository/github-repository.service.js';
+import { GitHubRepositoryService } from '@ci-dokumentor/repository-platforms-github';
 
 /**
  * GitHub Actions generator adapter.
