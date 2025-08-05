@@ -23,9 +23,7 @@ export class GitRepositoryProvider implements RepositoryProvider {
     }
 
     async getRepository(): Promise<Repository> {
-        const remoteUrl = await this.getRemoteUrl();
-
-        const parsedUrl = gitUrlParse(remoteUrl);
+        const parsedUrl = await this.getRemoteParsedUrl();
 
         let url = parsedUrl.toString('https');
         // Remove the .git suffix if present
@@ -41,6 +39,15 @@ export class GitRepositoryProvider implements RepositoryProvider {
             url,
             fullName,
         };
+    }
+
+    /**
+     * Get the parsed remote URL for the repository
+     * This is a public method that can be used by other providers
+     */
+    async getRemoteParsedUrl(): Promise<any> {
+        const remoteUrl = await this.getRemoteUrl();
+        return gitUrlParse(remoteUrl);
     }
 
     private async getRemoteUrl(): Promise<string> {

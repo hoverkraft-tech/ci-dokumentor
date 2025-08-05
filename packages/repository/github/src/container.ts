@@ -20,7 +20,6 @@ export function initContainer(baseContainer: Container | undefined = undefined):
     }
 
     // Services
-    container.bind(GitRepositoryProvider).toSelf().inSingletonScope();
     container.bind(GitHubRepositoryService).toSelf().inSingletonScope();
     
     // Register as repository provider

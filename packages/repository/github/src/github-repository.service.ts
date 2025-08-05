@@ -3,8 +3,6 @@ import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { existsSync } from "node:fs";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
 import { injectable, inject } from "inversify";
-import gitUrlParse from 'git-url-parse';
-import { simpleGit } from 'simple-git';
 
 export type GitHubRepository = Repository & {
     logo?: string;
@@ -13,7 +11,7 @@ export type GitHubRepository = Repository & {
 @injectable()
 export class GitHubRepositoryService implements RepositoryProvider {
     
-    constructor(@inject(GitRepositoryProvider) private basicRepositoryService: GitRepositoryProvider) {}
+    constructor(@inject(GitRepositoryProvider) private gitRepositoryService: GitRepositoryProvider) {}
     
     /**
      * Check if this provider supports the current repository context
@@ -21,15 +19,7 @@ export class GitHubRepositoryService implements RepositoryProvider {
      */
     async supports(): Promise<boolean> {
         try {
-            const git = simpleGit();
-            const remotes = await git.getRemotes(true);
-            const originRemote = remotes.find(remote => remote.name === 'origin');
-
-            if (!originRemote || !originRemote.refs.fetch) {
-                return false;
-            }
-
-            const parsedUrl = gitUrlParse(originRemote.refs.fetch);
+            const parsedUrl = await this.gitRepositoryService.getRemoteParsedUrl();
             return parsedUrl.source === 'github.com';
         } catch {
             return false;
@@ -37,7 +27,7 @@ export class GitHubRepositoryService implements RepositoryProvider {
     }
 
     async getRepository(): Promise<GitHubRepository> {
-        const repositoryInfo = await this.basicRepositoryService.getRepository();
+        const repositoryInfo = await this.gitRepositoryService.getRepository();
         const logo = await this.getLogoUri(repositoryInfo);
 
         return {
