@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
-import { GitHubRepositoryProvider } from './github-repository.service.js';
+import { GitHubRepositoryProvider } from './github-repository.provider.js';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { simpleGit } from 'simple-git';
 

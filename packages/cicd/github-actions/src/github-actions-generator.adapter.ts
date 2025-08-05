@@ -1,8 +1,7 @@
-import { GeneratorAdapter, OutputAdapter, SECTION_GENERATOR_ADAPTER_IDENTIFIER, SectionGeneratorAdapter, FormatterAdapter } from '@ci-dokumentor/core';
+import { GeneratorAdapter, OutputAdapter, SECTION_GENERATOR_ADAPTER_IDENTIFIER, SectionGeneratorAdapter, FormatterAdapter, RepositoryService } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import { GitHubAction, GitHubActionsParser, GitHubWorkflow } from './github-actions-parser.js';
 import { dirname, join } from 'node:path';
-import { GitHubRepositoryProvider } from '@ci-dokumentor/repository-github';
 
 /**
  * GitHub Actions generator adapter.
@@ -13,8 +12,8 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     constructor(
         @inject(GitHubActionsParser)
         public readonly gitHubActionsParser: GitHubActionsParser,
-        @inject(GitHubRepositoryProvider)
-        private readonly gitHubRepositoryService: GitHubRepositoryProvider,
+        @inject(RepositoryService)
+        private readonly repositoryService: RepositoryService,
         @multiInject(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
         private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubAction | GitHubWorkflow>[],
     ) { }
@@ -51,7 +50,7 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     }
 
     async generateDocumentation(source: string, formatterAdapter: FormatterAdapter, outputAdapter: OutputAdapter): Promise<void> {
-        const repository = await this.gitHubRepositoryService.getRepository();
+        const repository = await this.repositoryService.getRepository();
         const gitHubActionOrWorkflow = this.gitHubActionsParser.parseFile(source, repository);
 
         for (const sectionGeneratorAdapter of this.sectionGeneratorAdapters) {

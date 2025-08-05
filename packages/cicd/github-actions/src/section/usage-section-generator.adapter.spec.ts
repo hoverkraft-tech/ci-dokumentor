@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { UsageSectionGenerator } from './usage-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow, GitHubActionInput, GitHubWorkflowInput, GitHubWorkflowSecrets } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import { Repository } from '../repository/github-repository.service.js';
+import { Repository } from "@ci-dokumentor/core";
 import { initContainer } from '../container.js';
 
 describe('UsageSectionGenerator', () => {

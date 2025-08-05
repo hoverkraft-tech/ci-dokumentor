@@ -1,5 +1,5 @@
 import { Container, initContainer as coreInitContainer, REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
-import { GitHubRepositoryProvider } from './github-repository.service.js';
+import { GitHubRepositoryProvider } from './github-repository.provider.js';
 
 let container: Container | null = null;
 

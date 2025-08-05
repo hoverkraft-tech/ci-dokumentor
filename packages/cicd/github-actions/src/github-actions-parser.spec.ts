@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mockFs from 'mock-fs';
 import { GitHubActionsParser, GitHubAction, GitHubWorkflow } from './github-actions-parser.js';
-import { Repository } from './repository/github-repository.service.js';
+import { Repository } from "@ci-dokumentor/core";
 
 describe('GitHubActionsParser', () => {
-    let githubRepository: Repository;
+    let repository: Repository;
     let parser: GitHubActionsParser;
 
     beforeEach(() => {
-        githubRepository = {
+        repository = {
             owner: 'test-owner',
             name: 'test-repo',
             url: 'https://github.com/test-owner/test-repo',
@@ -58,7 +58,7 @@ runs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/action.yml', githubRepository) as GitHubAction;
+                const result = parser.parseFile('/test/action.yml', repository) as GitHubAction;
 
                 // Assert
                 expect(result).toBeDefined();
@@ -118,7 +118,7 @@ jobs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/.github/workflows/workflow.yml', githubRepository) as GitHubWorkflow;
+                const result = parser.parseFile('/test/.github/workflows/workflow.yml', repository) as GitHubWorkflow;
 
                 // Assert
                 expect(result).toBeDefined();
@@ -147,7 +147,7 @@ jobs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/.github/workflows/workflow-test.yml', githubRepository) as GitHubWorkflow;
+                const result = parser.parseFile('/test/.github/workflows/workflow-test.yml', repository) as GitHubWorkflow;
 
                 // Assert
                 expect(result).toBeDefined();
@@ -169,7 +169,7 @@ jobs:
                 });
 
                 // Act & Assert
-                expect(() => parser.parseFile('/test/.github/workflows/invalid.yml', githubRepository)).toThrow();
+                expect(() => parser.parseFile('/test/.github/workflows/invalid.yml', repository)).toThrow();
             });
 
             it('should throw error for empty file', async () => {
@@ -185,7 +185,7 @@ jobs:
                 });
 
                 // Act & Assert
-                expect(() => parser.parseFile('/test/.github/workflows/empty.yml', githubRepository)).toThrow('Unsupported source file');
+                expect(() => parser.parseFile('/test/.github/workflows/empty.yml', repository)).toThrow('Unsupported source file');
             });
 
             it('should throw error for plain text when parseable as YAML', async () => {
@@ -202,7 +202,7 @@ jobs:
 
                 // Act & Assert
                 expect(
-                    () => parser.parseFile('/test/.github/workflows/plain-text.yml', githubRepository)
+                    () => parser.parseFile('/test/.github/workflows/plain-text.yml', repository)
                 ).toThrow("Unsupported GitHub Actions file format: /test/.github/workflows/plain-text.yml");
             });
 
@@ -222,7 +222,7 @@ anotherField: 123
 
                 // Act & Assert
                 expect(
-                    () => parser.parseFile("/test/.github/workflows/object-without-required-fields.yml", githubRepository)
+                    () => parser.parseFile("/test/.github/workflows/object-without-required-fields.yml", repository)
                 ).toThrow('Unsupported GitHub Actions file format: /test/.github/workflows/object-without-required-fields.yml');
             });
         });
@@ -241,7 +241,7 @@ runs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/action.yml', githubRepository);
+                const result = parser.parseFile('/test/action.yml', repository);
 
                 // Assert
                 expect(result).toBeDefined();
@@ -271,7 +271,7 @@ jobs:
                 });
 
                 // Act
-                const result = parser.parseFile('/test/.github/workflows/workflow.yml', githubRepository);
+                const result = parser.parseFile('/test/.github/workflows/workflow.yml', repository);
 
                 // Assert
                 expect(result).toBeDefined();

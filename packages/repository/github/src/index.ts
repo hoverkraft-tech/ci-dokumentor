@@ -1,2 +1,2 @@
-export * from './github-repository.service.js';
+export * from './github-repository.provider.js';
 export * from './container.js';

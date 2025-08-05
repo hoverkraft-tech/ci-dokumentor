@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { HeaderSectionGenerator } from './header-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import { Repository } from '../repository/github-repository.service.js';
+import { Repository } from "@ci-dokumentor/core";
 import { initContainer } from '../container.js';
 
 describe('HeaderSectionGenerator', () => {

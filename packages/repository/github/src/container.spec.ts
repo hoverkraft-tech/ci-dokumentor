@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { initContainer } from './container.js';
-import { GitHubRepositoryProvider } from './github-repository.service.js';
+import { GitHubRepositoryProvider } from './github-repository.provider.js';
 import { initContainer as initGitContainer } from '@ci-dokumentor/repository-git';
 
 describe('GitHub Repository Platform Container', () => {

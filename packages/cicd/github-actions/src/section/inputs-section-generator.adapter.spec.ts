@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { InputsSectionGenerator } from './inputs-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow, GitHubActionInput, GitHubWorkflowInput } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import { Repository } from '../repository/github-repository.service.js';
+import { Repository } from "@ci-dokumentor/core";
 import { initContainer } from '../container.js';
 
 describe('InputsSectionGenerator', () => {
