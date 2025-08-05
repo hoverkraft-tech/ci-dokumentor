@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
 import { RepositoryService } from './repository.service.js';
-import { RepositoryAdapter } from './repository.adapter.js';
+import { RepositoryProvider } from './repository.provider.js';
 import { simpleGit } from 'simple-git';
 
 // Mock the simple-git module
 vi.mock('simple-git');
 
-// Mock adapter classes
-class MockGitHubAdapter implements RepositoryAdapter {
+// Mock provider classes
+class MockGitHubProvider implements RepositoryProvider {
     async supports(): Promise<boolean> {
         return true;
     }
@@ -23,7 +23,7 @@ class MockGitHubAdapter implements RepositoryAdapter {
     }
 }
 
-class MockGitLabAdapter implements RepositoryAdapter {
+class MockGitLabProvider implements RepositoryProvider {
     async supports(): Promise<boolean> {
         return false; // Will not be selected in our tests
     }
@@ -38,9 +38,9 @@ class MockGitLabAdapter implements RepositoryAdapter {
     }
 }
 
-class MockFailingAdapter implements RepositoryAdapter {
+class MockFailingProvider implements RepositoryProvider {
     async supports(): Promise<boolean> {
-        throw new Error('Adapter failure');
+        throw new Error('Provider failure');
     }
 
     async getRepository() {
@@ -48,7 +48,7 @@ class MockFailingAdapter implements RepositoryAdapter {
     }
 }
 
-describe('RepositoryService with adapters', () => {
+describe('RepositoryService with providers', () => {
     let repositoryService: RepositoryService;
     let mockGit: Mocked<ReturnType<typeof simpleGit>>;
 
@@ -66,14 +66,14 @@ describe('RepositoryService with adapters', () => {
         vi.resetAllMocks();
     });
 
-    describe('auto-detection with adapters', () => {
-        it('should use the first supporting adapter', async () => {
+    describe('auto-detection with providers', () => {
+        it('should use the first supporting provider', async () => {
             // Arrange
-            const mockGitHubAdapter = new MockGitHubAdapter();
-            const mockGitLabAdapter = new MockGitLabAdapter();
-            const adapters = [mockGitHubAdapter, mockGitLabAdapter];
+            const mockGitHubProvider = new MockGitHubProvider();
+            const mockGitLabProvider = new MockGitLabProvider();
+            const providers = [mockGitHubProvider, mockGitLabProvider];
             
-            repositoryService = new RepositoryService(adapters);
+            repositoryService = new RepositoryService(providers);
 
             // Act
             const result = await repositoryService.getRepository();
@@ -88,109 +88,42 @@ describe('RepositoryService with adapters', () => {
             });
         });
 
-        it('should skip failing adapters and continue to next', async () => {
+        it('should throw error when failing providers are encountered', async () => {
             // Arrange
-            const mockFailingAdapter = new MockFailingAdapter();
-            const mockGitHubAdapter = new MockGitHubAdapter();
-            const adapters = [mockFailingAdapter, mockGitHubAdapter];
+            const mockFailingProvider = new MockFailingProvider();
+            const providers = [mockFailingProvider];
             
-            repositoryService = new RepositoryService(adapters);
+            repositoryService = new RepositoryService(providers);
 
-            // Act
-            const result = await repositoryService.getRepository();
-
-            // Assert
-            expect(result).toEqual({
-                owner: 'github-owner',
-                name: 'github-repo',
-                url: 'https://github.com/github-owner/github-repo',
-                fullName: 'github-owner/github-repo',
-                logo: 'https://github.com/github-owner/github-repo/logo.png'
-            });
+            // Act & Assert
+            await expect(repositoryService.getRepository()).rejects.toThrow('Provider failure');
         });
 
-        it('should fall back to basic implementation when no adapters support the context', async () => {
+        it('should throw error when no providers support the context', async () => {
             // Arrange
-            const mockGitLabAdapter = new MockGitLabAdapter(); // Returns false for supports()
-            const adapters = [mockGitLabAdapter];
+            const mockGitLabProvider = new MockGitLabProvider(); // Returns false for supports()
+            const providers = [mockGitLabProvider];
             
-            repositoryService = new RepositoryService(adapters);
+            repositoryService = new RepositoryService(providers);
 
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: 'https://github.com/fallback-owner/fallback-repo.git',
-                        push: 'https://github.com/fallback-owner/fallback-repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
-
-            // Act
-            const result = await repositoryService.getRepository();
-
-            // Assert
-            expect(result).toEqual({
-                owner: 'fallback-owner',
-                name: 'fallback-repo',
-                url: 'https://github.com/fallback-owner/fallback-repo',
-                fullName: 'fallback-owner/fallback-repo'
-            });
+            // Act & Assert
+            await expect(repositoryService.getRepository()).rejects.toThrow('No repository provider found that supports the current context');
         });
 
-        it('should fall back to basic implementation when no adapters are provided', async () => {
+        it('should throw error when no providers are provided', async () => {
             // Arrange
             repositoryService = new RepositoryService([]);
 
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: 'https://github.com/no-adapter/basic-repo.git',
-                        push: 'https://github.com/no-adapter/basic-repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
-
-            // Act
-            const result = await repositoryService.getRepository();
-
-            // Assert
-            expect(result).toEqual({
-                owner: 'no-adapter',
-                name: 'basic-repo',
-                url: 'https://github.com/no-adapter/basic-repo',
-                fullName: 'no-adapter/basic-repo'
-            });
+            // Act & Assert
+            await expect(repositoryService.getRepository()).rejects.toThrow('No repository provider found that supports the current context');
         });
 
-        it('should use basic implementation when adapters is undefined', async () => {
+        it('should throw error when providers is undefined', async () => {
             // Arrange - Constructor will use default empty array
             repositoryService = new RepositoryService();
 
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: 'https://github.com/default/repo.git',
-                        push: 'https://github.com/default/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
-
-            // Act
-            const result = await repositoryService.getRepository();
-
-            // Assert
-            expect(result).toEqual({
-                owner: 'default',
-                name: 'repo',
-                url: 'https://github.com/default/repo',
-                fullName: 'default/repo'
-            });
+            // Act & Assert
+            await expect(repositoryService.getRepository()).rejects.toThrow('No repository provider found that supports the current context');
         });
     });
 });

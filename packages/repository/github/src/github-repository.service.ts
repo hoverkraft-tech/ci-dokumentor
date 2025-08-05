@@ -1,7 +1,8 @@
-import { Repository, RepositoryService, RepositoryAdapter } from "@ci-dokumentor/core";
+import { Repository, RepositoryProvider } from "@ci-dokumentor/core";
+import { BasicRepositoryService } from "@ci-dokumentor/repository-basic";
 import { existsSync } from "node:fs";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
-import { injectable } from "inversify";
+import { injectable, inject } from "inversify";
 import gitUrlParse from 'git-url-parse';
 import { simpleGit } from 'simple-git';
 
@@ -10,10 +11,12 @@ export type GitHubRepository = Repository & {
 };
 
 @injectable()
-export class GitHubRepositoryService extends RepositoryService implements RepositoryAdapter {
+export class GitHubRepositoryService implements RepositoryProvider {
+    
+    constructor(@inject(BasicRepositoryService) private basicRepositoryService: BasicRepositoryService) {}
     
     /**
-     * Check if this adapter supports the current repository context
+     * Check if this provider supports the current repository context
      * Checks if the repository is hosted on GitHub
      */
     async supports(): Promise<boolean> {
@@ -33,8 +36,8 @@ export class GitHubRepositoryService extends RepositoryService implements Reposi
         }
     }
 
-    override async getRepository(): Promise<GitHubRepository> {
-        const repositoryInfo = await super.getRepository();
+    async getRepository(): Promise<GitHubRepository> {
+        const repositoryInfo = await this.basicRepositoryService.getRepository();
         const logo = await this.getLogoUri(repositoryInfo);
 
         return {

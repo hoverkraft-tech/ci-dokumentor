@@ -1,0 +1,22 @@
+{
+  "name": "@ci-dokumentor/repository-basic",
+  "version": "1.0.0",
+  "description": "Basic Git repository information provider for CI Dokumentor",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest",
+    "lint": "nx lint"
+  },
+  "dependencies": {
+    "@ci-dokumentor/core": "workspace:*",
+    "git-url-parse": "^15.0.0",
+    "inversify": "^6.1.4",
+    "simple-git": "^3.27.0"
+  },
+  "devDependencies": {
+    "@types/git-url-parse": "^9.0.3"
+  }
+}

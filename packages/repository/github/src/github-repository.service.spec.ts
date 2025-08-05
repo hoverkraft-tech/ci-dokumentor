@@ -1,16 +1,29 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitHubRepositoryService } from './github-repository.service.js';
+import { BasicRepositoryService } from '@ci-dokumentor/repository-basic';
 import { simpleGit } from 'simple-git';
 
 // Mock the simple-git module
 vi.mock('simple-git');
 
+// Mock the BasicRepositoryService
+vi.mock('@ci-dokumentor/repository-basic', () => ({
+    BasicRepositoryService: vi.fn()
+}));
+
 describe('GitHubRepositoryService', () => {
     let service: GitHubRepositoryService;
     let mockGit: Mocked<ReturnType<typeof simpleGit>>;
+    let mockBasicRepositoryService: Mocked<BasicRepositoryService>;
 
     beforeEach(() => {
-        service = new GitHubRepositoryService();
+        // Create a mock basic repository service
+        mockBasicRepositoryService = {
+            supports: vi.fn(),
+            getRepository: vi.fn(),
+        } as unknown as Mocked<BasicRepositoryService>;
+
+        service = new GitHubRepositoryService(mockBasicRepositoryService);
 
         // Create a mock git instance
         mockGit = {
@@ -156,7 +169,7 @@ describe('GitHubRepositoryService', () => {
 
     describe('getRepository', () => {
         it('should extend base repository with logo information', async () => {
-            // Mock the parent class method
+            // Mock the basic repository service method
             const mockBaseRepo = {
                 owner: 'test-owner',
                 name: 'test-repo',
@@ -164,8 +177,7 @@ describe('GitHubRepositoryService', () => {
                 fullName: 'test-owner/test-repo'
             };
 
-            vi.spyOn(service.constructor.prototype.__proto__, 'getRepository')
-                .mockResolvedValue(mockBaseRepo);
+            mockBasicRepositoryService.getRepository.mockResolvedValue(mockBaseRepo);
 
             // Mock file system check
             vi.mock('node:fs', () => ({

@@ -1,24 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { RepositoryService } from './repository.service.js';
-import { simpleGit } from 'simple-git';
-
-// Mock the simple-git module
-vi.mock('simple-git');
+import { RepositoryProvider } from './repository.provider.js';
 
 describe('RepositoryService', () => {
     let repositoryService: RepositoryService;
-    let mockGit: Mocked<ReturnType<typeof simpleGit>>;
 
     beforeEach(() => {
         repositoryService = new RepositoryService();
-
-        // Create a mock git instance
-        mockGit = {
-            getRemotes: vi.fn(),
-        } as unknown as Mocked<ReturnType<typeof simpleGit>>;
-
-        // Mock simpleGit to return our mock instance
-        vi.mocked(simpleGit).mockReturnValue(mockGit);
     });
 
     afterEach(() => {
@@ -26,122 +14,91 @@ describe('RepositoryService', () => {
     });
 
     describe('getRepository', () => {
-        it.each([
-            {
-                description: 'HTTPS remote URL',
-                remote: 'https://github.com/owner/repo.git',
-                url: 'https://github.com/owner/repo',
-                owner: 'owner',
-                name: 'repo',
-                fullName: 'owner/repo',
-            },
-            {
-                description: 'SSH remote URL',
-                remote: 'git@github.com:owner/repo.git',
-                url: 'https://github.com/owner/repo',
-                owner: 'owner',
-                name: 'repo',
-                fullName: 'owner/repo',
-            },
-            {
-                description: 'remote without .git suffix',
-                remote: 'https://github.com/owner/repo',
-                url: 'https://github.com/owner/repo',
-                owner: 'owner',
-                name: 'repo',
-                fullName: 'owner/repo',
-            },
-            {
-                description: 'repository with complex name structure',
-                remote: 'https://github.com/owner/repo-name.git',
-                url: 'https://github.com/owner/repo-name',
-                owner: 'owner',
-                name: 'repo-name',
-                fullName: 'owner/repo-name',
-            },
-            {
-                description: 'GitLab repository',
-                remote: 'https://gitlab.com/owner/repo.git',
-                url: 'https://gitlab.com/owner/repo',
-                owner: 'owner',
-                name: 'repo',
-                fullName: 'owner/repo',
-            },
-            {
-                description: 'Bitbucket repository',
-                remote: 'https://bitbucket.org/owner/repo.git',
-                url: 'https://bitbucket.org/owner/repo',
-                owner: 'owner',
-                name: 'repo',
-                fullName: 'owner/repo',
-            }
-        ])
-            ('should return repository information for $description', async ({ remote, url, fullName, owner, name }) => {
-                // Arrange
-                const mockRemotes = [
-                    {
-                        name: 'origin',
-                        refs: {
-                            fetch: remote,
-                            push: remote
-                        }
-                    }
-                ];
-                mockGit.getRemotes.mockResolvedValue(mockRemotes);
+        it('should throw error when no providers are available', async () => {
+            // Arrange - service created with no providers
 
-                // Act
-                const result = await repositoryService.getRepository();
+            // Act & Assert
+            await expect(repositoryService.getRepository()).rejects.toThrow('No repository provider found that supports the current context');
+        });
 
-                // Assert
-                expect(result).toEqual({
-                    url,
-                    fullName,
-                    owner,
-                    name,
-                });
-                expect(mockGit.getRemotes).toHaveBeenCalledWith(true);
+        it('should use first supporting provider', async () => {
+            // Arrange
+            const mockProvider1: RepositoryProvider = {
+                supports: vi.fn().mockResolvedValue(false),
+                getRepository: vi.fn()
+            };
+
+            const mockProvider2: RepositoryProvider = {
+                supports: vi.fn().mockResolvedValue(true),
+                getRepository: vi.fn().mockResolvedValue({
+                    owner: 'test-owner',
+                    name: 'test-repo', 
+                    url: 'https://github.com/test-owner/test-repo',
+                    fullName: 'test-owner/test-repo'
+                })
+            };
+
+            repositoryService = new RepositoryService([mockProvider1, mockProvider2]);
+
+            // Act
+            const result = await repositoryService.getRepository();
+
+            // Assert
+            expect(result).toEqual({
+                owner: 'test-owner',
+                name: 'test-repo',
+                url: 'https://github.com/test-owner/test-repo',
+                fullName: 'test-owner/test-repo'
             });
-
-        it('should throw error when no origin remote is found', async () => {
-            // Arrange
-            const mockRemotes = [
-                {
-                    name: 'upstream',
-                    refs: {
-                        fetch: 'https://github.com/owner/repo.git',
-                        push: 'https://github.com/owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
-
-            // Act & Assert
-            await expect(repositoryService.getRepository()).rejects.toThrow('No remote "origin" found');
+            expect(mockProvider1.supports).toHaveBeenCalled();
+            expect(mockProvider1.getRepository).not.toHaveBeenCalled();
+            expect(mockProvider2.supports).toHaveBeenCalled();
+            expect(mockProvider2.getRepository).toHaveBeenCalled();
         });
 
-        it('should throw error when origin remote has no fetch URL', async () => {
+        it('should throw error when no provider supports current context', async () => {
             // Arrange
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: '',
-                        push: 'https://github.com/owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
+            const mockProvider: RepositoryProvider = {
+                supports: vi.fn().mockResolvedValue(false),
+                getRepository: vi.fn()
+            };
+
+            repositoryService = new RepositoryService([mockProvider]);
 
             // Act & Assert
-            await expect(repositoryService.getRepository()).rejects.toThrow('No remote "origin" found');
+            await expect(repositoryService.getRepository()).rejects.toThrow('No repository provider found that supports the current context');
+            expect(mockProvider.supports).toHaveBeenCalled();
+            expect(mockProvider.getRepository).not.toHaveBeenCalled();
         });
 
-        it('should throw error when remotes array is empty', async () => {
+        it('should propagate provider errors from supports method', async () => {
             // Arrange
-            mockGit.getRemotes.mockResolvedValue([]);
+            const mockProvider: RepositoryProvider = {
+                supports: vi.fn().mockRejectedValue(new Error('Provider error')),
+                getRepository: vi.fn()
+            };
+
+            repositoryService = new RepositoryService([mockProvider]);
 
             // Act & Assert
-            await expect(repositoryService.getRepository()).rejects.toThrow('No remote "origin" found');
+            await expect(repositoryService.getRepository()).rejects.toThrow('Provider error');
+            expect(mockProvider.supports).toHaveBeenCalled();
+            expect(mockProvider.getRepository).not.toHaveBeenCalled();
+        });
+
+        it('should propagate provider errors from getRepository method', async () => {
+            // Arrange
+            const mockProvider: RepositoryProvider = {
+                supports: vi.fn().mockResolvedValue(true),
+                getRepository: vi.fn().mockRejectedValue(new Error('Repository error'))
+            };
+
+            repositoryService = new RepositoryService([mockProvider]);
+
+            // Act & Assert
+            await expect(repositoryService.getRepository()).rejects.toThrow('Repository error');
+            expect(mockProvider.supports).toHaveBeenCalled();
+            expect(mockProvider.getRepository).toHaveBeenCalled();
         });
     });
 });
