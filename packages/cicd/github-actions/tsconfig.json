@@ -7,7 +7,7 @@
       "path": "../../core"
     },
     {
-      "path": "../../repository-platforms/github"
+      "path": "../../repository/github"
     },
     {
       "path": "./tsconfig.lib.json"

@@ -1,5 +1,5 @@
 import { Container, SECTION_GENERATOR_ADAPTER_IDENTIFIER, GENERATOR_ADAPTER_IDENTIFIER } from '@ci-dokumentor/core';
-import { initContainer as initRepositoryContainer } from '@ci-dokumentor/repository-platforms-github';
+import { initContainer as initRepositoryContainer } from '@ci-dokumentor/repository-github';
 import { GitHubActionsParser } from './github-actions-parser.js';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 

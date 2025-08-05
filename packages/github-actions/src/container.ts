@@ -1,5 +1,5 @@
 import { Container } from '@ci-dokumentor/core';
-import { initContainer as initCicdContainer } from '@ci-dokumentor/cicd-platforms-github-actions';
+import { initContainer as initCicdContainer } from '@ci-dokumentor/cicd-github-actions';
 
 let container: Container | null = null;
 

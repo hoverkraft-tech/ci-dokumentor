@@ -1,4 +1,4 @@
-import { GitHubRepository } from "@ci-dokumentor/repository-platforms-github";
+import { GitHubRepository } from "@ci-dokumentor/repository-github";
 import { FormatterAdapter, SectionGeneratorAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 import { GitHubAction, GitHubWorkflow } from "src/github-actions-parser.js";
 

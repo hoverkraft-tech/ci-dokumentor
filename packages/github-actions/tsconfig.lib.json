@@ -15,10 +15,10 @@
       "path": "../core/tsconfig.lib.json"
     },
     {
-      "path": "../repository-platforms/github/tsconfig.lib.json"
+      "path": "../repository/github/tsconfig.lib.json"
     },
     {
-      "path": "../cicd-platforms/github-actions/tsconfig.lib.json"
+      "path": "../cicd/github-actions/tsconfig.lib.json"
     }
   ],
   "exclude": [

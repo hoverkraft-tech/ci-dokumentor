@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
-    "@ci-dokumentor/repository-platforms-github": "workspace:*",
-    "@ci-dokumentor/cicd-platforms-github-actions": "workspace:*"
+    "@ci-dokumentor/repository-github": "workspace:*",
+    "@ci-dokumentor/cicd-github-actions": "workspace:*"
   }
 }

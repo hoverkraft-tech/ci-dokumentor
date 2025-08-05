@@ -1,9 +1,9 @@
 // Re-export types and classes from repository platforms
-export { GitHubRepositoryService } from '@ci-dokumentor/repository-platforms-github';
-export type { GitHubRepository } from '@ci-dokumentor/repository-platforms-github';
+export { GitHubRepositoryService } from '@ci-dokumentor/repository-github';
+export type { GitHubRepository } from '@ci-dokumentor/repository-github';
 
 // Re-export from CI/CD platforms  
-export * from '@ci-dokumentor/cicd-platforms-github-actions';
+export * from '@ci-dokumentor/cicd-github-actions';
 
 // Export the combined container with explicit name
 export { initContainer as initGitHubActionsContainer } from './container.js';

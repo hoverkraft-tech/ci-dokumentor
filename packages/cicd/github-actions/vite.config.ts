@@ -6,7 +6,7 @@ import * as path from 'path';
 
 export default defineConfig(() => ({
   root: __dirname,
-  cacheDir: '../../../node_modules/.vite/packages/repository-platforms/github',
+  cacheDir: '../../../node_modules/.vite/packages/cicd/github-actions',
   plugins: [
     nxCopyAssetsPlugin(['*.md', 'package.json']),
     dts({
@@ -26,7 +26,7 @@ export default defineConfig(() => ({
     lib: {
       // Could also be a dictionary or array of multiple entry points.
       entry: 'src/index.ts',
-      name: '@ci-dokumentor/repository-platforms-github',
+      name: '@ci-dokumentor/cicd-github-actions',
       fileName: 'index',
       // Change this to the formats you want to support.
       // Don't forget to update your package.json as well.

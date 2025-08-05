@@ -93,14 +93,14 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@18.16.9)(@vitest/ui@3.2.4)(jiti@2.4.2)(jsdom@22.1.0)(yaml@2.8.0)
 
-  packages/cicd-platforms/github-actions:
+  packages/cicd/github-actions:
     dependencies:
       '@ci-dokumentor/core':
         specifier: workspace:*
         version: link:../../core
-      '@ci-dokumentor/repository-platforms-github':
+      '@ci-dokumentor/repository-github':
         specifier: workspace:*
-        version: link:../../repository-platforms/github
+        version: link:../../repository/github
       feather-icons:
         specifier: ^4.29.2
         version: 4.29.2
@@ -147,17 +147,17 @@ importers:
 
   packages/github-actions:
     dependencies:
-      '@ci-dokumentor/cicd-platforms-github-actions':
+      '@ci-dokumentor/cicd-github-actions':
         specifier: workspace:*
-        version: link:../cicd-platforms/github-actions
+        version: link:../cicd/github-actions
       '@ci-dokumentor/core':
         specifier: workspace:*
         version: link:../core
-      '@ci-dokumentor/repository-platforms-github':
+      '@ci-dokumentor/repository-github':
         specifier: workspace:*
-        version: link:../repository-platforms/github
+        version: link:../repository/github
 
-  packages/repository-platforms/github:
+  packages/repository/github:
     dependencies:
       '@ci-dokumentor/core':
         specifier: workspace:*

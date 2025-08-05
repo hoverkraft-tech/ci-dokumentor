@@ -7,10 +7,10 @@
       "path": "../core"
     },
     {
-      "path": "../repository-platforms/github"
+      "path": "../repository/github"
     },
     {
-      "path": "../cicd-platforms/github-actions"
+      "path": "../cicd/github-actions"
     },
     {
       "path": "./tsconfig.lib.json"

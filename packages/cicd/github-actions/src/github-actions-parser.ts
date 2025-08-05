@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 import { parse } from 'yaml'
-import { GitHubRepository } from '@ci-dokumentor/repository-platforms-github';
+import { GitHubRepository } from '@ci-dokumentor/repository-github';
 
 
 // See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-action.json
