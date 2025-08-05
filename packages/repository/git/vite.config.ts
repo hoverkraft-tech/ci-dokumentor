@@ -6,7 +6,7 @@ import * as path from 'path';
 
 export default defineConfig(() => ({
   root: __dirname,
-  cacheDir: '../../../node_modules/.vite/packages/repository/basic',
+  cacheDir: '../../../node_modules/.vite/packages/repository/git',
   plugins: [
     nxCopyAssetsPlugin(['*.md', 'package.json']),
     dts({

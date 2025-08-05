@@ -1,5 +1,5 @@
 import { Repository, RepositoryProvider } from "@ci-dokumentor/core";
-import { BasicRepositoryService } from "@ci-dokumentor/repository-git";
+import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { existsSync } from "node:fs";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
 import { injectable, inject } from "inversify";
@@ -13,7 +13,7 @@ export type GitHubRepository = Repository & {
 @injectable()
 export class GitHubRepositoryService implements RepositoryProvider {
     
-    constructor(@inject(BasicRepositoryService) private basicRepositoryService: BasicRepositoryService) {}
+    constructor(@inject(GitRepositoryProvider) private basicRepositoryService: GitRepositoryProvider) {}
     
     /**
      * Check if this provider supports the current repository context

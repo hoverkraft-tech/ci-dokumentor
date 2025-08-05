@@ -1,5 +1,5 @@
 import { Container, initContainer as coreInitContainer, REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
-import { BasicRepositoryService } from '@ci-dokumentor/repository-git';
+import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { GitHubRepositoryService } from './github-repository.service.js';
 
 let container: Container | null = null;
@@ -20,7 +20,7 @@ export function initContainer(baseContainer: Container | undefined = undefined):
     }
 
     // Services
-    container.bind(BasicRepositoryService).toSelf().inSingletonScope();
+    container.bind(GitRepositoryProvider).toSelf().inSingletonScope();
     container.bind(GitHubRepositoryService).toSelf().inSingletonScope();
     
     // Register as repository provider

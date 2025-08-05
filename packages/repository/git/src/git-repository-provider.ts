@@ -4,7 +4,7 @@ import gitUrlParse from 'git-url-parse';
 import { simpleGit } from 'simple-git';
 
 @injectable()
-export class BasicRepositoryService implements RepositoryProvider {
+export class GitRepositoryProvider implements RepositoryProvider {
     
     /**
      * Check if this provider supports the current repository context
