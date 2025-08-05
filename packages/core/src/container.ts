@@ -8,6 +8,10 @@ export type Container = InversifyContainer;
 
 let container: Container | null = null;
 
+export function resetContainer(): void {
+    container = null;
+}
+
 export function initContainer(): Container {
     if (container) {
         return container;

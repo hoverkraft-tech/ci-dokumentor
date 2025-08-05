@@ -1,13 +1,13 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "files": [],
   "include": [],
   "references": [
     {
-      "path": "../cicd/github-actions"
+      "path": "../../core"
     },
     {
-      "path": "../core"
+      "path": "../../repository/github"
     },
     {
       "path": "./tsconfig.lib.json"
