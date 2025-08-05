@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitHubRepositoryProvider } from './github-repository.provider.js';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
-import { simpleGit } from 'simple-git';
-
-// Mock the simple-git module
-vi.mock('simple-git');
 
 // Mock the GitRepositoryProvider
 vi.mock('@ci-dokumentor/repository-git', () => ({
@@ -12,7 +8,7 @@ vi.mock('@ci-dokumentor/repository-git', () => ({
 }));
 
 describe('GitHubRepositoryProvider', () => {
-    let service: GitHubRepositoryProvider;
+    let gitHubRepositoryProvider: GitHubRepositoryProvider;
     let mockGitRepositoryService: Mocked<GitRepositoryProvider>;
 
     beforeEach(() => {
@@ -23,7 +19,7 @@ describe('GitHubRepositoryProvider', () => {
             getRemoteParsedUrl: vi.fn(),
         } as unknown as Mocked<GitRepositoryProvider>;
 
-        service = new GitHubRepositoryProvider(mockGitRepositoryService);
+        gitHubRepositoryProvider = new GitHubRepositoryProvider(mockGitRepositoryService);
     });
 
     describe('supports', () => {
@@ -37,7 +33,7 @@ describe('GitHubRepositoryProvider', () => {
             mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
-            const result = await service.supports();
+            const result = await gitHubRepositoryProvider.supports();
 
             // Assert
             expect(result).toBe(true);
@@ -53,7 +49,7 @@ describe('GitHubRepositoryProvider', () => {
             mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
-            const result = await service.supports();
+            const result = await gitHubRepositoryProvider.supports();
 
             // Assert
             expect(result).toBe(true);
@@ -69,7 +65,7 @@ describe('GitHubRepositoryProvider', () => {
             mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
-            const result = await service.supports();
+            const result = await gitHubRepositoryProvider.supports();
 
             // Assert
             expect(result).toBe(false);
@@ -85,7 +81,7 @@ describe('GitHubRepositoryProvider', () => {
             mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
-            const result = await service.supports();
+            const result = await gitHubRepositoryProvider.supports();
 
             // Assert
             expect(result).toBe(false);
@@ -96,7 +92,7 @@ describe('GitHubRepositoryProvider', () => {
             mockGitRepositoryService.getRemoteParsedUrl.mockRejectedValue(new Error('Git error'));
 
             // Act
-            const result = await service.supports();
+            const result = await gitHubRepositoryProvider.supports();
 
             // Assert
             expect(result).toBe(false);
@@ -129,7 +125,7 @@ describe('GitHubRepositoryProvider', () => {
                 })
             }));
 
-            const result = await service.getRepository();
+            const result = await gitHubRepositoryProvider.getRepository();
 
             expect(result).toEqual({
                 ...mockBaseRepo,

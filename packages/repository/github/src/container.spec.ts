@@ -11,8 +11,8 @@ describe('GitHub Repository Platform Container', () => {
         
         expect(container.isBound(GitHubRepositoryProvider)).toBe(true);
         
-        const service = container.get(GitHubRepositoryProvider);
-        expect(service).toBeInstanceOf(GitHubRepositoryProvider);
+        const gitHubRepositoryProvider = container.get(GitHubRepositoryProvider);
+        expect(gitHubRepositoryProvider).toBeInstanceOf(GitHubRepositoryProvider);
     });
 
     it('should return same container instance when called multiple times', () => {
