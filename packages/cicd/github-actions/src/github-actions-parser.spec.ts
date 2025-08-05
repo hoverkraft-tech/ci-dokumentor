@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mockFs from 'mock-fs';
 import { GitHubActionsParser, GitHubAction, GitHubWorkflow } from './github-actions-parser.js';
-import { GitHubRepository } from './repository/github-repository.service.js';
+import { Repository } from './repository/github-repository.service.js';
 
 describe('GitHubActionsParser', () => {
-    let githubRepository: GitHubRepository;
+    let githubRepository: Repository;
     let parser: GitHubActionsParser;
 
     beforeEach(() => {

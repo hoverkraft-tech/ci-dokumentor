@@ -8,23 +8,24 @@ import {
 import { initContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
-import { GitHubRepository, GitHubRepositoryService } from '@ci-dokumentor/repository-github';
+import { Repository } from '@ci-dokumentor/core';
+import { GitHubRepositoryProvider } from '@ci-dokumentor/repository-github';
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let formatterAdapter: FormatterAdapter;
   let gitHubActionsGeneratorAdapter: GitHubActionsGeneratorAdapter;
-  let gitHubRepositoryService: GitHubRepositoryService;
+  let gitHubRepositoryService: GitHubRepositoryProvider;
 
   beforeEach(async () => {
     // Use real dependencies from the container
     const container = initContainer();
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
-    gitHubRepositoryService = container.get(GitHubRepositoryService);
+    gitHubRepositoryService = container.get(GitHubRepositoryProvider);
     gitHubActionsGeneratorAdapter = container.get(GitHubActionsGeneratorAdapter);
 
     // Mock the repository service to return consistent test data
-    const mockRepository: GitHubRepository = {
+    const mockRepository: Repository = {
       url: 'https://github.com/test-owner/test-action',
       name: 'test-action',
       owner: 'test-owner',

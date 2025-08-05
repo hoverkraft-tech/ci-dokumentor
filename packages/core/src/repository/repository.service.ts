@@ -7,6 +7,7 @@ export type Repository = {
     name: string;
     url: string; // The URL of the repository, without the .git suffix
     fullName: string; // owner/name format
+    logo?: string; // Optional logo URI
 }
 
 @injectable()

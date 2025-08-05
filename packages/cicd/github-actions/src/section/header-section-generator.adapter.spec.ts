@@ -2,13 +2,13 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { HeaderSectionGenerator } from './header-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import { GitHubRepository } from '../repository/github-repository.service.js';
+import { Repository } from '../repository/github-repository.service.js';
 import { initContainer } from '../container.js';
 
 describe('HeaderSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
     let generator: HeaderSectionGenerator;
-    let mockRepository: GitHubRepository;
+    let mockRepository: Repository;
 
     beforeEach(() => {
         // Use real formatter to facilitate testing
@@ -70,7 +70,7 @@ describe('HeaderSectionGenerator', () => {
                     description: 'A test action',
                     runs: { using: 'node20' }
                 };
-                const repositoryWithLogo: GitHubRepository = {
+                const repositoryWithLogo: Repository = {
                     ...mockRepository,
                     logo: 'https://example.com/logo.png'
                 };
@@ -185,7 +185,7 @@ describe('HeaderSectionGenerator', () => {
                         color: 'blue'
                     }
                 };
-                const repositoryWithLogo: GitHubRepository = {
+                const repositoryWithLogo: Repository = {
                     ...mockRepository,
                     logo: 'https://example.com/logo.png'
                 };
@@ -236,7 +236,7 @@ describe('HeaderSectionGenerator', () => {
                     name: 'Test Workflow',
                     on: { push: {} }
                 };
-                const repositoryWithLogo: GitHubRepository = {
+                const repositoryWithLogo: Repository = {
                     ...mockRepository,
                     logo: 'https://example.com/logo.png'
                 };

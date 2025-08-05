@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 import { parse } from 'yaml'
-import { GitHubRepository } from '@ci-dokumentor/repository-github';
+import { Repository } from '@ci-dokumentor/core';
 
 
 // See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-action.json
@@ -10,6 +10,7 @@ export type GitHubActionInput = {
     description?: string;
     required?: boolean;
     default?: string;
+    type?: string; // e.g., 'string', 'boolean', 'choice'
 };
 
 export type GitHubActionOutput = {
@@ -44,6 +45,7 @@ export type GitHubWorkflow = {
         workflow_dispatch?: GitHubWorkflowDispatchEvent
     }; // Event triggers
     permissions?: Record<string, string>; // Permissions for the workflow
+    jobs?: Record<string, unknown>; // Jobs in the workflow
 };
 
 export type GitHubWorkflowDispatchEvent = {
@@ -75,7 +77,7 @@ export class GitHubActionsParser {
         return source.includes('.github/workflows/');
     }
 
-    parseFile(source: string, repository: GitHubRepository): GitHubAction | GitHubWorkflow {
+    parseFile(source: string, repository: Repository): GitHubAction | GitHubWorkflow {
         const parsed = parse(readFileSync(source, 'utf8'));
         if (!parsed) {
             throw new Error(`Unsupported source file: ${source}`);
@@ -108,7 +110,7 @@ export class GitHubActionsParser {
         throw new Error(`Unsupported GitHub Actions file format: ${source}`);
     }
 
-    private getUsesName(source: string, repository: GitHubRepository): string {
+    private getUsesName(source: string, repository: Repository): string {
         // For GitHub Actions, the usesName is typically the repository name
         if (this.isGitHubActionFile(source)) {
             return join(repository.owner, repository.name, dirname(source));

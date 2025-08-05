@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
-import { GitHubRepositoryService } from './github-repository.service.js';
+import { GitHubRepositoryProvider } from './github-repository.service.js';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { simpleGit } from 'simple-git';
 
@@ -11,42 +11,30 @@ vi.mock('@ci-dokumentor/repository-git', () => ({
     GitRepositoryProvider: vi.fn()
 }));
 
-describe('GitHubRepositoryService', () => {
-    let service: GitHubRepositoryService;
-    let mockGit: Mocked<ReturnType<typeof simpleGit>>;
-    let mockBasicRepositoryService: Mocked<GitRepositoryProvider>;
+describe('GitHubRepositoryProvider', () => {
+    let service: GitHubRepositoryProvider;
+    let mockGitRepositoryService: Mocked<GitRepositoryProvider>;
 
     beforeEach(() => {
-        // Create a mock basic repository service
-        mockBasicRepositoryService = {
+        // Create a mock git repository service
+        mockGitRepositoryService = {
             supports: vi.fn(),
             getRepository: vi.fn(),
+            getRemoteParsedUrl: vi.fn(),
         } as unknown as Mocked<GitRepositoryProvider>;
 
-        service = new GitHubRepositoryService(mockBasicRepositoryService);
-
-        // Create a mock git instance
-        mockGit = {
-            getRemotes: vi.fn(),
-        } as unknown as Mocked<ReturnType<typeof simpleGit>>;
-
-        // Mock simpleGit to return our mock instance
-        vi.mocked(simpleGit).mockReturnValue(mockGit);
+        service = new GitHubRepositoryProvider(mockGitRepositoryService);
     });
 
     describe('supports', () => {
         it('should return true for GitHub HTTPS URL', async () => {
             // Arrange
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: 'https://github.com/owner/repo.git',
-                        push: 'https://github.com/owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
+            const mockParsedUrl = {
+                source: 'github.com',
+                owner: 'owner',
+                name: 'repo'
+            };
+            mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
             const result = await service.supports();
@@ -57,16 +45,12 @@ describe('GitHubRepositoryService', () => {
 
         it('should return true for GitHub SSH URL', async () => {
             // Arrange
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: 'git@github.com:owner/repo.git',
-                        push: 'git@github.com:owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
+            const mockParsedUrl = {
+                source: 'github.com',
+                owner: 'owner',
+                name: 'repo'
+            };
+            mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
             const result = await service.supports();
@@ -77,16 +61,12 @@ describe('GitHubRepositoryService', () => {
 
         it('should return false for GitLab URL', async () => {
             // Arrange
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: 'https://gitlab.com/owner/repo.git',
-                        push: 'https://gitlab.com/owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
+            const mockParsedUrl = {
+                source: 'gitlab.com',
+                owner: 'owner',
+                name: 'repo'
+            };
+            mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
             const result = await service.supports();
@@ -97,16 +77,12 @@ describe('GitHubRepositoryService', () => {
 
         it('should return false for Bitbucket URL', async () => {
             // Arrange
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: 'https://bitbucket.org/owner/repo.git',
-                        push: 'https://bitbucket.org/owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
+            const mockParsedUrl = {
+                source: 'bitbucket.org',
+                owner: 'owner',
+                name: 'repo'
+            };
+            mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
 
             // Act
             const result = await service.supports();
@@ -115,49 +91,9 @@ describe('GitHubRepositoryService', () => {
             expect(result).toBe(false);
         });
 
-        it('should return false when no origin remote exists', async () => {
+        it('should return false when getRemoteParsedUrl throws an error', async () => {
             // Arrange
-            const mockRemotes = [
-                {
-                    name: 'upstream',
-                    refs: {
-                        fetch: 'https://github.com/owner/repo.git',
-                        push: 'https://github.com/owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
-
-            // Act
-            const result = await service.supports();
-
-            // Assert
-            expect(result).toBe(false);
-        });
-
-        it('should return false when origin remote has no fetch URL', async () => {
-            // Arrange
-            const mockRemotes = [
-                {
-                    name: 'origin',
-                    refs: {
-                        fetch: '',
-                        push: 'https://github.com/owner/repo.git'
-                    }
-                }
-            ];
-            mockGit.getRemotes.mockResolvedValue(mockRemotes);
-
-            // Act
-            const result = await service.supports();
-
-            // Assert
-            expect(result).toBe(false);
-        });
-
-        it('should return false when git operations fail', async () => {
-            // Arrange
-            mockGit.getRemotes.mockRejectedValue(new Error('Git error'));
+            mockGitRepositoryService.getRemoteParsedUrl.mockRejectedValue(new Error('Git error'));
 
             // Act
             const result = await service.supports();
@@ -169,7 +105,7 @@ describe('GitHubRepositoryService', () => {
 
     describe('getRepository', () => {
         it('should extend base repository with logo information', async () => {
-            // Mock the basic repository service method
+            // Mock the git repository service method
             const mockBaseRepo = {
                 owner: 'test-owner',
                 name: 'test-repo',
@@ -177,7 +113,7 @@ describe('GitHubRepositoryService', () => {
                 fullName: 'test-owner/test-repo'
             };
 
-            mockBasicRepositoryService.getRepository.mockResolvedValue(mockBaseRepo);
+            mockGitRepositoryService.getRepository.mockResolvedValue(mockBaseRepo);
 
             // Mock file system check
             vi.mock('node:fs', () => ({

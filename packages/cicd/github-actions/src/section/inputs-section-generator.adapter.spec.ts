@@ -2,13 +2,13 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { InputsSectionGenerator } from './inputs-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow, GitHubActionInput, GitHubWorkflowInput } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import { GitHubRepository } from '../repository/github-repository.service.js';
+import { Repository } from '../repository/github-repository.service.js';
 import { initContainer } from '../container.js';
 
 describe('InputsSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
     let generator: InputsSectionGenerator;
-    let mockRepository: GitHubRepository;
+    let mockRepository: Repository;
 
     beforeEach(() => {
         // Use real formatter to facilitate testing

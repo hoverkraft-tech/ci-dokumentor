@@ -1,4 +1,4 @@
-import { GitHubRepository } from "@ci-dokumentor/repository-github";
+import { Repository } from "@ci-dokumentor/core";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
@@ -8,7 +8,7 @@ export class ContributingSectionGenerator extends GitHubActionsSectionGeneratorA
         return SectionIdentifier.Contributing;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
         const contributingText = `We welcome contributions! Here's how you can help:
 
 1. Fork the repository

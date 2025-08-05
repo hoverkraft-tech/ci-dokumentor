@@ -2,7 +2,7 @@ import { GeneratorAdapter, OutputAdapter, SECTION_GENERATOR_ADAPTER_IDENTIFIER, 
 import { inject, multiInject } from 'inversify';
 import { GitHubAction, GitHubActionsParser, GitHubWorkflow } from './github-actions-parser.js';
 import { dirname, join } from 'node:path';
-import { GitHubRepositoryService } from '@ci-dokumentor/repository-github';
+import { GitHubRepositoryProvider } from '@ci-dokumentor/repository-github';
 
 /**
  * GitHub Actions generator adapter.
@@ -13,8 +13,8 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     constructor(
         @inject(GitHubActionsParser)
         public readonly gitHubActionsParser: GitHubActionsParser,
-        @inject(GitHubRepositoryService)
-        private readonly gitHubRepositoryService: GitHubRepositoryService,
+        @inject(GitHubRepositoryProvider)
+        private readonly gitHubRepositoryService: GitHubRepositoryProvider,
         @multiInject(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
         private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubAction | GitHubWorkflow>[],
     ) { }

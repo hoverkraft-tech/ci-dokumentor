@@ -1,4 +1,4 @@
-import { GitHubRepository } from "@ci-dokumentor/repository-github";
+import { Repository } from "@ci-dokumentor/core";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
@@ -9,7 +9,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         return SectionIdentifier.Header;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
         const logoContent = this.generateLogo(formatterAdapter, manifest, repository);
         const titleContent = this.generateTitle(formatterAdapter, manifest, repository);
 
@@ -22,7 +22,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         return Buffer.concat([formatterAdapter.center(sectionContent)]);
     }
 
-    private generateLogo(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer | null {
+    private generateLogo(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer | null {
         const logoPath = repository.logo;
         if (!logoPath) {
             return null;
@@ -37,13 +37,13 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         return logoImage;
     }
 
-    private getDisplayName(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    private getDisplayName(manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
         const name = (manifest.name || repository.name);
         // Convert to pascal case
         return Buffer.from(name.replace(/(?:^|_)(\w)/g, (_, c) => c.toUpperCase()));
     }
 
-    private generateTitle(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    private generateTitle(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
         const title = Buffer.from(this.getTitlePrefix(manifest) + this.getDisplayName(manifest, repository));
         const branchingIcon = this.generateBrandingIcon(formatterAdapter, manifest);
 

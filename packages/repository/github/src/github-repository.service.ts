@@ -4,12 +4,8 @@ import { existsSync } from "node:fs";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
 import { injectable, inject } from "inversify";
 
-export type GitHubRepository = Repository & {
-    logo?: string;
-};
-
 @injectable()
-export class GitHubRepositoryService implements RepositoryProvider {
+export class GitHubRepositoryProvider implements RepositoryProvider {
     
     constructor(@inject(GitRepositoryProvider) private gitRepositoryService: GitRepositoryProvider) {}
     
@@ -26,7 +22,7 @@ export class GitHubRepositoryService implements RepositoryProvider {
         }
     }
 
-    async getRepository(): Promise<GitHubRepository> {
+    async getRepository(): Promise<Repository> {
         const repositoryInfo = await this.gitRepositoryService.getRepository();
         const logo = await this.getLogoUri(repositoryInfo);
 

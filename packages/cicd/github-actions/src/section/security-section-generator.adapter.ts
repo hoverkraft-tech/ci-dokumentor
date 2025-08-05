@@ -1,4 +1,4 @@
-import { GitHubRepository } from "@ci-dokumentor/repository-github";
+import { Repository } from "@ci-dokumentor/core";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
@@ -8,7 +8,7 @@ export class SecuritySectionGenerator extends GitHubActionsSectionGeneratorAdapt
         return SectionIdentifier.Security;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
         const securityContent = `## Security Policy
 
 We take the security of our software seriously. If you believe you have found a security vulnerability, please report it to us as described below.
