@@ -1,6 +1,8 @@
 
 import { simpleGit } from 'simple-git';
 import gitUrlParse from 'git-url-parse';
+import { injectable, multiInject, optional } from 'inversify';
+import { RepositoryAdapter, REPOSITORY_ADAPTER_IDENTIFIER } from './repository.adapter.js';
 
 export type Repository = {
     owner: string;
@@ -9,8 +11,44 @@ export type Repository = {
     fullName: string; // owner/name format
 }
 
+@injectable()
 export class RepositoryService {
+    constructor(
+        @multiInject(REPOSITORY_ADAPTER_IDENTIFIER) @optional() private adapters: RepositoryAdapter[] = []
+    ) {}
+
     async getRepository(): Promise<Repository> {
+        // Try to auto-detect using adapters first
+        const detectedAdapter = await this.autoDetectAdapter();
+        if (detectedAdapter) {
+            return await detectedAdapter.getRepository();
+        }
+
+        // Fallback to basic implementation
+        return this.getBasicRepository();
+    }
+
+    /**
+     * Auto-detect the appropriate repository adapter for the current context
+     */
+    private async autoDetectAdapter(): Promise<RepositoryAdapter | null> {
+        for (const adapter of this.adapters) {
+            try {
+                if (await adapter.supports()) {
+                    return adapter;
+                }
+            } catch (error) {
+                // Continue to next adapter if this one fails
+                console.warn(`Repository adapter failed to check support: ${String(error)}`);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Basic repository information extraction (fallback)
+     */
+    private async getBasicRepository(): Promise<Repository> {
         const remoteUrl = await this.getRemoteUrl();
 
         const parsedUrl = gitUrlParse(remoteUrl);

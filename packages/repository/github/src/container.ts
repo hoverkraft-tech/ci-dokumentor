@@ -1,4 +1,4 @@
-import { Container, initContainer as coreInitContainer } from '@ci-dokumentor/core';
+import { Container, initContainer as coreInitContainer, REPOSITORY_ADAPTER_IDENTIFIER } from '@ci-dokumentor/core';
 import { GitHubRepositoryService } from './github-repository.service.js';
 
 let container: Container | null = null;
@@ -20,6 +20,9 @@ export function initContainer(baseContainer: Container | undefined = undefined):
 
     // Services
     container.bind(GitHubRepositoryService).toSelf().inSingletonScope();
+    
+    // Register as repository adapter
+    container.bind(REPOSITORY_ADAPTER_IDENTIFIER).to(GitHubRepositoryService);
 
     return container;
 }

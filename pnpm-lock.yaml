@@ -156,9 +156,15 @@ importers:
       '@octokit/graphql':
         specifier: ^9.0.1
         version: 9.0.1
+      git-url-parse:
+        specifier: ^16.1.0
+        version: 16.1.0
       inversify:
         specifier: ^7.5.2
         version: 7.7.0(reflect-metadata@0.2.2)
+      simple-git:
+        specifier: ^3.28.0
+        version: 3.28.0
 
 packages:
 
