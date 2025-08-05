@@ -10,9 +10,8 @@ describe('BadgesSectionGenerator', () => {
     let mockRepository: Repository;
 
     beforeEach(() => {
-        // Use real formatter to facilitate testing
-        const container = initContainer();
-        formatterAdapter = container.get(MarkdownFormatterAdapter);
+        // Create formatter adapter directly since it has no dependencies
+        formatterAdapter = new MarkdownFormatterAdapter();
 
         generator = new BadgesSectionGenerator();
 

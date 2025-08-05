@@ -35,7 +35,9 @@ export function initContainer(baseContainer: Container | undefined = undefined):
         return container;
     } else {
         // Initialize with repository platforms container
-        container = initRepositoryContainer();
+        // Get a fresh container that includes all dependencies
+        const repositoryContainer = initRepositoryContainer();
+        container = repositoryContainer;
     }
 
     // Bind parser
