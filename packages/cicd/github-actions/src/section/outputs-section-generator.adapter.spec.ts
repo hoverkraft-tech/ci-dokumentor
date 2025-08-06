@@ -11,14 +11,8 @@ describe('OutputsSectionGenerator', () => {
     let mockRepository: Repository;
 
     beforeEach(() => {
-        // Get formatter adapter from container to avoid initializing external services directly
-        try {
-            const container = initContainer();
-            formatterAdapter = container.get(MarkdownFormatterAdapter);
-        } catch (error) {
-            // Fallback to direct instantiation if container setup is not complete
-            formatterAdapter = new MarkdownFormatterAdapter();
-        }
+        const container = initContainer();
+        formatterAdapter = container.get(MarkdownFormatterAdapter);
 
         generator = new OutputsSectionGenerator();
 
