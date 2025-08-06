@@ -14,3 +14,4 @@ export * from './container.js';
 export { GENERATOR_ADAPTER_IDENTIFIER } from './generator/generator.adapter.js';
 export { SECTION_GENERATOR_ADAPTER_IDENTIFIER } from './generator/section-generator.adapter.js';
 export { REPOSITORY_PROVIDER_IDENTIFIER } from './repository/repository.provider.js';
+export { FORMATTER_ADAPTER_IDENTIFIER } from './formatter/formatter.adapter.js';

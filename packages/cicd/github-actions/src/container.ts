@@ -1,5 +1,4 @@
 import { Container, SECTION_GENERATOR_ADAPTER_IDENTIFIER, GENERATOR_ADAPTER_IDENTIFIER } from '@ci-dokumentor/core';
-import { initContainer as initRepositoryContainer } from '@ci-dokumentor/repository-github';
 import { GitHubActionsParser } from './github-actions-parser.js';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 
@@ -24,43 +23,34 @@ export function resetContainer(): void {
     container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-    if (baseContainer) {
-        // When a base container is provided, always use it and set it as our singleton
-        container = baseContainer;
-        // Initialize repository container with the base container 
-        initRepositoryContainer(container);
-    } else if (container) {
-        // Only return existing singleton if no base container is provided
-        return container;
-    } else {
-        // Initialize with repository platforms container
-        // Get a fresh container that includes all dependencies
-        const repositoryContainer = initRepositoryContainer();
-        container = repositoryContainer;
+export function initContainer(baseContainer: Container): Container {
+    // Always use the provided base container
+    container = baseContainer;
+
+    // Bind GitHub Actions specific services only
+    if (!container.isBound(GitHubActionsParser)) {
+        // Bind parser
+        container.bind(GitHubActionsParser).toSelf().inSingletonScope();
+
+        // Bind generator
+        container.bind(GitHubActionsGeneratorAdapter).toSelf().inSingletonScope();
+        container.bind(GENERATOR_ADAPTER_IDENTIFIER).to(GitHubActionsGeneratorAdapter);
+
+        // Bind section generators
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(HeaderSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(BadgesSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(OverviewSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ContentsSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(UsageSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(InputsSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(OutputsSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(SecretsSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ExamplesSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(JobsSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ContributingSectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(SecuritySectionGenerator);
+        container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(LicenseSectionGenerator);
     }
-
-    // Bind parser
-    container.bind(GitHubActionsParser).toSelf().inSingletonScope();
-
-    // Bind generator
-    container.bind(GitHubActionsGeneratorAdapter).toSelf().inSingletonScope();
-    container.bind(GENERATOR_ADAPTER_IDENTIFIER).to(GitHubActionsGeneratorAdapter);
-
-    // Bind section generators
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(HeaderSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(BadgesSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(OverviewSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ContentsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(UsageSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(InputsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(OutputsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(SecretsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ExamplesSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(JobsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ContributingSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(SecuritySectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(LicenseSectionGenerator);
 
     return container;
 }

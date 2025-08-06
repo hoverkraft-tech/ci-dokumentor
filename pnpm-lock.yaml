@@ -98,6 +98,9 @@ importers:
       '@ci-dokumentor/core':
         specifier: workspace:*
         version: link:../../core
+      '@ci-dokumentor/repository-git':
+        specifier: workspace:*
+        version: link:../../repository/git
       '@ci-dokumentor/repository-github':
         specifier: workspace:*
         version: link:../../repository/github

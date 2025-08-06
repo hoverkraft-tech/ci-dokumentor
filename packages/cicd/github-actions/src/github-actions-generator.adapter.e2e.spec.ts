@@ -6,7 +6,7 @@ import {
   MarkdownFormatterAdapter,
   RepositoryService,
 } from '@ci-dokumentor/core';
-import { initContainer } from './container.js';
+import { initGlobalContainer } from './test/global-container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
 import { Repository } from '@ci-dokumentor/core';
@@ -18,7 +18,7 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
 
   beforeEach(async () => {
     // Use real dependencies from the container
-    const container = initContainer();
+    const container = initGlobalContainer();
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     repositoryService = container.get(RepositoryService);

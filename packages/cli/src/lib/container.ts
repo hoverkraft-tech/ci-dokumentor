@@ -1,9 +1,6 @@
 import 'reflect-metadata';
 import { Command as CommanderCommand } from 'commander';
-import { type Container, initContainer as coreInitContainer } from '@ci-dokumentor/core';
-import { initContainer as gitHubActionsInitContainer } from '@ci-dokumentor/cicd-github-actions';
-import { initContainer as gitRepositoryInitContainer } from '@ci-dokumentor/repository-git';
-import { initContainer as gitHubRepositoryInitContainer } from '@ci-dokumentor/repository-github';
+import { type GlobalContainer, initGlobalContainer } from './global-container.js';
 import { COMMAND_IDENTIFIER, type Command } from './interfaces/command.interface.js';
 import { LOGGER_IDENTIFIER, type Logger } from './interfaces/logger.interface.js';
 import { PACKAGE_SERVICE_IDENTIFIER, type PackageService } from './interfaces/package-service.interface.js';
@@ -14,7 +11,7 @@ import { GenerateDocumentationUseCase } from './usecases/generate-documentation.
 import { ConsoleLogger } from './services/console-logger.service.js';
 import { FilePackageService } from './services/file-package.service.js';
 
-let container: Container | null = null;
+let container: GlobalContainer | null = null;
 
 /**
  * Resets the container singleton for testing purposes
@@ -26,27 +23,18 @@ export function resetContainer(): void {
 /**
  * Creates and configures the dependency injection container
  */
-export function initContainer(): Container {
+export function initContainer(): GlobalContainer {
     if (container) {
         return container;
     }
 
-    // Initialize the core container
-    // This allows us to use the core services and types
-    container = coreInitContainer();
+    // Initialize the global container which includes all packages
+    container = initGlobalContainer();
 
-    // Initialize repository providers - git and github separately to allow multiple providers
-    gitRepositoryInitContainer(container);
-    gitHubRepositoryInitContainer(container);
-
-    // Initialize GitHub Actions specific bindings
-    gitHubActionsInitContainer(container);
-
-    // Bind core services
+    // Bind CLI-specific services
     container.bind<Logger>(LOGGER_IDENTIFIER).to(ConsoleLogger).inSingletonScope();
     container.bind<PackageService>(PACKAGE_SERVICE_IDENTIFIER).to(FilePackageService).inSingletonScope();
     container.bind<Program>(PROGRAM_IDENTIFIER).toConstantValue(new CommanderCommand());
-
 
     // Bind use cases
     container.bind(GenerateDocumentationUseCase).toSelf();
