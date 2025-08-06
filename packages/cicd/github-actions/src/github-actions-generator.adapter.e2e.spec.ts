@@ -5,23 +5,11 @@ import {
   FileOutputAdapter,
   MarkdownFormatterAdapter,
   RepositoryService,
-  Container,
-  initContainer as coreInitContainer,
+  Repository,
+  createTestContainer,
 } from '@ci-dokumentor/core';
-import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
-import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
-import { initContainer as githubActionsInitContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
-import { Repository } from '@ci-dokumentor/core';
-
-function createTestContainer(): Container {
-    const container = coreInitContainer();
-    gitInitContainer(container);
-    githubInitContainer(container);
-    githubActionsInitContainer(container);
-    return container;
-}
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let formatterAdapter: FormatterAdapter;

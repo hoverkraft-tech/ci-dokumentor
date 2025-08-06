@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Command as CommanderCommand } from 'commander';
-import { type GlobalContainer, initGlobalContainer } from './global-container.js';
+import { type GlobalContainer, initGlobalContainerWithPackages } from '@ci-dokumentor/core';
 import { COMMAND_IDENTIFIER, type Command } from './interfaces/command.interface.js';
 import { LOGGER_IDENTIFIER, type Logger } from './interfaces/logger.interface.js';
 import { PACKAGE_SERVICE_IDENTIFIER, type PackageService } from './interfaces/package-service.interface.js';
@@ -23,13 +23,28 @@ export function resetContainer(): void {
 /**
  * Creates and configures the dependency injection container
  */
-export function initContainer(): GlobalContainer {
+export async function initContainer(): Promise<GlobalContainer> {
     if (container) {
         return container;
     }
 
-    // Initialize the global container which includes all packages
-    container = initGlobalContainer();
+    // Initialize the global container with all available packages
+    container = await initGlobalContainerWithPackages([
+        // Initialize repository packages
+        async (baseContainer) => {
+            const { initContainer: gitInitContainer } = await import('@ci-dokumentor/repository-git');
+            return gitInitContainer(baseContainer);
+        },
+        async (baseContainer) => {
+            const { initContainer: githubInitContainer } = await import('@ci-dokumentor/repository-github');
+            return githubInitContainer(baseContainer);
+        },
+        // Initialize CICD packages
+        async (baseContainer) => {
+            const { initContainer: githubActionsInitContainer } = await import('@ci-dokumentor/cicd-github-actions');
+            return githubActionsInitContainer(baseContainer);
+        }
+    ]);
 
     // Bind CLI-specific services
     container.bind<Logger>(LOGGER_IDENTIFIER).to(ConsoleLogger).inSingletonScope();

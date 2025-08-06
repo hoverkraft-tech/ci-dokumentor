@@ -10,6 +10,7 @@ export * from './output/file-output.adapter.js';
 export * from './repository/repository.provider.js';
 export * from './repository/repository.service.js';
 export * from './container.js';
+export * from './global-container.js';
 
 export { GENERATOR_ADAPTER_IDENTIFIER } from './generator/generator.adapter.js';
 export { SECTION_GENERATOR_ADAPTER_IDENTIFIER } from './generator/section-generator.adapter.js';
