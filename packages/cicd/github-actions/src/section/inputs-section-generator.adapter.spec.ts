@@ -1,9 +1,19 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { InputsSectionGenerator } from './inputs-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow, GitHubActionInput, GitHubWorkflowInput } from '../github-actions-parser.js';
-import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
+import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter, Container, initContainer as coreInitContainer } from '@ci-dokumentor/core';
 import { Repository } from "@ci-dokumentor/core";
-import { initGlobalContainer } from '../test/global-container.js';
+import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
+import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
+import { initContainer as githubActionsInitContainer } from '../container.js';
+
+function createTestContainer(): Container {
+    const container = coreInitContainer();
+    gitInitContainer(container);
+    githubInitContainer(container);
+    githubActionsInitContainer(container);
+    return container;
+}
 
 describe('InputsSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
@@ -11,7 +21,7 @@ describe('InputsSectionGenerator', () => {
     let mockRepository: Repository;
 
     beforeEach(() => {
-        const container = initGlobalContainer();
+        const container = createTestContainer();
         formatterAdapter = container.get(MarkdownFormatterAdapter);
 
         generator = new InputsSectionGenerator();
