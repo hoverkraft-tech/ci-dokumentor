@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { InputsSectionGenerator } from './inputs-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow, GitHubActionInput, GitHubWorkflowInput } from '../github-actions-parser.js';
-import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter, Repository, createTestContainer } from '@ci-dokumentor/core';
+import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter, Repository } from '@ci-dokumentor/core';
+import { initTestContainer } from '../container.js';
 
 describe('InputsSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
@@ -9,7 +10,7 @@ describe('InputsSectionGenerator', () => {
     let mockRepository: Repository;
 
     beforeEach(() => {
-        const container = createTestContainer();
+        const container = initTestContainer();
         formatterAdapter = container.get(MarkdownFormatterAdapter);
 
         generator = new InputsSectionGenerator();

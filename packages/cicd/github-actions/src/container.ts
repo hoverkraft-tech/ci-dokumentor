@@ -1,4 +1,5 @@
 import { Container, SECTION_GENERATOR_ADAPTER_IDENTIFIER, GENERATOR_ADAPTER_IDENTIFIER } from '@ci-dokumentor/core';
+import { Container as InversifyContainer } from "inversify";
 import { GitHubActionsParser } from './github-actions-parser.js';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 
@@ -23,9 +24,16 @@ export function resetContainer(): void {
     container = null;
 }
 
-export function initContainer(baseContainer: Container): Container {
-    // Always use the provided base container
-    container = baseContainer;
+export function initContainer(baseContainer: Container | undefined = undefined): Container {
+    if (baseContainer) {
+        // When a base container is provided, always use it and set it as our singleton
+        container = baseContainer;
+    } else if (container) {
+        // Only return existing singleton if no base container is provided
+        return container;
+    } else {
+        container = new InversifyContainer() as Container;
+    }
 
     // Bind GitHub Actions specific services only
     if (!container.isBound(GitHubActionsParser)) {
@@ -53,4 +61,25 @@ export function initContainer(baseContainer: Container): Container {
     }
 
     return container;
+}
+
+/**
+ * Initialize a test container for GitHub Actions package.
+ * This initializes all the proper packages needed for GitHub Actions testing.
+ */
+export function initTestContainer(): Container {
+    // Initialize core container first
+    const { initContainer: coreInitContainer } = require('@ci-dokumentor/core');
+    const baseContainer = coreInitContainer();
+
+    // Initialize git repository package
+    const { initContainer: gitInitContainer } = require('@ci-dokumentor/repository-git');
+    gitInitContainer(baseContainer);
+
+    // Initialize github repository package
+    const { initContainer: githubInitContainer } = require('@ci-dokumentor/repository-github');
+    githubInitContainer(baseContainer);
+
+    // Initialize this package
+    return initContainer(baseContainer);
 }

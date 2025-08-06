@@ -6,8 +6,8 @@ import {
   MarkdownFormatterAdapter,
   RepositoryService,
   Repository,
-  createTestContainer,
 } from '@ci-dokumentor/core';
+import { initTestContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
 
@@ -18,7 +18,7 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
 
   beforeEach(async () => {
     // Use real dependencies from the container
-    const container = createTestContainer();
+    const container = initTestContainer();
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     repositoryService = container.get(RepositoryService);
