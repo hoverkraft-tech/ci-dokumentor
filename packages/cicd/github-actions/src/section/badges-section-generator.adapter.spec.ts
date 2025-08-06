@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, Repository, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import { initContainer } from '../container.js';
+import { initContainer, resetContainer } from '../container.js';
 
 describe('BadgesSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
@@ -10,8 +10,14 @@ describe('BadgesSectionGenerator', () => {
     let mockRepository: Repository;
 
     beforeEach(() => {
-        // Create formatter adapter directly since it has no dependencies
-        formatterAdapter = new MarkdownFormatterAdapter();
+        // Get formatter adapter from container to avoid initializing external services directly
+        try {
+            const container = initContainer();
+            formatterAdapter = container.get(MarkdownFormatterAdapter);
+        } catch (error) {
+            // Fallback to direct instantiation if container setup is not complete
+            formatterAdapter = new MarkdownFormatterAdapter();
+        }
 
         generator = new BadgesSectionGenerator();
 

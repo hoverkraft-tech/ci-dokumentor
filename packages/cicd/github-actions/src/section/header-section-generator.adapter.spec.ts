@@ -3,7 +3,7 @@ import { HeaderSectionGenerator } from './header-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
 import { Repository } from "@ci-dokumentor/core";
-import { initContainer } from '../container.js';
+import { initContainer, resetContainer } from '../container.js';
 
 describe('HeaderSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
@@ -11,8 +11,14 @@ describe('HeaderSectionGenerator', () => {
     let mockRepository: Repository;
 
     beforeEach(() => {
-        // Create formatter adapter directly since it has no dependencies
-        formatterAdapter = new MarkdownFormatterAdapter();
+        // Get formatter adapter from container to avoid initializing external services directly
+        try {
+            const container = initContainer();
+            formatterAdapter = container.get(MarkdownFormatterAdapter);
+        } catch (error) {
+            // Fallback to direct instantiation if container setup is not complete
+            formatterAdapter = new MarkdownFormatterAdapter();
+        }
 
         generator = new HeaderSectionGenerator();
 
