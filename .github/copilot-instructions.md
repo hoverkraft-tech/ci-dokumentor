@@ -153,6 +153,11 @@ export function initContainer(): Container {
 - Squash commits when merging
 - Keep commit history clean and meaningful
 
+### Make Commands
+Running make commands to check and fix code:
+- `make lint`: Execute linting
+- `make ci`: Execute all formats and checks
+
 ## Error Handling
 
 ### Error Management
