@@ -76,32 +76,28 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
     }
 
     private async getLicenseInfo(repositoryInfo: Repository): Promise<{ name: string; spdxId: string | null; url: string | null } | undefined> {
-        try {
-            const result: GraphQlQueryResponseData = await graphql(`
-                query getLicense($owner: String!, $repo: String!) {
-                    repository(owner: $owner, name: $repo) {
-                        licenseInfo {
-                            name
-                            spdxId
-                            url
-                        }
+        const result: GraphQlQueryResponseData = await graphql(`
+            query getLicense($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                    licenseInfo {
+                        name
+                        spdxId
+                        url
                     }
                 }
-            `, {
-                owner: repositoryInfo.owner,
-                repo: repositoryInfo.name
-            });
-
-            const licenseInfo = result.repository?.licenseInfo;
-            if (licenseInfo) {
-                return {
-                    name: licenseInfo.name,
-                    spdxId: licenseInfo.spdxId,
-                    url: licenseInfo.url
-                };
             }
-        } catch (error) {
-            console.warn('Failed to fetch license from GitHub API:', error);
+        `, {
+            owner: repositoryInfo.owner,
+            repo: repositoryInfo.name
+        });
+
+        const licenseInfo = result.repository?.licenseInfo;
+        if (licenseInfo) {
+            return {
+                name: licenseInfo.name,
+                spdxId: licenseInfo.spdxId,
+                url: licenseInfo.url
+            };
         }
 
         // Fallback to reading license file directly if no license info from GitHub
