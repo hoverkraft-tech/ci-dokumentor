@@ -1,2 +1,2 @@
-export * from './github-repository.provider';
-export * from './container';
+export * from './github-repository.provider.js';
+export * from './container.js';
