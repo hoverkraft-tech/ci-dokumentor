@@ -30,10 +30,12 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
     async getRepository(): Promise<Repository> {
         const repositoryInfo = await this.gitRepositoryService.getRepository();
         const logo = await this.getLogoUri(repositoryInfo);
+        const license = await this.getLicenseInfo(repositoryInfo);
 
         return {
             ...repositoryInfo,
             logo, // Optional logo URI
+            license, // Optional license information
         };
     }
 
@@ -69,5 +71,37 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
 
         const repository = result.repository;
         return repository.openGraphImageUrl;
+    }
+
+    private async getLicenseInfo(repositoryInfo: Repository): Promise<{ name: string; spdxId: string | null; url: string | null } | undefined> {
+        try {
+            const result: GraphQlQueryResponseData = await graphql(`
+                query getLicense($owner: String!, $repo: String!) {
+                    repository(owner: $owner, name: $repo) {
+                        licenseInfo {
+                            name
+                            spdxId
+                            url
+                        }
+                    }
+                }
+            `, {
+                owner: repositoryInfo.owner,
+                repo: repositoryInfo.name
+            });
+
+            const licenseInfo = result.repository?.licenseInfo;
+            if (licenseInfo) {
+                return {
+                    name: licenseInfo.name,
+                    spdxId: licenseInfo.spdxId,
+                    url: licenseInfo.url
+                };
+            }
+        } catch (error) {
+            console.warn('Failed to fetch license from GitHub API:', error);
+        }
+
+        return undefined;
     }
 }
