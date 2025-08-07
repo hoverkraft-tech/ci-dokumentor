@@ -1,17 +1,34 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitHubRepositoryProvider } from './github-repository.provider.js';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
+import { LicenseService } from '@ci-dokumentor/core';
 
 // Mock the GitRepositoryProvider
 vi.mock('@ci-dokumentor/repository-git', () => ({
     GitRepositoryProvider: vi.fn()
 }));
 
+// Mock the LicenseService
+vi.mock('@ci-dokumentor/core', () => ({
+    LicenseService: vi.fn()
+}));
+
+// Mock @octokit/graphql
+vi.mock('@octokit/graphql', () => ({
+    graphql: vi.fn()
+}));
+
 describe('GitHubRepositoryProvider', () => {
     let gitHubRepositoryProvider: GitHubRepositoryProvider;
     let mockGitRepositoryService: Mocked<GitRepositoryProvider>;
+    let mockLicenseService: Mocked<LicenseService>;
+    let mockGraphql: ReturnType<typeof vi.fn>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // Import the mocked graphql function
+        const { graphql } = await import('@octokit/graphql');
+        mockGraphql = vi.mocked(graphql);
+
         // Create a mock git repository service
         mockGitRepositoryService = {
             supports: vi.fn(),
@@ -19,7 +36,15 @@ describe('GitHubRepositoryProvider', () => {
             getRemoteParsedUrl: vi.fn(),
         } as unknown as Mocked<GitRepositoryProvider>;
 
-        gitHubRepositoryProvider = new GitHubRepositoryProvider(mockGitRepositoryService);
+        // Create a mock license service
+        mockLicenseService = {
+            detectLicenseFromFile: vi.fn(),
+        } as unknown as Mocked<LicenseService>;
+
+        gitHubRepositoryProvider = new GitHubRepositoryProvider(mockGitRepositoryService, mockLicenseService);
+        
+        // Reset all mocks
+        vi.resetAllMocks();
     });
 
     describe('supports', () => {
@@ -117,37 +142,186 @@ describe('GitHubRepositoryProvider', () => {
     });
 
     describe('getRepository', () => {
-        it('should extend base repository with logo information', async () => {
-            // Mock the git repository service method
-            const mockBaseRepo = {
-                owner: 'test-owner',
-                name: 'test-repo',
-                url: 'https://github.com/test-owner/test-repo',
-                fullName: 'test-owner/test-repo'
-            };
+        const mockBaseRepo = {
+            owner: 'test-owner',
+            name: 'test-repo',
+            url: 'https://github.com/test-owner/test-repo',
+            fullName: 'test-owner/test-repo'
+        };
 
+        beforeEach(() => {
             mockGitRepositoryService.getRepository.mockResolvedValue(mockBaseRepo);
+        });
 
-            // Mock file system check
-            vi.mock('node:fs', () => ({
-                existsSync: vi.fn().mockReturnValue(false)
-            }));
-
-            // Mock GitHub API
-            vi.mock('@octokit/graphql', () => ({
-                graphql: vi.fn().mockResolvedValue({
-                    repository: {
-                        openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png'
+        it('should extend base repository with logo and license information from GitHub API', async () => {
+            // Arrange
+            mockGraphql.mockResolvedValueOnce({
+                repository: {
+                    openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png'
+                }
+            }).mockResolvedValueOnce({
+                repository: {
+                    licenseInfo: {
+                        name: 'MIT License',
+                        spdxId: 'MIT',
+                        url: 'https://api.github.com/licenses/mit'
                     }
-                })
-            }));
+                }
+            });
 
+            // Act
             const result = await gitHubRepositoryProvider.getRepository();
 
+            // Assert
             expect(result).toEqual({
                 ...mockBaseRepo,
-                logo: 'https://github.com/test-owner/test-repo/social-preview.png'
+                logo: 'https://github.com/test-owner/test-repo/social-preview.png',
+                license: {
+                    name: 'MIT License',
+                    spdxId: 'MIT',
+                    url: 'https://api.github.com/licenses/mit'
+                }
             });
+            expect(mockLicenseService.detectLicenseFromFile).not.toHaveBeenCalled();
+        });
+
+        it('should fallback to license service when GitHub API has no license info', async () => {
+            // Arrange
+            mockGraphql.mockResolvedValueOnce({
+                repository: {
+                    openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png'
+                }
+            }).mockResolvedValueOnce({
+                repository: {
+                    licenseInfo: null
+                }
+            });
+
+            mockLicenseService.detectLicenseFromFile.mockReturnValue({
+                name: 'Apache License 2.0',
+                spdxId: 'Apache-2.0',
+                url: null
+            });
+
+            // Act
+            const result = await gitHubRepositoryProvider.getRepository();
+
+            // Assert
+            expect(result).toEqual({
+                ...mockBaseRepo,
+                logo: 'https://github.com/test-owner/test-repo/social-preview.png',
+                license: {
+                    name: 'Apache License 2.0',
+                    spdxId: 'Apache-2.0',
+                    url: null
+                }
+            });
+            expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
+        });
+
+        it('should handle case when no license info is available from either source', async () => {
+            // Arrange
+            mockGraphql.mockResolvedValueOnce({
+                repository: {
+                    openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png'
+                }
+            }).mockResolvedValueOnce({
+                repository: {
+                    licenseInfo: null
+                }
+            });
+
+            mockLicenseService.detectLicenseFromFile.mockReturnValue(undefined);
+
+            // Act
+            const result = await gitHubRepositoryProvider.getRepository();
+
+            // Assert
+            expect(result).toEqual({
+                ...mockBaseRepo,
+                logo: 'https://github.com/test-owner/test-repo/social-preview.png',
+                license: undefined
+            });
+            expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
+        });
+
+        it('should let GitHub API errors bubble up when fetching license info', async () => {
+            // Arrange
+            mockGraphql.mockResolvedValueOnce({
+                repository: {
+                    openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png'
+                }
+            }).mockRejectedValueOnce(new Error('GitHub API rate limit exceeded'));
+
+            // Act & Assert
+            await expect(gitHubRepositoryProvider.getRepository()).rejects.toThrow('GitHub API rate limit exceeded');
+            expect(mockLicenseService.detectLicenseFromFile).not.toHaveBeenCalled();
+        });
+
+        it('should handle missing repository data from GitHub API', async () => {
+            // Arrange
+            mockGraphql.mockResolvedValueOnce({
+                repository: {
+                    openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png'
+                }
+            }).mockResolvedValueOnce({
+                repository: null
+            });
+
+            mockLicenseService.detectLicenseFromFile.mockReturnValue({
+                name: 'MIT License',
+                spdxId: 'MIT',
+                url: null
+            });
+
+            // Act
+            const result = await gitHubRepositoryProvider.getRepository();
+
+            // Assert
+            expect(result).toEqual({
+                ...mockBaseRepo,
+                logo: 'https://github.com/test-owner/test-repo/social-preview.png',
+                license: {
+                    name: 'MIT License',
+                    spdxId: 'MIT',
+                    url: null
+                }
+            });
+            expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
+        });
+
+        it('should use local license service when GitHub license API returns empty object', async () => {
+            // Arrange
+            mockGraphql.mockResolvedValueOnce({
+                repository: {
+                    openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png'
+                }
+            }).mockResolvedValueOnce({
+                repository: {
+                    licenseInfo: {}
+                }
+            });
+
+            mockLicenseService.detectLicenseFromFile.mockReturnValue({
+                name: 'Custom License',
+                spdxId: null,
+                url: null
+            });
+
+            // Act
+            const result = await gitHubRepositoryProvider.getRepository();
+
+            // Assert
+            expect(result).toEqual({
+                ...mockBaseRepo,
+                logo: 'https://github.com/test-owner/test-repo/social-preview.png',
+                license: {
+                    name: 'Custom License',
+                    spdxId: null,
+                    url: null
+                }
+            });
+            expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
         });
     });
 });

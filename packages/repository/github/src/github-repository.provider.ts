@@ -1,13 +1,15 @@
-import { Repository, RepositoryProvider } from "@ci-dokumentor/core";
+import { Repository, RepositoryProvider, LicenseService } from "@ci-dokumentor/core";
 import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
-import { existsSync } from "node:fs";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
 import { injectable, inject } from "inversify";
 
 @injectable()
 export class GitHubRepositoryProvider implements RepositoryProvider {
     
-    constructor(@inject(GitRepositoryProvider) private gitRepositoryService: GitRepositoryProvider) {}
+    constructor(
+        @inject(GitRepositoryProvider) private gitRepositoryService: GitRepositoryProvider,
+        @inject(LicenseService) private licenseService: LicenseService
+    ) {}
     
     /**
      * Check if this provider supports the current repository context
@@ -30,10 +32,12 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
     async getRepository(): Promise<Repository> {
         const repositoryInfo = await this.gitRepositoryService.getRepository();
         const logo = await this.getLogoUri(repositoryInfo);
+        const license = await this.getLicenseInfo(repositoryInfo);
 
         return {
             ...repositoryInfo,
             logo, // Optional logo URI
+            license, // Optional license information
         };
     }
 
@@ -69,5 +73,34 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
 
         const repository = result.repository;
         return repository.openGraphImageUrl;
+    }
+
+    private async getLicenseInfo(repositoryInfo: Repository): Promise<{ name: string; spdxId: string | null; url: string | null } | undefined> {
+        const result: GraphQlQueryResponseData = await graphql(`
+            query getLicense($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                    licenseInfo {
+                        name
+                        spdxId
+                        url
+                    }
+                }
+            }
+        `, {
+            owner: repositoryInfo.owner,
+            repo: repositoryInfo.name
+        });
+
+        const licenseInfo = result.repository?.licenseInfo;
+        if (licenseInfo) {
+            return {
+                name: licenseInfo.name,
+                spdxId: licenseInfo.spdxId,
+                url: licenseInfo.url
+            };
+        }
+
+        // Fallback to reading license file directly if no license info from GitHub
+        return this.licenseService.detectLicenseFromFile();
     }
 }
