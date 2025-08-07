@@ -8,7 +8,7 @@ export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapt
         return SectionIdentifier.Overview;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, _repository: Repository): Buffer {
         const description = 'description' in manifest ? manifest.description : undefined;
         if (!description) {
             return Buffer.from('');

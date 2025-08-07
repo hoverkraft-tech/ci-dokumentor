@@ -30,7 +30,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
         })), 'yaml');
     }
 
-    private generateActionUsage(manifest: GitHubAction, repository: Repository): Document {
+    private generateActionUsage(manifest: GitHubAction, _repository: Repository): Document {
 
         const inputs = manifest.inputs || {};
         const withUsage = this.generateInputsUsage(inputs);
@@ -43,7 +43,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
         ]);
     }
 
-    private generateWorkflowUsage(workflow: GitHubWorkflow, repository: Repository): Document {
+    private generateWorkflowUsage(workflow: GitHubWorkflow, _repository: Repository): Document {
 
         const filteredOn = Object.keys(workflow.on || {}).filter(key => key !== 'workflow_dispatch').reduce((acc, key) => {
             acc[key] = workflow.on[key as keyof typeof workflow.on] || {};
@@ -81,7 +81,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
             return undefined;
         }
 
-        let inputsUsageDocument = new Document({});
+        const inputsUsageDocument = new Document({});
 
         // Process inputs using the dedicated method
         const processedInputs: Record<string, unknown> = {};
@@ -101,7 +101,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
         // Add comments to each key using the internal YAML API
         if (inputsUsageDocument.contents && typeof inputsUsageDocument.contents === 'object' && 'items' in inputsUsageDocument.contents) {
-            const items = (inputsUsageDocument.contents as any).items;
+            const items = (inputsUsageDocument.contents as { items: unknown[] }).items;
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 if (!item.key || !item.key.value) {

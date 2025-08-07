@@ -8,7 +8,7 @@ export class JobsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
         return SectionIdentifier.Contents; // Reusing Contents identifier for Jobs
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, _repository: Repository): Buffer {
         // Only generate for workflows
         if ('runs' in manifest) {
             return Buffer.from('');
