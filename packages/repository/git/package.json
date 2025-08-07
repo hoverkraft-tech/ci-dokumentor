@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
-    "git-url-parse": "^15.0.0",
-    "inversify": "^6.1.4",
-    "simple-git": "^3.27.0"
+    "git-url-parse": "^16.1.0",
+    "inversify": "^7.5.2",
+    "simple-git": "^3.28.0"
   },
   "devDependencies": {
     "@types/git-url-parse": "^9.0.3"

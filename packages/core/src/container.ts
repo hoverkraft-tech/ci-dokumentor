@@ -24,6 +24,11 @@ export function initContainer(baseContainer: Container | undefined = undefined):
         container = new InversifyContainer();
     }
 
+    // Return early if services are already bound
+    if (container.isBound(FormatterService)) {
+        return container;
+    }
+
     // Bind core services only - no dependencies on other packages
     container.bind(FormatterService).toSelf().inSingletonScope();
     container.bind(GeneratorService).toSelf().inSingletonScope();
