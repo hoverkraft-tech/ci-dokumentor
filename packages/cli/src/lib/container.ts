@@ -11,7 +11,6 @@ import { GenerateDocumentationUseCase } from './usecases/generate-documentation.
 import { ConsoleLogger } from './services/console-logger.service.js';
 import { FilePackageService } from './services/file-package.service.js';
 import { Command as CommanderCommand } from 'commander';
-import { initGlobalContainer } from './global-container.js';
 
 let container: Container | null = null;
 
