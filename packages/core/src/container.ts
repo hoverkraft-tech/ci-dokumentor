@@ -4,6 +4,7 @@ import { FormatterService } from "./formatter/formatter.service.js";
 import { MarkdownFormatterAdapter } from "./formatter/markdown-formatter.adapter.js";
 import { FORMATTER_ADAPTER_IDENTIFIER } from "./formatter/formatter.adapter.js";
 import { RepositoryService } from "./repository/repository.service.js";
+import { LicenseService } from "./repository/license.service.js";
 
 export type Container = InversifyContainer;
 
@@ -33,6 +34,7 @@ export function initContainer(baseContainer: Container | undefined = undefined):
     container.bind(FormatterService).toSelf().inSingletonScope();
     container.bind(GeneratorService).toSelf().inSingletonScope();
     container.bind(RepositoryService).toSelf().inSingletonScope();
+    container.bind(LicenseService).toSelf().inSingletonScope();
 
     // Formatter adapters
     container.bind(MarkdownFormatterAdapter).toSelf().inSingletonScope();

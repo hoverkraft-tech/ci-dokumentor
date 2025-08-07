@@ -1,15 +1,22 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitHubRepositoryProvider } from './github-repository.provider.js';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
+import { LicenseService } from '@ci-dokumentor/core';
 
 // Mock the GitRepositoryProvider
 vi.mock('@ci-dokumentor/repository-git', () => ({
     GitRepositoryProvider: vi.fn()
 }));
 
+// Mock the LicenseService
+vi.mock('@ci-dokumentor/core', () => ({
+    LicenseService: vi.fn()
+}));
+
 describe('GitHubRepositoryProvider', () => {
     let gitHubRepositoryProvider: GitHubRepositoryProvider;
     let mockGitRepositoryService: Mocked<GitRepositoryProvider>;
+    let mockLicenseService: Mocked<LicenseService>;
 
     beforeEach(() => {
         // Create a mock git repository service
@@ -19,7 +26,12 @@ describe('GitHubRepositoryProvider', () => {
             getRemoteParsedUrl: vi.fn(),
         } as unknown as Mocked<GitRepositoryProvider>;
 
-        gitHubRepositoryProvider = new GitHubRepositoryProvider(mockGitRepositoryService);
+        // Create a mock license service
+        mockLicenseService = {
+            detectLicenseFromFile: vi.fn(),
+        } as unknown as Mocked<LicenseService>;
+
+        gitHubRepositoryProvider = new GitHubRepositoryProvider(mockGitRepositoryService, mockLicenseService);
     });
 
     describe('supports', () => {

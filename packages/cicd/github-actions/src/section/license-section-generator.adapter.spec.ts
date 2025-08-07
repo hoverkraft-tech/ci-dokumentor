@@ -34,7 +34,7 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
         expect(content).toContain('Test Author');
     });
     
-    it('should fallback to MIT license when no license information is available', () => {
+    it('should return empty buffer when no license information is available', () => {
         const generator = new LicenseSectionGenerator();
         const formatter = new MarkdownFormatterAdapter();
         
@@ -52,11 +52,8 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
         };
         
         const result = generator.generateSection(formatter, mockManifest, mockRepository);
-        const content = result.toString();
         
-        expect(content).toContain('This project is licensed under the MIT License');
-        expect(content).toContain('Test Author');
-        expect(content).toContain('LICENSE](LICENSE)');
+        expect(result).toHaveLength(0);
     });
     
     it('should use repository owner as fallback author', () => {

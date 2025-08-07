@@ -15,16 +15,19 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
         // Use license information from repository (fetched by GitHubRepositoryProvider with fallbacks)
         const licenseInfo = repository.license;
 
-        // Generate license section
-        const licenseText = licenseInfo 
-            ? `This project is licensed under the ${licenseInfo.name}.`
-            : 'This project is licensed under the MIT License.';
+        // Only generate license section if license information is available
+        if (!licenseInfo) {
+            return Buffer.alloc(0); // Return empty buffer if no license info
+        }
 
-        const spdxText = licenseInfo && licenseInfo.spdxId 
+        // Generate license section
+        const licenseText = `This project is licensed under the ${licenseInfo.name}.`;
+
+        const spdxText = licenseInfo.spdxId 
             ? `SPDX-License-Identifier: ${licenseInfo.spdxId}`
             : '';
 
-        const licenseLink = licenseInfo && licenseInfo.url
+        const licenseLink = licenseInfo.url
             ? `For more details, see the [license](${licenseInfo.url}).`
             : 'See the [LICENSE](LICENSE) file for full license text.';
 
