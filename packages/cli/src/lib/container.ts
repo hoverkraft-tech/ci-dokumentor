@@ -1,7 +1,6 @@
 import 'reflect-metadata';
-import { Command as CommanderCommand } from 'commander';
-import { type Container, initContainer as coreInitContainer } from '@ci-dokumentor/core';
-import { initContainer as gitHubActionsInitContainer } from '@ci-dokumentor/cicd-github-actions';
+import { Container } from '@ci-dokumentor/core';
+import { Container as InversifyContainer } from "inversify";
 import { COMMAND_IDENTIFIER, type Command } from './interfaces/command.interface.js';
 import { LOGGER_IDENTIFIER, type Logger } from './interfaces/logger.interface.js';
 import { PACKAGE_SERVICE_IDENTIFIER, type PackageService } from './interfaces/package-service.interface.js';
@@ -11,6 +10,7 @@ import { GenerateCommand } from './commands/generate-command.js';
 import { GenerateDocumentationUseCase } from './usecases/generate-documentation.usecase.js';
 import { ConsoleLogger } from './services/console-logger.service.js';
 import { FilePackageService } from './services/file-package.service.js';
+import { Command as CommanderCommand } from 'commander';
 
 let container: Container | null = null;
 
@@ -21,26 +21,21 @@ export function resetContainer(): void {
     container = null;
 }
 
-/**
- * Creates and configures the dependency injection container
- */
-export function initContainer(): Container {
-    if (container) {
+export function initContainer(baseContainer: Container | undefined = undefined): Container {
+    if (baseContainer) {
+        // When a base container is provided, always use it and set it as our singleton
+        container = baseContainer;
+    } else if (container) {
+        // Only return existing singleton if no base container is provided
         return container;
+    } else {
+        container = new InversifyContainer() as Container;
     }
 
-    // Initialize the core container
-    // This allows us to use the core services and types
-    container = coreInitContainer();
-
-    // Initialize GitHub Actions specific bindings
-    gitHubActionsInitContainer(container);
-
-    // Bind core services
+    // Bind CLI-specific services
     container.bind<Logger>(LOGGER_IDENTIFIER).to(ConsoleLogger).inSingletonScope();
     container.bind<PackageService>(PACKAGE_SERVICE_IDENTIFIER).to(FilePackageService).inSingletonScope();
     container.bind<Program>(PROGRAM_IDENTIFIER).toConstantValue(new CommanderCommand());
-
 
     // Bind use cases
     container.bind(GenerateDocumentationUseCase).toSelf();

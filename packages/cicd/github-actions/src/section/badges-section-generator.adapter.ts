@@ -1,4 +1,4 @@
-import { GitHubRepository } from "@ci-dokumentor/repository-github";
+import { Repository } from "@ci-dokumentor/core";
 import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
@@ -11,12 +11,12 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         return SectionIdentifier.Badges;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
         const linkedBadges = this.getAllBadges(manifest, repository);
         return this.formatBadgeCollection(linkedBadges, formatterAdapter);
     }
 
-    private getAllBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+    private getAllBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
         return [
             ...this.getDistributionBadges(manifest, repository),
             ...this.getBuildQualityBadges(manifest, repository),
@@ -26,7 +26,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         ];
     }
 
-    private getDistributionBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+    private getDistributionBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
         const actionName = manifest.name.toLowerCase().replace(/\s+/g, '-');
         const badges = [
             {
@@ -52,15 +52,15 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         return badges;
     }
 
-    private getBuildQualityBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+    private getBuildQualityBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
         return [];
     }
 
-    private getSecurityBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+    private getSecurityBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
         return [];
     }
 
-    private getComplianceBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+    private getComplianceBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
         return [
             {
                 url: `https://img.shields.io/github/license/${repository.fullName}`,
@@ -72,7 +72,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         ];
     }
 
-    private getCommunityBadges(manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): LinkedBadge[] {
+    private getCommunityBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
         return [
             {
                 url: `https://img.shields.io/github/stars/${repository.fullName}?style=social`,

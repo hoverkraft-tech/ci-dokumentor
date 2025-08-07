@@ -1,4 +1,4 @@
-import { GitHubRepository } from "@ci-dokumentor/repository-github";
+import { Repository } from "@ci-dokumentor/core";
 import { FormatterAdapter, SectionGeneratorAdapter, SectionIdentifier } from "@ci-dokumentor/core";
 import { GitHubAction, GitHubWorkflow } from "src/github-actions-parser.js";
 
@@ -6,7 +6,7 @@ export abstract class GitHubActionsSectionGeneratorAdapter implements SectionGen
 
     abstract getSectionIdentifier(): SectionIdentifier;
 
-    abstract generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer;
+    abstract generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer;
 
     protected isGitHubAction(parsed: any): parsed is GitHubAction {
         // Validate all required fields for a GitHub Action

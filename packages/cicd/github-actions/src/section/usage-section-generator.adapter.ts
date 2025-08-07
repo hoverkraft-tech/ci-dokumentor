@@ -1,4 +1,4 @@
-import { GitHubRepository } from "@ci-dokumentor/repository-github";
+import { Repository } from "@ci-dokumentor/core";
 import { GitHubAction, GitHubActionInput, GitHubWorkflow, GitHubWorkflowInput, GitHubWorkflowSecrets } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
@@ -13,7 +13,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
         return SectionIdentifier.Usage;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
 
         const usageExample = this.generateUsageExample(formatterAdapter, manifest, repository);
         return Buffer.concat([
@@ -23,14 +23,14 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
         ]);
     }
 
-    private generateUsageExample(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: GitHubRepository): Buffer {
+    private generateUsageExample(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
         const usageContent = this.isGitHubAction(manifest) ? this.generateActionUsage(manifest, repository) : this.generateWorkflowUsage(manifest, repository);
         return formatterAdapter.code(Buffer.from(usageContent.toString({
             commentString: (comment: string) => comment.split('\n').map(line => `# ${line}`).join('\n')
         })), 'yaml');
     }
 
-    private generateActionUsage(manifest: GitHubAction, repository: GitHubRepository): Document {
+    private generateActionUsage(manifest: GitHubAction, repository: Repository): Document {
 
         const inputs = manifest.inputs || {};
         const withUsage = this.generateInputsUsage(inputs);
@@ -43,7 +43,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
         ]);
     }
 
-    private generateWorkflowUsage(workflow: GitHubWorkflow, repository: GitHubRepository): Document {
+    private generateWorkflowUsage(workflow: GitHubWorkflow, repository: Repository): Document {
 
         const filteredOn = Object.keys(workflow.on || {}).filter(key => key !== 'workflow_dispatch').reduce((acc, key) => {
             acc[key] = workflow.on[key as keyof typeof workflow.on] || {};

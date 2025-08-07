@@ -1,6 +1,7 @@
-import { Container, REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
+import { Container } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from "inversify";
-import { GitHubRepositoryProvider } from './github-repository.provider.js';
+import { REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
+import { GitRepositoryProvider } from './git-repository-provider.js';
 
 let container: Container | null = null;
 
@@ -20,15 +21,15 @@ export function initContainer(baseContainer: Container | undefined = undefined):
     }
 
     // Return early if already bound
-    if (container.isBound(GitHubRepositoryProvider)) {
+    if (container.isBound(GitRepositoryProvider)) {
         return container;
     }
 
-    // Bind GitHub repository services only
-    container.bind(GitHubRepositoryProvider).toSelf().inSingletonScope();
+    // Bind git repository services only
+    container.bind(GitRepositoryProvider).toSelf().inSingletonScope();
     
     // Register as repository provider
-    container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitHubRepositoryProvider);
+    container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitRepositoryProvider);
 
     return container;
 }

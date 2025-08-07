@@ -1,45 +1,41 @@
 
-import { simpleGit } from 'simple-git';
-import gitUrlParse from 'git-url-parse';
+import { injectable, multiInject, optional } from 'inversify';
+import { RepositoryProvider, REPOSITORY_PROVIDER_IDENTIFIER } from './repository.provider.js';
 
 export type Repository = {
     owner: string;
     name: string;
     url: string; // The URL of the repository, without the .git suffix
     fullName: string; // owner/name format
+    logo?: string; // Optional logo URI
 }
 
+@injectable()
 export class RepositoryService {
+    constructor(
+        @multiInject(REPOSITORY_PROVIDER_IDENTIFIER) @optional() private providers: RepositoryProvider[] = []
+    ) {}
+
     async getRepository(): Promise<Repository> {
-        const remoteUrl = await this.getRemoteUrl();
-
-        const parsedUrl = gitUrlParse(remoteUrl);
-
-        let url = parsedUrl.toString('https');
-        // Remove the .git suffix if present
-        if (url.endsWith('.git')) {
-            url = url.slice(0, -4);
+        // Try to auto-detect using providers first
+        const detectedProvider = await this.autoDetectProvider();
+        if (detectedProvider) {
+            return await detectedProvider.getRepository();
         }
 
-        const fullName = parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
-
-        return {
-            owner: parsedUrl.owner,
-            name: parsedUrl.name,
-            url,
-            fullName,
-        };
+        // If no provider supports the current context, throw an error
+        throw new Error('No repository provider found that supports the current context');
     }
 
-    private async getRemoteUrl(): Promise<string> {
-        const git = simpleGit();
-        const remotes = await git.getRemotes(true);
-        const originRemote = remotes.find(remote => remote.name === 'origin');
-
-        if (!originRemote || !originRemote.refs.fetch) {
-            throw new Error('No remote "origin" found');
+    /**
+     * Auto-detect the appropriate repository provider for the current context
+     */
+    private async autoDetectProvider(): Promise<RepositoryProvider | null> {
+        for (const provider of this.providers) {
+            if (await provider.supports()) {
+                return provider;
+            }
         }
-
-        return originRemote.refs.fetch;
-    }
+        return null;
+}
 }

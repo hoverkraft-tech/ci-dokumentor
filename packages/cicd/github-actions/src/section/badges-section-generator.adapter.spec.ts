@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { FormatterAdapter, SectionIdentifier, Repository, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import { initContainer } from '../container.js';
+import { initTestContainer } from '../container.js';
 
 describe('BadgesSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
@@ -10,8 +10,7 @@ describe('BadgesSectionGenerator', () => {
     let mockRepository: Repository;
 
     beforeEach(() => {
-        // Use real formatter to facilitate testing
-        const container = initContainer();
+        const container = initTestContainer();
         formatterAdapter = container.get(MarkdownFormatterAdapter);
 
         generator = new BadgesSectionGenerator();

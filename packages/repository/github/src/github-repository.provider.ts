@@ -1,16 +1,34 @@
-import { Repository, RepositoryService } from "@ci-dokumentor/core";
+import { Repository, RepositoryProvider } from "@ci-dokumentor/core";
+import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { existsSync } from "node:fs";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
-import { injectable } from "inversify";
-
-export type GitHubRepository = Repository & {
-    logo?: string;
-};
+import { injectable, inject } from "inversify";
 
 @injectable()
-export class GitHubRepositoryService extends RepositoryService {
-    override async getRepository(): Promise<GitHubRepository> {
-        const repositoryInfo = await super.getRepository();
+export class GitHubRepositoryProvider implements RepositoryProvider {
+    
+    constructor(@inject(GitRepositoryProvider) private gitRepositoryService: GitRepositoryProvider) {}
+    
+    /**
+     * Check if this provider supports the current repository context
+     * Checks if the repository is hosted on GitHub
+     */
+    async supports(): Promise<boolean> {
+        try {
+            // First check if the git repository provider supports the context
+            if (!(await this.gitRepositoryService.supports())) {
+                return false;
+            }
+            
+            const parsedUrl = await this.gitRepositoryService.getRemoteParsedUrl();
+            return parsedUrl.source === 'github.com';
+        } catch {
+            return false;
+        }
+    }
+
+    async getRepository(): Promise<Repository> {
+        const repositoryInfo = await this.gitRepositoryService.getRepository();
         const logo = await this.getLogoUri(repositoryInfo);
 
         return {
