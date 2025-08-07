@@ -20,13 +20,16 @@ export function initContainer(baseContainer: Container | undefined = undefined):
         container = new InversifyContainer() as Container;
     }
 
-    // Bind git repository services only
-    if (!container.isBound(GitRepositoryProvider)) {
-        container.bind(GitRepositoryProvider).toSelf().inSingletonScope();
-        
-        // Register as repository provider
-        container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitRepositoryProvider);
+    // Return early if already bound
+    if (container.isBound(GitRepositoryProvider)) {
+        return container;
     }
+
+    // Bind git repository services only
+    container.bind(GitRepositoryProvider).toSelf().inSingletonScope();
+    
+    // Register as repository provider
+    container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitRepositoryProvider);
 
     return container;
 }

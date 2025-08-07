@@ -19,14 +19,16 @@ export function initContainer(baseContainer: Container | undefined = undefined):
         container = new InversifyContainer() as Container;
     }
 
-    // Check if GitHubRepositoryProvider is already bound
-    if (!container.isBound(GitHubRepositoryProvider)) {
-        // Bind GitHub repository services only
-        container.bind(GitHubRepositoryProvider).toSelf().inSingletonScope();
-        
-        // Register as repository provider
-        container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitHubRepositoryProvider);
+    // Return early if already bound
+    if (container.isBound(GitHubRepositoryProvider)) {
+        return container;
     }
+
+    // Bind GitHub repository services only
+    container.bind(GitHubRepositoryProvider).toSelf().inSingletonScope();
+    
+    // Register as repository provider
+    container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitHubRepositoryProvider);
 
     return container;
 }

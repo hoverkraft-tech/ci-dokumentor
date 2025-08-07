@@ -47,40 +47,24 @@ export function initContainer(baseContainer: Container | undefined = undefined):
 }
 
 /**
- * Initialize the global container that includes all packages including CLI.
- * This provides a complete container with all services from all packages.
+ * Initialize the global container that includes all packages.
+ * It should init cli container then other packages containers.
  */
-export async function initGlobalContainer(): Promise<Container> {
-    if (container) {
-        return container;
-    }
-
+export function initGlobalContainer(): Container {
     // Initialize core container first
-    const { initContainer: coreInitContainer } = await import('@ci-dokumentor/core');
+    const { initContainer: coreInitContainer } = require('@ci-dokumentor/core');
     const baseContainer = coreInitContainer();
 
     // Initialize repository packages
-    try {
-        const { initContainer: gitInitContainer } = await import('@ci-dokumentor/repository-git');
-        gitInitContainer(baseContainer);
-    } catch (error) {
-        // Package not available, skip
-    }
+    const { initContainer: gitInitContainer } = require('@ci-dokumentor/repository-git');
+    gitInitContainer(baseContainer);
 
-    try {
-        const { initContainer: githubInitContainer } = await import('@ci-dokumentor/repository-github');
-        githubInitContainer(baseContainer);
-    } catch (error) {
-        // Package not available, skip
-    }
+    const { initContainer: githubInitContainer } = require('@ci-dokumentor/repository-github');
+    githubInitContainer(baseContainer);
 
     // Initialize CICD packages
-    try {
-        const { initContainer: githubActionsInitContainer } = await import('@ci-dokumentor/cicd-github-actions');
-        githubActionsInitContainer(baseContainer);
-    } catch (error) {
-        // Package not available, skip
-    }
+    const { initContainer: githubActionsInitContainer } = require('@ci-dokumentor/cicd-github-actions');
+    githubActionsInitContainer(baseContainer);
 
     // Initialize CLI package itself
     return initContainer(baseContainer);
