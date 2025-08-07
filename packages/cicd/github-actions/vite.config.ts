@@ -14,13 +14,6 @@ export default defineConfig(() => ({
       tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
     }),
   ],
-  resolve: {
-    extensions: ['.ts', '.js', '.mjs', '.json'],
-    alias: [
-      // Handle .js imports that should resolve to .ts files
-      { find: /^(.+)\.js$/, replacement: '$1.ts' },
-    ],
-  },
   // Configuration for building your library.
   // See: https://vitejs.dev/guide/build.html#library-mode
   build: {

@@ -1,2 +1,2 @@
-export * from './git-repository-provider.js';
-export * from './container.js';
+export * from './git-repository-provider';
+export * from './container';

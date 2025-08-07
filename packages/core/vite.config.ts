@@ -12,13 +12,6 @@ export default defineConfig(() => ({
       tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
     }),
   ],
-  resolve: {
-    extensions: ['.ts', '.js', '.mjs', '.json'],
-    alias: [
-      // Handle .js imports that should resolve to .ts files
-      { find: /^(.+)\.js$/, replacement: '$1.ts' },
-    ],
-  },
   // Uncomment this if you are using workers.
   // worker: {
   //  plugins: [ nxViteTsPaths() ],

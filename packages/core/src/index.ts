@@ -1,17 +1,17 @@
 
-export * from './formatter/formatter.adapter.js';
-export * from './formatter/formatter.service.js';
-export * from './formatter/markdown-formatter.adapter.js';
-export * from './generator/generator.adapter.js';
-export * from './generator/generator.service.js';
-export * from './generator/section-generator.adapter.js';
-export * from './output/output.adapter.js';
-export * from './output/file-output.adapter.js';
-export * from './repository/repository.provider.js';
-export * from './repository/repository.service.js';
-export * from './container.js';
+export * from './formatter/formatter.adapter';
+export * from './formatter/formatter.service';
+export * from './formatter/markdown-formatter.adapter';
+export * from './generator/generator.adapter';
+export * from './generator/generator.service';
+export * from './generator/section-generator.adapter';
+export * from './output/output.adapter';
+export * from './output/file-output.adapter';
+export * from './repository/repository.provider';
+export * from './repository/repository.service';
+export * from './container';
 
-export { GENERATOR_ADAPTER_IDENTIFIER } from './generator/generator.adapter.js';
-export { SECTION_GENERATOR_ADAPTER_IDENTIFIER } from './generator/section-generator.adapter.js';
-export { REPOSITORY_PROVIDER_IDENTIFIER } from './repository/repository.provider.js';
-export { FORMATTER_ADAPTER_IDENTIFIER } from './formatter/formatter.adapter.js';
+export { GENERATOR_ADAPTER_IDENTIFIER } from './generator/generator.adapter';
+export { SECTION_GENERATOR_ADAPTER_IDENTIFIER } from './generator/section-generator.adapter';
+export { REPOSITORY_PROVIDER_IDENTIFIER } from './repository/repository.provider';
+export { FORMATTER_ADAPTER_IDENTIFIER } from './formatter/formatter.adapter';
