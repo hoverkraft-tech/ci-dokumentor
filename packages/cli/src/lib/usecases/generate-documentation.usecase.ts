@@ -94,17 +94,21 @@ export class GenerateDocumentationUseCase {
             this.logger.info(`Repository platform: ${repositoryPlatform}`);
         }
         
-        // Auto-detect CI/CD platform if not provided
-        let cicdPlatform = input.cicd?.platform;
-        if (!cicdPlatform) {
-            cicdPlatform = this.generatorService.autoDetectCicdPlatform(input.source);
-            if (cicdPlatform) {
-                this.logger.info(`Auto-detected CI/CD platform: ${cicdPlatform}`);
+        // Get CI/CD adapter (either from platform input or auto-detect)
+        let adapter;
+        if (input.cicd?.platform) {
+            this.logger.info(`CI/CD platform: ${input.cicd.platform}`);
+            adapter = this.generatorService.getGeneratorAdapterByPlatform(input.cicd.platform);
+            if (!adapter) {
+                throw new Error(`No generator adapter found for CI/CD platform '${input.cicd.platform}'`);
+            }
+        } else {
+            adapter = this.generatorService.autoDetectCicdAdapter(input.source);
+            if (adapter) {
+                this.logger.info(`Auto-detected CI/CD platform: ${adapter.getPlatformName()}`);
             } else {
                 throw new Error(`No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`);
             }
-        } else {
-            this.logger.info(`CI/CD platform: ${cicdPlatform}`);
         }
         
         // Log section options if provided
@@ -115,11 +119,7 @@ export class GenerateDocumentationUseCase {
             this.logger.info(`Excluding sections: ${input.sections.excludeSections.join(', ')}`);
         }
         
-        // Generate documentation using the specific CI/CD platform
-        const adapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
-        if (!adapter) {
-            throw new Error(`No generator adapter found for CI/CD platform '${cicdPlatform}'`);
-        }
+        // Generate documentation using the specific CI/CD platform adapter
         await this.generatorService.generateDocumentationForPlatform(input.source, adapter);
 
         this.logger.info('Documentation generated successfully!');

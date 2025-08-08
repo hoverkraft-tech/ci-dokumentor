@@ -48,6 +48,18 @@ export class GeneratorService {
   }
 
   /**
+   * Auto-detect CI/CD adapter for a given source
+   */
+  autoDetectCicdAdapter(source: string): GeneratorAdapter | null {
+    for (const adapter of this.generatorAdapters) {
+      if (adapter.supportsSource(source)) {
+        return adapter;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Generates documentation for the given path using a specific CI/CD platform adapter.
    */
   async generateDocumentationForPlatform(source: string, adapter: GeneratorAdapter): Promise<void> {

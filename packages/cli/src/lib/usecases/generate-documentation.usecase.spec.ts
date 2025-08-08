@@ -31,6 +31,13 @@ describe('GenerateDocumentationUseCase', () => {
                 getSupportedSections: () => ['header', 'overview']
             }),
             autoDetectCicdPlatform: vi.fn().mockReturnValue('github-actions'),
+            autoDetectCicdAdapter: vi.fn().mockReturnValue({
+                getPlatformName: () => 'github-actions',
+                supportsSource: () => true,
+                getDocumentationPath: () => './docs/README.md',
+                generateDocumentation: vi.fn().mockResolvedValue(undefined),
+                getSupportedSections: () => ['header', 'overview']
+            }),
             getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions'])
         };
 
@@ -243,7 +250,26 @@ describe('GenerateDocumentationUseCase', () => {
             await useCase.execute(input);
 
             // Assert
+            expect(mockGeneratorService.autoDetectCicdAdapter).toHaveBeenCalledWith('./src');
+            expect(mockGeneratorService.generateDocumentationForPlatform).toHaveBeenCalledWith('./src', expect.any(Object));
+        });
+
+        it('should use specified CI/CD platform when provided', async () => {
+            // Arrange
+            const input = {
+                source: './src',
+                output: './docs',
+                cicd: {
+                    platform: 'github-actions' as const
+                }
+            };
+
+            // Act
+            await useCase.execute(input);
+
+            // Assert
             expect(mockGeneratorService.getGeneratorAdapterByPlatform).toHaveBeenCalledWith('github-actions');
+            expect(mockGeneratorService.autoDetectCicdAdapter).not.toHaveBeenCalled();
             expect(mockGeneratorService.generateDocumentationForPlatform).toHaveBeenCalledWith('./src', expect.any(Object));
         });
 
@@ -263,6 +289,35 @@ describe('GenerateDocumentationUseCase', () => {
                 message: 'Documentation generated successfully',
                 outputPath: './docs'
             });
+        });
+
+        it('should throw error when CI/CD adapter cannot be auto-detected', async () => {
+            // Arrange
+            mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(null);
+            const input = {
+                source: './src',
+                output: './docs'
+            };
+
+            // Act & Assert
+            await expect(useCase.execute(input)).rejects.toThrow('No CI/CD platform could be auto-detected for source \'./src\'. Please specify one using --cicd option.');
+        });
+
+        it('should throw error when specified CI/CD platform adapter is not found', async () => {
+            // Arrange
+            // Mock that platform is valid during validation but adapter lookup returns null
+            mockGeneratorService.getSupportedCicdPlatforms.mockReturnValue(['github-actions', 'test-platform']);
+            mockGeneratorService.getGeneratorAdapterByPlatform.mockReturnValue(null);
+            const input = {
+                source: './src',
+                output: './docs',
+                cicd: {
+                    platform: 'test-platform' as any
+                }
+            };
+
+            // Act & Assert
+            await expect(useCase.execute(input)).rejects.toThrow('No generator adapter found for CI/CD platform \'test-platform\'');
         });
     });
 
