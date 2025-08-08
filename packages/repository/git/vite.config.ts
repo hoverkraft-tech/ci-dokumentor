@@ -56,8 +56,6 @@ export default defineConfig(() => ({
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
     },
-    snapshotSerializers: [
-      'jest-serializer-html',
-    ],
+    snapshotSerializers: ['jest-serializer-html'],
   },
 }));

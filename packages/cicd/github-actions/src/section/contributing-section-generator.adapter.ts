@@ -1,15 +1,19 @@
-import { Repository } from "@ci-dokumentor/core";
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
-import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
-import { FormatterAdapter, SectionIdentifier } from "@ci-dokumentor/core";
+import { Repository } from '@ci-dokumentor/core';
+import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
+import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
 export class ContributingSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
-    getSectionIdentifier(): SectionIdentifier {
-        return SectionIdentifier.Contributing;
-    }
+  getSectionIdentifier(): SectionIdentifier {
+    return SectionIdentifier.Contributing;
+  }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
-        const contributingText = `We welcome contributions! Here's how you can help:
+  generateSection(
+    formatterAdapter: FormatterAdapter,
+    manifest: GitHubAction | GitHubWorkflow,
+    repository: Repository
+  ): Buffer {
+    const contributingText = `We welcome contributions! Here's how you can help:
 
 1. Fork the repository
 2. Create a feature branch (\`git checkout -b feature/amazing-feature\`)
@@ -25,15 +29,15 @@ Please make sure to:
 - Update documentation as needed
 - Keep commits atomic and descriptive`;
 
-        const developmentSteps = [
-            Buffer.from('Clone the repository'),
-            Buffer.from('Install dependencies'),
-            Buffer.from('Make your changes'),
-            Buffer.from('Test your changes'),
-            Buffer.from('Submit a pull request')
-        ];
+    const developmentSteps = [
+      Buffer.from('Clone the repository'),
+      Buffer.from('Install dependencies'),
+      Buffer.from('Make your changes'),
+      Buffer.from('Test your changes'),
+      Buffer.from('Submit a pull request'),
+    ];
 
-        const setupInstructions = `# Development Setup
+    const setupInstructions = `# Development Setup
 
 \`\`\`bash
 # Clone the repository
@@ -50,18 +54,18 @@ npm test
 npm run build
 \`\`\``;
 
-        return Buffer.concat([
-            formatterAdapter.heading(Buffer.from('Contributing'), 2),
-            formatterAdapter.lineBreak(),
-            formatterAdapter.paragraph(Buffer.from(contributingText)),
-            formatterAdapter.lineBreak(),
-            formatterAdapter.heading(Buffer.from('Development Workflow'), 3),
-            formatterAdapter.lineBreak(),
-            formatterAdapter.list(developmentSteps, true),
-            formatterAdapter.lineBreak(),
-            formatterAdapter.code(Buffer.from(setupInstructions), 'markdown'),
-            formatterAdapter.lineBreak(),
-            formatterAdapter.lineBreak()
-        ]);
-    }
+    return Buffer.concat([
+      formatterAdapter.heading(Buffer.from('Contributing'), 2),
+      formatterAdapter.lineBreak(),
+      formatterAdapter.paragraph(Buffer.from(contributingText)),
+      formatterAdapter.lineBreak(),
+      formatterAdapter.heading(Buffer.from('Development Workflow'), 3),
+      formatterAdapter.lineBreak(),
+      formatterAdapter.list(developmentSteps, true),
+      formatterAdapter.lineBreak(),
+      formatterAdapter.code(Buffer.from(setupInstructions), 'markdown'),
+      formatterAdapter.lineBreak(),
+      formatterAdapter.lineBreak(),
+    ]);
+  }
 }

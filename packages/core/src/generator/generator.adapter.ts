@@ -1,10 +1,9 @@
-import { FormatterAdapter } from "src/formatter/formatter.adapter.js";
-import { OutputAdapter } from "../output/output.adapter.js";
+import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
+import { OutputAdapter } from '../output/output.adapter.js';
 
-export const GENERATOR_ADAPTER_IDENTIFIER = Symbol("GeneratorAdapter");
+export const GENERATOR_ADAPTER_IDENTIFIER = Symbol('GeneratorAdapter');
 
 export interface GeneratorAdapter {
-
   /**
    * Get the platform name identifier for this adapter
    * @returns string the platform name (e.g., 'github-actions')
@@ -31,7 +30,8 @@ export interface GeneratorAdapter {
    */
   getDocumentationPath(source: string): string;
 
-  generateDocumentation(source: string,
+  generateDocumentation(
+    source: string,
     formatterAdapter: FormatterAdapter,
     outputAdapter: OutputAdapter
   ): Promise<void>;

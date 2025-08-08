@@ -29,11 +29,11 @@ export default defineConfig(() => ({
       // Multiple entry points for library and CLI binary
       input: {
         index: 'src/index.ts',
-        'bin/ci-dokumentor': 'src/bin/ci-dokumentor.ts'
+        'bin/ci-dokumentor': 'src/bin/ci-dokumentor.ts',
       },
       output: {
         entryFileNames: '[name].js',
-        format: 'es' as const
+        format: 'es' as const,
       },
       // External packages that should not be bundled into your library.
       external: [], // Bundle everything for standalone binary

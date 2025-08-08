@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  MockInstance,
+} from 'vitest';
 import { cli } from './cli.js';
 
 describe('CLI', () => {
@@ -17,7 +25,7 @@ describe('CLI', () => {
     });
 
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
-      // Mock implementation - intentionally empty  
+      // Mock implementation - intentionally empty
     });
 
     const processExitMock = (() => {
@@ -25,7 +33,7 @@ describe('CLI', () => {
     }) as unknown as typeof process.exit;
 
     processExitSpy = vi
-      .spyOn(process, "exit")
+      .spyOn(process, 'exit')
       .mockImplementation(processExitMock);
   });
 
@@ -45,9 +53,10 @@ describe('CLI', () => {
 
       // Assert
       expect(consoleErrorSpy).not.toHaveBeenCalled();
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Usage:')
+      );
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
-
   });
 });
