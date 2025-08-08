@@ -33,19 +33,46 @@ export class GeneratorService {
     return adapter ? adapter.getSupportedSections() : [];
   }
 
+
+
   /**
-   * Get all supported sections from all registered generator adapters
+   * Auto-detect CI/CD platform for a given source
    */
-  getAllSupportedSections(): string[] {
-    const allSections = new Set<string>();
+  autoDetectCicdPlatform(source: string): string | null {
     for (const adapter of this.generatorAdapters) {
-      adapter.getSupportedSections().forEach(section => allSections.add(section));
+      if (adapter.supportsSource(source)) {
+        return adapter.getPlatformName();
+      }
     }
-    return Array.from(allSections).sort();
+    return null;
+  }
+
+  /**
+   * Generates documentation for the given path using a specific CI/CD platform adapter.
+   */
+  async generateDocumentationForPlatform(source: string, cicdPlatform: string): Promise<void> {
+    const adapter = this.getGeneratorAdapterByPlatform(cicdPlatform);
+    if (!adapter) {
+      throw new Error(`No generator adapter found for CI/CD platform '${cicdPlatform}'`);
+    }
+
+    // Check if the adapter supports the source path
+    if (!adapter.supportsSource(source)) {
+      throw new Error(`CI/CD platform '${cicdPlatform}' does not support source '${source}'`);
+    }
+
+    const destinationPath = adapter.getDocumentationPath(source);
+    const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
+
+    // Create an output adapter for the destination path
+    const outputAdapter = new FileOutputAdapter(destinationPath, formatterAdapter);
+
+    await adapter.generateDocumentation(source, formatterAdapter, outputAdapter);
   }
 
   /**
    * Generates documentation for the given path using all registered generator adapters.
+   * @deprecated Use generateDocumentationForPlatform instead for better control
    */
   async generateDocumentation(source: string): Promise<void> {
     for (const adapter of this.generatorAdapters) {

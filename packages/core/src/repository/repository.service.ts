@@ -28,6 +28,14 @@ export class RepositoryService {
         return this.providers.map(provider => provider.getPlatformName());
     }
 
+    /**
+     * Auto-detect repository platform for the current context
+     */
+    async autoDetectRepositoryPlatform(): Promise<string | null> {
+        const detectedProvider = await this.autoDetectProvider();
+        return detectedProvider ? detectedProvider.getPlatformName() : null;
+    }
+
     async getRepository(): Promise<Repository> {
         // Try to auto-detect using providers first
         const detectedProvider = await this.autoDetectProvider();

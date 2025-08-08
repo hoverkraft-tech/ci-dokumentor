@@ -83,12 +83,28 @@ export class GenerateDocumentationUseCase {
         this.logger.info(`Source directory: ${input.source}`);
         this.logger.info(`Output directory: ${input.output}`);
         
-        // Log platform options if provided
-        if (input.repository?.platform) {
-            this.logger.info(`Repository platform: ${input.repository.platform}`);
+        // Auto-detect repository platform if not provided
+        let repositoryPlatform = input.repository?.platform;
+        if (!repositoryPlatform) {
+            repositoryPlatform = await this.repositoryService.autoDetectRepositoryPlatform();
+            if (repositoryPlatform) {
+                this.logger.info(`Auto-detected repository platform: ${repositoryPlatform}`);
+            }
+        } else {
+            this.logger.info(`Repository platform: ${repositoryPlatform}`);
         }
-        if (input.cicd?.platform) {
-            this.logger.info(`CI/CD platform: ${input.cicd.platform}`);
+        
+        // Auto-detect CI/CD platform if not provided
+        let cicdPlatform = input.cicd?.platform;
+        if (!cicdPlatform) {
+            cicdPlatform = this.generatorService.autoDetectCicdPlatform(input.source);
+            if (cicdPlatform) {
+                this.logger.info(`Auto-detected CI/CD platform: ${cicdPlatform}`);
+            } else {
+                throw new Error(`No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`);
+            }
+        } else {
+            this.logger.info(`CI/CD platform: ${cicdPlatform}`);
         }
         
         // Log section options if provided
@@ -99,8 +115,8 @@ export class GenerateDocumentationUseCase {
             this.logger.info(`Excluding sections: ${input.sections.excludeSections.join(', ')}`);
         }
         
-        // Use the core generation service to generate documentation
-        await this.generatorService.generateDocumentation(input.source);
+        // Generate documentation using the specific CI/CD platform
+        await this.generatorService.generateDocumentationForPlatform(input.source, cicdPlatform);
 
         this.logger.info('Documentation generated successfully!');
         this.logger.info(`Output saved to: ${input.output}`);
@@ -157,12 +173,5 @@ export class GenerateDocumentationUseCase {
      */
     getSupportedSectionsForCicdPlatform(platform: string): string[] {
         return this.generatorService.getSupportedSectionsForPlatform(platform);
-    }
-
-    /**
-     * Get all supported sections from all registered generator adapters
-     */
-    getAllSupportedSections(): string[] {
-        return this.generatorService.getAllSupportedSections();
     }
 }
