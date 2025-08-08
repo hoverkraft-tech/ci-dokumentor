@@ -116,7 +116,11 @@ export class GenerateDocumentationUseCase {
         }
         
         // Generate documentation using the specific CI/CD platform
-        await this.generatorService.generateDocumentationForPlatform(input.source, cicdPlatform);
+        const adapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
+        if (!adapter) {
+            throw new Error(`No generator adapter found for CI/CD platform '${cicdPlatform}'`);
+        }
+        await this.generatorService.generateDocumentationForPlatform(input.source, adapter);
 
         this.logger.info('Documentation generated successfully!');
         this.logger.info(`Output saved to: ${input.output}`);

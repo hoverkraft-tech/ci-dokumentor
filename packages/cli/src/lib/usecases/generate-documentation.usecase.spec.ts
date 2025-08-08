@@ -22,7 +22,15 @@ describe('GenerateDocumentationUseCase', () => {
         };
 
         mockGeneratorService = {
-            generateDocumentation: vi.fn().mockResolvedValue(undefined),
+            generateDocumentationForPlatform: vi.fn().mockResolvedValue(undefined),
+            getGeneratorAdapterByPlatform: vi.fn().mockReturnValue({
+                getPlatformName: () => 'github-actions',
+                supportsSource: () => true,
+                getDocumentationPath: () => './docs/README.md',
+                generateDocumentation: vi.fn().mockResolvedValue(undefined),
+                getSupportedSections: () => ['header', 'overview']
+            }),
+            autoDetectCicdPlatform: vi.fn().mockReturnValue('github-actions'),
             getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions'])
         };
 
@@ -33,6 +41,7 @@ describe('GenerateDocumentationUseCase', () => {
                 url: 'https://github.com/test/repo',
                 fullName: 'test/repo'
             }),
+            autoDetectRepositoryPlatform: vi.fn().mockResolvedValue('github'),
             getSupportedRepositoryPlatforms: vi.fn().mockReturnValue(['git', 'github'])
         };
 
@@ -223,7 +232,7 @@ describe('GenerateDocumentationUseCase', () => {
     });
 
     describe('generator service integration', () => {
-        it('should call generator service with source path', async () => {
+        it('should call generator service with source path and adapter', async () => {
             // Arrange
             const input = {
                 source: './src',
@@ -234,7 +243,8 @@ describe('GenerateDocumentationUseCase', () => {
             await useCase.execute(input);
 
             // Assert
-            expect(mockGeneratorService.generateDocumentation).toHaveBeenCalledWith('./src');
+            expect(mockGeneratorService.getGeneratorAdapterByPlatform).toHaveBeenCalledWith('github-actions');
+            expect(mockGeneratorService.generateDocumentationForPlatform).toHaveBeenCalledWith('./src', expect.any(Object));
         });
 
         it('should return success response', async () => {

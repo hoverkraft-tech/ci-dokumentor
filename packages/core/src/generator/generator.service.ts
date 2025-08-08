@@ -50,15 +50,10 @@ export class GeneratorService {
   /**
    * Generates documentation for the given path using a specific CI/CD platform adapter.
    */
-  async generateDocumentationForPlatform(source: string, cicdPlatform: string): Promise<void> {
-    const adapter = this.getGeneratorAdapterByPlatform(cicdPlatform);
-    if (!adapter) {
-      throw new Error(`No generator adapter found for CI/CD platform '${cicdPlatform}'`);
-    }
-
+  async generateDocumentationForPlatform(source: string, adapter: GeneratorAdapter): Promise<void> {
     // Check if the adapter supports the source path
     if (!adapter.supportsSource(source)) {
-      throw new Error(`CI/CD platform '${cicdPlatform}' does not support source '${source}'`);
+      throw new Error(`CI/CD platform '${adapter.getPlatformName()}' does not support source '${source}'`);
     }
 
     const destinationPath = adapter.getDocumentationPath(source);
@@ -70,25 +65,4 @@ export class GeneratorService {
     await adapter.generateDocumentation(source, formatterAdapter, outputAdapter);
   }
 
-  /**
-   * Generates documentation for the given path using all registered generator adapters.
-   * @deprecated Use generateDocumentationForPlatform instead for better control
-   */
-  async generateDocumentation(source: string): Promise<void> {
-    for (const adapter of this.generatorAdapters) {
-      // Check if the adapter supports the source path
-      if (!adapter.supportsSource(source)) {
-        continue;
-      }
-
-      const destinationPath = adapter.getDocumentationPath(source);
-
-      const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
-
-      // Create an output adapter for the destination path
-      const outputAdapter = new FileOutputAdapter(destinationPath, formatterAdapter);
-
-      await adapter.generateDocumentation(source, formatterAdapter, outputAdapter);
-    }
-  }
 }
