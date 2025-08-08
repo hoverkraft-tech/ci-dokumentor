@@ -69,18 +69,6 @@ describe('GenerateDocumentationUseCase', () => {
             await expect(useCase.execute(input)).rejects.toThrow('Output directory is required');
         });
 
-        it('should validate legacy type field', async () => {
-            // Arrange
-            const input = {
-                source: './src',
-                output: './docs',
-                type: 'invalid-type'
-            };
-
-            // Act & Assert
-            await expect(useCase.execute(input)).rejects.toThrow('Invalid type \'invalid-type\'. Valid types: github-actions');
-        });
-
         it('should validate repository platform', async () => {
             // Arrange
             const input = {
@@ -193,21 +181,6 @@ describe('GenerateDocumentationUseCase', () => {
 
             // Assert
             expect(mockLogger.info).toHaveBeenCalledWith('CI/CD platform: github-actions');
-        });
-
-        it('should log legacy type when provided', async () => {
-            // Arrange
-            const input = {
-                source: './src',
-                output: './docs',
-                type: 'github-actions'
-            };
-
-            // Act
-            await useCase.execute(input);
-
-            // Assert
-            expect(mockLogger.info).toHaveBeenCalledWith('Legacy CI/CD type: github-actions');
         });
 
         it('should log section options when provided', async () => {

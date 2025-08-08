@@ -4,8 +4,6 @@ import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
 import { GenerateOptions } from '../interfaces/generate-options.interface.js';
 
 export interface GenerateDocumentationUseCaseInput extends GenerateOptions {
-    // Legacy field for backward compatibility
-    type?: string;
 }
 
 export interface GenerateDocumentationUseCaseOutput {
@@ -41,9 +39,6 @@ export class GenerateDocumentationUseCase {
         if (input.cicd?.platform) {
             this.logger.info(`CI/CD platform: ${input.cicd.platform}`);
         }
-        if (input.type) {
-            this.logger.info(`Legacy CI/CD type: ${input.type}`);
-        }
         
         // Log section options if provided
         if (input.sections?.includeSections?.length) {
@@ -73,14 +68,6 @@ export class GenerateDocumentationUseCase {
 
         if (!input.output) {
             throw new Error('Output directory is required');
-        }
-
-        // Validate legacy type field for backward compatibility
-        if (input.type) {
-            const validTypes = this.getSupportedCicdPlatforms();
-            if (!validTypes.includes(input.type)) {
-                throw new Error(`Invalid type '${input.type}'. Valid types: ${validTypes.join(', ')}`);
-            }
         }
 
         // Validate repository platform if provided
