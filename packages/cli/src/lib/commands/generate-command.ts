@@ -33,11 +33,19 @@ export class GenerateCommand extends BaseCommand {
             .description('Generate documentation from CI/CD configuration files')
             .option('-s, --source <dir>', 'Source directory containing CI/CD files', '.')
             .option('-o, --output <dir>', 'Output directory for generated documentation', './docs')
-            .option('-r, --repository <platform>', 'Repository platform').choices(supportedRepositoryPlatforms)
-            .option('-c, --cicd <platform>', 'CI/CD platform').choices(supportedCicdPlatforms)
+            .option('-r, --repository <platform>', `Repository platform (choices: ${supportedRepositoryPlatforms.join(', ')})`)
+            .option('-c, --cicd <platform>', `CI/CD platform (choices: ${supportedCicdPlatforms.join(', ')})`)
             .option('--include-sections <sections>', 'Comma-separated list of sections to include')
             .option('--exclude-sections <sections>', 'Comma-separated list of sections to exclude')
-            .action(async (options) => {
+            .action(async (options: any) => {
+                // Validate platform options if provided
+                this.validatePlatformOptions(options);
+                
+                // Validate section options if provided
+                if (options.includeSections || options.excludeSections) {
+                    this.validateSectionOptions(options);
+                }
+
                 const generateOptions: GenerateOptions = {
                     source: options.source,
                     output: options.output,
@@ -78,5 +86,77 @@ export class GenerateCommand extends BaseCommand {
 
                 await this.generateDocumentationUseCase.execute(generateOptions);
             });
+    }
+
+    /**
+     * Validate platform options against supported platforms
+     */
+    private validatePlatformOptions(options: any): void {
+        const supportedRepositoryPlatforms = this.generateDocumentationUseCase.getSupportedRepositoryPlatforms();
+        const supportedCicdPlatforms = this.generateDocumentationUseCase.getSupportedCicdPlatforms();
+
+        // Validate repository platform
+        if (options.repository && !supportedRepositoryPlatforms.includes(options.repository)) {
+            throw new Error(
+                `Invalid repository platform '${options.repository}'. ` +
+                `Valid platforms: ${supportedRepositoryPlatforms.join(', ')}`
+            );
+        }
+
+        // Validate CI/CD platform
+        if (options.cicd && !supportedCicdPlatforms.includes(options.cicd)) {
+            throw new Error(
+                `Invalid CI/CD platform '${options.cicd}'. ` +
+                `Valid platforms: ${supportedCicdPlatforms.join(', ')}`
+            );
+        }
+    }
+
+    /**
+     * Validate section options against supported sections
+     */
+    private validateSectionOptions(options: any): void {
+        let supportedSections: string[];
+
+        // If CI/CD platform is specified, get sections for that platform
+        if (options.cicd) {
+            supportedSections = this.generateDocumentationUseCase.getSupportedSectionsForCicdPlatform(options.cicd);
+            
+            if (supportedSections.length === 0) {
+                // Fallback to all sections if platform-specific sections are not available
+                supportedSections = this.generateDocumentationUseCase.getAllSupportedSections();
+            }
+        } else {
+            // If no CI/CD platform is specified, use all supported sections
+            supportedSections = this.generateDocumentationUseCase.getAllSupportedSections();
+        }
+
+        // Validate included sections
+        if (options.includeSections) {
+            const includedSections = options.includeSections.split(',').map((s: string) => s.trim());
+            const invalidSections = includedSections.filter((section: string) => !supportedSections.includes(section));
+            
+            if (invalidSections.length > 0) {
+                const platformInfo = options.cicd ? ` for CI/CD platform '${options.cicd}'` : '';
+                throw new Error(
+                    `Invalid section(s) '${invalidSections.join(', ')}'${platformInfo}. ` +
+                    `Valid sections: ${supportedSections.join(', ')}`
+                );
+            }
+        }
+
+        // Validate excluded sections
+        if (options.excludeSections) {
+            const excludedSections = options.excludeSections.split(',').map((s: string) => s.trim());
+            const invalidSections = excludedSections.filter((section: string) => !supportedSections.includes(section));
+            
+            if (invalidSections.length > 0) {
+                const platformInfo = options.cicd ? ` for CI/CD platform '${options.cicd}'` : '';
+                throw new Error(
+                    `Invalid section(s) '${invalidSections.join(', ')}'${platformInfo}. ` +
+                    `Valid sections: ${supportedSections.join(', ')}`
+                );
+            }
+        }
     }
 }

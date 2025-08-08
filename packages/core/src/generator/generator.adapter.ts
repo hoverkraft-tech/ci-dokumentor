@@ -12,6 +12,12 @@ export interface GeneratorAdapter {
   getPlatformName(): string;
 
   /**
+   * Get the list of supported section identifiers for this adapter
+   * @returns Array of section identifiers that this adapter can generate
+   */
+  getSupportedSections(): string[];
+
+  /**
    * Checks if the adapter supports the given source file.
    * @param source The source file path.
    * @returns True if the adapter supports the source, false otherwise.

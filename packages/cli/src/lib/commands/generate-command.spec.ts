@@ -19,7 +19,9 @@ describe('GenerateCommand', () => {
                 outputPath: './docs'
             }),
             getSupportedRepositoryPlatforms: vi.fn().mockReturnValue(['git', 'github']),
-            getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions'])
+            getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions']),
+            getSupportedSectionsForCicdPlatform: vi.fn().mockReturnValue(['header', 'overview', 'usage', 'inputs', 'outputs']),
+            getAllSupportedSections: vi.fn().mockReturnValue(['header', 'overview', 'usage', 'inputs', 'outputs', 'examples'])
         };
 
         // Bind mocks to container

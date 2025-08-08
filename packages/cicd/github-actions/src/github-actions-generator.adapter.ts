@@ -26,6 +26,13 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     }
 
     /**
+     * Get the list of supported section identifiers for this adapter
+     */
+    getSupportedSections(): string[] {
+        return this.sectionGeneratorAdapters.map(adapter => adapter.getSectionIdentifier());
+    }
+
+    /**
      * Checks if the adapter supports the given source file.
      * @param source The source file path.
      * @returns True if the adapter supports the source, false otherwise.

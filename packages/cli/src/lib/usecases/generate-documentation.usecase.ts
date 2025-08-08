@@ -113,4 +113,18 @@ export class GenerateDocumentationUseCase {
     getSupportedCicdPlatforms(): string[] {
         return this.generatorService.getSupportedCicdPlatforms();
     }
+
+    /**
+     * Get supported sections for a specific CI/CD platform
+     */
+    getSupportedSectionsForCicdPlatform(platform: string): string[] {
+        return this.generatorService.getSupportedSectionsForPlatform(platform);
+    }
+
+    /**
+     * Get all supported sections from all registered generator adapters
+     */
+    getAllSupportedSections(): string[] {
+        return this.generatorService.getAllSupportedSections();
+    }
 }

@@ -19,6 +19,32 @@ export class GeneratorService {
   }
 
   /**
+   * Get generator adapter for a specific platform
+   */
+  getGeneratorAdapterByPlatform(platform: string): GeneratorAdapter | undefined {
+    return this.generatorAdapters.find(adapter => adapter.getPlatformName() === platform);
+  }
+
+  /**
+   * Get supported sections for a specific CI/CD platform
+   */
+  getSupportedSectionsForPlatform(platform: string): string[] {
+    const adapter = this.getGeneratorAdapterByPlatform(platform);
+    return adapter ? adapter.getSupportedSections() : [];
+  }
+
+  /**
+   * Get all supported sections from all registered generator adapters
+   */
+  getAllSupportedSections(): string[] {
+    const allSections = new Set<string>();
+    for (const adapter of this.generatorAdapters) {
+      adapter.getSupportedSections().forEach(section => allSections.add(section));
+    }
+    return Array.from(allSections).sort();
+  }
+
+  /**
    * Generates documentation for the given path using all registered generator adapters.
    */
   async generateDocumentation(source: string): Promise<void> {
