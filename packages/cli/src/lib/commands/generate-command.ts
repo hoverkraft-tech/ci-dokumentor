@@ -23,15 +23,19 @@ export class GenerateCommand extends BaseCommand {
      * Configure the command with name, description, options, and action
      */
     configure(): this {
+        // Get supported platforms from the use case
+        const supportedRepositoryPlatforms = this.generateDocumentationUseCase.getSupportedRepositoryPlatforms();
+        const supportedCicdPlatforms = this.generateDocumentationUseCase.getSupportedCicdPlatforms();
+
         return this
             .name('generate')
             .alias('gen')
             .description('Generate documentation from CI/CD configuration files')
             .option('-s, --source <dir>', 'Source directory containing CI/CD files', '.')
             .option('-o, --output <dir>', 'Output directory for generated documentation', './docs')
-            .option('-t, --type <type>', 'Type of CI/CD system (legacy, use --cicd-platform instead)', 'github-actions')
-            .option('--repository-platform <platform>', 'Repository platform (git, github)')
-            .option('--cicd-platform <platform>', 'CI/CD platform (github-actions)')
+            .option('-t, --type <type>', `Type of CI/CD system (legacy, use --cicd-platform instead) (${supportedCicdPlatforms.join(', ')})`, 'github-actions')
+            .option('--repository-platform <platform>', `Repository platform (${supportedRepositoryPlatforms.join(', ')})`)
+            .option('--cicd-platform <platform>', `CI/CD platform (${supportedCicdPlatforms.join(', ')})`)
             .option('--include-sections <sections>', 'Comma-separated list of sections to include')
             .option('--exclude-sections <sections>', 'Comma-separated list of sections to exclude')
             .action(async (options) => {

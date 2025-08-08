@@ -17,7 +17,9 @@ describe('GenerateCommand', () => {
                 success: true,
                 message: 'Documentation generated successfully',
                 outputPath: './docs'
-            })
+            }),
+            getSupportedRepositoryPlatforms: vi.fn().mockReturnValue(['git', 'github']),
+            getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions'])
         };
 
         // Bind mocks to container

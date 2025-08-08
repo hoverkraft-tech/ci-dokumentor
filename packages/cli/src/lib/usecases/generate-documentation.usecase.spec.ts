@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'inversify';
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
 import { LOGGER_IDENTIFIER } from '../interfaces/logger.interface.js';
-import { GeneratorService } from '@ci-dokumentor/core';
+import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
 
 describe('GenerateDocumentationUseCase', () => {
     let container: Container;
     let useCase: GenerateDocumentationUseCase;
     let mockLogger: any;
     let mockGeneratorService: any;
+    let mockRepositoryService: any;
 
     beforeEach(() => {
         container = new Container();
@@ -24,9 +25,19 @@ describe('GenerateDocumentationUseCase', () => {
             generateDocumentation: vi.fn().mockResolvedValue(undefined)
         };
 
+        mockRepositoryService = {
+            getRepository: vi.fn().mockResolvedValue({
+                owner: 'test',
+                name: 'repo',
+                url: 'https://github.com/test/repo',
+                fullName: 'test/repo'
+            })
+        };
+
         // Bind mocks to container
         container.bind(LOGGER_IDENTIFIER).toConstantValue(mockLogger);
         container.bind(GeneratorService).toConstantValue(mockGeneratorService);
+        container.bind(RepositoryService).toConstantValue(mockRepositoryService);
         container.bind(GenerateDocumentationUseCase).to(GenerateDocumentationUseCase);
 
         // Get the use case instance

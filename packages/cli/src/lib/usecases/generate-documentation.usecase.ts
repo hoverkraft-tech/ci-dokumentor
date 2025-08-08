@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { LOGGER_IDENTIFIER, type Logger } from '../interfaces/logger.interface.js';
-import { GeneratorService } from '@ci-dokumentor/core';
+import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
 import { GenerateOptions } from '../interfaces/generate-options.interface.js';
 
 export interface GenerateDocumentationUseCaseInput extends GenerateOptions {
@@ -22,7 +22,8 @@ export interface GenerateDocumentationUseCaseOutput {
 export class GenerateDocumentationUseCase {
     constructor(
         @inject(LOGGER_IDENTIFIER) private readonly logger: Logger,
-        @inject(GeneratorService) private readonly generatorService: GeneratorService
+        @inject(GeneratorService) private readonly generatorService: GeneratorService,
+        @inject(RepositoryService) private readonly repositoryService: RepositoryService
     ) { }
 
     async execute(input: GenerateDocumentationUseCaseInput): Promise<GenerateDocumentationUseCaseOutput> {
@@ -76,7 +77,7 @@ export class GenerateDocumentationUseCase {
 
         // Validate legacy type field for backward compatibility
         if (input.type) {
-            const validTypes = ['github-actions'];
+            const validTypes = this.getSupportedCicdPlatforms();
             if (!validTypes.includes(input.type)) {
                 throw new Error(`Invalid type '${input.type}'. Valid types: ${validTypes.join(', ')}`);
             }
@@ -84,7 +85,7 @@ export class GenerateDocumentationUseCase {
 
         // Validate repository platform if provided
         if (input.repository?.platform) {
-            const validRepositoryPlatforms = ['git', 'github'];
+            const validRepositoryPlatforms = this.getSupportedRepositoryPlatforms();
             if (!validRepositoryPlatforms.includes(input.repository.platform)) {
                 throw new Error(`Invalid repository platform '${input.repository.platform}'. Valid platforms: ${validRepositoryPlatforms.join(', ')}`);
             }
@@ -92,10 +93,28 @@ export class GenerateDocumentationUseCase {
 
         // Validate CI/CD platform if provided
         if (input.cicd?.platform) {
-            const validCicdPlatforms = ['github-actions'];
+            const validCicdPlatforms = this.getSupportedCicdPlatforms();
             if (!validCicdPlatforms.includes(input.cicd.platform)) {
                 throw new Error(`Invalid CI/CD platform '${input.cicd.platform}'. Valid platforms: ${validCicdPlatforms.join(', ')}`);
             }
         }
+    }
+
+    /**
+     * Get list of supported repository platforms based on registered providers
+     */
+    getSupportedRepositoryPlatforms(): string[] {
+        // For now, return the known platforms based on the packages available
+        // In the future, this could be dynamic based on registered providers
+        return ['git', 'github'];
+    }
+
+    /**
+     * Get list of supported CI/CD platforms based on registered generator adapters
+     */
+    getSupportedCicdPlatforms(): string[] {
+        // For now, return the known platforms based on the packages available
+        // In the future, this could be dynamic based on registered generator adapters
+        return ['github-actions'];
     }
 }
