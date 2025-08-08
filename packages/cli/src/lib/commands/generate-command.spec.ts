@@ -51,9 +51,8 @@ describe('GenerateCommand', () => {
 
             expect(optionFlags).toContain('-s, --source <dir>');
             expect(optionFlags).toContain('-o, --output <dir>');
-            expect(optionFlags).toContain('-t, --type <type>');
-            expect(optionFlags).toContain('--repository-platform <platform>');
-            expect(optionFlags).toContain('--cicd-platform <platform>');
+            expect(optionFlags).toContain('-r, --repository <platform>');
+            expect(optionFlags).toContain('-c, --cicd <platform>');
             expect(optionFlags).toContain('--include-sections <sections>');
             expect(optionFlags).toContain('--exclude-sections <sections>');
         });
@@ -62,7 +61,7 @@ describe('GenerateCommand', () => {
     describe('option parsing', () => {
         it('should parse basic options correctly', async () => {
             // Arrange
-            const args = ['generate', '--source', './test-source', '--output', './test-output', '--type', 'github-actions'];
+            const args = ['generate', '--source', './test-source', '--output', './test-output'];
 
             // Act
             await generateCommand.parseAsync(args, { from: 'user' });
@@ -70,14 +69,13 @@ describe('GenerateCommand', () => {
             // Assert
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
-                output: './test-output',
-                type: 'github-actions'
+                output: './test-output'
             });
         });
 
         it('should parse repository platform options correctly', async () => {
             // Arrange
-            const args = ['generate', '--source', './test-source', '--output', './test-output', '--repository-platform', 'github'];
+            const args = ['generate', '--source', './test-source', '--output', './test-output', '--repository', 'github'];
 
             // Act
             await generateCommand.parseAsync(args, { from: 'user' });
@@ -86,7 +84,6 @@ describe('GenerateCommand', () => {
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
                 output: './test-output',
-                type: 'github-actions',
                 repository: {
                     platform: 'github'
                 }
@@ -95,7 +92,7 @@ describe('GenerateCommand', () => {
 
         it('should parse CI/CD platform options correctly', async () => {
             // Arrange
-            const args = ['generate', '--source', './test-source', '--output', './test-output', '--cicd-platform', 'github-actions'];
+            const args = ['generate', '--source', './test-source', '--output', './test-output', '--cicd', 'github-actions'];
 
             // Act
             await generateCommand.parseAsync(args, { from: 'user' });
@@ -104,7 +101,6 @@ describe('GenerateCommand', () => {
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
                 output: './test-output',
-                type: 'github-actions',
                 cicd: {
                     platform: 'github-actions'
                 }
@@ -122,7 +118,6 @@ describe('GenerateCommand', () => {
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
                 output: './test-output',
-                type: 'github-actions',
                 sections: {
                     includeSections: ['header', 'overview', 'badges']
                 }
@@ -140,7 +135,6 @@ describe('GenerateCommand', () => {
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
                 output: './test-output',
-                type: 'github-actions',
                 sections: {
                     excludeSections: ['license', 'security']
                 }
@@ -158,7 +152,6 @@ describe('GenerateCommand', () => {
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
                 output: './test-output',
-                type: 'github-actions',
                 sections: {
                     includeSections: ['header', 'overview'],
                     excludeSections: ['license']
@@ -177,7 +170,6 @@ describe('GenerateCommand', () => {
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
                 output: './test-output',
-                type: 'github-actions',
                 sections: {
                     includeSections: ['header', 'overview', 'badges']
                 }
@@ -195,9 +187,28 @@ describe('GenerateCommand', () => {
             expect(mockUseCase.execute).toHaveBeenCalledWith({
                 source: './test-source',
                 output: './test-output',
-                type: 'github-actions',
                 sections: {
                     includeSections: ['header', 'overview']
+                }
+            });
+        });
+
+        it('should parse short options correctly', async () => {
+            // Arrange
+            const args = ['generate', '-s', './test-source', '-o', './test-output', '-r', 'github', '-c', 'github-actions'];
+
+            // Act
+            await generateCommand.parseAsync(args, { from: 'user' });
+
+            // Assert
+            expect(mockUseCase.execute).toHaveBeenCalledWith({
+                source: './test-source',
+                output: './test-output',
+                repository: {
+                    platform: 'github'
+                },
+                cicd: {
+                    platform: 'github-actions'
                 }
             });
         });

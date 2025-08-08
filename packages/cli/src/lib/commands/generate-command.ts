@@ -33,9 +33,8 @@ export class GenerateCommand extends BaseCommand {
             .description('Generate documentation from CI/CD configuration files')
             .option('-s, --source <dir>', 'Source directory containing CI/CD files', '.')
             .option('-o, --output <dir>', 'Output directory for generated documentation', './docs')
-            .option('-t, --type <type>', `Type of CI/CD system (legacy, use --cicd-platform instead) (${supportedCicdPlatforms.join(', ')})`, 'github-actions')
-            .option('--repository-platform <platform>', `Repository platform (${supportedRepositoryPlatforms.join(', ')})`)
-            .option('--cicd-platform <platform>', `CI/CD platform (${supportedCicdPlatforms.join(', ')})`)
+            .option('-r, --repository <platform>', 'Repository platform').choices(supportedRepositoryPlatforms)
+            .option('-c, --cicd <platform>', 'CI/CD platform').choices(supportedCicdPlatforms)
             .option('--include-sections <sections>', 'Comma-separated list of sections to include')
             .option('--exclude-sections <sections>', 'Comma-separated list of sections to exclude')
             .action(async (options) => {
@@ -45,21 +44,16 @@ export class GenerateCommand extends BaseCommand {
                 };
 
                 // Handle repository platform options
-                if (options.repositoryPlatform) {
+                if (options.repository) {
                     generateOptions.repository = {
-                        platform: options.repositoryPlatform as 'git' | 'github'
+                        platform: options.repository
                     };
                 }
 
-                // Handle CI/CD platform options (prefer new option over legacy)
-                if (options.cicdPlatform) {
+                // Handle CI/CD platform options
+                if (options.cicd) {
                     generateOptions.cicd = {
-                        platform: options.cicdPlatform as 'github-actions'
-                    };
-                } else if (options.type !== 'github-actions') {
-                    // Only set cicd platform from type if it's not the default
-                    generateOptions.cicd = {
-                        platform: options.type as 'github-actions'
+                        platform: options.cicd
                     };
                 }
 
@@ -82,11 +76,7 @@ export class GenerateCommand extends BaseCommand {
                     }
                 }
 
-                await this.generateDocumentationUseCase.execute({
-                    ...generateOptions,
-                    // Include legacy type for backward compatibility
-                    type: options.type
-                });
+                await this.generateDocumentationUseCase.execute(generateOptions);
             });
     }
 }
