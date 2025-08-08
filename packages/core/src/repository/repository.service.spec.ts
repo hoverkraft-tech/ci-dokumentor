@@ -3,102 +3,152 @@ import { RepositoryService } from './repository.service.js';
 import { RepositoryProvider } from './repository.provider.js';
 
 describe('RepositoryService', () => {
-    let repositoryService: RepositoryService;
+  let repositoryService: RepositoryService;
 
-    beforeEach(() => {
-        repositoryService = new RepositoryService();
+  beforeEach(() => {
+    repositoryService = new RepositoryService();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  describe('getRepository', () => {
+    it('should throw error when no providers are available', async () => {
+      // Arrange - service created with no providers
+
+      // Act & Assert
+      await expect(repositoryService.getRepository()).rejects.toThrow(
+        'No repository provider found that supports the current context'
+      );
     });
 
-    afterEach(() => {
-        vi.resetAllMocks();
+    it('should use first supporting provider', async () => {
+      // Arrange
+      const mockProvider1: RepositoryProvider = {
+        getPlatformName: vi.fn().mockReturnValue('git'),
+        supports: vi.fn().mockResolvedValue(false),
+        getRepository: vi.fn(),
+      };
+
+      const mockProvider2: RepositoryProvider = {
+        getPlatformName: vi.fn().mockReturnValue('github'),
+        supports: vi.fn().mockResolvedValue(true),
+        getRepository: vi.fn().mockResolvedValue({
+          owner: 'test-owner',
+          name: 'test-repo',
+          url: 'https://github.com/test-owner/test-repo',
+          fullName: 'test-owner/test-repo',
+        }),
+      };
+
+      repositoryService = new RepositoryService([mockProvider1, mockProvider2]);
+
+      // Act
+      const result = await repositoryService.getRepository();
+
+      // Assert
+      expect(result).toEqual({
+        owner: 'test-owner',
+        name: 'test-repo',
+        url: 'https://github.com/test-owner/test-repo',
+        fullName: 'test-owner/test-repo',
+      });
+      expect(mockProvider1.supports).toHaveBeenCalled();
+      expect(mockProvider1.getRepository).not.toHaveBeenCalled();
+      expect(mockProvider2.supports).toHaveBeenCalled();
+      expect(mockProvider2.getRepository).toHaveBeenCalled();
     });
 
-    describe('getRepository', () => {
-        it('should throw error when no providers are available', async () => {
-            // Arrange - service created with no providers
+    it('should throw error when no provider supports current context', async () => {
+      // Arrange
+      const mockProvider: RepositoryProvider = {
+        getPlatformName: vi.fn().mockReturnValue('git'),
+        supports: vi.fn().mockResolvedValue(false),
+        getRepository: vi.fn(),
+      };
 
-            // Act & Assert
-            await expect(repositoryService.getRepository()).rejects.toThrow('No repository provider found that supports the current context');
-        });
+      repositoryService = new RepositoryService([mockProvider]);
 
-        it('should use first supporting provider', async () => {
-            // Arrange
-            const mockProvider1: RepositoryProvider = {
-                supports: vi.fn().mockResolvedValue(false),
-                getRepository: vi.fn()
-            };
-
-            const mockProvider2: RepositoryProvider = {
-                supports: vi.fn().mockResolvedValue(true),
-                getRepository: vi.fn().mockResolvedValue({
-                    owner: 'test-owner',
-                    name: 'test-repo', 
-                    url: 'https://github.com/test-owner/test-repo',
-                    fullName: 'test-owner/test-repo'
-                })
-            };
-
-            repositoryService = new RepositoryService([mockProvider1, mockProvider2]);
-
-            // Act
-            const result = await repositoryService.getRepository();
-
-            // Assert
-            expect(result).toEqual({
-                owner: 'test-owner',
-                name: 'test-repo',
-                url: 'https://github.com/test-owner/test-repo',
-                fullName: 'test-owner/test-repo'
-            });
-            expect(mockProvider1.supports).toHaveBeenCalled();
-            expect(mockProvider1.getRepository).not.toHaveBeenCalled();
-            expect(mockProvider2.supports).toHaveBeenCalled();
-            expect(mockProvider2.getRepository).toHaveBeenCalled();
-        });
-
-        it('should throw error when no provider supports current context', async () => {
-            // Arrange
-            const mockProvider: RepositoryProvider = {
-                supports: vi.fn().mockResolvedValue(false),
-                getRepository: vi.fn()
-            };
-
-            repositoryService = new RepositoryService([mockProvider]);
-
-            // Act & Assert
-            await expect(repositoryService.getRepository()).rejects.toThrow('No repository provider found that supports the current context');
-            expect(mockProvider.supports).toHaveBeenCalled();
-            expect(mockProvider.getRepository).not.toHaveBeenCalled();
-        });
-
-        it('should propagate provider errors from supports method', async () => {
-            // Arrange
-            const mockProvider: RepositoryProvider = {
-                supports: vi.fn().mockRejectedValue(new Error('Provider error')),
-                getRepository: vi.fn()
-            };
-
-            repositoryService = new RepositoryService([mockProvider]);
-
-            // Act & Assert
-            await expect(repositoryService.getRepository()).rejects.toThrow('Provider error');
-            expect(mockProvider.supports).toHaveBeenCalled();
-            expect(mockProvider.getRepository).not.toHaveBeenCalled();
-        });
-
-        it('should propagate provider errors from getRepository method', async () => {
-            // Arrange
-            const mockProvider: RepositoryProvider = {
-                supports: vi.fn().mockResolvedValue(true),
-                getRepository: vi.fn().mockRejectedValue(new Error('Repository error'))
-            };
-
-            repositoryService = new RepositoryService([mockProvider]);
-
-            // Act & Assert
-            await expect(repositoryService.getRepository()).rejects.toThrow('Repository error');
-            expect(mockProvider.supports).toHaveBeenCalled();
-            expect(mockProvider.getRepository).toHaveBeenCalled();
-        });
+      // Act & Assert
+      await expect(repositoryService.getRepository()).rejects.toThrow(
+        'No repository provider found that supports the current context'
+      );
+      expect(mockProvider.supports).toHaveBeenCalled();
+      expect(mockProvider.getRepository).not.toHaveBeenCalled();
     });
+
+    it('should propagate provider errors from supports method', async () => {
+      // Arrange
+      const mockProvider: RepositoryProvider = {
+        getPlatformName: vi.fn().mockReturnValue('git'),
+        supports: vi.fn().mockRejectedValue(new Error('Provider error')),
+        getRepository: vi.fn(),
+      };
+
+      repositoryService = new RepositoryService([mockProvider]);
+
+      // Act & Assert
+      await expect(repositoryService.getRepository()).rejects.toThrow(
+        'Provider error'
+      );
+      expect(mockProvider.supports).toHaveBeenCalled();
+      expect(mockProvider.getRepository).not.toHaveBeenCalled();
+    });
+
+    it('should propagate provider errors from getRepository method', async () => {
+      // Arrange
+      const mockProvider: RepositoryProvider = {
+        getPlatformName: vi.fn().mockReturnValue('git'),
+        supports: vi.fn().mockResolvedValue(true),
+        getRepository: vi.fn().mockRejectedValue(new Error('Repository error')),
+      };
+
+      repositoryService = new RepositoryService([mockProvider]);
+
+      // Act & Assert
+      await expect(repositoryService.getRepository()).rejects.toThrow(
+        'Repository error'
+      );
+      expect(mockProvider.supports).toHaveBeenCalled();
+      expect(mockProvider.getRepository).toHaveBeenCalled();
+    });
+  });
+
+  describe('getSupportedRepositoryPlatforms', () => {
+    it('should return empty array when no providers are available', () => {
+      // Arrange - service created with no providers
+
+      // Act
+      const result = repositoryService.getSupportedRepositoryPlatforms();
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+    it('should return platform names from all providers', () => {
+      // Arrange
+      const mockProvider1: RepositoryProvider = {
+        getPlatformName: vi.fn().mockReturnValue('git'),
+        supports: vi.fn(),
+        getRepository: vi.fn(),
+      };
+
+      const mockProvider2: RepositoryProvider = {
+        getPlatformName: vi.fn().mockReturnValue('github'),
+        supports: vi.fn(),
+        getRepository: vi.fn(),
+      };
+
+      repositoryService = new RepositoryService([mockProvider1, mockProvider2]);
+
+      // Act
+      const result = repositoryService.getSupportedRepositoryPlatforms();
+
+      // Assert
+      expect(result).toEqual(['git', 'github']);
+      expect(mockProvider1.getPlatformName).toHaveBeenCalled();
+      expect(mockProvider2.getPlatformName).toHaveBeenCalled();
+    });
+  });
 });

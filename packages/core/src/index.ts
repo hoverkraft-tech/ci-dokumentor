@@ -1,4 +1,3 @@
-
 export * from './formatter/formatter.adapter.js';
 export * from './formatter/formatter.service.js';
 export * from './formatter/markdown-formatter.adapter.js';

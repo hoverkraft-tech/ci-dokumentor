@@ -7,6 +7,7 @@ CI Dokumentor is an automated documentation generator for CI/CD components. The 
 ## Core Principles
 
 ### Clean Code
+
 - Use descriptive variable and function names that express intent
 - Keep functions small and focused on a single responsibility
 - Write self-documenting code with minimal but meaningful comments
@@ -15,6 +16,7 @@ CI Dokumentor is an automated documentation generator for CI/CD components. The 
 - Use TypeScript strict mode features for type safety
 
 ### Clean Architecture
+
 - Respect the dependency inversion principle: high-level modules should not depend on low-level modules
 - Follow the established layered architecture:
   - **Core**: Contains business logic and abstractions (no external dependencies)
@@ -26,6 +28,7 @@ CI Dokumentor is an automated documentation generator for CI/CD components. The 
 - Keep business logic separate from framework-specific code
 
 ### SOLID Principles
+
 - **Single Responsibility**: Each class/module should have one reason to change
 - **Open/Closed**: Open for extension, closed for modification (use interfaces and adapters)
 - **Liskov Substitution**: Derived classes must be substitutable for their base classes
@@ -35,12 +38,14 @@ CI Dokumentor is an automated documentation generator for CI/CD components. The 
 ## Technology Stack Guidelines
 
 ### NX Monorepo Structure
+
 - Respect package boundaries defined in `nx.json` and ESLint configuration
 - Use NX generators for creating new packages/components
 - Follow the established package naming convention: `@ci-dokumentor/package-name`
 - Import from other packages using their public API only (index.ts exports)
 
 ### TypeScript Best Practices
+
 - Use strict TypeScript configuration
 - Prefer interfaces over types for object shapes
 - Use union types and discriminated unions for variants
@@ -49,12 +54,14 @@ CI Dokumentor is an automated documentation generator for CI/CD components. The 
 - Avoid `any` type - use `unknown` for truly dynamic content
 
 ### Dependency Management
+
 - Use pnpm for package management
 - Keep dependencies in the appropriate package.json (root for shared dev deps, package-specific for runtime deps)
 - Prefer peer dependencies for shared libraries
 - Use exact versions for critical dependencies
 
 ### Testing Standards
+
 - Write tests using Vitest framework
 - Follow AAA pattern: Arrange, Act, Assert
 - Use descriptive test names that explain the scenario and expected outcome
@@ -63,6 +70,7 @@ CI Dokumentor is an automated documentation generator for CI/CD components. The 
 - Write both unit tests and integration tests where appropriate
 
 ### Code Organization
+
 - Use barrel exports in index.ts files for clean public APIs
 - Group related functionality in services
 - Use adapters for external library integrations
@@ -72,6 +80,7 @@ CI Dokumentor is an automated documentation generator for CI/CD components. The 
 ## Project-Specific Patterns
 
 ### Service Pattern
+
 ```typescript
 // Services contain business logic and orchestrate adapters
 export class DocumentationGeneratorService {
@@ -84,6 +93,7 @@ export class DocumentationGeneratorService {
 ```
 
 ### Adapter Pattern
+
 ```typescript
 // Adapters implement interfaces and handle external dependencies
 export class GitHubRepositoryAdapter implements RepositoryProvider {
@@ -94,6 +104,7 @@ export class GitHubRepositoryAdapter implements RepositoryProvider {
 ```
 
 ### Container Pattern
+
 ```typescript
 // Use dependency injection containers for setup
 export function initContainer(): Container {
@@ -106,18 +117,21 @@ export function initContainer(): Container {
 ## Documentation Standards
 
 ### README Files
+
 - Each package must have a README.md with purpose, API, and usage examples
 - Keep documentation concise but comprehensive
 - Include code examples for public APIs
 - Document breaking changes and migration guides
 
 ### Code Comments
+
 - Document complex business logic and algorithms
 - Explain "why" not "what" in comments
 - Use JSDoc for public APIs
 - Keep comments up-to-date with code changes
 
 ### Architecture Documentation
+
 - Document architectural decisions in `/docs` folder
 - Explain design patterns and their rationale
 - Maintain up-to-date architecture diagrams
@@ -125,6 +139,7 @@ export function initContainer(): Container {
 ## CI/CD Guidelines
 
 ### GitHub Actions
+
 - All CI checks must pass before merging
 - Use semantic pull request titles
 - Run linting, testing, and building in CI pipeline
@@ -132,6 +147,7 @@ export function initContainer(): Container {
 - Pin action versions to specific SHAs for security
 
 ### Quality Gates
+
 - Maintain ESLint configuration for code quality
 - Use Prettier for consistent code formatting
 - Ensure TypeScript compilation without errors
@@ -141,6 +157,7 @@ export function initContainer(): Container {
 ## Development Workflow
 
 ### Pull Requests
+
 - Create focused PRs with single responsibility
 - Write descriptive PR titles and descriptions
 - Include tests for new functionality
@@ -148,19 +165,23 @@ export function initContainer(): Container {
 - Ensure all CI checks pass
 
 ### Git Practices
+
 - Use conventional commit messages
 - Create feature branches from main
 - Squash commits when merging
 - Keep commit history clean and meaningful
 
 ### Make Commands
+
 Running make commands to check and fix code:
+
 - `make lint`: Execute linting
 - `make ci`: Execute all formats and checks
 
 ## Error Handling
 
 ### Error Management
+
 - Use typed errors with specific error classes
 - Provide meaningful error messages for users
 - Log errors appropriately (info, warn, error levels)
@@ -168,6 +189,7 @@ Running make commands to check and fix code:
 - Use Result/Option types for operations that may fail
 
 ### Validation
+
 - Validate inputs at service boundaries
 - Use schema validation for external data
 - Provide clear validation error messages
@@ -176,6 +198,7 @@ Running make commands to check and fix code:
 ## Performance Considerations
 
 ### Optimization Guidelines
+
 - Minimize external dependencies
 - Use lazy loading for optional features
 - Cache expensive operations when appropriate
@@ -183,6 +206,7 @@ Running make commands to check and fix code:
 - Optimize for common use cases
 
 ### Memory Management
+
 - Dispose of resources properly
 - Avoid memory leaks in event handlers
 - Use streaming for large data processing
@@ -191,6 +215,7 @@ Running make commands to check and fix code:
 ## Security Practices
 
 ### Code Security
+
 - Validate all external inputs
 - Use parameterized queries/safe APIs
 - Avoid exposing sensitive information in logs
@@ -198,6 +223,7 @@ Running make commands to check and fix code:
 - Keep dependencies updated
 
 ### CI/CD Security
+
 - Pin action versions for reproducibility
 - Use secrets management for sensitive data
 - Scan for vulnerabilities in dependencies
@@ -206,6 +232,7 @@ Running make commands to check and fix code:
 ## Guidelines for AI Assistance
 
 When suggesting code changes:
+
 1. Respect the existing architecture and patterns
 2. Maintain consistency with the established codebase style
 3. Suggest the minimal change that achieves the goal

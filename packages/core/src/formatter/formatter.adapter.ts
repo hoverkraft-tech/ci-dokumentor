@@ -1,41 +1,45 @@
-import { FormatterLanguage } from "./formatter-language.js";
+import { FormatterLanguage } from './formatter-language.js';
 
-export const FORMATTER_ADAPTER_IDENTIFIER = Symbol("FormatterAdapter");
+export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');
 
 export interface FormatterAdapter {
-    supportsLanguage(language: FormatterLanguage): boolean;
+  supportsLanguage(language: FormatterLanguage): boolean;
 
-    heading(input: Buffer, level?: number): Buffer;
+  heading(input: Buffer, level?: number): Buffer;
 
-    center(input: Buffer): Buffer;
+  center(input: Buffer): Buffer;
 
-    comment(input: Buffer): Buffer;
+  comment(input: Buffer): Buffer;
 
-    paragraph(input: Buffer): Buffer;
+  paragraph(input: Buffer): Buffer;
 
-    bold(input: Buffer): Buffer;
+  bold(input: Buffer): Buffer;
 
-    italic(input: Buffer): Buffer;
+  italic(input: Buffer): Buffer;
 
-    code(input: Buffer, language?: string): Buffer;
+  code(input: Buffer, language?: string): Buffer;
 
-    inlineCode(input: Buffer): Buffer;
+  inlineCode(input: Buffer): Buffer;
 
-    link(text: Buffer, url: string): Buffer;
+  link(text: Buffer, url: string): Buffer;
 
-    image(url: string, altText: Buffer, options?: { width?: string; align?: string }): Buffer;
+  image(
+    url: string,
+    altText: Buffer,
+    options?: { width?: string; align?: string }
+  ): Buffer;
 
-    list(items: Buffer[], ordered?: boolean): Buffer;
+  list(items: Buffer[], ordered?: boolean): Buffer;
 
-    table(headers: Buffer[], rows: Buffer[][]): Buffer;
+  table(headers: Buffer[], rows: Buffer[][]): Buffer;
 
-    badge(label: string, message: string, color?: string): Buffer;
+  badge(label: string, message: string, color?: string): Buffer;
 
-    blockquote(input: Buffer): Buffer;
+  blockquote(input: Buffer): Buffer;
 
-    details(summary: Buffer, content: Buffer): Buffer;
+  details(summary: Buffer, content: Buffer): Buffer;
 
-    lineBreak(): Buffer;
+  lineBreak(): Buffer;
 
-    horizontalRule(): Buffer;
+  horizontalRule(): Buffer;
 }

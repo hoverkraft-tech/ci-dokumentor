@@ -1,3 +1,3 @@
 export enum FormatterLanguage {
-    Markdown = "markdown"
+  Markdown = 'markdown',
 }

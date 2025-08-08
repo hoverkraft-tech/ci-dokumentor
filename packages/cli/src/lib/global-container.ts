@@ -11,17 +11,17 @@ import { initContainer as githubActionsInitContainer } from '@ci-dokumentor/cicd
  * It should init cli container then other packages containers.
  */
 export function initGlobalContainer(): Container {
-    // Initialize core container first
-    const baseContainer = coreInitContainer();
+  // Initialize core container first
+  const baseContainer = coreInitContainer();
 
-    // Initialize repository packages
-    gitInitContainer(baseContainer);
+  // Initialize repository packages
+  gitInitContainer(baseContainer);
 
-    githubInitContainer(baseContainer);
+  githubInitContainer(baseContainer);
 
-    // Initialize CICD packages
-    githubActionsInitContainer(baseContainer);
+  // Initialize CICD packages
+  githubActionsInitContainer(baseContainer);
 
-    // Initialize CLI package itself
-    return initContainer(baseContainer);
+  // Initialize CLI package itself
+  return initContainer(baseContainer);
 }

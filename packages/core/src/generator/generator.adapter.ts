@@ -1,9 +1,20 @@
-import { FormatterAdapter } from "src/formatter/formatter.adapter.js";
-import { OutputAdapter } from "../output/output.adapter.js";
+import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
+import { OutputAdapter } from '../output/output.adapter.js';
 
-export const GENERATOR_ADAPTER_IDENTIFIER = Symbol("GeneratorAdapter");
+export const GENERATOR_ADAPTER_IDENTIFIER = Symbol('GeneratorAdapter');
 
 export interface GeneratorAdapter {
+  /**
+   * Get the platform name identifier for this adapter
+   * @returns string the platform name (e.g., 'github-actions')
+   */
+  getPlatformName(): string;
+
+  /**
+   * Get the list of supported section identifiers for this adapter
+   * @returns Array of section identifiers that this adapter can generate
+   */
+  getSupportedSections(): string[];
 
   /**
    * Checks if the adapter supports the given source file.
@@ -19,7 +30,8 @@ export interface GeneratorAdapter {
    */
   getDocumentationPath(source: string): string;
 
-  generateDocumentation(source: string,
+  generateDocumentation(
+    source: string,
     formatterAdapter: FormatterAdapter,
     outputAdapter: OutputAdapter
   ): Promise<void>;

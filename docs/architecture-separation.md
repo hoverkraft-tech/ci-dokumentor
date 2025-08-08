@@ -5,6 +5,7 @@ This document describes the separation of concerns between repository platforms 
 ## Overview
 
 The codebase has been refactored to separate:
+
 - **Repository platforms**: Handle repository-specific functionality (GitHub, GitLab, Git)
 - **CI/CD platforms**: Handle CI/CD manifest parsing and generation (GitHub Actions, GitLab CI, etc.)
 
@@ -23,6 +24,7 @@ packages/
 ## Repository Platforms
 
 Located in `packages/repository/`, these packages handle:
+
 - Repository information extraction
 - Platform-specific metadata (logos, descriptions, etc.)
 - Repository URL parsing and validation
@@ -35,6 +37,7 @@ Located in `packages/repository/`, these packages handle:
 ## CI/CD Platforms
 
 Located in `packages/cicd/`, these packages handle:
+
 - CI/CD manifest parsing (action.yml, workflow files)
 - Documentation generation for CI/CD workflows
 - Platform-specific section generators
@@ -78,6 +81,7 @@ This separation enables:
 ## Future Extensions
 
 This architecture supports adding:
+
 - **Repository Platforms**: GitLab, Bitbucket, Azure DevOps
 - **CI/CD Platforms**: GitLab CI, Jenkins, Azure Pipelines, Dagger.io
 

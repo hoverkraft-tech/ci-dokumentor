@@ -1,5 +1,9 @@
-import { Container, SECTION_GENERATOR_ADAPTER_IDENTIFIER, GENERATOR_ADAPTER_IDENTIFIER } from '@ci-dokumentor/core';
-import { Container as InversifyContainer } from "inversify";
+import {
+  Container,
+  SECTION_GENERATOR_ADAPTER_IDENTIFIER,
+  GENERATOR_ADAPTER_IDENTIFIER,
+} from '@ci-dokumentor/core';
+import { Container as InversifyContainer } from 'inversify';
 import { initContainer as coreInitContainer } from '@ci-dokumentor/core';
 import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
 import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
@@ -24,49 +28,77 @@ import { LicenseSectionGenerator } from './section/license-section-generator.ada
 let container: Container | null = null;
 
 export function resetContainer(): void {
-    container = null;
+  container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-    if (baseContainer) {
-        // When a base container is provided, always use it and set it as our singleton
-        container = baseContainer;
-    } else if (container) {
-        // Only return existing singleton if no base container is provided
-        return container;
-    } else {
-        container = new InversifyContainer() as Container;
-    }
-
-    // Return early if already bound
-    if (container.isBound(GitHubActionsParser)) {
-        return container;
-    }
-
-    // Bind GitHub Actions specific services only
-    // Bind parser
-    container.bind(GitHubActionsParser).toSelf().inSingletonScope();
-
-    // Bind generator
-    container.bind(GitHubActionsGeneratorAdapter).toSelf().inSingletonScope();
-    container.bind(GENERATOR_ADAPTER_IDENTIFIER).to(GitHubActionsGeneratorAdapter);
-
-    // Bind section generators
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(HeaderSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(BadgesSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(OverviewSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ContentsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(UsageSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(InputsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(OutputsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(SecretsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ExamplesSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(JobsSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(ContributingSectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(SecuritySectionGenerator);
-    container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(LicenseSectionGenerator);
-
+export function initContainer(
+  baseContainer: Container | undefined = undefined
+): Container {
+  if (baseContainer) {
+    // When a base container is provided, always use it and set it as our singleton
+    container = baseContainer;
+  } else if (container) {
+    // Only return existing singleton if no base container is provided
     return container;
+  } else {
+    container = new InversifyContainer() as Container;
+  }
+
+  // Return early if already bound
+  if (container.isBound(GitHubActionsParser)) {
+    return container;
+  }
+
+  // Bind GitHub Actions specific services only
+  // Bind parser
+  container.bind(GitHubActionsParser).toSelf().inSingletonScope();
+
+  // Bind generator
+  container.bind(GitHubActionsGeneratorAdapter).toSelf().inSingletonScope();
+  container
+    .bind(GENERATOR_ADAPTER_IDENTIFIER)
+    .to(GitHubActionsGeneratorAdapter);
+
+  // Bind section generators
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(HeaderSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(BadgesSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(OverviewSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(ContentsSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(UsageSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(InputsSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(OutputsSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(SecretsSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(ExamplesSectionGenerator);
+  container.bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(JobsSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(ContributingSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(SecuritySectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(LicenseSectionGenerator);
+
+  return container;
 }
 
 /**
@@ -74,15 +106,15 @@ export function initContainer(baseContainer: Container | undefined = undefined):
  * This initializes all the proper packages needed for GitHub Actions testing.
  */
 export function initTestContainer(): Container {
-    // Initialize core container first
-    const baseContainer = coreInitContainer();
+  // Initialize core container first
+  const baseContainer = coreInitContainer();
 
-    // Initialize git repository package
-    gitInitContainer(baseContainer);
+  // Initialize git repository package
+  gitInitContainer(baseContainer);
 
-    // Initialize github repository package
-    githubInitContainer(baseContainer);
+  // Initialize github repository package
+  githubInitContainer(baseContainer);
 
-    // Initialize this package
-    return initContainer(baseContainer);
+  // Initialize this package
+  return initContainer(baseContainer);
 }

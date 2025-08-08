@@ -39,7 +39,7 @@ export default defineConfig(() => ({
       external: [],
     },
     target: 'node20', // Specify Node.js version target
-    ssr: true
+    ssr: true,
   },
   test: {
     watch: false,

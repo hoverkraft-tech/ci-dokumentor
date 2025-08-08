@@ -22,7 +22,9 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     repositoryService = container.get(RepositoryService);
-    gitHubActionsGeneratorAdapter = container.get(GitHubActionsGeneratorAdapter);
+    gitHubActionsGeneratorAdapter = container.get(
+      GitHubActionsGeneratorAdapter
+    );
 
     // Mock the repository service to return consistent test data
     const mockRepository: Repository = {
@@ -33,7 +35,9 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
       logo: 'https://example.com/logo.png',
     };
 
-    vi.spyOn(repositoryService, 'getRepository').mockResolvedValue(mockRepository);
+    vi.spyOn(repositoryService, 'getRepository').mockResolvedValue(
+      mockRepository
+    );
   });
 
   afterEach(() => {
@@ -41,6 +45,16 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
     mockFs.restore();
     // Restore all mocks
     vi.restoreAllMocks();
+  });
+
+  describe('getPlatformName', () => {
+    it('should return "github-actions" as platform name', () => {
+      // Act
+      const result = gitHubActionsGeneratorAdapter.getPlatformName();
+
+      // Assert
+      expect(result).toBe('github-actions');
+    });
   });
 
   describe('generateDocumentation', () => {
@@ -89,7 +103,10 @@ runs:
       });
 
       // Use real FileOutputAdapter for integration testing
-      const outputAdapter = new FileOutputAdapter('/test/README.md', formatterAdapter);
+      const outputAdapter = new FileOutputAdapter(
+        '/test/README.md',
+        formatterAdapter
+      );
 
       // Act
       await gitHubActionsGeneratorAdapter.generateDocumentation(
@@ -223,7 +240,10 @@ jobs:
       });
 
       // Use real FileOutputAdapter for integration testing
-      const outputAdapter = new FileOutputAdapter('/test/.github/workflows/ci-cd.md', formatterAdapter);
+      const outputAdapter = new FileOutputAdapter(
+        '/test/.github/workflows/ci-cd.md',
+        formatterAdapter
+      );
 
       // Act
       await gitHubActionsGeneratorAdapter.generateDocumentation(
@@ -248,12 +268,9 @@ jobs:
 
   describe('file support validation', () => {
     it('should correctly identify supported GitHub Action files', () => {
-      const actionFiles = [
-        'action.yml',
-        'action.yaml'
-      ];
+      const actionFiles = ['action.yml', 'action.yaml'];
 
-      actionFiles.forEach(file => {
+      actionFiles.forEach((file) => {
         expect(gitHubActionsGeneratorAdapter.supportsSource(file)).toBe(true);
       });
     });
@@ -263,10 +280,10 @@ jobs:
         '.github/workflows/ci.yml',
         '.github/workflows/ci.yaml',
         '.github/workflows/deploy.yml',
-        '.github/workflows/release.yaml'
+        '.github/workflows/release.yaml',
       ];
 
-      workflowFiles.forEach(file => {
+      workflowFiles.forEach((file) => {
         expect(gitHubActionsGeneratorAdapter.supportsSource(file)).toBe(true);
       });
     });
@@ -277,10 +294,10 @@ jobs:
         'README.md',
         'config.yml',
         'action.json',
-        '.github/dependabot.yml'
+        '.github/dependabot.yml',
       ];
 
-      unsupportedFiles.forEach(file => {
+      unsupportedFiles.forEach((file) => {
         expect(gitHubActionsGeneratorAdapter.supportsSource(file)).toBe(false);
       });
     });
@@ -291,23 +308,36 @@ jobs:
       const testCases = [
         { input: 'action.yml', expected: 'README.md' },
         { input: 'action.yaml', expected: 'README.md' },
-        { input: 'subfolder/action.yml', expected: 'subfolder/README.md' }
+        { input: 'subfolder/action.yml', expected: 'subfolder/README.md' },
       ];
 
       testCases.forEach(({ input, expected }) => {
-        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(expected);
+        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(
+          expected
+        );
       });
     });
 
     it('should generate correct paths for GitHub Workflows', () => {
       const testCases = [
-        { input: '.github/workflows/ci.yml', expected: '.github/workflows/ci.md' },
-        { input: '.github/workflows/deploy.yaml', expected: '.github/workflows/deploy.md' },
-        { input: '.github/workflows/release.yml', expected: '.github/workflows/release.md' }
+        {
+          input: '.github/workflows/ci.yml',
+          expected: '.github/workflows/ci.md',
+        },
+        {
+          input: '.github/workflows/deploy.yaml',
+          expected: '.github/workflows/deploy.md',
+        },
+        {
+          input: '.github/workflows/release.yml',
+          expected: '.github/workflows/release.md',
+        },
       ];
 
       testCases.forEach(({ input, expected }) => {
-        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(expected);
+        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(
+          expected
+        );
       });
     });
   });
@@ -328,11 +358,14 @@ runs:
 
       // Setup mock file with malformed YAML
       mockFs({
-        '/test/action.yml': malformedYaml
+        '/test/action.yml': malformedYaml,
       });
 
       // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter('/test/README.md', formatterAdapter);
+      const outputAdapter = new FileOutputAdapter(
+        '/test/README.md',
+        formatterAdapter
+      );
 
       // Act & Assert
       await expect(
@@ -350,7 +383,10 @@ runs:
       mockFs({});
 
       // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter('/test/README.md', formatterAdapter);
+      const outputAdapter = new FileOutputAdapter(
+        '/test/README.md',
+        formatterAdapter
+      );
 
       // Act & Assert
       await expect(
@@ -366,11 +402,14 @@ runs:
       // Arrange
       // Setup mock file with empty content
       mockFs({
-        '/test/action.yml': ''
+        '/test/action.yml': '',
       });
 
       // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter('/test/README.md', formatterAdapter);
+      const outputAdapter = new FileOutputAdapter(
+        '/test/README.md',
+        formatterAdapter
+      );
 
       // Act & Assert
       // This should either work with empty content or throw a meaningful error
