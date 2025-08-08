@@ -8,7 +8,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
         return SectionIdentifier.Examples;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, _repository: Repository): Buffer {
         let content = Buffer.from('');
 
         if ('runs' in manifest) {

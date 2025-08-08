@@ -8,7 +8,7 @@ export class SecuritySectionGenerator extends GitHubActionsSectionGeneratorAdapt
         return SectionIdentifier.Security;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, _repository: Repository): Buffer {
         const securityContent = `## Security Policy
 
 We take the security of our software seriously. If you believe you have found a security vulnerability, please report it to us as described below.

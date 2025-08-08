@@ -1,6 +1,10 @@
 import 'reflect-metadata';
 import { Container } from '@ci-dokumentor/core';
 import { initContainer } from './container.js';
+import { initContainer as coreInitContainer } from '@ci-dokumentor/core';
+import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
+import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
+import { initContainer as githubActionsInitContainer } from '@ci-dokumentor/cicd-github-actions';
 
 /**
  * Initialize the global container that includes all packages.
@@ -8,18 +12,14 @@ import { initContainer } from './container.js';
  */
 export function initGlobalContainer(): Container {
     // Initialize core container first
-    const { initContainer: coreInitContainer } = require('@ci-dokumentor/core');
     const baseContainer = coreInitContainer();
 
     // Initialize repository packages
-    const { initContainer: gitInitContainer } = require('@ci-dokumentor/repository-git');
     gitInitContainer(baseContainer);
 
-    const { initContainer: githubInitContainer } = require('@ci-dokumentor/repository-github');
     githubInitContainer(baseContainer);
 
     // Initialize CICD packages
-    const { initContainer: githubActionsInitContainer } = require('@ci-dokumentor/cicd-github-actions');
     githubActionsInitContainer(baseContainer);
 
     // Initialize CLI package itself

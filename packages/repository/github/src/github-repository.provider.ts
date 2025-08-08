@@ -2,6 +2,7 @@ import { Repository, RepositoryProvider, LicenseService } from "@ci-dokumentor/c
 import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { graphql, GraphQlQueryResponseData } from "@octokit/graphql";
 import { injectable, inject } from "inversify";
+import { existsSync } from "fs";
 
 @injectable()
 export class GitHubRepositoryProvider implements RepositoryProvider {

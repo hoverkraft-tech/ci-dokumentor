@@ -52,11 +52,11 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         return badges;
     }
 
-    private getBuildQualityBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
+    private getBuildQualityBadges(_manifest: GitHubAction | GitHubWorkflow, _repository: Repository): LinkedBadge[] {
         return [];
     }
 
-    private getSecurityBadges(manifest: GitHubAction | GitHubWorkflow, repository: Repository): LinkedBadge[] {
+    private getSecurityBadges(_manifest: GitHubAction | GitHubWorkflow, _repository: Repository): LinkedBadge[] {
         return [];
     }
 

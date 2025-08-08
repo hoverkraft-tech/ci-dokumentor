@@ -13,7 +13,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         return SectionIdentifier.Inputs;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, _repository: Repository): Buffer {
         let table: InputsTable;
 
         if (this.isGitHubAction(manifest)) {

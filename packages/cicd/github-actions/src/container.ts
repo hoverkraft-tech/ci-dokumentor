@@ -1,5 +1,8 @@
 import { Container, SECTION_GENERATOR_ADAPTER_IDENTIFIER, GENERATOR_ADAPTER_IDENTIFIER } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from "inversify";
+import { initContainer as coreInitContainer } from '@ci-dokumentor/core';
+import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
+import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
 import { GitHubActionsParser } from './github-actions-parser.js';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 
@@ -72,15 +75,12 @@ export function initContainer(baseContainer: Container | undefined = undefined):
  */
 export function initTestContainer(): Container {
     // Initialize core container first
-    const { initContainer: coreInitContainer } = require('@ci-dokumentor/core');
     const baseContainer = coreInitContainer();
 
     // Initialize git repository package
-    const { initContainer: gitInitContainer } = require('@ci-dokumentor/repository-git');
     gitInitContainer(baseContainer);
 
     // Initialize github repository package
-    const { initContainer: githubInitContainer } = require('@ci-dokumentor/repository-github');
     githubInitContainer(baseContainer);
 
     // Initialize this package

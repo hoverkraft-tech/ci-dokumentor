@@ -8,7 +8,7 @@ export class ContentsSectionGenerator extends GitHubActionsSectionGeneratorAdapt
         return SectionIdentifier.Contents;
     }
 
-    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, repository: Repository): Buffer {
+    generateSection(formatterAdapter: FormatterAdapter, manifest: GitHubAction | GitHubWorkflow, _repository: Repository): Buffer {
         const tocItems: Buffer[] = [];
 
         // Add standard sections based on manifest type
