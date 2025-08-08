@@ -24,11 +24,13 @@ describe('RepositoryService', () => {
         it('should use first supporting provider', async () => {
             // Arrange
             const mockProvider1: RepositoryProvider = {
+                getPlatformName: vi.fn().mockReturnValue('git'),
                 supports: vi.fn().mockResolvedValue(false),
                 getRepository: vi.fn()
             };
 
             const mockProvider2: RepositoryProvider = {
+                getPlatformName: vi.fn().mockReturnValue('github'),
                 supports: vi.fn().mockResolvedValue(true),
                 getRepository: vi.fn().mockResolvedValue({
                     owner: 'test-owner',
@@ -59,6 +61,7 @@ describe('RepositoryService', () => {
         it('should throw error when no provider supports current context', async () => {
             // Arrange
             const mockProvider: RepositoryProvider = {
+                getPlatformName: vi.fn().mockReturnValue('git'),
                 supports: vi.fn().mockResolvedValue(false),
                 getRepository: vi.fn()
             };
@@ -74,6 +77,7 @@ describe('RepositoryService', () => {
         it('should propagate provider errors from supports method', async () => {
             // Arrange
             const mockProvider: RepositoryProvider = {
+                getPlatformName: vi.fn().mockReturnValue('git'),
                 supports: vi.fn().mockRejectedValue(new Error('Provider error')),
                 getRepository: vi.fn()
             };
@@ -89,6 +93,7 @@ describe('RepositoryService', () => {
         it('should propagate provider errors from getRepository method', async () => {
             // Arrange
             const mockProvider: RepositoryProvider = {
+                getPlatformName: vi.fn().mockReturnValue('git'),
                 supports: vi.fn().mockResolvedValue(true),
                 getRepository: vi.fn().mockRejectedValue(new Error('Repository error'))
             };
@@ -99,6 +104,43 @@ describe('RepositoryService', () => {
             await expect(repositoryService.getRepository()).rejects.toThrow('Repository error');
             expect(mockProvider.supports).toHaveBeenCalled();
             expect(mockProvider.getRepository).toHaveBeenCalled();
+        });
+    });
+
+    describe('getSupportedRepositoryPlatforms', () => {
+        it('should return empty array when no providers are available', () => {
+            // Arrange - service created with no providers
+
+            // Act
+            const result = repositoryService.getSupportedRepositoryPlatforms();
+
+            // Assert
+            expect(result).toEqual([]);
+        });
+
+        it('should return platform names from all providers', () => {
+            // Arrange
+            const mockProvider1: RepositoryProvider = {
+                getPlatformName: vi.fn().mockReturnValue('git'),
+                supports: vi.fn(),
+                getRepository: vi.fn()
+            };
+
+            const mockProvider2: RepositoryProvider = {
+                getPlatformName: vi.fn().mockReturnValue('github'),
+                supports: vi.fn(),
+                getRepository: vi.fn()
+            };
+
+            repositoryService = new RepositoryService([mockProvider1, mockProvider2]);
+
+            // Act
+            const result = repositoryService.getSupportedRepositoryPlatforms();
+
+            // Assert
+            expect(result).toEqual(['git', 'github']);
+            expect(mockProvider1.getPlatformName).toHaveBeenCalled();
+            expect(mockProvider2.getPlatformName).toHaveBeenCalled();
         });
     });
 });

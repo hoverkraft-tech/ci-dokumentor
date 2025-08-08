@@ -7,6 +7,13 @@ import { simpleGit } from 'simple-git';
 export class GitRepositoryProvider implements RepositoryProvider {
     
     /**
+     * Get the platform name identifier for this provider
+     */
+    getPlatformName(): string {
+        return 'git';
+    }
+
+    /**
      * Check if this provider supports the current repository context
      * This basic provider supports any git repository
      */

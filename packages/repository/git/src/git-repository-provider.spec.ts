@@ -27,6 +27,16 @@ describe('GitRepositoryProvider', () => {
         mockGitUrlParse = vi.mocked(gitUrlParse);
     });
 
+    describe('getPlatformName', () => {
+        it('should return "git" as platform name', () => {
+            // Act
+            const result = provider.getPlatformName();
+
+            // Assert
+            expect(result).toBe('git');
+        });
+    });
+
     describe('supports', () => {
         it('should return true when origin remote with fetch URL exists', async () => {
             // Arrange

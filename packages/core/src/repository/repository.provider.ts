@@ -5,6 +5,12 @@ import { Repository } from './repository.service.js';
  */
 export interface RepositoryProvider {
     /**
+     * Get the platform name identifier for this provider
+     * @returns string the platform name (e.g., 'git', 'github')
+     */
+    getPlatformName(): string;
+
+    /**
      * Check if this provider supports the current repository context
      * @returns Promise<boolean> true if this provider can handle the current repository
      */

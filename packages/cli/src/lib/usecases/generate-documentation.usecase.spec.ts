@@ -22,7 +22,8 @@ describe('GenerateDocumentationUseCase', () => {
         };
 
         mockGeneratorService = {
-            generateDocumentation: vi.fn().mockResolvedValue(undefined)
+            generateDocumentation: vi.fn().mockResolvedValue(undefined),
+            getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions'])
         };
 
         mockRepositoryService = {
@@ -31,7 +32,8 @@ describe('GenerateDocumentationUseCase', () => {
                 name: 'repo',
                 url: 'https://github.com/test/repo',
                 fullName: 'test/repo'
-            })
+            }),
+            getSupportedRepositoryPlatforms: vi.fn().mockReturnValue(['git', 'github'])
         };
 
         // Bind mocks to container
@@ -278,6 +280,26 @@ describe('GenerateDocumentationUseCase', () => {
                 message: 'Documentation generated successfully',
                 outputPath: './docs'
             });
+        });
+    });
+
+    describe('platform support', () => {
+        it('should get supported repository platforms from repository service', () => {
+            // Act
+            const platforms = useCase.getSupportedRepositoryPlatforms();
+
+            // Assert
+            expect(platforms).toEqual(['git', 'github']);
+            expect(mockRepositoryService.getSupportedRepositoryPlatforms).toHaveBeenCalled();
+        });
+
+        it('should get supported CI/CD platforms from generator service', () => {
+            // Act
+            const platforms = useCase.getSupportedCicdPlatforms();
+
+            // Assert
+            expect(platforms).toEqual(['github-actions']);
+            expect(mockGeneratorService.getSupportedCicdPlatforms).toHaveBeenCalled();
         });
     });
 });

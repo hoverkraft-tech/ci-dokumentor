@@ -19,6 +19,13 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     ) { }
 
     /**
+     * Get the platform name identifier for this adapter
+     */
+    getPlatformName(): string {
+        return 'github-actions';
+    }
+
+    /**
      * Checks if the adapter supports the given source file.
      * @param source The source file path.
      * @returns True if the adapter supports the source, false otherwise.

@@ -13,6 +13,13 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
     ) {}
     
     /**
+     * Get the platform name identifier for this provider
+     */
+    getPlatformName(): string {
+        return 'github';
+    }
+
+    /**
      * Check if this provider supports the current repository context
      * Checks if the repository is hosted on GitHub
      */

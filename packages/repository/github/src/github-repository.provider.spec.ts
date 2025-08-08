@@ -31,6 +31,7 @@ describe('GitHubRepositoryProvider', () => {
 
         // Create a mock git repository service
         mockGitRepositoryService = {
+            getPlatformName: vi.fn(),
             supports: vi.fn(),
             getRepository: vi.fn(),
             getRemoteParsedUrl: vi.fn(),
@@ -45,6 +46,16 @@ describe('GitHubRepositoryProvider', () => {
         
         // Reset all mocks
         vi.resetAllMocks();
+    });
+
+    describe('getPlatformName', () => {
+        it('should return "github" as platform name', () => {
+            // Act
+            const result = gitHubRepositoryProvider.getPlatformName();
+
+            // Assert
+            expect(result).toBe('github');
+        });
     });
 
     describe('supports', () => {

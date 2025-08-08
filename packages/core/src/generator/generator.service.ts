@@ -11,6 +11,12 @@ export class GeneratorService {
     @multiInject(GENERATOR_ADAPTER_IDENTIFIER) private readonly generatorAdapters: GeneratorAdapter[]
   ) { }
 
+  /**
+   * Get list of supported CI/CD platforms based on registered generator adapters
+   */
+  getSupportedCicdPlatforms(): string[] {
+    return this.generatorAdapters.map(adapter => adapter.getPlatformName());
+  }
 
   /**
    * Generates documentation for the given path using all registered generator adapters.

@@ -43,6 +43,16 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
     vi.restoreAllMocks();
   });
 
+  describe('getPlatformName', () => {
+    it('should return "github-actions" as platform name', () => {
+      // Act
+      const result = gitHubActionsGeneratorAdapter.getPlatformName();
+
+      // Assert
+      expect(result).toBe('github-actions');
+    });
+  });
+
   describe('generateDocumentation', () => {
     it('should generate complete documentation for a GitHub Action', async () => {
       // Arrange

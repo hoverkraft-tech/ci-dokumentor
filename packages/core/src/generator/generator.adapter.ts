@@ -6,6 +6,12 @@ export const GENERATOR_ADAPTER_IDENTIFIER = Symbol("GeneratorAdapter");
 export interface GeneratorAdapter {
 
   /**
+   * Get the platform name identifier for this adapter
+   * @returns string the platform name (e.g., 'github-actions')
+   */
+  getPlatformName(): string;
+
+  /**
    * Checks if the adapter supports the given source file.
    * @param source The source file path.
    * @returns True if the adapter supports the source, false otherwise.

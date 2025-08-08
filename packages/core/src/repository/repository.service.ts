@@ -21,6 +21,13 @@ export class RepositoryService {
         @multiInject(REPOSITORY_PROVIDER_IDENTIFIER) @optional() private providers: RepositoryProvider[] = []
     ) {}
 
+    /**
+     * Get list of supported repository platforms based on registered providers
+     */
+    getSupportedRepositoryPlatforms(): string[] {
+        return this.providers.map(provider => provider.getPlatformName());
+    }
+
     async getRepository(): Promise<Repository> {
         // Try to auto-detect using providers first
         const detectedProvider = await this.autoDetectProvider();
@@ -42,5 +49,6 @@ export class RepositoryService {
             }
         }
         return null;
+    }
 }
 }

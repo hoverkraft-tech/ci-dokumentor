@@ -3,10 +3,10 @@
  */
 export interface RepositoryPlatformOptions {
     /**
-     * The repository platform to use (git, github)
+     * The repository platform to use
      * If not specified, auto-detected from the repository
      */
-    platform?: 'git' | 'github';
+    platform?: string;
 }
 
 /**
@@ -17,7 +17,7 @@ export interface CicdPlatformOptions {
      * The CI/CD platform to use
      * If not specified, auto-detected from available manifest files
      */
-    platform?: 'github-actions';
+    platform?: string;
 }
 
 /**

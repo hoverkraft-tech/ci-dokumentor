@@ -104,17 +104,13 @@ export class GenerateDocumentationUseCase {
      * Get list of supported repository platforms based on registered providers
      */
     getSupportedRepositoryPlatforms(): string[] {
-        // For now, return the known platforms based on the packages available
-        // In the future, this could be dynamic based on registered providers
-        return ['git', 'github'];
+        return this.repositoryService.getSupportedRepositoryPlatforms();
     }
 
     /**
      * Get list of supported CI/CD platforms based on registered generator adapters
      */
     getSupportedCicdPlatforms(): string[] {
-        // For now, return the known platforms based on the packages available
-        // In the future, this could be dynamic based on registered generator adapters
-        return ['github-actions'];
+        return this.generatorService.getSupportedCicdPlatforms();
     }
 }
