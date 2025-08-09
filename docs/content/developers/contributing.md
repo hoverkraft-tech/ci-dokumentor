@@ -484,7 +484,6 @@ We use semantic versioning (SemVer):
 
 - **GitHub Discussions** - For questions and general discussion
 - **GitHub Issues** - For bug reports and feature requests
-- **Discord** (coming soon) - For real-time chat
 
 ### Communication Guidelines
 

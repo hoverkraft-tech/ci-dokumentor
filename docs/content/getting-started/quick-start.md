@@ -291,9 +291,4 @@ Now that you've generated your first documentation, explore more advanced featur
 - 🔧 [CLI Reference](../packages/cli) - Complete command-line options
 - 👨‍💻 [Contributing](../developers/contributing) - Help improve CI Dokumentor
 
-## Examples Repository
-
-Check out our examples repository for more real-world use cases:
-- [CI Dokumentor Examples](https://github.com/hoverkraft-tech/ci-dokumentor-examples)
-
 Happy documenting! 🚀

@@ -41,6 +41,8 @@ const config: Config = {
       'classic',
       {
         docs: {
+          path: 'content',
+          routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
@@ -109,8 +111,8 @@ const config: Config = {
               href: 'https://github.com/hoverkraft-tech/ci-dokumentor/issues',
             },
             {
-              label: 'Discussions',
-              href: 'https://github.com/hoverkraft-tech/ci-dokumentor/discussions',
+              label: 'Pull Requests',
+              href: 'https://github.com/hoverkraft-tech/ci-dokumentor/pulls',
             },
           ],
         },

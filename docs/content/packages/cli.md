@@ -4,17 +4,16 @@ sidebar_position: 2
 
 # CLI Package
 
-The `@ci-dokumentor/cli` package provides a powerful, extensible command-line interface for generating documentation from CI/CD configuration files.
+The `@ci-dokumentor/cli` package provides a command-line interface for generating documentation from CI/CD configuration files.
 
 ## Overview
 
-The CLI package is built with clean architecture principles and provides:
+The CLI package provides:
 
-- **Professional CLI Experience** - Built with Commander.js
-- **Extensible Command System** - Easy to add new commands
-- **Type Safety** - Full TypeScript implementation
-- **Dependency Injection** - Clean, testable architecture
-- **Comprehensive Help** - Detailed usage information
+- **Generate Command** - Main command for documentation generation
+- **Platform Auto-detection** - Automatically detects supported CI/CD platforms
+- **Repository Integration** - Works with Git and GitHub repositories
+- **Configurable Output** - Flexible output options and sections
 
 ## Installation
 
@@ -42,12 +41,155 @@ npx ci-dokumentor --help
 
 ### Generate Command
 
-The primary command for generating documentation from CI/CD files.
+The main command for generating documentation from CI/CD files.
+
+**Aliases:** `generate`, `gen`
 
 #### Basic Usage
 
 ```bash
-# Generate documentation for a GitHub Action
+# Generate documentation for current directory
+ci-dokumentor generate
+
+# Generate with specific source and output
+ci-dokumentor generate --source ./my-project --output ./my-docs
+```
+
+#### Command Options
+
+| Option | Alias | Description | Default |
+|--------|-------|-------------|---------|
+| `--source <dir>` | `-s` | Source directory containing CI/CD files | `.` |
+| `--output <dir>` | `-o` | Output directory for generated documentation | `./docs` |
+| `--repository <platform>` | `-r` | Repository platform (auto-detected if not specified) | - |
+| `--cicd <platform>` | `-c` | CI/CD platform (auto-detected if not specified) | - |
+| `--include-sections <sections>` | - | Comma-separated list of sections to include | - |
+| `--exclude-sections <sections>` | - | Comma-separated list of sections to exclude | - |
+
+#### Supported Platforms
+
+**Repository Platforms:**
+- `git` - Git repository support
+- `github` - GitHub-specific features
+
+**CI/CD Platforms:**
+- `github-actions` - GitHub Actions workflows and action files
+
+#### Examples
+
+```bash
+# Auto-detect everything
+ci-dokumentor generate
+
+# Specify platforms explicitly
+ci-dokumentor generate --repository github --cicd github-actions
+
+# Include only specific sections
+ci-dokumentor generate --include-sections "overview,inputs,outputs"
+
+# Exclude specific sections
+ci-dokumentor generate --exclude-sections "examples,troubleshooting"
+
+# Generate to specific output directory
+ci-dokumentor generate --source ./actions --output ./action-docs
+```
+
+#### Section Configuration
+
+The CLI supports including/excluding specific documentation sections:
+
+**Common Sections (varies by platform):**
+- `overview` - General information
+- `inputs` - Input parameters
+- `outputs` - Output values
+- `usage` - Usage examples
+- `examples` - Code examples
+
+Use `ci-dokumentor generate --help` to see platform-specific sections.
+
+## CLI Architecture
+
+The CLI is built with:
+
+- **Commander.js** - Command-line parsing and help generation
+- **InversifyJS** - Dependency injection
+- **Clean Architecture** - Separated concerns and testable components
+
+### Core Components
+
+#### CliApplication
+Main application class that orchestrates command execution:
+
+```typescript
+class CliApplication {
+  async run(args?: string[]): Promise<void>
+}
+```
+
+#### GenerateCommand
+Implements the generate command:
+
+```typescript
+class GenerateCommand extends BaseCommand {
+  configure(): this // Sets up command options and action
+}
+```
+
+#### GenerateDocumentationUseCase
+Business logic for documentation generation:
+
+```typescript
+class GenerateDocumentationUseCase {
+  execute(input: GenerateDocumentationUseCaseInput): Promise<GenerateDocumentationUseCaseOutput>
+  getSupportedRepositoryPlatforms(): string[]
+  getSupportedCicdPlatforms(): string[]
+}
+```
+
+## Error Handling
+
+The CLI provides helpful error messages for common issues:
+
+- **Invalid platform names** - Shows available platforms
+- **Missing CI/CD files** - Suggests checking the source directory
+- **Permission errors** - Provides guidance for file system issues
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `1` | General error (invalid arguments, file not found, etc.) |
+
+## Development
+
+### Building
+
+```bash
+# Build the CLI package
+nx build cli
+
+# Run tests
+nx test cli
+
+# Run linting
+nx lint cli
+```
+
+### Testing
+
+```bash
+# Test the CLI locally
+nx build cli
+node dist/packages/cli/bin/ci-dokumentor.js --help
+```
+
+## Related Packages
+
+- [Core Package](./core) - Core services and interfaces
+- [Repository Git](./repository-git) - Git repository provider
+- [Repository GitHub](./repository-github) - GitHub repository provider  
+- [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions support
 ci-dokumentor generate action.yml
 
 # Generate documentation for a workflow

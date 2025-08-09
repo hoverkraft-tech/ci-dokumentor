@@ -38,7 +38,7 @@ docker run --rm -v $(pwd):/workspace \
 ghcr.io/hoverkraft-tech/ci-dokumentor:latest
 
 # Specific version
-ghcr.io/hoverkraft-tech/ci-dokumentor:v1.0.0
+ghcr.io/hoverkraft-tech/ci-dokumentor:1.0.0
 
 # Development builds
 ghcr.io/hoverkraft-tech/ci-dokumentor:main

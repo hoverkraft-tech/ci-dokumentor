@@ -21,12 +21,12 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Clean Architecture',
+    title: 'Extensible Design',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Built with SOLID principles and clean architecture patterns.
-        Extensible design allows easy support for new CI/CD platforms and repository providers.
+        Modular architecture allows easy support for new CI/CD platforms and repository providers.
+        Plugin-based system for custom documentation sections.
       </>
     ),
   },
