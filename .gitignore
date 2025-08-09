@@ -48,4 +48,4 @@ vitest.config.*.timestamp*
 *.tsbuildinfo
 
 # Docusaurus build output
-website/build
+docs/build

@@ -11,32 +11,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Automated Documentation',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Generate comprehensive documentation automatically from your CI/CD configuration files.
+        No manual work required - just point CI Dokumentor at your files and get professional docs.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Clean Architecture',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Built with SOLID principles and clean architecture patterns.
+        Extensible design allows easy support for new CI/CD platforms and repository providers.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Multiple Platforms',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Works with GitHub Actions, Docker, NPX, and GitHub workflows.
+        Available as CLI tool, Docker image, and GitHub Action for flexible integration.
       </>
     ),
   },

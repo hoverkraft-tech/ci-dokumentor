@@ -45,22 +45,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/hoverkraft-tech/ci-dokumentor/tree/main/website/',
-        },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/hoverkraft-tech/ci-dokumentor/tree/main/website/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
+            'https://github.com/hoverkraft-tech/ci-dokumentor/tree/main/docs/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -85,7 +70,6 @@ const config: Config = {
           position: 'left',
           label: 'Documentation',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/hoverkraft-tech/ci-dokumentor',
           label: 'GitHub',
@@ -133,10 +117,6 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
             {
               label: 'Hoverkraft',
               href: 'https://hoverkraft.cloud',

@@ -6,15 +6,15 @@ sidebar_position: 1
 
 Welcome to **CI Dokumentor** - an automated documentation generator for CI/CD components.
 
-CI Dokumentor helps you generate comprehensive, professional documentation for your CI/CD workflows, actions, and configurations automatically.
-
 ## What is CI Dokumentor?
 
-CI Dokumentor is a powerful TypeScript-based tool that:
+CI Dokumentor is a powerful TypeScript-based tool that automatically generates comprehensive, professional documentation for your CI/CD workflows, actions, and configurations.
 
-- 📖 **Generates documentation** from CI/CD configuration files (GitHub Actions, workflows, etc.)
+### Key Features
+
+- 📖 **Automated Generation** - Convert CI/CD configuration files into professional documentation
 - 🏗️ **Clean Architecture** - Built with SOLID principles and clean architecture patterns  
-- 🔧 **Extensible** - Easy to add support for new CI/CD platforms
+- 🔧 **Extensible Design** - Easy to add support for new CI/CD platforms
 - 🐳 **Docker Ready** - Available as a Docker image for easy integration
 - 🚀 **GitHub Action** - Can be used directly in GitHub workflows
 - 📋 **CLI Tool** - Command-line interface for local usage
@@ -29,34 +29,6 @@ CI Dokumentor is a powerful TypeScript-based tool that:
 - ✅ **GitHub** - Repository information and metadata
 - ✅ **Git** - Basic repository information
 - 🔄 **More platforms coming** - GitLab, Bitbucket planned
-
-## Quick Start
-
-Get started with CI Dokumentor in minutes:
-
-### Using Docker (Recommended)
-
-```bash
-# Generate documentation for a GitHub Action
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  /workspace/action.yml --output /workspace/docs
-```
-
-### Using NPX
-
-```bash
-# Install and run CI Dokumentor
-npx ci-dokumentor action.yml --output docs
-```
-
-### In GitHub Actions
-
-```yaml
-- name: Generate CI Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-  with:
-    args: 'action.yml --output docs'
-```
 
 ## Architecture Overview
 
