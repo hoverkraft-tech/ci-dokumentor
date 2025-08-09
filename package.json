@@ -7,7 +7,12 @@
     "lint": "nx run-many --target=lint --all --parallel",
     "test": "nx run-many --target=test --all --parallel",
     "test:ci": "nx run-many --target=test --all --parallel --coverage.all",
-    "all": "pnpm run build && pnpm run lint --fix && pnpm run test:ci"
+    "all": "pnpm run build && pnpm run lint --fix && pnpm run test:ci",
+    "docs:install": "cd website && npm ci",
+    "docs:start": "cd website && npm start",
+    "docs:build": "cd website && npm run build",
+    "docs:serve": "cd website && npm run serve",
+    "docs:clear": "cd website && npm run clear"
   },
   "private": true,
   "devDependencies": {
