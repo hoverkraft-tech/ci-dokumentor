@@ -15,9 +15,74 @@
 
 📢 **CI Dokumentor** is an automated documentation generator for CI/CD components
 
-## Contributing
+## 📖 Documentation
 
-👍 If you wish to contribute to CI Dokumentor, PRs are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+**Complete documentation is available at: [hoverkraft-tech.github.io/ci-dokumentor](https://hoverkraft-tech.github.io/ci-dokumentor)**
+
+### Quick Links
+
+- 🚀 [Getting Started](https://hoverkraft-tech.github.io/ci-dokumentor/docs/getting-started/installation) - Installation and quick start
+- 📦 [Packages](https://hoverkraft-tech.github.io/ci-dokumentor/docs/packages/core) - Package documentation
+- 🐳 [Docker](https://hoverkraft-tech.github.io/ci-dokumentor/docs/integrations/docker) - Docker integration guide
+- 🔧 [GitHub Action](https://hoverkraft-tech.github.io/ci-dokumentor/docs/integrations/github-action) - GitHub Actions integration
+- 👨‍💻 [Contributing](https://hoverkraft-tech.github.io/ci-dokumentor/docs/developers/contributing) - How to contribute
+
+## Overview
+
+CI Dokumentor helps you generate comprehensive, professional documentation for your CI/CD workflows, actions, and configurations automatically.
+
+### What is CI Dokumentor?
+
+CI Dokumentor is a powerful TypeScript-based tool that:
+
+- 📖 **Generates documentation** from CI/CD configuration files (GitHub Actions, workflows, etc.)
+- 🏗️ **Clean Architecture** - Built with SOLID principles and clean architecture patterns  
+- 🔧 **Extensible** - Easy to add support for new CI/CD platforms
+- 🐳 **Docker Ready** - Available as a Docker image for easy integration
+- 🚀 **GitHub Action** - Can be used directly in GitHub workflows
+- 📋 **CLI Tool** - Command-line interface for local usage
+
+### Supported Platforms
+
+#### CI/CD Platforms
+- ✅ **GitHub Actions** - Action files (`action.yml`) and workflow files (`.github/workflows/*.yml`)
+- 🔄 **More platforms coming** - GitLab CI, Jenkins, Azure Pipelines planned
+
+#### Repository Platforms  
+- ✅ **GitHub** - Repository information and metadata
+- ✅ **Git** - Basic repository information
+- 🔄 **More platforms coming** - GitLab, Bitbucket planned
+
+## Quick Start
+
+Choose your preferred method to get started:
+
+### Using Docker (Recommended)
+
+```bash
+# Generate documentation for a GitHub Action
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  /workspace/action.yml --output /workspace/docs
+```
+
+### Using NPX
+
+```bash
+# Install and run CI Dokumentor
+npx ci-dokumentor action.yml --output docs
+```
+
+### In GitHub Actions
+
+```yaml
+- name: Generate CI Documentation
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  with:
+    args: 'action.yml --output docs'
+```
+
+**📖 For detailed installation instructions and usage examples, visit our [complete documentation](https://hoverkraft-tech.github.io/ci-dokumentor).**
 
 ## Usage
 
