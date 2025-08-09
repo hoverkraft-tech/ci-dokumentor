@@ -43,9 +43,55 @@ npx ci-dokumentor /path/to/ci-cd/component.yml
 
 ### Docker
 
+CI Dokumentor is available as a Docker image that provides a lightweight, containerized way to generate documentation for your CI/CD components.
+
+#### Quick Start
+
 ```bash
-docker run --rm -v $(pwd):/app hoverkraft/ci-dokumentor:latest /app/path/to/ci-cd/component.yml
+# Show available options
+docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor:latest --help
+
+# Generate documentation from CI/CD file
+docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  /workspace/.github/workflows/ci.yml --output /workspace/docs
 ```
+
+#### GitHub Actions Integration
+
+```yaml
+- name: Generate CI Documentation
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  with:
+    args: '.github/workflows/ci.yml --output docs'
+```
+
+#### GitLab CI Integration
+
+```yaml
+generate-docs:
+  stage: docs
+  image: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  script:
+    - ci-dokumentor .gitlab-ci.yml --output docs
+  artifacts:
+    paths:
+      - docs/
+```
+
+#### Dagger.io Integration
+
+```go
+func (m *MyModule) GenerateDocs(ctx context.Context, source *dagger.Directory) *dagger.Directory {
+    return dag.Container().
+        From("ghcr.io/hoverkraft-tech/ci-dokumentor:latest").
+        WithMountedDirectory("/workspace", source).
+        WithWorkdir("/workspace").
+        WithExec([]string{"ci-dokumentor", ".github/workflows/ci.yml", "--output", "docs"}).
+        Directory("docs")
+}
+```
+
+> **📖 Full Documentation**: See [docker/README.md](docker/README.md) for complete Docker usage guide, troubleshooting, and advanced configurations.
 
 ### GitHub Action
 
