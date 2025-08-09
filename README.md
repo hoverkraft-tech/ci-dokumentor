@@ -15,9 +15,17 @@
 
 📢 **CI Dokumentor** is an automated documentation generator for CI/CD components
 
-## Contributing
+## 📖 Documentation
 
-👍 If you wish to contribute to CI Dokumentor, PRs are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+**Complete documentation is available at: [hoverkraft-tech.github.io/ci-dokumentor](https://hoverkraft-tech.github.io/ci-dokumentor)**
+
+### Quick Links
+
+- 🚀 [Getting Started](./docs/docs/getting-started/installation.md) - Installation and quick start
+- 📦 [Packages](./docs/docs/packages/core.md) - Package documentation
+- 🐳 [Docker](./docs/docs/integrations/docker.md) - Docker integration guide
+- 🔧 [GitHub Action](./docs/docs/integrations/github-action.md) - GitHub Actions integration
+- 👨‍💻 [Contributing](./docs/docs/developers/contributing.md) - How to contribute
 
 ## Usage
 
@@ -95,12 +103,21 @@ func (m *MyModule) GenerateDocs(ctx context.Context, source *dagger.Directory) *
 
 ### GitHub Action
 
+## 👨‍💻 Contributing
+
+👍 If you wish to contribute to CI Dokumentor, PRs are welcome! Please read our [Contributing Guide](./docs/docs/developers/contributing.md) for detailed instructions on:
+
+- Setting up the development environment
+- Running tests and linting
+- Submitting pull requests
+- Code conventions and architecture
+
 ## Author
 
 👤 **[Hoverkraft](https://hoverkraft.cloud)**
 
 - Site: <https://hoverkraft.cloud>
-- GitHub: [@escemi-tech](https://github.com/hoverkraft-tech)
+- GitHub: [@hoverkraft-tech](https://github.com/hoverkraft-tech)
 
 ## 📝 License
 
