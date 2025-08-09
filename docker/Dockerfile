@@ -2,7 +2,7 @@
 # Production-grade Node.js Docker image with best practices for performance, security, and lightweight design
 
 # Build stage - includes all dependencies and development tools
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Install pnpm for building
 RUN corepack enable pnpm
@@ -24,7 +24,7 @@ COPY . .
 RUN pnpm build
 
 # Production stage - minimal runtime image
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \

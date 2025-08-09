@@ -40,11 +40,6 @@ jobs:
       id-token: write
     secrets:
       oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
-      build-secrets: ""
-      build-secret-github-app-private-key: ""
-      build-secret-envs: ""
-      build-secret-github-app-id: ""
-      build-secret-github-app-owner: ${{ github.repository_owner }}
     with:
       images: |
         [

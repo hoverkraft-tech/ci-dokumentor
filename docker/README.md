@@ -61,27 +61,6 @@ make docker-test
 make docker-test
 ```
 
-## Testing
-
-Run the test script to validate the Docker image:
-
-```bash
-make docker-test
-```
-
-## CI/CD Integration
-
-The image is automatically built and published via GitHub Actions integrated into the main CI workflow.
-
-### GitHub Actions Usage
-
-```yaml
-- name: Generate Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-  with:
-    args: '.github/workflows/ci.yml --output docs'
-```
-
 ## Current Limitations
 
 > **Note**: There is currently a bundling issue that affects the CLI's dependency injection system. This is a build-time issue that will be resolved in a future update. The Docker image structure and deployment pipeline are production-ready.
