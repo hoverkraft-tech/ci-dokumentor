@@ -20,6 +20,21 @@ ci: ## Execute all formats and checks
 	@pnpm run all
 	$(MAKE) lint-fix
 
+docker-build: ## Build Docker image
+	@echo "🐳 Building CI Dokumentor Docker image..."
+	@docker build -f docker/Dockerfile -t ci-dokumentor:latest .
+	@echo "✅ Docker image built successfully!"
+
+docker-test: docker-build ## Test Docker image functionality
+	@echo "🧪 Testing Docker image..."
+	@echo "Testing --help command:"
+	@docker run --rm ci-dokumentor:latest --help
+	@echo "Testing with volume mount:"
+	@docker run --rm -v "$(CURDIR):/workspace" ci-dokumentor:latest --help
+	@echo "✅ All tests passed!"
+	@echo "📊 Image information:"
+	@docker images ci-dokumentor:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
+
 define run_linter
 	DEFAULT_WORKSPACE="$(CURDIR)"; \
 	LINTER_IMAGE="linter:latest"; \

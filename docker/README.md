@@ -5,9 +5,8 @@ This directory contains the Docker implementation for the CI Dokumentor CLI tool
 ## Files
 
 - `Dockerfile` - Production-grade multi-stage build
-- `test.sh` - Docker image testing script
 - `validate-structure.js` - Validation script for container health checks
-- `docker-compose.yml` - Development and testing configuration (in root)
+- `README.md` - This documentation file
 
 ## Docker Image Features
 
@@ -49,17 +48,17 @@ docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:lates
   /workspace/.github/workflows/ci.yml --output /workspace/docs
 ```
 
-### Development with Docker Compose
+### Development with Make
 
 ```bash
-# Build and run with compose
-docker-compose up ci-dokumentor
+# Build Docker image
+make docker-build
 
-# Development mode with shell access
-docker-compose run ci-dokumentor-dev
+# Test Docker image functionality
+make docker-test
 
-# Build locally
-docker-compose build
+# Build and test in one command
+make docker-test
 ```
 
 ## Testing
@@ -67,12 +66,12 @@ docker-compose build
 Run the test script to validate the Docker image:
 
 ```bash
-./docker/test.sh
+make docker-test
 ```
 
 ## CI/CD Integration
 
-The image is automatically built and published via GitHub Actions using the workflow in `.github/workflows/docker-build-images.yml`.
+The image is automatically built and published via GitHub Actions integrated into the main CI workflow.
 
 ### GitHub Actions Usage
 
@@ -81,15 +80,6 @@ The image is automatically built and published via GitHub Actions using the work
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
   with:
     args: '.github/workflows/ci.yml --output docs'
-```
-
-### Docker Compose in CI
-
-```yaml
-- name: Run Documentation Generation
-  run: |
-    docker-compose run --rm ci-dokumentor \
-      /workspace/.github/workflows/ci.yml --output /workspace/docs
 ```
 
 ## Current Limitations
@@ -160,7 +150,7 @@ chmod 755 ./docs
 
 When making changes to the Docker implementation:
 
-1. Test locally with `./docker/test.sh`
+1. Test locally with `make docker-test`
 2. Update documentation if changing functionality
 3. Ensure both amd64 and arm64 builds work
 4. Test health checks and validation scripts

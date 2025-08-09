@@ -1,10 +1,8 @@
 # Multi-stage build for CI Dokumentor CLI
 # Production-grade Node.js Docker image with best practices for performance, security, and lightweight design
 
-ARG NODE_VERSION=20.12.2
-
 # Build stage - includes all dependencies and development tools
-FROM node:${NODE_VERSION}-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Install pnpm for building
 RUN corepack enable pnpm
@@ -26,7 +24,7 @@ COPY . .
 RUN pnpm build
 
 # Production stage - minimal runtime image
-FROM node:${NODE_VERSION}-alpine AS production
+FROM node:20-alpine AS production
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
@@ -70,5 +68,8 @@ EXPOSE 0
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node /app/docker/validate-structure.js || exit 1
 
-# Default command is the CI Dokumentor CLI with help when no args provided
-CMD ["node", "packages/cli/dist/bin/ci-dokumentor.js", "--help"]
+# Set entrypoint so users can use the image exactly as they would use the nodejs package
+ENTRYPOINT ["node", "packages/cli/dist/bin/ci-dokumentor.js"]
+
+# Default to help when no arguments provided
+CMD ["--help"]

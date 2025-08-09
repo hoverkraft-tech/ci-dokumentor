@@ -48,42 +48,47 @@ CI Dokumentor is available as a Docker image that provides a lightweight, contai
 #### Quick Start
 
 ```bash
-# Run CI Dokumentor on a specific file
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest /workspace/path/to/ci-cd/component.yml
-
-# Run with custom output directory
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest /workspace/.github/workflows/ci.yml --output /workspace/docs
-
-# See all available options
+# Show available options
 docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor:latest --help
+
+# Generate documentation from CI/CD file
+docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  /workspace/.github/workflows/ci.yml --output /workspace/docs
 ```
 
-#### Advanced Usage
-
-```bash
-# Interactive mode with shell access
-docker run --rm -it -v $(pwd):/workspace --entrypoint /bin/sh ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-```
-
-#### Docker Compose
-
-```yaml
-version: '3.8'
-services:
-  ci-dokumentor:
-    image: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-    volumes:
-      - .:/workspace
-    command: ["/workspace/.github/workflows/ci.yml", "--output", "/workspace/docs"]
-```
-
-#### CI/CD Integration
+#### GitHub Actions Integration
 
 ```yaml
 - name: Generate CI Documentation
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
   with:
-    args: '.github/workflows/ci.yml --output docs/ci'
+    args: '.github/workflows/ci.yml --output docs'
+```
+
+#### GitLab CI Integration
+
+```yaml
+generate-docs:
+  stage: docs
+  image: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  script:
+    - ci-dokumentor .gitlab-ci.yml --output docs
+  artifacts:
+    paths:
+      - docs/
+```
+
+#### Dagger.io Integration
+
+```go
+func (m *MyModule) GenerateDocs(ctx context.Context, source *dagger.Directory) *dagger.Directory {
+    return dag.Container().
+        From("ghcr.io/hoverkraft-tech/ci-dokumentor:latest").
+        WithMountedDirectory("/workspace", source).
+        WithWorkdir("/workspace").
+        WithExec([]string{"ci-dokumentor", ".github/workflows/ci.yml", "--output", "docs"}).
+        Directory("docs")
+}
 ```
 
 > **📖 Full Documentation**: See [docker/README.md](docker/README.md) for complete Docker usage guide, troubleshooting, and advanced configurations.
