@@ -6,7 +6,7 @@ on:
 permissions:
   actions: read
   contents: read
-  packages: write
+  packages: read
   security-events: write
   statuses: write
   id-token: write
@@ -30,27 +30,3 @@ jobs:
       id-token: write
       security-events: write
       contents: read
-
-  docker:
-    needs: nodejs
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@d9615e8f03feb5d9a3d96bbdd3b5617277395899 # 0.26.0
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    secrets:
-      oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      images: |
-        [
-          {
-            "name": "ci-dokumentor",
-            "context": ".",
-            "dockerfile": "docker/Dockerfile",
-            "target": "production",
-            "platforms": [
-              "linux/amd64",
-              "linux/arm64"
-            ]
-          }
-        ]
