@@ -53,6 +53,9 @@ COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/pa
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/package.json ./packages/repository/github/
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
 
+# Copy validation script for health checks
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/docker/validate-structure.js ./docker/
+
 # Switch to non-root user
 USER ci-dokumentor
 
@@ -63,9 +66,9 @@ ENV NODE_OPTIONS="--unhandled-rejections=strict"
 # Expose no ports (CLI tool)
 EXPOSE 0
 
-# Health check to ensure the CLI can start
+# Health check to ensure the CLI structure is valid and can start
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node packages/cli/dist/bin/ci-dokumentor.js --help > /dev/null 2>&1 || exit 1
+    CMD node /app/docker/validate-structure.js || exit 1
 
 # Default command is the CI Dokumentor CLI with help when no args provided
 CMD ["node", "packages/cli/dist/bin/ci-dokumentor.js", "--help"]

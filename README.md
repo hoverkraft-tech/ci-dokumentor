@@ -45,7 +45,7 @@ npx ci-dokumentor /path/to/ci-cd/component.yml
 
 CI Dokumentor is available as a Docker image that provides a lightweight, containerized way to generate documentation for your CI/CD components.
 
-#### Basic Usage
+#### Quick Start
 
 ```bash
 # Run CI Dokumentor on a specific file
@@ -54,20 +54,16 @@ docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:lates
 # Run with custom output directory
 docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest /workspace/.github/workflows/ci.yml --output /workspace/docs
 
-# Interactive mode with shell access
-docker run --rm -it -v $(pwd):/workspace --entrypoint /bin/sh ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-
 # See all available options
 docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor:latest --help
 ```
 
-#### Image Details
+#### Advanced Usage
 
-- **Base**: Node.js Alpine Linux for minimal size and security
-- **Size**: ~50MB (production image)
-- **Architectures**: linux/amd64, linux/arm64
-- **User**: Runs as non-root user `ci-dokumentor` (UID 1001)
-- **Entry Point**: CI Dokumentor CLI with full option support
+```bash
+# Interactive mode with shell access
+docker run --rm -it -v $(pwd):/workspace --entrypoint /bin/sh ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+```
 
 #### Docker Compose
 
@@ -89,6 +85,8 @@ services:
   with:
     args: '.github/workflows/ci.yml --output docs/ci'
 ```
+
+> **📖 Full Documentation**: See [docker/README.md](docker/README.md) for complete Docker usage guide, troubleshooting, and advanced configurations.
 
 ### GitHub Action
 
