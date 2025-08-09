@@ -33,7 +33,7 @@ jobs:
 
   docker:
     needs: nodejs
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@0.26.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@d9615e8f03feb5d9a3d96bbdd3b5617277395899 # 0.26.0
     permissions:
       contents: read
       packages: write
