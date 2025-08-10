@@ -264,7 +264,7 @@ This means:
 
 #### Visual Studio Code
 
-The repository includes VS Code configuration in `.vscode/`:
+The repository includes Visual Studio Code configuration in `.vscode/`:
 
 ```json title=".vscode/settings.json"
 {
@@ -484,7 +484,7 @@ node --inspect-brk dist/bin/ci-dokumentor.js action.yml --verbose
 # Open Chrome DevTools: chrome://inspect
 ```
 
-#### VS Code Debugging
+#### Visual Studio Code Debugging
 
 Create `.vscode/launch.json`:
 
@@ -567,7 +567,7 @@ rm -rf packages/*/.tsbuildinfo
 # Rebuild all packages
 pnpm build
 
-# Restart TypeScript server in VS Code
+# Restart TypeScript server in Visual Studio Code
 # Cmd/Ctrl + Shift + P -> "TypeScript: Restart TS Server"
 ```
 

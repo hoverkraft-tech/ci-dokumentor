@@ -267,7 +267,7 @@ jobs:
 
 #### 3. Release Job
 
-- **README generation** - Auto-update repository README
+- **Readme generation** - Auto-update repository readme
 - **Documentation updates** - Generate action/workflow docs
 - **Automated PRs** - Create and merge documentation updates
 - **GitHub App authentication** - Secure token management
@@ -337,7 +337,7 @@ CI Dokumentor follows semantic versioning:
 
 - **Major (1.0.0)** - Breaking changes
 - **Minor (0.1.0)** - New features (backward compatible)
-- **Patch (0.0.1)** - Bug fixes
+- **Patch (0.0.1)** - Bugfixes
 
 ### Automated Releases
 
@@ -353,7 +353,7 @@ The release process is triggered by:
 2. **Changelog Generation** - Auto-generate from commit history
 3. **Asset Creation** - Build and package artifacts
 4. **Docker Image** - Build and tag container images
-5. **Documentation** - Update documentation and README
+5. **Documentation** - Update documentation and readme
 6. **GitHub Release** - Create release with notes and assets
 7. **NPM Publish** - Publish packages to npm registry (future)
 
@@ -372,7 +372,7 @@ Each release includes:
 
 The pipeline automatically maintains documentation:
 
-#### README Updates
+#### Readme Updates
 
 ```yaml
 - uses: bitflight-devops/github-action-readme-generator@f750ff0ac8a4b68a3c2d622cc50a5ad20bcebaa1

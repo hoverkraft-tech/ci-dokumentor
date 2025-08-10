@@ -13,8 +13,6 @@
 [![License](https://poser.pugx.org/hoverkraft-tech/ci-dokumentor/license)](https://packagist.org/packages/hoverkraft-tech/ci-dokumentor)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-# CI Dokumentor
-
 📢 **CI Dokumentor** is an automated documentation generator for CI/CD components
 
 ## 📖 Documentation
