@@ -39,8 +39,8 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Developers',
       items: [
-        'developers/architecture',
         'developers/contributing',
+        'developers/architecture',
         'developers/setup',
         'developers/testing',
         'developers/ci-cd',
