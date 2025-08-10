@@ -20,7 +20,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [Suggesting Enhancements](#suggesting-enhancements)
 - [Your First Code Contribution](#your-first-code-contribution)
 - [Improving The Documentation](#improving-the-documentation)
-- [Styleguides](#styleguides)
+- [Style guides](#style-guides)
 - [Commit Messages](#commit-messages)
 
 ## Code of Conduct
@@ -115,9 +115,9 @@ Enhancement suggestions are tracked as [GitHub issues](../../issues).
 
 Updates to documentation are always welcome! See the [documentation structure](docs/content/) for how documentation is organized.
 
-## Styleguides
+## Style guides
 
-- Code MUST respect the lint rules defined in the project.
+- Code MUST respect the linter rules defined in the project.
 - Use the established TypeScript and clean architecture patterns.
 - Follow the dependency injection and container patterns used throughout the project.
 

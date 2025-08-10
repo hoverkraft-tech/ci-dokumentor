@@ -16,7 +16,7 @@ CI Dokumentor is a powerful TypeScript-based tool that automatically generates c
 - 🔧 **Extensible Design** - Easy to add support for new CI/CD platforms
 - 🐳 **Docker Ready** - Available as a Docker image for easy integration
 - 🚀 **GitHub Action** - Can be used directly in GitHub workflows
-- 📋 **CLI Tool** - Command-line interface for local usage
+- 📋 **Command-line tool** - Command-line interface for local usage
 
 ## Quick Start
 
