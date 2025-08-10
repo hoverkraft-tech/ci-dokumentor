@@ -89,12 +89,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
           args: 'generate --source . --output docs'
-          
+
       - name: Upload Documentation
         uses: actions/upload-artifact@v4
         with:
@@ -111,9 +111,9 @@ generate-docs:
   services:
     - docker:dind
   script:
-    - docker run --rm -v $PWD:/workspace 
-        ghcr.io/hoverkraft-tech/ci-dokumentor:latest 
-        generate --source /workspace --output /workspace/docs
+    - docker run --rm -v $PWD:/workspace
+      ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+      generate --source /workspace --output /workspace/docs
   artifacts:
     paths:
       - docs/
@@ -155,6 +155,7 @@ docker run --rm \
 ### Common Issues
 
 #### Permission Denied
+
 ```bash
 # Solution: Run with user mapping
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
@@ -163,6 +164,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 ```
 
 #### Platform Detection Failed
+
 ```bash
 # Solution: Specify platform explicitly
 docker run --rm -v $(pwd):/workspace \
@@ -172,6 +174,7 @@ docker run --rm -v $(pwd):/workspace \
 ```
 
 #### Invalid File Paths
+
 - Ensure source files exist in mounted directory
 - Use absolute paths within the container (`/workspace/...`)
 - Check file permissions and ownership

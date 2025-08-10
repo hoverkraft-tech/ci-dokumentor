@@ -32,9 +32,9 @@ The main service for Git repository operations:
 
 ```typescript
 class GitRepositoryProvider implements IRepositoryProvider {
-  async getRepository(url: string): Promise<Repository>
-  supportsUrl(url: string): boolean
-  async getRepositoryInfo(path: string): Promise<GitRepositoryInfo>
+  async getRepository(url: string): Promise<Repository>;
+  supportsUrl(url: string): boolean;
+  async getRepositoryInfo(path: string): Promise<GitRepositoryInfo>;
 }
 ```
 
@@ -52,12 +52,12 @@ class GitRepositoryProvider implements IRepositoryProvider {
 
 ```typescript
 interface Repository {
-  name: string;           // Repository name
-  description?: string;   // Repository description (if available)
-  url: string;           // Repository URL
-  owner: string;         // Repository owner/organization
+  name: string; // Repository name
+  description?: string; // Repository description (if available)
+  url: string; // Repository URL
+  owner: string; // Repository owner/organization
   defaultBranch: string; // Default branch name
-  language?: string;     // Primary language (if detectable)
+  language?: string; // Primary language (if detectable)
 }
 ```
 
@@ -65,12 +65,12 @@ interface Repository {
 
 ```typescript
 interface GitRepositoryInfo {
-  path: string;          // Local repository path
-  remotes: GitRemote[];  // Remote configurations
-  branches: string[];    // Available branches
+  path: string; // Local repository path
+  remotes: GitRemote[]; // Remote configurations
+  branches: string[]; // Available branches
   currentBranch: string; // Currently checked out branch
   lastCommit: GitCommit; // Most recent commit
-  tags: string[];        // Available tags
+  tags: string[]; // Available tags
 }
 ```
 
@@ -84,10 +84,12 @@ import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 const provider = new GitRepositoryProvider();
 
 // Get repository information from URL
-const repository = await provider.getRepository('https://github.com/user/repo.git');
+const repository = await provider.getRepository(
+  'https://github.com/user/repo.git',
+);
 
-console.log(repository.name);         // 'repo'
-console.log(repository.owner);        // 'user'  
+console.log(repository.name); // 'repo'
+console.log(repository.owner); // 'user'
 console.log(repository.defaultBranch); // 'main'
 ```
 
@@ -97,9 +99,9 @@ console.log(repository.defaultBranch); // 'main'
 // Analyze local Git repository
 const localInfo = await provider.getRepositoryInfo('./my-project');
 
-console.log(localInfo.currentBranch);  // 'feature-branch'
-console.log(localInfo.remotes);        // [{ name: 'origin', url: '...' }]
-console.log(localInfo.lastCommit);     // { hash: 'abc123', message: '...' }
+console.log(localInfo.currentBranch); // 'feature-branch'
+console.log(localInfo.remotes); // [{ name: 'origin', url: '...' }]
+console.log(localInfo.lastCommit); // { hash: 'abc123', message: '...' }
 ```
 
 ### URL Support Detection
@@ -121,36 +123,36 @@ The Git repository provider supports various Git URL formats:
 
 ```typescript
 // GitHub
-'https://github.com/user/repo.git'
-'https://github.com/user/repo'
+'https://github.com/user/repo.git';
+'https://github.com/user/repo';
 
 // GitLab
-'https://gitlab.com/user/repo.git'
-'https://gitlab.com/user/repo'
+'https://gitlab.com/user/repo.git';
+'https://gitlab.com/user/repo';
 
 // Generic Git hosting
-'https://git.example.com/user/repo.git'
+'https://git.example.com/user/repo.git';
 ```
 
 ### SSH URLs
 
 ```typescript
 // GitHub SSH
-'git@github.com:user/repo.git'
+'git@github.com:user/repo.git';
 
-// GitLab SSH  
-'git@gitlab.com:user/repo.git'
+// GitLab SSH
+'git@gitlab.com:user/repo.git';
 
 // Generic SSH
-'git@git.example.com:user/repo.git'
+'git@git.example.com:user/repo.git';
 ```
 
 ### Git Protocol URLs
 
 ```typescript
 // Git protocol
-'git://github.com/user/repo.git'
-'git://git.example.com/user/repo.git'
+'git://github.com/user/repo.git';
+'git://git.example.com/user/repo.git';
 ```
 
 ## Integration with Other Packages
@@ -167,7 +169,8 @@ import { TYPES } from '@ci-dokumentor/core';
 const container = new Container();
 
 // Register Git repository provider
-container.bind<IRepositoryProvider>(TYPES.RepositoryProvider)
+container
+  .bind<IRepositoryProvider>(TYPES.RepositoryProvider)
   .to(GitRepositoryProvider)
   .whenTargetNamed('git');
 ```
@@ -182,13 +185,13 @@ class GitHubRepositoryProvider extends GitRepositoryProvider {
   async getRepository(url: string): Promise<GitHubRepository> {
     // Get base Git information
     const baseRepository = await super.getRepository(url);
-    
+
     // Add GitHub-specific information
     const githubInfo = await this.getGitHubSpecificInfo(url);
-    
+
     return {
       ...baseRepository,
-      ...githubInfo
+      ...githubInfo,
     };
   }
 }
@@ -250,17 +253,19 @@ The package includes comprehensive testing utilities:
 const mockGitProvider = mock<GitRepositoryProvider>();
 
 // Setup mock behavior
-when(mockGitProvider.getRepository('https://github.com/test/repo.git'))
-  .thenResolve({
-    name: 'repo',
-    owner: 'test',
-    url: 'https://github.com/test/repo.git',
-    defaultBranch: 'main'
-  });
+when(
+  mockGitProvider.getRepository('https://github.com/test/repo.git'),
+).thenResolve({
+  name: 'repo',
+  owner: 'test',
+  url: 'https://github.com/test/repo.git',
+  defaultBranch: 'main',
+});
 
 // Use in tests
-const repository = await instance(mockGitProvider)
-  .getRepository('https://github.com/test/repo.git');
+const repository = await instance(mockGitProvider).getRepository(
+  'https://github.com/test/repo.git',
+);
 ```
 
 ### Test Builders
@@ -305,13 +310,16 @@ Configure the Git provider through dependency injection:
 
 ```typescript
 // Custom Git provider configuration
-container.bind<GitRepositoryProvider>(TYPES.GitRepositoryProvider)
-  .toConstantValue(new GitRepositoryProvider({
-    timeout: 5000,           // Git command timeout
-    maxCommits: 100,         // Maximum commits to analyze
-    includeRemotes: true,    // Include remote information
-    analyzeBranches: true,   // Analyze branch information
-  }));
+container
+  .bind<GitRepositoryProvider>(TYPES.GitRepositoryProvider)
+  .toConstantValue(
+    new GitRepositoryProvider({
+      timeout: 5000, // Git command timeout
+      maxCommits: 100, // Maximum commits to analyze
+      includeRemotes: true, // Include remote information
+      analyzeBranches: true, // Analyze branch information
+    }),
+  );
 ```
 
 ## Performance Considerations
@@ -331,7 +339,7 @@ Typical performance characteristics:
 // Local repository analysis: ~10-50ms
 const localRepo = await provider.getRepositoryInfo('./project');
 
-// Remote URL parsing: ~1-5ms  
+// Remote URL parsing: ~1-5ms
 const isSupported = provider.supportsUrl(url);
 
 // Full repository information: ~50-200ms
@@ -378,7 +386,7 @@ nx lint repository-git
 class CustomGitProvider extends GitRepositoryProvider {
   async getRepositoryStats(path: string): Promise<GitStats> {
     const gitInfo = await this.getRepositoryInfo(path);
-    
+
     return {
       commitCount: await this.getCommitCount(path),
       contributorCount: await this.getContributorCount(path),
@@ -400,10 +408,10 @@ const repositories = [
 ];
 
 const repoInfos = await Promise.all(
-  repositories.map(url => provider.getRepository(url))
+  repositories.map((url) => provider.getRepository(url)),
 );
 
-repoInfos.forEach(repo => {
+repoInfos.forEach((repo) => {
   console.log(`${repo.name}: ${repo.description}`);
 });
 ```

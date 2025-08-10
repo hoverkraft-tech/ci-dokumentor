@@ -84,7 +84,7 @@ describe('RepositoryService', () => {
         name: 'repo',
         owner: 'user',
         url,
-        defaultBranch: 'main'
+        defaultBranch: 'main',
       };
 
       when(mockProvider.getRepository(url)).thenResolve(expectedRepo);
@@ -99,12 +99,14 @@ describe('RepositoryService', () => {
     it('should throw error for invalid URL', async () => {
       // Arrange
       const invalidUrl = 'not-a-url';
-      when(mockProvider.getRepository(invalidUrl))
-        .thenReject(new Error('Invalid URL'));
+      when(mockProvider.getRepository(invalidUrl)).thenReject(
+        new Error('Invalid URL'),
+      );
 
       // Act & Assert
-      await expect(service.getRepositoryInfo(invalidUrl))
-        .rejects.toThrow('Invalid URL');
+      await expect(service.getRepositoryInfo(invalidUrl)).rejects.toThrow(
+        'Invalid URL',
+      );
     });
   });
 });
@@ -168,7 +170,9 @@ describe('CLI E2E Tests', () => {
   beforeEach(() => {
     // Create test directory and action file
     fs.mkdirSync(testDir, { recursive: true });
-    fs.writeFileSync(actionFile, `
+    fs.writeFileSync(
+      actionFile,
+      `
 name: 'Test Action'
 description: 'A test action'
 inputs:
@@ -181,7 +185,8 @@ outputs:
 runs:
   using: 'node20'
   main: 'index.js'
-    `);
+    `,
+    );
   });
 
   afterEach(() => {
@@ -193,7 +198,7 @@ runs:
     // Act
     const result = execSync(
       `node dist/bin/ci-dokumentor.js "${actionFile}" --output "${outputDir}"`,
-      { encoding: 'utf8', cwd: path.join(__dirname, '../../') }
+      { encoding: 'utf8', cwd: path.join(__dirname, '../../') },
     );
 
     // Assert
@@ -202,7 +207,7 @@ runs:
 
     const generatedContent = fs.readFileSync(
       path.join(outputDir, 'README.md'),
-      'utf8'
+      'utf8',
     );
     expect(generatedContent).toContain('# Test Action');
     expect(generatedContent).toContain('## Inputs');
@@ -232,19 +237,19 @@ export default defineConfig({
         'dist/',
         '**/*.spec.ts',
         '**/*.test.ts',
-        '**/test-data/**'
+        '**/test-data/**',
       ],
       thresholds: {
         global: {
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
-    setupFiles: ['./src/test-setup.ts']
-  }
+    setupFiles: ['./src/test-setup.ts'],
+  },
 });
 ```
 
@@ -265,15 +270,15 @@ expect.extend({
   toBeValidMarkdown(received: string) {
     const hasHeaders = /^#+\s/.test(received);
     const pass = hasHeaders && received.length > 0;
-    
+
     return {
-      message: () => 
-        pass 
+      message: () =>
+        pass
           ? `Expected ${received} not to be valid markdown`
           : `Expected ${received} to be valid markdown`,
-      pass
+      pass,
     };
-  }
+  },
 });
 
 declare global {
@@ -340,7 +345,7 @@ export class RepositoryBuilder {
       owner: this.repository.owner || 'test-owner',
       url: this.repository.url || 'https://github.com/test-owner/test-repo',
       defaultBranch: this.repository.defaultBranch || 'main',
-      ...this.repository
+      ...this.repository,
     } as Repository;
   }
 }
@@ -357,7 +362,9 @@ const testRepo = new RepositoryBuilder()
 
 ```typescript title="packages/test-utils/src/mock-data.factory.ts"
 export class MockDataFactory {
-  static createGitHubAction(overrides: Partial<GitHubAction> = {}): GitHubAction {
+  static createGitHubAction(
+    overrides: Partial<GitHubAction> = {},
+  ): GitHubAction {
     return {
       name: 'Test Action',
       description: 'A test action for unit testing',
@@ -366,23 +373,23 @@ export class MockDataFactory {
         'test-input': {
           description: 'A test input',
           required: true,
-          default: 'test-value'
-        }
+          default: 'test-value',
+        },
       },
       outputs: {
         'test-output': {
-          description: 'A test output'
-        }
+          description: 'A test output',
+        },
       },
       runs: {
         using: 'node20',
-        main: 'index.js'
+        main: 'index.js',
       },
       branding: {
         icon: 'star',
-        color: 'blue'
+        color: 'blue',
       },
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -393,7 +400,7 @@ export class MockDataFactory {
       url: 'https://github.com/test-owner/test-repo',
       defaultBranch: 'main',
       description: 'A test repository',
-      ...overrides
+      ...overrides,
     };
   }
 }
@@ -413,12 +420,12 @@ describe('FileOutputAdapter', () => {
 
   beforeEach(() => {
     adapter = new FileOutputAdapter();
-    
+
     // Mock file system
     mockFs({
       '/test': {
-        'existing-file.txt': 'existing content'
-      }
+        'existing-file.txt': 'existing content',
+      },
     });
   });
 
@@ -459,12 +466,12 @@ describe('GitHubApiClient', () => {
     const mockResponse = {
       name: 'test-repo',
       owner: { login: 'test-owner' },
-      default_branch: 'main'
+      default_branch: 'main',
     };
 
     (fetch as any).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockResponse)
+      json: () => Promise.resolve(mockResponse),
     });
 
     // Act
@@ -475,9 +482,9 @@ describe('GitHubApiClient', () => {
       'https://api.github.com/repos/test-owner/test-repo',
       expect.objectContaining({
         headers: expect.objectContaining({
-          'Authorization': 'token fake-token'
-        })
-      })
+          Authorization: 'token fake-token',
+        }),
+      }),
     );
     expect(result.name).toBe('test-repo');
   });
@@ -501,17 +508,19 @@ describe('GenerateCommand', () => {
   beforeEach(() => {
     container = new Container();
     mockDocumentationService = mock<IDocumentationService>();
-    
-    container.bind<IDocumentationService>('DocumentationService')
+
+    container
+      .bind<IDocumentationService>('DocumentationService')
       .toConstantValue(instance(mockDocumentationService));
-      
+
     command = container.get<GenerateCommand>(GenerateCommand);
   });
 
   it('should generate documentation', async () => {
     // Arrange
-    when(mockDocumentationService.generate('action.yml'))
-      .thenResolve('# Generated Documentation');
+    when(mockDocumentationService.generate('action.yml')).thenResolve(
+      '# Generated Documentation',
+    );
 
     // Act
     await command.execute(['action.yml']);
@@ -539,9 +548,9 @@ describe('UsageSectionGenerator', () => {
       inputs: {
         'api-key': {
           description: 'API key for authentication',
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     });
 
     // Act
@@ -700,20 +709,20 @@ describe('MarkdownFormatterAdapter Performance', () => {
 describe('Memory Usage Tests', () => {
   it('should not leak memory during large document generation', async () => {
     const initialMemory = process.memoryUsage().heapUsed;
-    
+
     // Generate many documents
     for (let i = 0; i < 100; i++) {
       await generator.generate(largeAction, repository);
     }
-    
+
     // Force garbage collection if available
     if (global.gc) {
       global.gc();
     }
-    
+
     const finalMemory = process.memoryUsage().heapUsed;
     const memoryIncrease = finalMemory - initialMemory;
-    
+
     // Memory should not increase significantly
     expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024); // 50MB
   });
@@ -735,26 +744,26 @@ jobs:
     strategy:
       matrix:
         node-version: [18, 20]
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: latest
-          
+
       - name: Install dependencies
         run: pnpm install
-        
+
       - name: Run tests
         run: pnpm test:ci
-        
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -804,12 +813,12 @@ describe('Component', () => {
     it('should behave in way X', () => {
       // Test implementation
     });
-    
+
     it('should not behave in way Y', () => {
       // Test implementation
     });
   });
-  
+
   describe('when condition B', () => {
     it('should behave in way Z', () => {
       // Test implementation

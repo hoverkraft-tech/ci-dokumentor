@@ -39,7 +39,7 @@ graph TD
     C --> D[Docker Build]
     C --> E[Release]
     C --> F[Documentation Update]
-    
+
     B --> G[Linting]
     B --> H[Node.js CI]
     H --> I[Build]
@@ -89,6 +89,7 @@ jobs:
 ### What It Does
 
 #### Linting Stage
+
 - **Super-Linter** - Multi-language linting
 - **ESLint** - TypeScript/JavaScript code quality
 - **Prettier** - Code formatting validation
@@ -96,6 +97,7 @@ jobs:
 - **YAML Lint** - Configuration file validation
 
 #### Node.js Stage
+
 - **Dependencies** - pnpm install with caching
 - **Build** - nx build all packages
 - **Test** - Comprehensive test suite with coverage
@@ -175,7 +177,7 @@ on:
     tags: ['*']
   workflow_dispatch:
   schedule:
-    - cron: '25 8 * * 1'  # Weekly scheduled run
+    - cron: '25 8 * * 1' # Weekly scheduled run
 
 permissions:
   actions: read
@@ -250,11 +252,13 @@ jobs:
 ### Main Branch Jobs
 
 #### 1. CI Job
+
 - Same as PR workflow
 - Full validation pipeline
 - Must pass for subsequent jobs
 
 #### 2. Docker Job
+
 - **Multi-architecture builds** - AMD64 and ARM64
 - **Production optimization** - Minimal image size
 - **Registry push** - GitHub Container Registry
@@ -262,6 +266,7 @@ jobs:
 - **Security scanning** - Container vulnerability assessment
 
 #### 3. Release Job
+
 - **README generation** - Auto-update repository README
 - **Documentation updates** - Generate action/workflow docs
 - **Automated PRs** - Create and merge documentation updates
@@ -339,7 +344,7 @@ CI Dokumentor follows semantic versioning:
 The release process is triggered by:
 
 1. **Manual workflow dispatch**
-2. **Tag creation** (v*)
+2. **Tag creation** (v\*)
 3. **Scheduled releases** (weekly)
 
 ### Release Steps
@@ -377,8 +382,9 @@ The pipeline automatically maintains documentation:
 ```
 
 This generates:
+
 - **Action documentation** - From action.yml files
-- **Workflow documentation** - From .github/workflows/*.yml
+- **Workflow documentation** - From .github/workflows/\*.yml
 - **API documentation** - From code comments
 - **Badge updates** - CI status, coverage, version badges
 
@@ -393,7 +399,7 @@ This generates:
     body: Update actions and workflows documentation
     commit-message: |
       docs: update actions and workflows documentation
-      
+
       [skip ci]
 ```
 
@@ -530,6 +536,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -f docker/Dockerfile .
 #### Workflow Debugging
 
 1. **Enable debug logging**:
+
    ```yaml
    env:
      ACTIONS_RUNNER_DEBUG: true
@@ -583,7 +590,7 @@ new-job:
   needs: ci
   runs-on: ubuntu-latest
   permissions:
-    contents: read  # Minimal permissions
+    contents: read # Minimal permissions
   steps:
     - uses: actions/checkout@v4
     - name: Your new step

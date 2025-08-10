@@ -11,7 +11,7 @@ The `@ci-dokumentor/core` package contains the fundamental building blocks and a
 The core package provides:
 
 - **Services** - Core business logic and orchestration
-- **Adapters** - Interface implementations for various platforms  
+- **Adapters** - Interface implementations for various platforms
 - **Interfaces** - Contracts for extensibility
 - **Dependencies** - Dependency injection container setup
 
@@ -20,17 +20,19 @@ The core package provides:
 ### Services
 
 #### RepositoryService
+
 Manages repository information and platform detection:
 
 ```typescript
 class RepositoryService {
-  getSupportedRepositoryPlatforms(): string[]
-  autoDetectRepositoryPlatform(): Promise<string | null>
-  getRepository(): Promise<Repository>
+  getSupportedRepositoryPlatforms(): string[];
+  autoDetectRepositoryPlatform(): Promise<string | null>;
+  getRepository(): Promise<Repository>;
 }
 ```
 
 **Repository Model:**
+
 ```typescript
 type Repository = {
   owner: string;
@@ -47,25 +49,30 @@ type Repository = {
 ```
 
 #### GeneratorService
+
 Manages CI/CD platform adapters and documentation generation:
 
 ```typescript
 class GeneratorService {
-  getSupportedCicdPlatforms(): string[]
-  getGeneratorAdapterByPlatform(platform: string): GeneratorAdapter | undefined
-  getSupportedSectionsForPlatform(platform: string): string[]
-  autoDetectCicdPlatform(source: string): string | null
-  autoDetectCicdAdapter(source: string): GeneratorAdapter | null
-  generateDocumentationForPlatform(source: string, adapter: GeneratorAdapter): Promise<void>
+  getSupportedCicdPlatforms(): string[];
+  getGeneratorAdapterByPlatform(platform: string): GeneratorAdapter | undefined;
+  getSupportedSectionsForPlatform(platform: string): string[];
+  autoDetectCicdPlatform(source: string): string | null;
+  autoDetectCicdAdapter(source: string): GeneratorAdapter | null;
+  generateDocumentationForPlatform(
+    source: string,
+    adapter: GeneratorAdapter,
+  ): Promise<void>;
 }
 ```
 
 #### FormatterService
+
 Handles content formatting and output adapters:
 
 ```typescript
 class FormatterService {
-  getFormatterAdapterForFile(filePath: string): FormatterAdapter
+  getFormatterAdapterForFile(filePath: string): FormatterAdapter;
   // Additional formatting utilities
 }
 ```
@@ -73,6 +80,7 @@ class FormatterService {
 ### Interfaces
 
 #### RepositoryProvider
+
 Interface for repository platform providers:
 
 ```typescript
@@ -84,6 +92,7 @@ interface RepositoryProvider {
 ```
 
 #### GeneratorAdapter
+
 Interface for CI/CD platform adapters:
 
 ```typescript
@@ -95,12 +104,13 @@ interface GeneratorAdapter {
   generateDocumentation(
     source: string,
     formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter
+    outputAdapter: OutputAdapter,
   ): Promise<void>;
 }
 ```
 
 #### FormatterAdapter
+
 Interface for content formatters:
 
 ```typescript
@@ -110,6 +120,7 @@ interface FormatterAdapter {
 ```
 
 #### OutputAdapter
+
 Interface for output handling:
 
 ```typescript
@@ -121,9 +132,11 @@ interface OutputAdapter {
 ### Adapters
 
 #### MarkdownFormatterAdapter
+
 Provides Markdown-specific formatting capabilities.
 
 #### FileOutputAdapter
+
 Handles file system operations for documentation output.
 
 ## Dependency Injection
@@ -154,6 +167,6 @@ nx lint core
 ## Related Packages
 
 - [CLI Package](./cli) - Command-line interface built on core
-- [Repository Git](./repository-git) - Git repository provider implementation  
+- [Repository Git](./repository-git) - Git repository provider implementation
 - [Repository GitHub](./repository-github) - GitHub-specific repository provider
 - [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions manifest parser and generator

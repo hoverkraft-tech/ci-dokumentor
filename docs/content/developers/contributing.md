@@ -57,7 +57,7 @@ CI Dokumentor follows clean architecture principles with these packages:
 
 - `packages/core/` - Core abstractions and services
 - `packages/cli/` - Command-line interface
-- `packages/repository/git/` - Git repository provider  
+- `packages/repository/git/` - Git repository provider
 - `packages/repository/github/` - GitHub repository provider
 - `packages/cicd/github-actions/` - GitHub Actions CI/CD provider
 

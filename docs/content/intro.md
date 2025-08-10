@@ -25,16 +25,19 @@ CI Dokumentor is a powerful TypeScript-based tool that automatically generates c
 Choose your preferred installation method:
 
 **Docker (Recommended):**
+
 ```bash
 docker pull ghcr.io/hoverkraft-tech/ci-dokumentor:latest
 ```
 
 **NPX (No Installation):**
+
 ```bash
 npx ci-dokumentor --help
 ```
 
 **NPM Global:**
+
 ```bash
 npm install -g @ci-dokumentor/cli
 ```
@@ -86,9 +89,11 @@ The main command is `generate` with these key options:
 ## Supported Platforms
 
 ### CI/CD Platforms
+
 - ✅ **GitHub Actions** - Action files (`action.yml`) and workflow files (`.github/workflows/*.yml`)
 
-### Repository Platforms  
+### Repository Platforms
+
 - ✅ **GitHub** - Repository information and metadata
 - ✅ **Git** - Basic repository information
 

@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
@@ -119,14 +119,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
           args: 'action.yml --output docs --include-repo-info'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Check for Documentation Changes
         id: verify-changed-files
         run: |
@@ -135,7 +135,7 @@ jobs:
           else
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
-          
+
       - name: Commit Documentation Updates
         if: steps.verify-changed-files.outputs.changed == 'true'
         run: |
@@ -165,14 +165,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
           args: 'action.yml --output temp-docs'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Check Documentation is Up-to-Date
         run: |
           if ! diff -r docs/ temp-docs/ > /dev/null; then
@@ -208,24 +208,24 @@ jobs:
     strategy:
       matrix:
         platform: [github-actions, general]
-        
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation for ${{ matrix.platform }}
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
           args: 'action.yml --output docs/${{ matrix.platform }} --type ${{ matrix.platform }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Upload Documentation Artifact
         uses: actions/upload-artifact@v4
         with:
           name: docs-${{ matrix.platform }}
           path: docs/${{ matrix.platform }}/
-          
+
   publish-docs:
     needs: generate-docs
     runs-on: ubuntu-latest
@@ -234,12 +234,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: all-docs/
-          
+
       - name: Combine Documentation
         run: |
           mkdir -p final-docs
           cp -r all-docs/docs-*/* final-docs/
-          
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -266,19 +266,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name }}
-          
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
           args: 'action.yml --output release-docs --include-repo-info'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Create Documentation Archive
         run: |
           cd release-docs
           tar -czf ../docs-${{ github.event.release.tag_name }}.tar.gz *
-          
+
       - name: Upload Documentation to Release
         uses: actions/upload-release-asset@v1
         env:
@@ -353,9 +353,9 @@ Provide enhanced repository information:
     args: 'action.yml --output docs'
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    CI_DOKUMENTOR_AUTHOR: "My Organization"
-    CI_DOKUMENTOR_LICENSE: "MIT"
-    CI_DOKUMENTOR_VERBOSE: "true"
+    CI_DOKUMENTOR_AUTHOR: 'My Organization'
+    CI_DOKUMENTOR_LICENSE: 'MIT'
+    CI_DOKUMENTOR_VERBOSE: 'true'
 ```
 
 ## Conditional Execution
@@ -399,7 +399,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
@@ -427,7 +427,7 @@ jobs:
   with:
     args: 'action.yml --output docs'
   continue-on-error: true
-  
+
 - name: Handle Documentation Failure
   if: steps.generate-docs.outcome == 'failure'
   run: |
@@ -448,7 +448,7 @@ jobs:
         yamllint "$file" || exit 1
       fi
     done
-    
+
 - name: Generate Documentation
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
   with:
@@ -476,14 +476,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        file: 
+        file:
           - action.yml
           - .github/workflows/ci.yml
           - .github/workflows/deploy.yml
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation for ${{ matrix.file }}
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
@@ -496,15 +496,15 @@ jobs:
 
 ```yaml
 permissions:
-  contents: read  # Only read access needed for basic generation
-  
+  contents: read # Only read access needed for basic generation
+
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
@@ -515,20 +515,20 @@ jobs:
 
 ```yaml
 permissions:
-  contents: write  # Write access for committing documentation
-  
+  contents: write # Write access for committing documentation
+
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
           args: 'action.yml --output docs'
-          
+
       - name: Commit Documentation
         run: |
           git config --local user.email "action@github.com"
@@ -548,7 +548,7 @@ jobs:
   env:
     # Use built-in GITHUB_TOKEN (automatically provided)
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+
     # Or use a custom PAT for enhanced permissions
     # GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 ```
@@ -562,6 +562,7 @@ jobs:
 **Problem**: `Error: Unable to resolve action`
 
 **Solution**: Ensure you're using the full Docker image path:
+
 ```yaml
 # ✅ Correct
 uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
@@ -575,6 +576,7 @@ uses: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
 **Problem**: `Permission denied` when writing files
 
 **Solution**: Ensure proper permissions are set:
+
 ```yaml
 permissions:
   contents: write
@@ -589,14 +591,15 @@ permissions:
 **Problem**: `File not found: action.yml`
 
 **Solution**: Check file paths and ensure checkout:
+
 ```yaml
 - name: Checkout
-  uses: actions/checkout@v4  # Required to access repository files
-  
+  uses: actions/checkout@v4 # Required to access repository files
+
 - name: Generate Documentation
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
   with:
-    args: 'action.yml --output docs'  # Ensure correct file path
+    args: 'action.yml --output docs' # Ensure correct file path
 ```
 
 ### Debugging
@@ -617,10 +620,10 @@ permissions:
   run: |
     echo "Repository contents:"
     find . -name "*.yml" -o -name "*.yaml" | head -20
-    
+
     echo "action.yml contents:"
     cat action.yml || echo "action.yml not found"
-    
+
 - name: Generate Documentation
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
   with:

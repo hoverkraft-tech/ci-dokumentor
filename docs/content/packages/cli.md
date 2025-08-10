@@ -57,22 +57,24 @@ ci-dokumentor generate --source ./my-project --output ./my-docs
 
 #### Command Options
 
-| Option | Alias | Description | Default |
-|--------|-------|-------------|---------|
-| `--source <dir>` | `-s` | Source directory containing CI/CD files | `.` |
-| `--output <dir>` | `-o` | Output directory for generated documentation | `./docs` |
-| `--repository <platform>` | `-r` | Repository platform (auto-detected if not specified) | - |
-| `--cicd <platform>` | `-c` | CI/CD platform (auto-detected if not specified) | - |
-| `--include-sections <sections>` | - | Comma-separated list of sections to include | - |
-| `--exclude-sections <sections>` | - | Comma-separated list of sections to exclude | - |
+| Option                          | Alias | Description                                          | Default  |
+| ------------------------------- | ----- | ---------------------------------------------------- | -------- |
+| `--source <dir>`                | `-s`  | Source directory containing CI/CD files              | `.`      |
+| `--output <dir>`                | `-o`  | Output directory for generated documentation         | `./docs` |
+| `--repository <platform>`       | `-r`  | Repository platform (auto-detected if not specified) | -        |
+| `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)      | -        |
+| `--include-sections <sections>` | -     | Comma-separated list of sections to include          | -        |
+| `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude          | -        |
 
 #### Supported Platforms
 
 **Repository Platforms:**
+
 - `git` - Git repository support
 - `github` - GitHub-specific features
 
 **CI/CD Platforms:**
+
 - `github-actions` - GitHub Actions workflows and action files
 
 #### Examples
@@ -99,6 +101,7 @@ ci-dokumentor generate --source ./actions --output ./action-docs
 The CLI supports including/excluding specific documentation sections:
 
 **Common Sections (varies by platform):**
+
 - `overview` - General information
 - `inputs` - Input parameters
 - `outputs` - Output values
@@ -118,31 +121,36 @@ The CLI is built with:
 ### Core Components
 
 #### CliApplication
+
 Main application class that orchestrates command execution:
 
 ```typescript
 class CliApplication {
-  async run(args?: string[]): Promise<void>
+  async run(args?: string[]): Promise<void>;
 }
 ```
 
 #### GenerateCommand
+
 Implements the generate command:
 
 ```typescript
 class GenerateCommand extends BaseCommand {
-  configure(): this // Sets up command options and action
+  configure(): this; // Sets up command options and action
 }
 ```
 
 #### GenerateDocumentationUseCase
+
 Business logic for documentation generation:
 
 ```typescript
 class GenerateDocumentationUseCase {
-  execute(input: GenerateDocumentationUseCaseInput): Promise<GenerateDocumentationUseCaseOutput>
-  getSupportedRepositoryPlatforms(): string[]
-  getSupportedCicdPlatforms(): string[]
+  execute(
+    input: GenerateDocumentationUseCaseInput,
+  ): Promise<GenerateDocumentationUseCaseOutput>;
+  getSupportedRepositoryPlatforms(): string[];
+  getSupportedCicdPlatforms(): string[];
 }
 ```
 
@@ -156,10 +164,10 @@ The CLI provides helpful error messages for common issues:
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | General error (invalid arguments, file not found, etc.) |
+| Code | Meaning                                                 |
+| ---- | ------------------------------------------------------- |
+| `0`  | Success                                                 |
+| `1`  | General error (invalid arguments, file not found, etc.) |
 
 ## Development
 
@@ -188,10 +196,10 @@ node dist/packages/cli/bin/ci-dokumentor.js --help
 
 - [Core Package](./core) - Core services and interfaces
 - [Repository Git](./repository-git) - Git repository provider
-- [Repository GitHub](./repository-github) - GitHub repository provider  
+- [Repository GitHub](./repository-github) - GitHub repository provider
 - [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions support
 
-### Examples
+### Basic Examples
 
 ```bash
 # Basic usage
@@ -222,16 +230,16 @@ ci-dokumentor generate --author "My Team" --license "MIT" action.yml
 
 #### Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--output` | `-o` | Output directory or file | `./docs` |
-| `--type` | `-t` | CI/CD platform type | `auto-detect` |
-| `--author` | `-a` | Override author information | From manifest |
-| `--license` | `-l` | Override license information | From repository |
-| `--include-repo-info` | | Include repository metadata | `false` |
-| `--template` | | Custom template file | Built-in |
-| `--format` | `-f` | Output format | `markdown` |
-| `--verbose` | `-v` | Verbose logging | `false` |
+| Option                | Short | Description                  | Default         |
+| --------------------- | ----- | ---------------------------- | --------------- |
+| `--output`            | `-o`  | Output directory or file     | `./docs`        |
+| `--type`              | `-t`  | CI/CD platform type          | `auto-detect`   |
+| `--author`            | `-a`  | Override author information  | From manifest   |
+| `--license`           | `-l`  | Override license information | From repository |
+| `--include-repo-info` |       | Include repository metadata  | `false`         |
+| `--template`          |       | Custom template file         | Built-in        |
+| `--format`            | `-f`  | Output format                | `markdown`      |
+| `--verbose`           | `-v`  | Verbose logging              | `false`         |
 
 ### Help Command
 
@@ -293,7 +301,7 @@ export CI_DOKUMENTOR_VERBOSE=true
 
 The CLI follows clean architecture principles with clear separation of concerns:
 
-### Core Components
+### Architecture Core Components
 
 #### Command Interface
 
@@ -332,7 +340,7 @@ interface ICliApplication {
 abstract class BaseCommand implements ICommand {
   constructor(
     public readonly name: string,
-    public readonly description: string
+    public readonly description: string,
   ) {}
 
   abstract execute(args: string[]): Promise<void>;
@@ -347,13 +355,13 @@ abstract class BaseCommand implements ICommand {
 }
 ```
 
-#### Generate Command
+#### Generate Command Implementation
 
 ```typescript
 class GenerateCommand extends BaseCommand {
   constructor(
     private readonly documentationService: DocumentationService,
-    private readonly repositoryService: RepositoryService
+    private readonly repositoryService: RepositoryService,
   ) {
     super('generate', 'Generate documentation from CI/CD files');
   }
@@ -365,8 +373,11 @@ class GenerateCommand extends BaseCommand {
     // Generate documentation
     const manifest = await this.parseManifest(options.input);
     const repository = await this.getRepository(options);
-    const documentation = await this.generateDocumentation(manifest, repository);
-    
+    const documentation = await this.generateDocumentation(
+      manifest,
+      repository,
+    );
+
     await this.writeOutput(documentation, options.output);
   }
 }
@@ -380,30 +391,33 @@ function initContainer(): Container {
   const container = new Container();
 
   // Bind core services
-  container.bind<IRepositoryService>(TYPES.RepositoryService)
+  container
+    .bind<IRepositoryService>(TYPES.RepositoryService)
     .to(RepositoryService);
 
-  container.bind<IDocumentationService>(TYPES.DocumentationService)
+  container
+    .bind<IDocumentationService>(TYPES.DocumentationService)
     .to(DocumentationService);
 
   // Bind commands
-  container.bind<ICommand>(TYPES.Command)
+  container
+    .bind<ICommand>(TYPES.Command)
     .to(GenerateCommand)
     .whenTargetNamed('generate');
 
-  container.bind<ICommand>(TYPES.Command)
+  container
+    .bind<ICommand>(TYPES.Command)
     .to(HelpCommand)
     .whenTargetNamed('help');
 
   // Bind CLI application
-  container.bind<ICliApplication>(TYPES.CliApplication)
-    .to(CliApplication);
+  container.bind<ICliApplication>(TYPES.CliApplication).to(CliApplication);
 
   return container;
 }
 ```
 
-## Error Handling
+## CLI Error Handling
 
 The CLI provides comprehensive error handling with helpful messages:
 
@@ -438,7 +452,7 @@ class PermissionError extends CliError {
 # Example error output
 Error: File not found: action.yml
   at GenerateCommand.execute (/path/to/cli.js:123:45)
-  
+
 Suggestion: Make sure the file path is correct and the file exists.
 
 Usage: ci-dokumentor generate <file> [options]
@@ -472,15 +486,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          
+
       - name: Generate Documentation
         run: npx ci-dokumentor generate action.yml --output docs/
-        
+
       - name: Commit Documentation
         run: |
           git config --local user.email "action@github.com"
@@ -527,19 +541,19 @@ generate-docs:
 .PHONY: docs docs-watch docs-clean
 
 docs:
-	ci-dokumentor generate action.yml --output docs/
+    ci-dokumentor generate action.yml --output docs/
 
 docs-watch:
-	watch make docs
+    watch make docs
 
 docs-clean:
-	rm -rf docs/
+    rm -rf docs/
 
 docs-serve: docs
-	cd docs && python -m http.server 8000
+    cd docs && python -m http.server 8000
 ```
 
-## Testing
+## CLI Testing
 
 The CLI package includes comprehensive testing utilities:
 
@@ -557,8 +571,9 @@ describe('GenerateCommand', () => {
 
   it('should generate documentation for valid input', async () => {
     // Setup
-    when(mockDocumentationService.generate(anything()))
-      .thenResolve('# Generated Documentation');
+    when(mockDocumentationService.generate(anything())).thenResolve(
+      '# Generated Documentation',
+    );
 
     // Execute
     await command.execute(['action.yml', '--output', 'docs/']);
@@ -583,7 +598,7 @@ describe('CLI Integration', () => {
     // Verify output
     expect(result.exitCode).toBe(0);
     expect(fs.existsSync('docs/README.md')).toBe(true);
-    
+
     const generatedContent = fs.readFileSync('docs/README.md', 'utf8');
     expect(generatedContent).toContain('# Test Action');
   });
@@ -658,7 +673,8 @@ class MyCommand extends BaseCommand {
 2. **Register in Container**:
 
 ```typescript
-container.bind<ICommand>(TYPES.Command)
+container
+  .bind<ICommand>(TYPES.Command)
   .to(MyCommand)
   .whenTargetNamed('my-command');
 ```
@@ -673,7 +689,7 @@ describe('MyCommand', () => {
 });
 ```
 
-## Related Packages
+## CLI Related Packages
 
 - [Core Package](./core) - Foundation services and abstractions
 - [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions support

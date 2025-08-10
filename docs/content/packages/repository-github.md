@@ -76,7 +76,7 @@ const container = initContainer();
 ## Dependencies
 
 - `@ci-dokumentor/core` - Core abstractions and services
-- `@ci-dokumentor/repository-git` - Base Git repository functionality  
+- `@ci-dokumentor/repository-git` - Base Git repository functionality
 - `@octokit/graphql` - GitHub GraphQL API client
 - `inversify` - Dependency injection container
 

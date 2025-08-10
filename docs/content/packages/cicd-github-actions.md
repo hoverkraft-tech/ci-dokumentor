@@ -54,22 +54,26 @@ import { GitHubActionsParser } from '@ci-dokumentor/cicd-github-actions';
 The package includes the following section generators:
 
 ### Core Sections
+
 - **HeaderSectionGenerator** - Action/workflow title and description
 - **OverviewSectionGenerator** - General information and summary
 - **BadgesSectionGenerator** - Status badges and shields
 - **ContentsTable** - Table of contents for navigation
 
 ### Action-Specific Sections
+
 - **InputsSectionGenerator** - Input parameters documentation
 - **OutputsSectionGenerator** - Output values documentation
 - **UsageSectionGenerator** - Usage examples and code snippets
 - **ExamplesSectionGenerator** - Detailed usage examples
 
 ### Workflow-Specific Sections
+
 - **JobsSectionGenerator** - Job definitions and descriptions
 - **SecretsSectionGenerator** - Required secrets documentation
 
 ### Additional Sections
+
 - **SecuritySectionGenerator** - Security considerations
 - **LicenseSectionGenerator** - License information
 - **ContributingSectionGenerator** - Contributing guidelines
@@ -79,6 +83,7 @@ The package includes the following section generators:
 ### File Support
 
 Supports parsing of:
+
 - `action.yml` and `action.yaml` files
 - GitHub workflow files in `.github/workflows/`
 - Composite actions
@@ -88,6 +93,7 @@ Supports parsing of:
 ### Documentation Generation
 
 Generates:
+
 - Comprehensive README.md files
 - Usage examples with proper YAML syntax
 - Input/output parameter tables

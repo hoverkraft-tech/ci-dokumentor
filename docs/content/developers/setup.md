@@ -25,19 +25,22 @@ node --version
 
 1. **Official installer**: [nodejs.org](https://nodejs.org/)
 2. **Node Version Manager (nvm)** (recommended):
+
    ```bash
    # Install nvm (macOS/Linux)
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-   
+
    # Install and use Node.js 20
    nvm install 20
    nvm use 20
    ```
+
 3. **Package managers**:
+
    ```bash
    # macOS with Homebrew
    brew install node@20
-   
+
    # Ubuntu/Debian
    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
    sudo apt-get install -y nodejs
@@ -90,6 +93,7 @@ docker-compose --version
 #### IDE/Editor
 
 **Visual Studio Code** (recommended):
+
 - Download: [code.visualstudio.com](https://code.visualstudio.com/)
 - Extensions (install after cloning):
   ```bash
@@ -101,6 +105,7 @@ docker-compose --version
   ```
 
 **Alternative editors**:
+
 - **WebStorm** - Full TypeScript/Node.js support
 - **Vim/Neovim** - With TypeScript language server
 - **Emacs** - With tide-mode or lsp-mode
@@ -157,6 +162,7 @@ pnpm install
 ```
 
 Expected output:
+
 ```text
 Scope: all 6 workspace projects
 Lockfile is up to date, resolution step is skipped
@@ -171,17 +177,18 @@ pnpm build
 
 # This builds packages in dependency order:
 # 1. @ci-dokumentor/core
-# 2. @ci-dokumentor/repository-git  
+# 2. @ci-dokumentor/repository-git
 # 3. @ci-dokumentor/repository-github
 # 4. @ci-dokumentor/cicd-github-actions
 # 5. @ci-dokumentor/cli
 ```
 
 Expected output:
+
 ```text
 NX   Running target build for 5 projects:
 - @ci-dokumentor/cicd-github-actions
-- @ci-dokumentor/repository-github  
+- @ci-dokumentor/repository-github
 - @ci-dokumentor/repository-git
 - @ci-dokumentor/core
 - @ci-dokumentor/cli
@@ -247,6 +254,7 @@ graph TD
 ```
 
 This means:
+
 - **Core** has no dependencies (pure domain logic)
 - **Repository packages** depend on core
 - **CI/CD packages** depend on core and repository packages
@@ -281,7 +289,7 @@ The repository includes VS Code configuration in `.vscode/`:
 {
   "recommendations": [
     "ms-vscode.vscode-typescript-next",
-    "esbenp.prettier-vscode", 
+    "esbenp.prettier-vscode",
     "ms-vscode.vscode-eslint",
     "eamodio.gitlens",
     "nrwl.angular-console"
@@ -405,7 +413,7 @@ CI Dokumentor uses NX for monorepo management:
 nx build core
 nx build cli
 
-# Test specific package  
+# Test specific package
 nx test core
 nx test cli
 
@@ -531,6 +539,7 @@ docker run --rm -it -v $(pwd):/workspace --entrypoint /bin/sh ci-dokumentor:debu
 **Problem**: Build fails with Node.js version errors
 
 **Solution**:
+
 ```bash
 # Check Node.js version
 node --version
@@ -549,6 +558,7 @@ pnpm install
 **Problem**: TypeScript errors in IDE or build
 
 **Solution**:
+
 ```bash
 # Clean TypeScript cache
 rm -rf packages/*/dist
@@ -566,6 +576,7 @@ pnpm build
 **Problem**: pnpm install fails or is slow
 
 **Solution**:
+
 ```bash
 # Clear pnpm cache
 pnpm store prune
@@ -583,6 +594,7 @@ pnpm install --registry https://registry.npmjs.org/
 **Problem**: Cannot push to repository
 
 **Solution**:
+
 ```bash
 # Check remote URLs
 git remote -v
@@ -599,6 +611,7 @@ git remote set-url origin git@github.com:YOUR_USERNAME/ci-dokumentor.git
 **Problem**: Docker build fails
 
 **Solution**:
+
 ```bash
 # Check Docker is running
 docker info
@@ -662,6 +675,6 @@ Happy coding! 🚀
 ## Related Guides
 
 - [Contributing Guidelines](./contributing) - How to contribute effectively
-- [Testing Guide](./testing) - Comprehensive testing information  
+- [Testing Guide](./testing) - Comprehensive testing information
 - [CI/CD Guide](./ci-cd) - Understanding our build pipeline
 - [Architecture Documentation](./architecture) - System design
