@@ -46,3 +46,6 @@ vitest.config.*.timestamp*
 
 # TypeScript build info files
 *.tsbuildinfo
+
+# Docusaurus build output
+docs/build

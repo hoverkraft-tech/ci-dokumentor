@@ -79,3 +79,22 @@ jobs:
             docs: update actions and workflows documentation
 
             [skip ci]
+
+  docs-deploy:
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@f13e51c76d00932ad7a9ad02606a7ba96ea97f68 # main
+        with:
+          source-path: docs/build
+          build-artifact-name: documentation-build

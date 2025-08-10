@@ -1,0 +1,74 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #1e3a8a;
+  --ifm-color-primary-dark: #1a237e;
+  --ifm-color-primary-darker: #162073;
+  --ifm-color-primary-darkest: #0f1649;
+  --ifm-color-primary-light: #2563eb;
+  --ifm-color-primary-lighter: #3b82f6;
+  --ifm-color-primary-lightest: #60a5fa;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgb(0 0 0 / 10%);
+  
+  /* Custom Hoverkraft/CI Dokumentor branding */
+  --ifm-navbar-background-color: #0f172a;
+  --ifm-navbar-link-color: #e2e8f0;
+  --ifm-navbar-link-hover-color: #f8fafc;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #3b82f6;
+  --ifm-color-primary-dark: #2563eb;
+  --ifm-color-primary-darker: #1d4ed8;
+  --ifm-color-primary-darkest: #1e40af;
+  --ifm-color-primary-light: #60a5fa;
+  --ifm-color-primary-lighter: #93c5fd;
+  --ifm-color-primary-lightest: #bfdbfe;
+  --docusaurus-highlighted-code-line-bg: rgb(0 0 0 / 30%);
+}
+
+/* Custom hero section styling */
+.hero--primary {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  color: white;
+}
+
+.hero__title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #60a5fa, #3b82f6, #1d4ed8);
+  background-clip: text;
+  color: transparent;
+}
+
+.hero__subtitle {
+  font-size: 1.5rem;
+  color: #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+/* Navbar customization */
+.navbar {
+  background-color: var(--ifm-navbar-background-color) !important;
+  border-bottom: 1px solid #334155;
+}
+
+.navbar__brand {
+  font-weight: 700;
+  color: #f8fafc !important;
+}
+
+.navbar__link {
+  color: var(--ifm-navbar-link-color) !important;
+}
+
+.navbar__link:hover {
+  color: var(--ifm-navbar-link-hover-color) !important;
+}

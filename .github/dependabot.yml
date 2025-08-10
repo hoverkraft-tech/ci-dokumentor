@@ -24,6 +24,19 @@ updates:
       npm-dev-dependencies:
         dependency-type: development
 
+  - package-ecosystem: npm
+    directory: '/docs'
+    open-pull-requests-limit: 20
+    versioning-strategy: increase
+    schedule:
+      interval: weekly
+      day: friday
+      time: '04:00'
+    groups:
+      docs-dependencies:
+        patterns:
+          - '*'
+
   - package-ecosystem: 'devcontainers'
     open-pull-requests-limit: 20
     directory: '/'
