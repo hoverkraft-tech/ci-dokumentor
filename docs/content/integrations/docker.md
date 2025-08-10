@@ -15,112 +15,60 @@ docker run --rm -v $(pwd):/workspace \
   generate --source /workspace/action.yml --output /workspace/docs
 ```
 
-## Available Commands
+## Docker Image
 
-Based on the CLI package, the following commands and options are available:
+The official Docker image is available on GitHub Container Registry:
 
-### Generate Command
+- **Image**: `ghcr.io/hoverkraft-tech/ci-dokumentor:latest`
+- **Base**: Alpine Linux (minimal footprint)
+- **Tags**: `latest`, version-specific tags (e.g., `1.0.0`)
 
-```bash
-ci-dokumentor generate [options]
-# or
-ci-dokumentor gen [options]
-```
+## Basic Usage
 
-#### Options
+### Volume Mounting
 
-| Option | Alias | Description | Default |
-|--------|-------|-------------|---------|
-| `--source <dir>` | `-s` | Source directory containing CI/CD files | `.` |
-| `--output <dir>` | `-o` | Output directory for generated documentation | `./docs` |
-| `--repository <platform>` | `-r` | Repository platform (`github`, `git`) | Auto-detected |
-| `--cicd <platform>` | `-c` | CI/CD platform (`github-actions`) | Auto-detected |
-| `--include-sections <sections>` | | Comma-separated list of sections to include | All sections |
-| `--exclude-sections <sections>` | | Comma-separated list of sections to exclude | None |
-
-## Docker Usage Examples
-
-### Basic GitHub Action Documentation
+Mount your project directory to `/workspace` for both input and output:
 
 ```bash
-# Generate documentation for action.yml
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace --output /workspace/docs
 ```
 
-### Specify Platforms Explicitly
+### File Permissions
+
+For correct file ownership on Linux/macOS:
 
 ```bash
-# Generate with explicit platform specification
-docker run --rm -v $(pwd):/workspace \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs \
-  --repository github --cicd github-actions
-```
-
-### Include/Exclude Specific Sections
-
-```bash
-# Include only specific sections
-docker run --rm -v $(pwd):/workspace \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs \
-  --include-sections "header,usage,inputs"
-
-# Exclude specific sections
-docker run --rm -v $(pwd):/workspace \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs \
-  --exclude-sections "license,badges"
-```
-
-## Platform Support
-
-CI Dokumentor supports the following platforms:
-
-### Repository Platforms
-- **`github`** - GitHub repositories with enhanced features
-- **`git`** - Generic Git repositories
-
-### CI/CD Platforms
-- **`github-actions`** - GitHub Actions workflows and composite actions
-
-### Available Sections
-
-When using GitHub Actions, the following sections can be generated:
-- Header section with title and description
-- Usage examples and syntax
-- Inputs and outputs documentation
-- License information
-- Badges and status indicators
-
-## Volume Mounting
-
-### Recommended Mount Points
-
-- **`/workspace`** - Mount your project directory here for both input and output
-
-### Mount Examples
-
-#### Single Directory Mount
-
-```bash
-# Mount project directory containing action.yml
-docker run --rm -v $(pwd):/workspace \
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace --output /workspace/docs
 ```
 
-#### Read-Only Source Mount
+## Platform-Specific Examples
+
+### Linux/macOS (Bash)
 
 ```bash
-# Mount source as read-only for security
-docker run --rm \
-  -v $(pwd):/workspace:ro \
-  -v $(pwd)/docs:/output \
+docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /output
+  generate --source /workspace/action.yml --output /workspace/docs
+```
+
+### Windows PowerShell
+
+```powershell
+docker run --rm -v ${PWD}:/workspace `
+  ghcr.io/hoverkraft-tech/ci-dokumentor:latest `
+  generate --source /workspace/action.yml --output /workspace/docs
+```
+
+### Windows Command Prompt
+
+```cmd
+docker run --rm -v %cd%:/workspace ^
+  ghcr.io/hoverkraft-tech/ci-dokumentor:latest ^
+  generate --source /workspace/action.yml --output /workspace/docs
 ```
 
 ## CI/CD Integration
@@ -134,7 +82,6 @@ on:
   push:
     paths:
       - 'action.yml'
-      - '.github/workflows/*.yml'
 
 jobs:
   generate-docs:
@@ -174,27 +121,33 @@ generate-docs:
   rules:
     - changes:
         - action.yml
-        - .github/workflows/*.yml
 ```
 
-## Platform-Specific Usage
+## Volume Configuration
 
-### Windows PowerShell
+### Recommended Mount Points
 
-```powershell
-# PowerShell syntax
-docker run --rm -v ${PWD}:/workspace `
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest `
+- **`/workspace`** - Primary mount point for project files
+- **`/workspace/docs`** - Default output directory (can be customized)
+
+### Mount Examples
+
+#### Single Directory (Read/Write)
+
+```bash
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace --output /workspace/docs
 ```
 
-### Windows Command Prompt
+#### Separate Input/Output Mounts
 
-```cmd
-# Command Prompt syntax
-docker run --rm -v %cd%:/workspace ^
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest ^
-  generate --source /workspace --output /workspace/docs
+```bash
+docker run --rm \
+  -v $(pwd):/workspace:ro \
+  -v $(pwd)/output:/output \
+  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  generate --source /workspace --output /output
 ```
 
 ## Troubleshooting
@@ -202,44 +155,51 @@ docker run --rm -v %cd%:/workspace ^
 ### Common Issues
 
 #### Permission Denied
-
-**Problem**: Output files are created with wrong permissions
-
-**Solution**:
 ```bash
-# Run with user mapping
+# Solution: Run with user mapping
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace --output /workspace/docs
 ```
 
-#### Platform Auto-Detection Failed
-
-**Problem**: CI/CD platform cannot be auto-detected
-
-**Solution**:
+#### Platform Detection Failed
 ```bash
-# Specify platform explicitly
+# Solution: Specify platform explicitly
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace --output /workspace/docs \
   --cicd github-actions
 ```
 
-#### Invalid Section Names
+#### Invalid File Paths
+- Ensure source files exist in mounted directory
+- Use absolute paths within the container (`/workspace/...`)
+- Check file permissions and ownership
 
-**Problem**: Unknown section names in include/exclude options
+## Docker Compose
 
-**Solution**: Use only the supported section names for GitHub Actions:
-- `header`
-- `usage` 
-- `inputs`
-- `outputs`
-- `license`
-- `badges`
+For consistent development environments:
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  ci-dokumentor:
+    image: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+    volumes:
+      - .:/workspace
+    command: generate --source /workspace --output /workspace/docs
+```
+
+```bash
+# Run documentation generation
+docker-compose run --rm ci-dokumentor
+```
 
 ## Related Documentation
 
-- [CLI Package](../packages/cli) - Complete command-line interface reference
-- [GitHub Action Integration](./github-action) - Use as a GitHub Action
-- [Introduction](../intro) - Quick start and installation methods
+For detailed CLI options and platform support, see:
+
+- **[CLI Package](../packages/cli)** - Complete command-line interface reference and all available options
+- **[GitHub Action Integration](./github-action)** - Use as a GitHub Action instead of Docker
+- **[Introduction](../intro)** - Quick start and other installation methods

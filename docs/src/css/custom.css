@@ -14,7 +14,7 @@
   --ifm-color-primary-lighter: #3b82f6;
   --ifm-color-primary-lightest: #60a5fa;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgb(0 0 0 / 10%);
   
   /* Custom Hoverkraft/CI Dokumentor branding */
   --ifm-navbar-background-color: #0f172a;
@@ -31,7 +31,7 @@
   --ifm-color-primary-light: #60a5fa;
   --ifm-color-primary-lighter: #93c5fd;
   --ifm-color-primary-lightest: #bfdbfe;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --docusaurus-highlighted-code-line-bg: rgb(0 0 0 / 30%);
 }
 
 /* Custom hero section styling */
@@ -45,8 +45,7 @@
   font-weight: 700;
   background: linear-gradient(45deg, #60a5fa, #3b82f6, #1d4ed8);
   background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .hero__subtitle {
