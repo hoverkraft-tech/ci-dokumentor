@@ -21,12 +21,12 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Extensible Design',
+    title: 'Professional Output',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Modular architecture allows easy support for new CI/CD platforms and repository providers.
-        Plugin-based system for custom documentation sections.
+        Generates comprehensive, professional documentation in Markdown format.
+        Perfect for GitHub README files and documentation websites.
       </>
     ),
   },

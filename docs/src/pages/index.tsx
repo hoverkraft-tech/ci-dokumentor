@@ -20,14 +20,8 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
+            to="/intro">
             Get Started - 5min ⏱️
-          </Link>
-          <Link
-            className="button button--outline button--secondary button--lg"
-            to="/docs/getting-started/quick-start"
-            style={{marginLeft: '10px'}}>
-            Quick Start 🚀
           </Link>
         </div>
       </div>

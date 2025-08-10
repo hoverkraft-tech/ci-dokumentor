@@ -16,14 +16,7 @@ const sidebars: SidebarsConfig = {
   // Create a structured sidebar for CI Dokumentor documentation
   tutorialSidebar: [
     'intro',
-    {
-      type: 'category',
-      label: 'Getting Started',
-      items: [
-        'getting-started/installation',
-        'getting-started/quick-start',
-      ],
-    },
+    'architecture',
     {
       type: 'category',
       label: 'Packages',

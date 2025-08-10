@@ -112,14 +112,8 @@ jobs:
           cd docs
           npm run build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/build
-
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@main
+        with:
+          source-path: docs/build

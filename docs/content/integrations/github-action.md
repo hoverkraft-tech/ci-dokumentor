@@ -631,5 +631,5 @@ permissions:
 
 - [Docker Integration](./docker) - Using CI Dokumentor with Docker
 - [CLI Package](../packages/cli) - Command-line interface reference
-- [Getting Started](../getting-started/quick-start) - Basic usage examples
+- [Introduction](../intro) - Quick start and basic usage examples
 - [Developers Guide](../developers/ci-cd) - Advanced CI/CD integration patterns

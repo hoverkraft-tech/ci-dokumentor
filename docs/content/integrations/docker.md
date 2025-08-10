@@ -667,5 +667,5 @@ docs-watch:
 
 - [CLI Package](../packages/cli) - Command-line interface options
 - [GitHub Action Integration](./github-action) - Use as a GitHub Action
-- [Getting Started](../getting-started/installation) - Installation methods
+- [Introduction](../intro) - Quick start and installation methods
 - [Core Package](../packages/core) - Understanding the architecture

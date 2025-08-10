@@ -87,15 +87,15 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/intro',
+              to: '/intro',
             },
             {
               label: 'Packages',
-              to: '/docs/packages/core',
+              to: '/packages/core',
             },
             {
               label: 'Integrations',
-              to: '/docs/integrations/docker',
+              to: '/integrations/docker',
             },
           ],
         },
@@ -107,12 +107,12 @@ const config: Config = {
               href: 'https://github.com/hoverkraft-tech/ci-dokumentor',
             },
             {
-              label: 'Issues',
-              href: 'https://github.com/hoverkraft-tech/ci-dokumentor/issues',
-            },
-            {
               label: 'Pull Requests',
               href: 'https://github.com/hoverkraft-tech/ci-dokumentor/pulls',
+            },
+            {
+              label: 'Issues',
+              href: 'https://github.com/hoverkraft-tech/ci-dokumentor/issues',
             },
           ],
         },
