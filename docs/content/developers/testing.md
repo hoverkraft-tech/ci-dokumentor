@@ -823,4 +823,4 @@ describe('Component', () => {
 - [Development Setup](./setup) - Setting up your development environment
 - [Contributing](./contributing) - How to contribute to the project
 - [CI/CD Guide](./ci-cd) - Understanding our build pipeline
-- [Architecture](../architecture) - System architecture overview
+- [Architecture](./architecture) - System architecture overview

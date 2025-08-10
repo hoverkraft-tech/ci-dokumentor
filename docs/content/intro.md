@@ -65,13 +65,13 @@ runs:
 # Using Docker
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate /workspace/action.yml --output /workspace/docs
+  generate --source /workspace/action.yml --output /workspace/docs
 
 # Using NPX
-npx ci-dokumentor generate action.yml --output docs
+npx ci-dokumentor generate --source action.yml --output docs
 
 # Using CLI
-ci-dokumentor generate action.yml --output docs
+ci-dokumentor generate --source action.yml --output docs
 ```
 
 ### CLI Usage

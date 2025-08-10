@@ -27,7 +27,7 @@ updates:
   - package-ecosystem: npm
     directory: '/docs'
     open-pull-requests-limit: 20
-    versioning-strategy: widen
+    versioning-strategy: increase
     schedule:
       interval: weekly
       day: friday

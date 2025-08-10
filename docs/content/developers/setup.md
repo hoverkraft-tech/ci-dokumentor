@@ -664,4 +664,4 @@ Happy coding! 🚀
 - [Contributing Guidelines](./contributing) - How to contribute effectively
 - [Testing Guide](./testing) - Comprehensive testing information  
 - [CI/CD Guide](./ci-cd) - Understanding our build pipeline
-- [Architecture Documentation](../architecture) - System design
+- [Architecture Documentation](./architecture) - System design
