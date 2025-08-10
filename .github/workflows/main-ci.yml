@@ -94,7 +94,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@main
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@f13e51c76d00932ad7a9ad02606a7ba96ea97f68 # main
         with:
           source-path: docs/build
           build-artifact-name: documentation-build
