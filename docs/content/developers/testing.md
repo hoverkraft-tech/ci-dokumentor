@@ -34,7 +34,7 @@ CI Dokumentor follows these testing principles:
 
 ### Test Organization
 
-```
+```text
 packages/
 ├── core/
 │   ├── src/
@@ -289,7 +289,7 @@ declare global {
 
 ### Test Data Organization
 
-```
+```text
 test-data/
 ├── actions/
 │   ├── basic-action.yml

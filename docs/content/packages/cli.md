@@ -190,6 +190,11 @@ node dist/packages/cli/bin/ci-dokumentor.js --help
 - [Repository Git](./repository-git) - Git repository provider
 - [Repository GitHub](./repository-github) - GitHub repository provider  
 - [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions support
+
+### Examples
+
+```bash
+# Basic usage
 ci-dokumentor generate action.yml
 
 # Generate documentation for a workflow

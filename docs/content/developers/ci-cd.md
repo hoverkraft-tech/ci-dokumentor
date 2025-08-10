@@ -19,7 +19,7 @@ CI Dokumentor uses GitHub Actions for continuous integration and deployment with
 
 ### Workflow Files
 
-```
+```yaml
 .github/workflows/
 ├── __shared-ci.yml          # Reusable CI tasks
 ├── main-ci.yml             # Main branch CI/CD

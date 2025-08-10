@@ -11,7 +11,7 @@ The codebase has been refactored to separate:
 
 ## Package Structure
 
-```
+```text
 packages/
 ├── core/                              # Core abstractions and base services
 ├── repository/

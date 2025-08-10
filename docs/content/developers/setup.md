@@ -157,7 +157,7 @@ pnpm install
 ```
 
 Expected output:
-```
+```text
 Scope: all 6 workspace projects
 Lockfile is up to date, resolution step is skipped
 Progress: resolved 659, reused 659, downloaded 0, added 659, done
@@ -178,7 +178,7 @@ pnpm build
 ```
 
 Expected output:
-```
+```text
 NX   Running target build for 5 projects:
 - @ci-dokumentor/cicd-github-actions
 - @ci-dokumentor/repository-github  
@@ -208,7 +208,7 @@ ci-dokumentor --help
 
 ### Workspace Structure
 
-```
+```text
 ci-dokumentor/
 ├── .github/                 # GitHub workflows and templates
 ├── docs/                   # Architecture documentation
