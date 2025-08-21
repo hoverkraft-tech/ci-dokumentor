@@ -4,6 +4,12 @@
   "include": [],
   "references": [
     {
+      "path": "../repository/github"
+    },
+    {
+      "path": "../repository/git"
+    },
+    {
       "path": "../cicd/github-actions"
     },
     {

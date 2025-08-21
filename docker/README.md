@@ -1,6 +1,6 @@
 # Docker Implementation for CI Dokumentor
 
-This directory contains the Docker implementation for the CI Dokumentor CLI tool.
+This directory contains the Docker implementation for the CI Dokumentor command-line tool.
 
 ## Files
 

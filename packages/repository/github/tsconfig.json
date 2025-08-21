@@ -4,6 +4,9 @@
   "include": [],
   "references": [
     {
+      "path": "../git"
+    },
+    {
       "path": "../../core"
     },
     {

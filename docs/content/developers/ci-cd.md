@@ -137,11 +137,13 @@ jobs:
 ### What Happens on PRs
 
 1. **Trigger Conditions**:
+
    - Pull request opened/updated
    - Merge queue integration
    - Branch protection rules
 
 2. **Validation Steps**:
+
    - Code quality checks
    - Unit and integration tests
    - Build verification

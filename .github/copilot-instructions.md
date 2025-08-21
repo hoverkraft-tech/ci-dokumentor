@@ -87,7 +87,7 @@ export class DocumentationGeneratorService {
   constructor(
     private readonly parser: ManifestParser,
     private readonly generator: DocumentationGenerator,
-    private readonly output: OutputAdapter
+    private readonly output: OutputAdapter,
   ) {}
 }
 ```
@@ -116,7 +116,7 @@ export function initContainer(): Container {
 
 ## Documentation Standards
 
-### README Files
+### Readme Files
 
 - Each package must have a README.md with purpose, API, and usage examples
 - Keep documentation concise but comprehensive

@@ -82,9 +82,9 @@ Generates documentation from CI/CD configuration files.
 
 **Options:**
 
-- `-s, --source <dir>`: Source directory containing CI/CD files (default: ".")
-- `-o, --output <dir>`: Output directory for generated documentation (default: "./docs")
-- `-t, --type <type>`: Type of CI/CD system (default: "github-actions")
+- `-s, --source <dir>`: Source directory containing CI/CD files
+- `-o, --output <dir>`: Output directory for generated documentation
+- `-t, --type <type>`: Type of CI/CD system
 
 #### Help Command
 

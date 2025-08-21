@@ -105,7 +105,7 @@ func (m *MyModule) GenerateDocs(ctx context.Context, source *dagger.Directory) *
 
 ## 👨‍💻 Contributing
 
-👍 If you wish to contribute to CI Dokumentor, PRs are welcome! Please read our [Contributing Guide](./docs/docs/developers/contributing.md) for detailed instructions on:
+👍 If you wish to contribute to CI Dokumentor, PRs are welcome! Please read our [Contributing Guide](./CONTRIBUTING.md) for detailed instructions on:
 
 - Setting up the development environment
 - Running tests and linting

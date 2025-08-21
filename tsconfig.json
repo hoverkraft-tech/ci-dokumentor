@@ -8,6 +8,15 @@
     },
     {
       "path": "./packages/core"
+    },
+    {
+      "path": "./packages/cicd/github-actions"
+    },
+    {
+      "path": "./packages/repository/github"
+    },
+    {
+      "path": "./packages/repository/git"
     }
   ]
 }
