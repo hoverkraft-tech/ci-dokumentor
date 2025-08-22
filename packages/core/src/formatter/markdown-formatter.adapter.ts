@@ -8,46 +8,92 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
   heading(input: Buffer, level = 1): Buffer {
     const hashes = '#'.repeat(Math.max(1, Math.min(6, level)));
-    return Buffer.from(`${hashes} ${input.toString()}`);
+    return Buffer.concat([
+      Buffer.from(`${hashes} `),
+      input,
+      this.lineBreak()
+    ]);
   }
 
   center(input: Buffer): Buffer {
-    return Buffer.from(
-      `<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\n${input.toString()}\n\n</div>`
-    );
+    const lineBreak = this.lineBreak().toString();
+    const indentedInput = input.toString().trim()
+      .split(lineBreak)
+      .map(line => line.length ? `  ${line}` : ``)
+      .join(lineBreak);
+
+    return Buffer.concat([
+      Buffer.from(`<div align="center">`),
+      ...(indentedInput.length ? [this.lineBreak(), Buffer.from(indentedInput), this.lineBreak(),] : []),
+      Buffer.from(`</div>`),
+      this.lineBreak(),
+    ]);
   }
 
   comment(input: Buffer): Buffer {
-    return Buffer.from(`<!-- ${input.toString()} -->`);
+    return Buffer.concat([
+      Buffer.from(`<!-- `),
+      input,
+      Buffer.from(` -->`),
+      this.lineBreak()
+    ]);
   }
 
   paragraph(input: Buffer): Buffer {
-    return Buffer.from(`${input.toString()}\n`);
+    return Buffer.concat([
+      input,
+      this.lineBreak()
+    ]);
   }
 
   bold(input: Buffer): Buffer {
-    return Buffer.from(`**${input.toString()}**`);
+    return Buffer.concat([
+      Buffer.from(`**`),
+      input,
+      Buffer.from(`**`)
+    ]);
   }
 
   italic(input: Buffer): Buffer {
-    return Buffer.from(`*${input.toString()}*`);
+    return Buffer.concat([
+      Buffer.from(`*`),
+      input,
+      Buffer.from(`*`)
+    ]);
   }
 
-  code(input: Buffer, language?: string): Buffer {
-    const lang = language || '';
-    return Buffer.from(`\`\`\`${lang}\n${input.toString()}\n\`\`\``);
+  code(input: Buffer, language?: Buffer): Buffer {
+    const lang = language || Buffer.from('');
+    return Buffer.concat([
+      Buffer.from(`\`\`\``),
+      lang,
+      this.lineBreak(),
+      input,
+      this.lineBreak(),
+      Buffer.from(`\`\`\``)
+    ]);
   }
 
   inlineCode(input: Buffer): Buffer {
-    return Buffer.from(`\`${input.toString()}\``);
+    return Buffer.concat([
+      Buffer.from(`\``),
+      input,
+      Buffer.from(`\``)
+    ]);
   }
 
-  link(text: Buffer, url: string): Buffer {
-    return Buffer.from(`[${text.toString()}](${url})`);
+  link(text: Buffer, url: Buffer): Buffer {
+    return Buffer.concat([
+      Buffer.from(`[`),
+      text,
+      Buffer.from(`](`),
+      url,
+      Buffer.from(`)`)
+    ]);
   }
 
   image(
-    url: string,
+    url: Buffer,
     altText: Buffer,
     options?: { width?: string; align?: string }
   ): Buffer {
@@ -59,10 +105,17 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       const attributeStr =
         attributes.length > 0 ? ` ${attributes.join(' ')}` : '';
       return Buffer.from(
-        `<img src="${url}"${attributeStr} alt="${altText.toString()}" />`
+        `<img src="${url.toString()}"${attributeStr} alt="${altText.toString()}" />`
       );
     }
-    return Buffer.from(`![${altText.toString()}](${url})`);
+
+    return Buffer.concat([
+      Buffer.from(`![`),
+      altText,
+      Buffer.from(`](`),
+      url,
+      Buffer.from(`)`)
+    ]);
   }
 
   list(items: Buffer[], ordered = false): Buffer {
@@ -131,14 +184,17 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return Buffer.from(result.trimEnd());
   }
 
-  badge(label: string, url: string): Buffer {
-    return Buffer.from(`![${label}](${url})`);
+  badge(label: Buffer, url: Buffer): Buffer {
+    return Buffer.from(`![${label.toString()}](${url.toString()})`);
   }
 
   blockquote(input: Buffer): Buffer {
-    const lines = input.toString().split('\n');
-    const quotedLines = lines.map((line) => `> ${line}`).join('\n');
-    return Buffer.from(quotedLines);
+    const lines = input.toString().split(this.lineBreak().toString());
+    const quotedLines = lines.map((line) => [
+      Buffer.from(`> ${line}`),
+      this.lineBreak()
+    ]).flat();
+    return Buffer.concat(quotedLines);
   }
 
   details(summary: Buffer, content: Buffer): Buffer {

@@ -4,6 +4,7 @@ import {
   GitHubAction,
   GitHubWorkflow,
   GitHubActionOutput,
+  GitHubActionsManifest,
 } from '../github-actions-parser.js';
 import {
   FormatterAdapter,
@@ -75,6 +76,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |
 | **\`output-name\`** | Test output description |
@@ -102,6 +104,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |`
         );
@@ -128,6 +131,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |`
         );
@@ -156,6 +160,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |
 | **\`minimal-output\`** |  |`
@@ -187,6 +192,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |
 | **\`description-only\`** | Output with description only |`
@@ -218,6 +224,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |
 | **\`no-description\`** |  |`
@@ -234,6 +241,7 @@ describe('OutputsSectionGenerator', () => {
           on: {
             workflow_dispatch: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -247,6 +255,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |`
         );
@@ -260,6 +269,7 @@ describe('OutputsSectionGenerator', () => {
           on: {
             push: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -273,6 +283,7 @@ describe('OutputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Outputs
+
 | **Output** | **Description** |
 | --- | --- |`
         );
@@ -284,7 +295,7 @@ describe('OutputsSectionGenerator', () => {
         // Arrange
         const invalidManifest = {
           unsupportedType: true,
-        } as unknown as GitHubAction | GitHubWorkflow;
+        } as unknown as GitHubActionsManifest;
 
         // Act & Assert
         expect(() => {

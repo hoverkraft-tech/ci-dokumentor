@@ -1,5 +1,5 @@
 import { Repository } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
@@ -13,7 +13,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const linkedBadges = this.getAllBadges(manifest, repository);
@@ -21,7 +21,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private getAllBadges(
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): LinkedBadge[] {
     return [
@@ -34,7 +34,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private getDistributionBadges(
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): LinkedBadge[] {
     const actionName = manifest.name.toLowerCase().replace(/\s+/g, '-');
@@ -63,21 +63,21 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private getBuildQualityBadges(
-    _manifest: GitHubAction | GitHubWorkflow,
+    _manifest: GitHubActionsManifest,
     _repository: Repository
   ): LinkedBadge[] {
     return [];
   }
 
   private getSecurityBadges(
-    _manifest: GitHubAction | GitHubWorkflow,
+    _manifest: GitHubActionsManifest,
     _repository: Repository
   ): LinkedBadge[] {
     return [];
   }
 
   private getComplianceBadges(
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): LinkedBadge[] {
     return [
@@ -92,7 +92,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private getCommunityBadges(
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): LinkedBadge[] {
     return [
@@ -116,11 +116,13 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     return linkedBadges.reduce((acc, linkedBadge, index) => {
       const badgeBuffer = formatterAdapter.link(
-        formatterAdapter.badge(linkedBadge.badge.label, linkedBadge.badge.url),
-        linkedBadge.url
+        formatterAdapter.badge(Buffer.from(linkedBadge.badge.label), Buffer.from(linkedBadge.badge.url)),
+        Buffer.from(linkedBadge.url)
       );
-      if (index === 0) return badgeBuffer;
-      return Buffer.concat([acc, Buffer.from('\n'), badgeBuffer]);
+      if (index === 0) {
+        return badgeBuffer;
+      }
+      return Buffer.concat([acc, formatterAdapter.lineBreak(), badgeBuffer]);
     }, Buffer.from(''));
   }
 }

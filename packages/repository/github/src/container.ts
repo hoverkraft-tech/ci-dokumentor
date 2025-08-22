@@ -1,4 +1,5 @@
-import { Container, REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
+import { Container, REPOSITORY_PROVIDER_IDENTIFIER, initContainer as coreInitContainer } from '@ci-dokumentor/core';
+import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
 import { Container as InversifyContainer } from 'inversify';
 import { GitHubRepositoryProvider } from './github-repository.provider.js';
 
@@ -33,4 +34,19 @@ export function initContainer(
   container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitHubRepositoryProvider);
 
   return container;
+}
+
+/**
+ * Initialize a test container for GitHub Actions package.
+ * This initializes all the proper packages needed for GitHub Actions testing.
+ */
+export function initTestContainer(): Container {
+  // Initialize core container first
+  const baseContainer = coreInitContainer();
+
+  // Initialize git repository package
+  gitInitContainer(baseContainer);
+
+  // Initialize this package
+  return initContainer(baseContainer);
 }

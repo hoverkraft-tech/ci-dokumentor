@@ -1,6 +1,6 @@
 import { Repository } from '@ci-dokumentor/core';
 import {
-  GitHubAction,
+  GitHubActionsManifest,
   GitHubWorkflow,
   GitHubWorkflowInput,
 } from '../github-actions-parser.js';
@@ -19,7 +19,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     _repository: Repository
   ): Buffer {
     if (this.isGitHubAction(manifest)) {

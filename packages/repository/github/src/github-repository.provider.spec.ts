@@ -344,7 +344,7 @@ describe('GitHubRepositoryProvider', () => {
         })
         .mockResolvedValueOnce({
           repository: {
-            licenseInfo: {},
+
           },
         });
 

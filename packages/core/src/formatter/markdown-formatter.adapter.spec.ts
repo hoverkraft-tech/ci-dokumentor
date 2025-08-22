@@ -39,7 +39,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.heading(input);
 
       // Assert
-      expect(result.toString()).toBe('# Test Heading');
+      expect(result.toString()).toBe('# Test Heading\n');
     });
 
     it('should handle empty string input', () => {
@@ -50,7 +50,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.heading(input);
 
       // Assert
-      expect(result.toString()).toBe('# ');
+      expect(result.toString()).toBe('# \n');
     });
 
     it('should handle multi-word headings', () => {
@@ -62,7 +62,7 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '# This is a Long Heading with Multiple Words'
+        '# This is a Long Heading with Multiple Words\n'
       );
     });
 
@@ -74,7 +74,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.heading(input);
 
       // Assert
-      expect(result.toString()).toBe('# Heading with "quotes" & symbols!');
+      expect(result.toString()).toBe('# Heading with "quotes" & symbols!\n');
     });
 
     it('should handle headings with numbers', () => {
@@ -85,7 +85,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.heading(input);
 
       // Assert
-      expect(result.toString()).toBe('# Version 1.0.0 Release Notes');
+      expect(result.toString()).toBe('# Version 1.0.0 Release Notes\n');
     });
 
     it('should handle different heading levels', () => {
@@ -93,12 +93,12 @@ describe('MarkdownFormatterAdapter', () => {
       const input = Buffer.from('Test Heading');
 
       // Act & Assert
-      expect(adapter.heading(input, 1).toString()).toBe('# Test Heading');
-      expect(adapter.heading(input, 2).toString()).toBe('## Test Heading');
-      expect(adapter.heading(input, 3).toString()).toBe('### Test Heading');
-      expect(adapter.heading(input, 4).toString()).toBe('#### Test Heading');
-      expect(adapter.heading(input, 5).toString()).toBe('##### Test Heading');
-      expect(adapter.heading(input, 6).toString()).toBe('###### Test Heading');
+      expect(adapter.heading(input, 1).toString()).toBe('# Test Heading\n');
+      expect(adapter.heading(input, 2).toString()).toBe('## Test Heading\n');
+      expect(adapter.heading(input, 3).toString()).toBe('### Test Heading\n');
+      expect(adapter.heading(input, 4).toString()).toBe('#### Test Heading\n');
+      expect(adapter.heading(input, 5).toString()).toBe('##### Test Heading\n');
+      expect(adapter.heading(input, 6).toString()).toBe('###### Test Heading\n');
     });
 
     it('should clamp heading levels to valid range (1-6)', () => {
@@ -106,10 +106,10 @@ describe('MarkdownFormatterAdapter', () => {
       const input = Buffer.from('Test Heading');
 
       // Act & Assert
-      expect(adapter.heading(input, 0).toString()).toBe('# Test Heading'); // Should be clamped to 1
-      expect(adapter.heading(input, 7).toString()).toBe('###### Test Heading'); // Should be clamped to 6
-      expect(adapter.heading(input, -1).toString()).toBe('# Test Heading'); // Should be clamped to 1
-      expect(adapter.heading(input, 10).toString()).toBe('###### Test Heading'); // Should be clamped to 6
+      expect(adapter.heading(input, 0).toString()).toBe('# Test Heading\n'); // Should be clamped to 1
+      expect(adapter.heading(input, 7).toString()).toBe('###### Test Heading\n'); // Should be clamped to 6
+      expect(adapter.heading(input, -1).toString()).toBe('# Test Heading\n'); // Should be clamped to 1
+      expect(adapter.heading(input, 10).toString()).toBe('###### Test Heading\n'); // Should be clamped to 6
     });
   });
 
@@ -123,7 +123,10 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\nCentered Text\n\n</div>'
+        `<div align="center">
+  Centered Text
+</div>
+`
       );
     });
 
@@ -136,7 +139,8 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\n\n\n</div>'
+        `<div align="center"></div>
+`
       );
     });
 
@@ -149,7 +153,11 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '<!-- markdownlint-disable-next-line first-line-heading -->\n<div align="center">\n\nLine 1\nLine 2\n\n</div>'
+        `<div align="center">
+  Line 1
+  Line 2
+</div>
+`
       );
     });
   });
@@ -163,7 +171,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.comment(input);
 
       // Assert
-      expect(result.toString()).toBe('<!-- This is a comment -->');
+      expect(result.toString()).toBe('<!-- This is a comment -->\n');
     });
 
     it('should handle empty string input', () => {
@@ -174,7 +182,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.comment(input);
 
       // Assert
-      expect(result.toString()).toBe('<!--  -->');
+      expect(result.toString()).toBe('<!--  -->\n');
     });
 
     it('should handle multi-line comments', () => {
@@ -185,7 +193,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.comment(input);
 
       // Assert
-      expect(result.toString()).toBe('<!-- First line\nSecond line -->');
+      expect(result.toString()).toBe('<!-- First line\nSecond line -->\n');
     });
 
     it('should handle comments with special characters', () => {
@@ -197,7 +205,7 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '<!-- Comment with "quotes" & symbols! -->'
+        '<!-- Comment with "quotes" & symbols! -->\n'
       );
     });
 
@@ -209,7 +217,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.comment(input);
 
       // Assert
-      expect(result.toString()).toBe('<!--   spaced content   -->');
+      expect(result.toString()).toBe('<!--   spaced content   -->\n');
     });
 
     it('should handle comments with existing HTML comment syntax', () => {
@@ -221,7 +229,7 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '<!-- Already has <!-- comment --> syntax -->'
+        '<!-- Already has <!-- comment --> syntax -->\n'
       );
     });
   });
@@ -346,9 +354,10 @@ describe('MarkdownFormatterAdapter', () => {
     it('should format text as code block with language', () => {
       // Arrange
       const input = Buffer.from('console.log("Hello World");');
+      const language = Buffer.from('javascript');
 
       // Act
-      const result = adapter.code(input, 'javascript');
+      const result = adapter.code(input, language);
 
       // Assert
       expect(result.toString()).toBe(
@@ -370,9 +379,10 @@ describe('MarkdownFormatterAdapter', () => {
     it('should handle multi-line code', () => {
       // Arrange
       const input = Buffer.from('function test() {\n  return true;\n}');
+      const language = Buffer.from('typescript');
 
       // Act
-      const result = adapter.code(input, 'typescript');
+      const result = adapter.code(input, language);
 
       // Assert
       expect(result.toString()).toBe(
@@ -420,7 +430,8 @@ describe('MarkdownFormatterAdapter', () => {
     it('should format text as markdown link', () => {
       // Arrange
       const text = Buffer.from('GitHub');
-      const url = 'https://github.com';
+      const url = Buffer.from('https://github.com');
+
 
       // Act
       const result = adapter.link(text, url);
@@ -432,7 +443,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should handle empty text', () => {
       // Arrange
       const text = Buffer.from('');
-      const url = 'https://example.com';
+      const url = Buffer.from('https://example.com');
 
       // Act
       const result = adapter.link(text, url);
@@ -444,7 +455,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should handle text with special characters', () => {
       // Arrange
       const text = Buffer.from('Link with "quotes" & symbols!');
-      const url = 'https://example.com/path?query=value';
+      const url = Buffer.from('https://example.com/path?query=value');
 
       // Act
       const result = adapter.link(text, url);
@@ -460,7 +471,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should format as markdown image without options', () => {
       // Arrange
       const altText = Buffer.from('Alternative Text');
-      const url = 'https://example.com/image.png';
+      const url = Buffer.from('https://example.com/image.png');
 
       // Act
       const result = adapter.image(url, altText);
@@ -474,7 +485,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should format as HTML img tag with width option', () => {
       // Arrange
       const altText = Buffer.from('Alternative Text');
-      const url = 'https://example.com/image.png';
+      const url = Buffer.from('https://example.com/image.png');
       const options = { width: '300px' };
 
       // Act
@@ -489,7 +500,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should format as HTML img tag with align option', () => {
       // Arrange
       const altText = Buffer.from('Alternative Text');
-      const url = 'https://example.com/image.png';
+      const url = Buffer.from('https://example.com/image.png');
       const options = { align: 'center' };
 
       // Act
@@ -504,7 +515,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should format as HTML img tag with both width and align options', () => {
       // Arrange
       const altText = Buffer.from('Alternative Text');
-      const url = 'https://example.com/image.png';
+      const url = Buffer.from('https://example.com/image.png');
       const options = { width: '300px', align: 'center' };
 
       // Act
@@ -519,7 +530,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should handle empty alt text', () => {
       // Arrange
       const altText = Buffer.from('');
-      const url = 'https://example.com/image.png';
+      const url = Buffer.from('https://example.com/image.png');
 
       // Act
       const result = adapter.image(url, altText);
@@ -622,9 +633,9 @@ describe('MarkdownFormatterAdapter', () => {
       // Assert
       expect(result.toString()).toBe(
         '| Name | Age | City |\n' +
-          '| --- | --- | --- |\n' +
-          '| John | 25 | New York |\n' +
-          '| Jane | 30 | Paris |'
+        '| --- | --- | --- |\n' +
+        '| John | 25 | New York |\n' +
+        '| Jane | 30 | Paris |'
       );
     });
 
@@ -667,8 +678,8 @@ describe('MarkdownFormatterAdapter', () => {
       // Assert
       expect(result.toString()).toBe(
         '| Name | Description |\n' +
-          '| --- | --- |\n' +
-          '| Item "A" | Description with & symbols! |'
+        '| --- | --- |\n' +
+        '| Item "A" | Description with & symbols! |'
       );
     });
 
@@ -688,10 +699,10 @@ describe('MarkdownFormatterAdapter', () => {
       // Assert
       expect(result.toString()).toBe(
         '| Name | Description |\n' +
-          '| --- | --- |\n' +
-          '| John | A person with |\n' +
-          '| Doe | multiple lines |\n' +
-          '|  | of description |'
+        '| --- | --- |\n' +
+        '| John | A person with |\n' +
+        '| Doe | multiple lines |\n' +
+        '|  | of description |'
       );
     });
 
@@ -708,8 +719,8 @@ describe('MarkdownFormatterAdapter', () => {
       // Assert
       expect(result.toString()).toBe(
         '| Code | Output |\n' +
-          '| --- | --- |\n' +
-          '| if (a \\| b) | result: true \\| false |'
+        '| --- | --- |\n' +
+        '| if (a \\| b) | result: true \\| false |'
       );
     });
 
@@ -727,10 +738,10 @@ describe('MarkdownFormatterAdapter', () => {
       // Assert
       expect(result.toString()).toBe(
         '| Multi | Description |\n' +
-          '| --- | --- |\n' +
-          '| Line |  |\n' +
-          '| Header |  |\n' +
-          '| Value | Single line content |'
+        '| --- | --- |\n' +
+        '| Line |  |\n' +
+        '| Header |  |\n' +
+        '| Value | Single line content |'
       );
     });
 
@@ -760,11 +771,11 @@ describe('MarkdownFormatterAdapter', () => {
       // Assert
       expect(result.toString()).toBe(
         '| Name | Status | Notes |\n' +
-          '| --- | --- | --- |\n' +
-          '| John | Active | Single line note |\n' +
-          '| Jane | Pending | This is a |\n' +
-          '| Smith | Review | multiline note |\n' +
-          '|  |  | with details |'
+        '| --- | --- | --- |\n' +
+        '| John | Active | Single line note |\n' +
+        '| Jane | Pending | This is a |\n' +
+        '| Smith | Review | multiline note |\n' +
+        '|  |  | with details |'
       );
     });
   });
@@ -772,8 +783,8 @@ describe('MarkdownFormatterAdapter', () => {
   describe('badge', () => {
     it('should format as badge image', () => {
       // Arrange
-      const label = 'build';
-      const url = 'https://img.shields.io/badge/build-passing-brightgreen';
+      const label = Buffer.from('build');
+      const url = Buffer.from('https://img.shields.io/badge/build-passing-brightgreen');
 
       // Act
       const result = adapter.badge(label, url);
@@ -786,8 +797,8 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle empty label', () => {
       // Arrange
-      const label = '';
-      const url = 'https://example.com/badge.svg';
+      const label = Buffer.from('');
+      const url = Buffer.from('https://example.com/badge.svg');
 
       // Act
       const result = adapter.badge(label, url);
@@ -798,8 +809,8 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle label with special characters', () => {
       // Arrange
-      const label = 'coverage-90%';
-      const url = 'https://example.com/coverage.svg';
+      const label = Buffer.from('coverage-90%');
+      const url = Buffer.from('https://example.com/coverage.svg');
 
       // Act
       const result = adapter.badge(label, url);
@@ -820,7 +831,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.blockquote(input);
 
       // Assert
-      expect(result.toString()).toBe('> This is a quote');
+      expect(result.toString()).toBe('> This is a quote\n');
     });
 
     it('should format multi-line text as blockquote', () => {
@@ -832,7 +843,7 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '> First line\n> Second line\n> Third line'
+        '> First line\n> Second line\n> Third line\n'
       );
     });
 
@@ -844,7 +855,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.blockquote(input);
 
       // Assert
-      expect(result.toString()).toBe('> ');
+      expect(result.toString()).toBe('> \n');
     });
 
     it('should handle text with special characters', () => {
@@ -855,7 +866,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.blockquote(input);
 
       // Assert
-      expect(result.toString()).toBe('> Quote with "nested quotes" & symbols!');
+      expect(result.toString()).toBe('> Quote with "nested quotes" & symbols!\n');
     });
   });
 

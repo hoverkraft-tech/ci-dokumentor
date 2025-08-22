@@ -14,8 +14,10 @@ exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentati
 [![License](https://img.shields.io/github/license/test-owner/test-action)](https://img.shields.io/github/license/test-owner/test-action)
 [![Stars](https://img.shields.io/github/stars/test-owner/test-action?style=social)](https://img.shields.io/github/stars/test-owner/test-action?style=social)
 ## Overview
+
 Builds the application and deploys it to the specified environment
 ## Usage
+
 \`\`\`yaml
 - uses: test-owner/test-action/test
   with:
@@ -37,6 +39,7 @@ Builds the application and deploys it to the specified environment
 
 \`\`\`
 ## Inputs
+
 | **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |
 | **\`environment\`** | Target environment (staging, production) | **true** | \`\` |
@@ -44,13 +47,16 @@ Builds the application and deploys it to the specified environment
 | **\`dry-run\`** | Run in dry-run mode | **false** | \`false\` |
 | **\`config-file\`** | Path to configuration file | **false** | \`config/deploy.yml\` |
 ## Outputs
+
 | **Output** | **Description** |
 | --- | --- |
 | **\`deployment-url\`** | URL of the deployed application |
 | **\`build-artifacts\`** | Path to build artifacts |
 | **\`deployment-status\`** | Status of the deployment (success/failure) |
 ## Examples
+
 ### Basic Usage
+
 \`\`\`yaml
 - name: Run Build and Deploy
   uses: owner/repo@v1
@@ -60,6 +66,7 @@ Builds the application and deploys it to the specified environment
     dry-run: false
 \`\`\`
 ### Advanced Usage
+
 \`\`\`yaml
 - name: Advanced Build and Deploy
   uses: owner/repo@v1
@@ -70,6 +77,7 @@ Builds the application and deploys it to the specified environment
     config-file: config/deploy.yml
 \`\`\`
 ### Using Outputs
+
 \`\`\`yaml
 - name: Use Build and Deploy
   id: my-action
@@ -80,6 +88,7 @@ Builds the application and deploys it to the specified environment
     echo "Output: \${{ steps.my-action.outputs.deployment-url }}"
 \`\`\`
 ## Contributing
+
 We welcome contributions! Here's how you can help:
 
 1. Fork the repository
@@ -97,6 +106,7 @@ Please make sure to:
 - Keep commits atomic and descriptive
 
 ### Development Workflow
+
 1. Clone the repository
 2. Install dependencies
 3. Make your changes
@@ -121,6 +131,7 @@ npm run build
 \`\`\`
 \`\`\`
 ## Security
+
 \`\`\`markdown
 ## Security Policy
 
@@ -145,6 +156,7 @@ Please include the requested information listed below (as much as you can provid
 This information will help us triage your report more quickly.
 \`\`\`
 ### Security Best Practices
+
 - Always use the latest version of the action/workflow
 - Pin action versions to specific commits for production use
 - Review and audit third-party actions before use
@@ -159,17 +171,6 @@ This information will help us triage your report more quickly.
 - Be cautious with \`shell\` actions that execute user input
 - Review permissions required by the action
 \`\`\`
-## License
-This project is licensed under the MIT License.
-
-Copyright © 2025 CI Team
-
-See the [LICENSE](LICENSE) file for full license text.
-
----
-<div align="center">
-  Made with ❤️ by CI Team
-</div>
 `;
 
 exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentation > should generate documentation for a CI/CD workflow > workflow-documentation 1`] = `
@@ -185,12 +186,14 @@ exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentati
 [![License](https://img.shields.io/github/license/test-owner/test-action)](https://img.shields.io/github/license/test-owner/test-action)
 [![Stars](https://img.shields.io/github/stars/test-owner/test-action?style=social)](https://img.shields.io/github/stars/test-owner/test-action?style=social)
 ## Jobs
+
 | Job | Runs On | Steps | Dependencies |
 | --- | --- | --- | --- |
 | \`test\` | ubuntu-latest | 5 | None |
 | \`build\` | ubuntu-latest | 5 | test |
 | \`deploy\` | ubuntu-latest | 1 | build |
 ### Job: test
+
 **Name: **Run Tests
 **Runs on: **ubuntu-latest
 **Matrix strategy: **Yes
@@ -203,6 +206,7 @@ exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentati
 5. Upload coverage
 
 ### Job: build
+
 **Name: **Build Application
 **Runs on: **ubuntu-latest
 **Depends on: **test
@@ -215,6 +219,7 @@ exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentati
 5. Build and push
 
 ### Job: deploy
+
 **Name: **Deploy to Environment
 **Runs on: **ubuntu-latest
 **Depends on: **build
@@ -223,6 +228,7 @@ exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentati
 **Steps:**
 1. Deploy application
 ## Usage
+
 \`\`\`yaml
 name: CI/CD Pipeline
 on:
@@ -249,19 +255,24 @@ jobs:
 
 \`\`\`
 ## Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
 | **\`environment\`** | Deployment environment | **true** | **choice** | \`staging\` |
 |  | Options: \`staging\`, \`production\` |  |  |  |
 ## Outputs
+
 | **Output** | **Description** |
 | --- | --- |
 ## Secrets
+
 | **Secret** | **Description** | **Required** |
 | --- | --- | --- |
 | **\`environment\`** | Deployment environment | **true** |
 ## Examples
+
 ### Basic Workflow
+
 \`\`\`yaml
 name: CI/CD Pipeline
 
@@ -283,6 +294,7 @@ jobs:
         run: npm ci
 \`\`\`
 ### Multi-Job Workflow
+
 \`\`\`yaml
 name: CI/CD Pipeline
 
@@ -303,6 +315,7 @@ jobs:
         run: echo "Running build"
 \`\`\`
 ## Contributing
+
 We welcome contributions! Here's how you can help:
 
 1. Fork the repository
@@ -320,6 +333,7 @@ Please make sure to:
 - Keep commits atomic and descriptive
 
 ### Development Workflow
+
 1. Clone the repository
 2. Install dependencies
 3. Make your changes
@@ -344,6 +358,7 @@ npm run build
 \`\`\`
 \`\`\`
 ## Security
+
 \`\`\`markdown
 ## Security Policy
 
@@ -368,6 +383,7 @@ Please include the requested information listed below (as much as you can provid
 This information will help us triage your report more quickly.
 \`\`\`
 ### Security Best Practices
+
 - Always use the latest version of the action/workflow
 - Pin action versions to specific commits for production use
 - Review and audit third-party actions before use
@@ -382,15 +398,4 @@ This information will help us triage your report more quickly.
 - Validate external inputs and dependencies
 - Use environment protection rules for production deployments
 \`\`\`
-## License
-This project is licensed under the MIT License.
-
-Copyright © 2025 Your Name
-
-See the [LICENSE](LICENSE) file for full license text.
-
----
-<div align="center">
-  Made with ❤️ by Your Name
-</div>
 `;

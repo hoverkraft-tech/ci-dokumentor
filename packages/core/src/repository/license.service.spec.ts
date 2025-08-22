@@ -201,7 +201,9 @@ describe('LicenseService', () => {
       });
 
       // Mock console.warn to avoid output during tests
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
 
       // Act
       const result = licenseService.detectLicenseFromFile();

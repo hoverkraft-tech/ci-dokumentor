@@ -1,5 +1,5 @@
 import { Repository } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
@@ -10,7 +10,7 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const currentYear = new Date().getFullYear();
@@ -36,34 +36,34 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
     const licenseLink = licenseInfo.url
       ? `For more details, see the [license](${licenseInfo.url}).`
-      : 'See the [LICENSE](LICENSE) file for full license text.';
+      : '';
 
     const elements = [
       formatterAdapter.heading(Buffer.from('License'), 2),
       formatterAdapter.lineBreak(),
       formatterAdapter.paragraph(Buffer.from(licenseText)),
-      formatterAdapter.lineBreak(),
     ];
 
     if (spdxText) {
       elements.push(
+        formatterAdapter.lineBreak(),
         formatterAdapter.paragraph(Buffer.from(spdxText)),
-        formatterAdapter.lineBreak()
       );
     }
 
     elements.push(
+      formatterAdapter.lineBreak(),
       formatterAdapter.paragraph(
         Buffer.from(`Copyright © ${currentYear} ${authorName}`)
       ),
-      formatterAdapter.lineBreak(),
-      formatterAdapter.paragraph(Buffer.from(licenseLink)),
-      formatterAdapter.lineBreak(),
-      formatterAdapter.horizontalRule(),
-      formatterAdapter.lineBreak(),
-      formatterAdapter.center(Buffer.from(`Made with ❤️ by ${authorName}`)),
-      formatterAdapter.lineBreak()
     );
+
+    if (licenseLink) {
+      elements.push(
+        formatterAdapter.lineBreak(),
+        formatterAdapter.paragraph(Buffer.from(licenseLink))
+      );
+    }
 
     return Buffer.concat(elements);
   }

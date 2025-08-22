@@ -1,5 +1,5 @@
 import { Repository } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 import { icons } from 'feather-icons';
@@ -11,7 +11,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const logoContent = this.generateLogo(
@@ -30,17 +30,17 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     if (logoContent) {
       sectionContent = Buffer.concat([
         logoContent,
-        Buffer.from('\n'),
+        formatterAdapter.lineBreak(),
         titleContent,
       ]);
     }
 
-    return Buffer.concat([formatterAdapter.center(sectionContent)]);
+    return formatterAdapter.center(sectionContent);
   }
 
   private generateLogo(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer | null {
     const logoPath = repository.logo;
@@ -58,7 +58,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private getDisplayName(
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const name = manifest.name || repository.name;
@@ -68,7 +68,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   private generateTitle(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const title = Buffer.from(
@@ -83,13 +83,13 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     return formatterAdapter.heading(headingContent, 1);
   }
 
-  private getTitlePrefix(manifest: GitHubAction | GitHubWorkflow): string {
+  private getTitlePrefix(manifest: GitHubActionsManifest): string {
     return 'runs' in manifest ? 'GitHub Action: ' : 'GitHub Workflow: ';
   }
 
   private generateBrandingIcon(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow
+    manifest: GitHubActionsManifest
   ): Buffer | null {
     if (!('branding' in manifest) || !manifest.branding?.icon) {
       return null;
@@ -105,9 +105,9 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     }
 
     // Get data URI for the icon
-    const data = `data:image/svg+xml;base64,${Buffer.from(featherIcon).toString(
+    const data = Buffer.from(`data:image/svg+xml;base64,${Buffer.from(featherIcon).toString(
       'base64'
-    )}`;
+    )}`);
 
     return formatterAdapter.image(data, Buffer.from('Icon'));
   }

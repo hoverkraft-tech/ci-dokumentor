@@ -14,7 +14,7 @@ export class FileOutputAdapter implements OutputAdapter {
   constructor(
     private readonly filePath: string,
     private readonly formatter: FormatterAdapter
-  ) {}
+  ) { }
 
   async writeSection(sectionIdentifier: string, data: Buffer): Promise<void> {
     // Serialize access to the same file to prevent race conditions
@@ -65,42 +65,40 @@ export class FileOutputAdapter implements OutputAdapter {
 
       let sectionFound = false;
       let inSection = false;
-      const output: Buffer[] = [];
+      let output: Buffer = Buffer.alloc(0);
 
-      const sectionStart = this.getSectionStart(sectionIdentifier).toString();
-      const sectionEnd = this.getSectionEnd(sectionIdentifier).toString();
-
-      if (data.length > 0) {
-        // Ensure the data is properly formatted
-        data = Buffer.concat([Buffer.from('\n'), data, Buffer.from('\n')]);
-      }
+      const sectionStart = this.getSectionStart(sectionIdentifier);
+      const sectionEnd = this.getSectionEnd(sectionIdentifier);
 
       const sectionContent = Buffer.concat([
-        this.formatter.comment(Buffer.from(`${sectionIdentifier}:start`)),
-        data,
-        this.formatter.comment(Buffer.from(`${sectionIdentifier}:end`)),
+        sectionStart,
+        ...(data.length ? [data, this.formatter.lineBreak()] : []),
+        sectionEnd,
       ]);
 
+      const sectionStartString = sectionStart.toString();
+      const sectionEndString = sectionEnd.toString();
+
       readLine.on('line', (line) => {
-        if (line.trim() === sectionStart.trim()) {
+        if (line.trim() === sectionStartString.trim()) {
           sectionFound = true;
           inSection = true;
-          output.push(sectionContent);
-        } else if (line.trim() === sectionEnd.trim() && inSection) {
+          output = Buffer.concat([output, sectionContent]);
+        } else if (line.trim() === sectionEndString.trim() && inSection) {
           inSection = false;
           // Skip the end marker as it's already included above
           return;
         } else if (!inSection) {
-          output.push(Buffer.from(line + '\n'));
+          output = Buffer.concat([output, Buffer.from(line), this.formatter.lineBreak()]);
         }
         // Skip lines inside the section (they get replaced)
       });
 
       readLine.on('close', () => {
         if (!sectionFound) {
-          output.push(sectionContent);
+          output = Buffer.concat([output, sectionContent]);
         }
-        writeFile(this.filePath, Buffer.concat(output), (err) => {
+        writeFile(this.filePath, output, (err) => {
           if (err) {
             reject(err);
           } else {

@@ -4,16 +4,15 @@ import {
   SectionGeneratorAdapter,
   SectionIdentifier,
 } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from 'src/github-actions-parser.js';
+import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from 'src/github-actions-parser.js';
 
 export abstract class GitHubActionsSectionGeneratorAdapter
-  implements SectionGeneratorAdapter<GitHubAction | GitHubWorkflow>
-{
+  implements SectionGeneratorAdapter<GitHubActionsManifest> {
   abstract getSectionIdentifier(): SectionIdentifier;
 
   abstract generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer;
 

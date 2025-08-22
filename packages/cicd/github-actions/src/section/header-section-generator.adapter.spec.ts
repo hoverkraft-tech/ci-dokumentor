@@ -60,12 +60,10 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# GitHub Action: Test Action
-
-</div>`
+          `<div align="center">
+  # GitHub Action: Test Action
+</div>
+`
         );
       });
 
@@ -92,13 +90,11 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-<img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
-# GitHub Action: Test Action
-
-</div>`
+          `<div align="center">
+  <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
+  # GitHub Action: Test Action
+</div>
+`
         );
       });
 
@@ -125,12 +121,10 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJibHVlIj48cG9seWxpbmUgcG9pbnRzPSIyMiAxMiAxOCAxMiAxNSAyMSA5IDMgNiAxMiAyIDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==) GitHub Action: Test Action
-
-</div>`
+          `<div align="center">
+  # ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJibHVlIj48cG9seWxpbmUgcG9pbnRzPSIyMiAxMiAxOCAxMiAxNSAyMSA5IDMgNiAxMiAyIDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==) GitHub Action: Test Action
+</div>
+`
         );
       });
 
@@ -156,12 +150,10 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJncmF5LWRhcmsiPjxwb2x5bGluZSBwb2ludHM9IjIyIDEyIDE4IDEyIDE1IDIxIDkgMyA2IDEyIDIgMTIiPjwvcG9seWxpbmU+PC9zdmc+) GitHub Action: Test Action
-
-</div>`
+          `<div align="center">
+  # ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJncmF5LWRhcmsiPjxwb2x5bGluZSBwb2ludHM9IjIyIDEyIDE4IDEyIDE1IDIxIDkgMyA2IDEyIDIgMTIiPjwvcG9seWxpbmU+PC9zdmc+) GitHub Action: Test Action
+</div>
+`
         );
       });
 
@@ -188,12 +180,10 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# GitHub Action: Test Action
-
-</div>`
+          `<div align="center">
+  # GitHub Action: Test Action
+</div>
+`
         );
       });
 
@@ -224,13 +214,11 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-<img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
-# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJibHVlIj48cG9seWxpbmUgcG9pbnRzPSIyMiAxMiAxOCAxMiAxNSAyMSA5IDMgNiAxMiAyIDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==) GitHub Action: Test Action
-
-</div>`
+          `<div align="center">
+  <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
+  # ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJibHVlIj48cG9seWxpbmUgcG9pbnRzPSIyMiAxMiAxOCAxMiAxNSAyMSA5IDMgNiAxMiAyIDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==) GitHub Action: Test Action
+</div>
+`
         );
       });
     });
@@ -242,6 +230,7 @@ describe('HeaderSectionGenerator', () => {
           usesName: 'owner/repo/.github/workflows/test-workflow.yml',
           name: 'Test Workflow',
           on: { push: {} },
+          jobs: {},
         };
 
         // Act
@@ -254,12 +243,10 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString())
-          .toBe(`<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# GitHub Workflow: Test Workflow
-
-</div>`);
+          .toBe(`<div align="center">
+  # GitHub Workflow: Test Workflow
+</div>
+`);
       });
 
       it('should generate header section for GitHub Workflow with logo', () => {
@@ -268,6 +255,7 @@ describe('HeaderSectionGenerator', () => {
           usesName: 'owner/repo/.github/workflows/test-workflow.yml',
           name: 'Test Workflow',
           on: { push: {} },
+          jobs: {},
         };
         const repositoryWithLogo: Repository = {
           ...mockRepository,
@@ -284,13 +272,11 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString())
-          .toBe(`<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-<img src="https://example.com/logo.png" width="60px" align="center" alt="Test Workflow" />
-# GitHub Workflow: Test Workflow
-
-</div>`);
+          .toBe(`<div align="center">
+  <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Workflow" />
+  # GitHub Workflow: Test Workflow
+</div>
+`);
       });
 
       it('should not generate branding icon for GitHub Workflow', () => {
@@ -299,6 +285,7 @@ describe('HeaderSectionGenerator', () => {
           usesName: 'owner/repo/.github/workflows/test-workflow.yml',
           name: 'Test Workflow',
           on: { push: {} },
+          jobs: {}
         };
 
         // Act
@@ -311,12 +298,10 @@ describe('HeaderSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString())
-          .toBe(`<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# GitHub Workflow: Test Workflow
-
-</div>`);
+          .toBe(`<div align="center">
+  # GitHub Workflow: Test Workflow
+</div>
+`);
       });
     });
 
@@ -339,12 +324,10 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(Buffer);
       expect(result.toString()).toBe(
-        `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# GitHub Action: Repo
-
-</div>`
+        `<div align="center">
+  # GitHub Action: Repo
+</div>
+`
       );
     });
 
@@ -367,12 +350,10 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(Buffer);
       expect(result.toString()).toBe(
-        `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# GitHub Action: Test & Action <script>
-
-</div>`
+        `<div align="center">
+  # GitHub Action: Test & Action <script>
+</div>
+`
       );
     });
 
@@ -384,6 +365,7 @@ describe('HeaderSectionGenerator', () => {
         description: 'A test action',
         runs: { using: 'node20' },
       };
+
       const repositoryWithoutLogo = {
         url: 'https://github.com/owner/repo',
         owner: 'owner',
@@ -402,12 +384,10 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(Buffer);
       expect(result.toString()).toBe(
-        `<!-- markdownlint-disable-next-line first-line-heading -->
-<div align="center">
-
-# GitHub Action: Test Action
-
-</div>`
+        `<div align="center">
+  # GitHub Action: Test Action
+</div>
+`
       );
     });
   });

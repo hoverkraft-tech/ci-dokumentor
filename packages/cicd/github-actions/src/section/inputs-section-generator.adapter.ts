@@ -2,6 +2,7 @@ import { Repository } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
+  GitHubActionsManifest,
   GitHubWorkflow,
   GitHubWorkflowInput,
 } from '../github-actions-parser.js';
@@ -20,7 +21,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     _repository: Repository
   ): Buffer {
     let table: InputsTable;

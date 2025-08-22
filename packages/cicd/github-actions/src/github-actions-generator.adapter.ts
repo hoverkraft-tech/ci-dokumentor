@@ -8,9 +8,8 @@ import {
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
-  GitHubAction,
+  GitHubActionsManifest,
   GitHubActionsParser,
-  GitHubWorkflow,
 } from './github-actions-parser.js';
 import { dirname, join } from 'node:path';
 
@@ -27,9 +26,9 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     private readonly repositoryService: RepositoryService,
     @multiInject(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<
-      GitHubAction | GitHubWorkflow
+      GitHubActionsManifest
     >[]
-  ) {}
+  ) { }
 
   /**
    * Get the platform name identifier for this adapter

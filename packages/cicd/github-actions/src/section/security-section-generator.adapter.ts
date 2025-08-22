@@ -1,5 +1,5 @@
 import { Repository } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
@@ -10,7 +10,7 @@ export class SecuritySectionGenerator extends GitHubActionsSectionGeneratorAdapt
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     _repository: Repository
   ): Buffer {
     const securityContent = `## Security Policy
@@ -66,13 +66,13 @@ This information will help us triage your report more quickly.`;
     return Buffer.concat([
       formatterAdapter.heading(Buffer.from('Security'), 2),
       formatterAdapter.lineBreak(),
-      formatterAdapter.code(Buffer.from(securityContent), 'markdown'),
+      formatterAdapter.code(Buffer.from(securityContent), Buffer.from('markdown')),
       formatterAdapter.lineBreak(),
       formatterAdapter.heading(Buffer.from('Security Best Practices'), 3),
       formatterAdapter.lineBreak(),
       formatterAdapter.list(securityBestPractices, false),
       formatterAdapter.lineBreak(),
-      formatterAdapter.code(Buffer.from(specificGuidance), 'markdown'),
+      formatterAdapter.code(Buffer.from(specificGuidance), Buffer.from('markdown')),
       formatterAdapter.lineBreak(),
       formatterAdapter.lineBreak(),
     ]);

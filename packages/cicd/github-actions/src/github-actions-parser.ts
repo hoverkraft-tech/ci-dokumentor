@@ -82,6 +82,8 @@ export type GitHubWorkflowSecrets = {
   required?: boolean;
 };
 
+export type GitHubActionsManifest = GitHubAction | GitHubWorkflow;
+
 export class GitHubActionsParser {
   isGitHubActionFile(source: string): boolean {
     // Check if the source is a GitHub Action by looking for action.yml or action.yaml
@@ -96,7 +98,7 @@ export class GitHubActionsParser {
   parseFile(
     source: string,
     repository: Repository
-  ): GitHubAction | GitHubWorkflow {
+  ): GitHubActionsManifest {
     const parsed = parse(readFileSync(source, 'utf8'));
     if (!parsed) {
       throw new Error(`Unsupported source file: ${source}`);

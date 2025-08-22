@@ -17,14 +17,14 @@ export interface FormatterAdapter {
 
   italic(input: Buffer): Buffer;
 
-  code(input: Buffer, language?: string): Buffer;
+  code(input: Buffer, language?: Buffer): Buffer;
 
   inlineCode(input: Buffer): Buffer;
 
-  link(text: Buffer, url: string): Buffer;
+  link(text: Buffer, url: Buffer): Buffer;
 
   image(
-    url: string,
+    url: Buffer,
     altText: Buffer,
     options?: { width?: string; align?: string }
   ): Buffer;
@@ -33,7 +33,7 @@ export interface FormatterAdapter {
 
   table(headers: Buffer[], rows: Buffer[][]): Buffer;
 
-  badge(label: string, message: string, color?: string): Buffer;
+  badge(label: Buffer, message: Buffer, color?: Buffer): Buffer;
 
   blockquote(input: Buffer): Buffer;
 

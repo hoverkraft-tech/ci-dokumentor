@@ -2,6 +2,7 @@ import { Repository } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
+  GitHubActionsManifest,
   GitHubWorkflow,
   GitHubWorkflowInput,
   GitHubWorkflowSecrets,
@@ -21,7 +22,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const usageExample = this.generateUsageExample(
@@ -38,7 +39,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
   private generateUsageExample(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const usageContent = this.isGitHubAction(manifest)
@@ -54,7 +55,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
               .join('\n'),
         })
       ),
-      'yaml'
+      Buffer.from('yaml')
     );
   }
 
@@ -148,7 +149,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       typeof inputsUsageDocument.contents === 'object' &&
       'items' in inputsUsageDocument.contents
     ) {
-      const items = (inputsUsageDocument.contents as { items: unknown[] })
+      const items = (inputsUsageDocument.contents as { items: { key?: { value?: string, spaceBefore?: boolean, commentBefore?: string }; }[] })
         .items;
       for (let i = 0; i < items.length; i++) {
         const item = items[i];

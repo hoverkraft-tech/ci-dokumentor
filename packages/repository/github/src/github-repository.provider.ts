@@ -14,7 +14,7 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
     @inject(GitRepositoryProvider)
     private gitRepositoryService: GitRepositoryProvider,
     @inject(LicenseService) private licenseService: LicenseService
-  ) {}
+  ) { }
 
   /**
    * Get the platform name identifier for this provider

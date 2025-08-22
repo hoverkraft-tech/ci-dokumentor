@@ -1,7 +1,6 @@
 import { Repository } from '@ci-dokumentor/core';
 import {
-  GitHubAction,
-  GitHubWorkflow,
+  GitHubActionsManifest,
   GitHubWorkflowJob,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
@@ -14,7 +13,7 @@ export class JobsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     _repository: Repository
   ): Buffer {
     // Only generate for workflows
@@ -136,9 +135,8 @@ export class JobsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
           } else if (step.uses) {
             stepDesc = `Use ${step.uses}`;
           } else if (step.run) {
-            stepDesc = `Run: ${step.run.split('\n')[0].substring(0, 50)}${
-              step.run.length > 50 ? '...' : ''
-            }`;
+            stepDesc = `Run: ${step.run.split('\n')[0].substring(0, 50)}${step.run.length > 50 ? '...' : ''
+              }`;
           }
           return Buffer.from(stepDesc);
         });

@@ -2,6 +2,7 @@ import { Repository } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionOutput,
+  GitHubActionsManifest,
   GitHubWorkflow,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
@@ -19,7 +20,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     _repository: Repository
   ): Buffer {
     let table: OutputsTable;
@@ -27,9 +28,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     if (this.isGitHubAction(manifest)) {
       table = this.generateActionOutputsTable(formatterAdapter, manifest);
     } else if (this.isGitHubWorkflow(manifest)) {
-      // GitHub Workflows don't have outputs at the workflow level for reusable workflows
-      // They can only have outputs at the job level, which is not supported by this generator
-      table = this.generateEmptyOutputsTable();
+      table = this.generateWorkflowOutputsTable(formatterAdapter, manifest);
     } else {
       throw new Error('Unsupported manifest type for OutputsSectionGenerator');
     }
@@ -59,10 +58,11 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return { headers, rows };
   }
 
-  private generateEmptyOutputsTable(): OutputsTable {
-    const headers = [Buffer.from('**Output**'), Buffer.from('**Description**')];
-
-    return { headers, rows: [] };
+  private generateWorkflowOutputsTable(
+    formatterAdapter: FormatterAdapter,
+    manifest: GitHubWorkflow
+  ): OutputsTable {
+    throw new Error('Must be implemented');
   }
 
   private getOutputName(

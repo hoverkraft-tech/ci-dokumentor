@@ -75,6 +75,7 @@ describe('BadgesSectionGenerator', () => {
           usesName: 'owner/repo/.github/workflows/test-workflow.yml',
           name: 'Test Workflow',
           on: { push: {} },
+          jobs: {}
         };
 
         // Act

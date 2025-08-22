@@ -5,6 +5,7 @@ import {
   GitHubWorkflow,
   GitHubActionInput,
   GitHubWorkflowInput,
+  GitHubActionsManifest,
 } from '../github-actions-parser.js';
 import {
   FormatterAdapter,
@@ -77,6 +78,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |
 | **\`input-name\`** | Test input description | **true** | \`default-value\` |
@@ -104,6 +106,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |`
         );
@@ -130,6 +133,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |`
         );
@@ -158,6 +162,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |
 | **\`minimal-input\`** |  | **false** | \`\` |`
@@ -189,6 +194,7 @@ describe('InputsSectionGenerator', () => {
               },
             },
           },
+          jobs: {}
         };
 
         // Act
@@ -202,6 +208,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
 | **\`environment\`** | Environment to deploy to | **true** | **choice** | \`staging\` |
@@ -218,6 +225,7 @@ describe('InputsSectionGenerator', () => {
           on: {
             push: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -231,6 +239,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |`
         );
@@ -244,6 +253,7 @@ describe('InputsSectionGenerator', () => {
           on: {
             workflow_dispatch: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -257,6 +267,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |`
         );
@@ -277,6 +288,7 @@ describe('InputsSectionGenerator', () => {
               },
             },
           },
+          jobs: {},
         };
 
         // Act
@@ -290,6 +302,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
 | **\`minimal-input\`** | Minimal input | **false** | **string** | \`\` |`
@@ -312,6 +325,7 @@ describe('InputsSectionGenerator', () => {
               },
             },
           },
+          jobs: {}
         };
 
         // Act
@@ -325,6 +339,7 @@ describe('InputsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
 | **\`choice-input\`** |  | **false** | **choice** | \`\` |
@@ -338,7 +353,7 @@ describe('InputsSectionGenerator', () => {
         // Arrange
         const invalidManifest = {
           unsupportedType: true,
-        } as unknown as GitHubAction | GitHubWorkflow;
+        } as unknown as GitHubActionsManifest;
 
         // Act & Assert
         expect(() => {

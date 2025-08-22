@@ -67,6 +67,7 @@ describe('UsageSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 - uses: owner/repo
 
@@ -106,6 +107,7 @@ describe('UsageSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 - uses: owner/repo
   with:
@@ -157,6 +159,7 @@ describe('UsageSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 - uses: owner/repo
   with:
@@ -186,6 +189,7 @@ describe('UsageSectionGenerator', () => {
             push: { branches: ['main'] },
             workflow_dispatch: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -199,6 +203,7 @@ describe('UsageSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 name: Test Workflow
 on:
@@ -258,6 +263,7 @@ jobs:
             contents: 'read',
             deployments: 'write',
           },
+          jobs: {}
         };
 
         // Act
@@ -271,6 +277,7 @@ jobs:
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 name: Deploy Workflow
 on:
@@ -321,6 +328,7 @@ jobs:
             pull_request: { branches: ['main'] },
             workflow_dispatch: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -334,6 +342,7 @@ jobs:
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 name: CI Workflow
 on:
@@ -362,6 +371,7 @@ jobs:
             schedule: [{ cron: '0 0 * * 0' }],
             workflow_dispatch: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -375,6 +385,7 @@ jobs:
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 name: Release Workflow
 on:
@@ -399,6 +410,7 @@ jobs:
           on: {
             workflow_dispatch: {},
           },
+          jobs: {}
         };
 
         // Act
@@ -412,6 +424,7 @@ jobs:
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
           `## Usage
+
 \`\`\`yaml
 name: Test Workflow
 on:

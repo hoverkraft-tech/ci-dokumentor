@@ -1,5 +1,5 @@
 import { Repository } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
@@ -10,7 +10,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     _repository: Repository
   ): Buffer {
     let content = Buffer.from('');
@@ -61,7 +61,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
       Buffer.concat([
         formatterAdapter.heading(Buffer.from('Basic Usage'), 3),
         formatterAdapter.lineBreak(),
-        formatterAdapter.code(Buffer.from(basicExample), 'yaml'),
+        formatterAdapter.code(Buffer.from(basicExample), Buffer.from('yaml')),
         formatterAdapter.lineBreak(),
       ])
     );
@@ -83,7 +83,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
         Buffer.concat([
           formatterAdapter.heading(Buffer.from('Advanced Usage'), 3),
           formatterAdapter.lineBreak(),
-          formatterAdapter.code(Buffer.from(advancedExample), 'yaml'),
+          formatterAdapter.code(Buffer.from(advancedExample), Buffer.from('yaml')),
           formatterAdapter.lineBreak(),
         ])
       );
@@ -97,15 +97,14 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
 
 - name: Use outputs
   run: |
-    echo "Output: \${{ steps.my-action.outputs.${
-      Object.keys(action.outputs)[0]
-    } }}"`;
+    echo "Output: \${{ steps.my-action.outputs.${Object.keys(action.outputs)[0]
+        } }}"`;
 
       examples.push(
         Buffer.concat([
           formatterAdapter.heading(Buffer.from('Using Outputs'), 3),
           formatterAdapter.lineBreak(),
-          formatterAdapter.code(Buffer.from(outputExample), 'yaml'),
+          formatterAdapter.code(Buffer.from(outputExample), Buffer.from('yaml')),
           formatterAdapter.lineBreak(),
         ])
       );
@@ -134,11 +133,10 @@ on:
 
 jobs:
   ${jobNames[0]}:
-    runs-on: ${
-      Array.isArray(firstJob['runs-on'])
+    runs-on: ${Array.isArray(firstJob['runs-on'])
         ? firstJob['runs-on'][0]
         : firstJob['runs-on']
-    }
+      }
     steps:`;
 
     if (firstJob.steps && firstJob.steps.length > 0) {
@@ -161,7 +159,7 @@ jobs:
       Buffer.concat([
         formatterAdapter.heading(Buffer.from('Basic Workflow'), 3),
         formatterAdapter.lineBreak(),
-        formatterAdapter.code(Buffer.from(basicExample), 'yaml'),
+        formatterAdapter.code(Buffer.from(basicExample), Buffer.from('yaml')),
         formatterAdapter.lineBreak(),
       ])
     );
@@ -178,9 +176,8 @@ jobs:`;
         const job = workflow.jobs[jobName];
         multiJobExample += `
   ${jobName}:
-    runs-on: ${
-      Array.isArray(job['runs-on']) ? job['runs-on'][0] : job['runs-on']
-    }
+    runs-on: ${Array.isArray(job['runs-on']) ? job['runs-on'][0] : job['runs-on']
+          }
     steps:
       - uses: actions/checkout@v4
       - name: ${jobName} task
@@ -191,7 +188,7 @@ jobs:`;
         Buffer.concat([
           formatterAdapter.heading(Buffer.from('Multi-Job Workflow'), 3),
           formatterAdapter.lineBreak(),
-          formatterAdapter.code(Buffer.from(multiJobExample), 'yaml'),
+          formatterAdapter.code(Buffer.from(multiJobExample), Buffer.from('yaml')),
           formatterAdapter.lineBreak(),
         ])
       );

@@ -112,7 +112,10 @@ describe('FileOutputAdapter', () => {
 
       // Assert
       const fileContent = readFileSync('/test/empty.md', 'utf-8');
-      const expectedContent = `<!-- ${testSectionIdentifier}:start -->\nNew section content\n<!-- ${testSectionIdentifier}:end -->`;
+      const expectedContent = `<!-- ${testSectionIdentifier}:start -->
+New section content
+<!-- ${testSectionIdentifier}:end -->
+`;
       expect(fileContent).toBe(expectedContent);
     });
 
@@ -189,7 +192,7 @@ describe('FileOutputAdapter', () => {
         sectionStart + `<!-- ${testSectionIdentifier}:start -->`.length,
         sectionEnd
       );
-      expect(sectionContent).toBe('');
+      expect(sectionContent).toEqual('\n');
     });
 
     it('should handle special characters in section identifier', async () => {

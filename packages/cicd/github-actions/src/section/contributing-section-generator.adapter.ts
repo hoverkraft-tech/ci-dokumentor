@@ -1,5 +1,5 @@
 import { Repository } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
@@ -10,7 +10,7 @@ export class ContributingSectionGenerator extends GitHubActionsSectionGeneratorA
 
   generateSection(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubAction | GitHubWorkflow,
+    manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
     const contributingText = `We welcome contributions! Here's how you can help:
@@ -63,7 +63,7 @@ npm run build
       formatterAdapter.lineBreak(),
       formatterAdapter.list(developmentSteps, true),
       formatterAdapter.lineBreak(),
-      formatterAdapter.code(Buffer.from(setupInstructions), 'markdown'),
+      formatterAdapter.code(Buffer.from(setupInstructions), Buffer.from('markdown')),
       formatterAdapter.lineBreak(),
       formatterAdapter.lineBreak(),
     ]);
