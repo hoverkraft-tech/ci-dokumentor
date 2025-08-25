@@ -19,6 +19,6 @@
     "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/repository-git": "workspace:*",
     "@octokit/graphql": "^9.0.1",
-    "inversify": "^7.5.2"
+    "inversify": "^7.9.0"
   }
 }

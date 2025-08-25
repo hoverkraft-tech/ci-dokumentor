@@ -20,12 +20,12 @@
     }
   },
   "dependencies": {
-    "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/cicd-github-actions": "workspace:*",
+    "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/repository-git": "workspace:*",
     "@ci-dokumentor/repository-github": "workspace:*",
     "commander": "^14.0.0",
-    "inversify": "^7.5.2",
+    "inversify": "^7.9.0",
     "reflect-metadata": "^0.2.2"
   }
 }

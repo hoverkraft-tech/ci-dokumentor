@@ -99,7 +99,7 @@ Shows help information for commands.
 
 ### Project Structure
 
-```
+```txt
 src/
 ├── lib/
 │   ├── interfaces/          # Core interfaces and contracts

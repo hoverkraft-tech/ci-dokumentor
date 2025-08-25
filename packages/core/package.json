@@ -16,6 +16,6 @@
     }
   },
   "dependencies": {
-    "inversify": "^7.5.2"
+    "inversify": "^7.9.0"
   }
 }
