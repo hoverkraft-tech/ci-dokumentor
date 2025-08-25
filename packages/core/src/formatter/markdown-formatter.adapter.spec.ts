@@ -348,7 +348,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.code(input);
 
       // Assert
-      expect(result.toString()).toBe('```\nconsole.log("Hello World");\n```');
+      expect(result.toString()).toBe('```\nconsole.log("Hello World");\n```\n');
     });
 
     it('should format text as code block with language', () => {
@@ -361,7 +361,7 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '```javascript\nconsole.log("Hello World");\n```'
+        '```javascript\nconsole.log("Hello World");\n```\n'
       );
     });
 
@@ -373,7 +373,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.code(input);
 
       // Assert
-      expect(result.toString()).toBe('```\n\n```');
+      expect(result.toString()).toBe('```\n\n```\n');
     });
 
     it('should handle multi-line code', () => {
@@ -386,7 +386,7 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '```typescript\nfunction test() {\n  return true;\n}\n```'
+        '```typescript\nfunction test() {\n  return true;\n}\n```\n'
       );
     });
   });
@@ -635,7 +635,7 @@ describe('MarkdownFormatterAdapter', () => {
         '| Name | Age | City |\n' +
         '| --- | --- | --- |\n' +
         '| John | 25 | New York |\n' +
-        '| Jane | 30 | Paris |'
+        '| Jane | 30 | Paris |\n'
       );
     });
 
@@ -648,7 +648,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe('|  |\n|  |');
+      expect(result.toString()).toBe('|  |\n|  |\n');
     });
 
     it('should handle table with only headers', () => {
@@ -661,7 +661,7 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '| Column 1 | Column 2 |\n' + '| --- | --- |'
+        '| Column 1 | Column 2 |\n' + '| --- | --- |\n'
       );
     });
 
@@ -679,7 +679,7 @@ describe('MarkdownFormatterAdapter', () => {
       expect(result.toString()).toBe(
         '| Name | Description |\n' +
         '| --- | --- |\n' +
-        '| Item "A" | Description with & symbols! |'
+        '| Item "A" | Description with & symbols! |\n'
       );
     });
 
@@ -702,7 +702,7 @@ describe('MarkdownFormatterAdapter', () => {
         '| --- | --- |\n' +
         '| John | A person with |\n' +
         '| Doe | multiple lines |\n' +
-        '|  | of description |'
+        '|  | of description |\n'
       );
     });
 
@@ -720,7 +720,7 @@ describe('MarkdownFormatterAdapter', () => {
       expect(result.toString()).toBe(
         '| Code | Output |\n' +
         '| --- | --- |\n' +
-        '| if (a \\| b) | result: true \\| false |'
+        '| if (a \\| b) | result: true \\| false |\n'
       );
     });
 
@@ -741,7 +741,7 @@ describe('MarkdownFormatterAdapter', () => {
         '| --- | --- |\n' +
         '| Line |  |\n' +
         '| Header |  |\n' +
-        '| Value | Single line content |'
+        '| Value | Single line content |\n'
       );
     });
 
@@ -775,7 +775,7 @@ describe('MarkdownFormatterAdapter', () => {
         '| John | Active | Single line note |\n' +
         '| Jane | Pending | This is a |\n' +
         '| Smith | Review | multiline note |\n' +
-        '|  |  | with details |'
+        '|  |  | with details |\n'
       );
     });
   });

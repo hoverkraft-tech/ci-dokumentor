@@ -80,7 +80,8 @@ describe('OutputsSectionGenerator', () => {
 | **Output** | **Description** |
 | --- | --- |
 | **\`output-name\`** | Test output description |
-| **\`another-output\`** | Another output description |`
+| **\`another-output\`** | Another output description |
+`
         );
       });
 
@@ -102,11 +103,8 @@ describe('OutputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
-          `## Outputs
-
-| **Output** | **Description** |
-| --- | --- |`
+        expect(result.toString()).toEqual(
+          ``
         );
       });
 
@@ -129,12 +127,7 @@ describe('OutputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
-          `## Outputs
-
-| **Output** | **Description** |
-| --- | --- |`
-        );
+        expect(result.toString()).toBe("");
       });
 
       it('should handle outputs with missing optional properties', () => {
@@ -163,7 +156,8 @@ describe('OutputsSectionGenerator', () => {
 
 | **Output** | **Description** |
 | --- | --- |
-| **\`minimal-output\`** |  |`
+| **\`minimal-output\`** |  |
+`
         );
       });
 
@@ -195,7 +189,8 @@ describe('OutputsSectionGenerator', () => {
 
 | **Output** | **Description** |
 | --- | --- |
-| **\`description-only\`** | Output with description only |`
+| **\`description-only\`** | Output with description only |
+`
         );
       });
 
@@ -227,19 +222,27 @@ describe('OutputsSectionGenerator', () => {
 
 | **Output** | **Description** |
 | --- | --- |
-| **\`no-description\`** |  |`
+| **\`no-description\`** |  |
+`
         );
       });
     });
 
     describe('with GitHub Workflow manifest', () => {
-      it('should generate empty outputs section for GitHub Workflow', () => {
+      it('should generate outputs section for GitHub Workflow with outputs', () => {
         // Arrange
         const manifest: GitHubWorkflow = {
           usesName: 'owner/repo/.github/workflows/test.yml',
           name: 'Test Workflow',
           on: {
-            workflow_dispatch: {},
+            workflow_call: {
+              outputs: {
+                'workflow-output': {
+                  description: 'A workflow output',
+                  value: '${{ steps.build.outputs.version }}',
+                },
+              },
+            },
           },
           jobs: {}
         };
@@ -257,7 +260,36 @@ describe('OutputsSectionGenerator', () => {
           `## Outputs
 
 | **Output** | **Description** |
-| --- | --- |`
+| --- | --- |
+| **\`workflow-output\`** | A workflow output |
+`
+        );
+      });
+
+      it('should generate empty outputs section for GitHub Workflow', () => {
+        // Arrange
+        const manifest: GitHubWorkflow = {
+          usesName: 'owner/repo/.github/workflows/test.yml',
+          name: 'Test Workflow',
+          on: {
+            workflow_call: {
+              outputs: {},
+            },
+          },
+          jobs: {}
+        };
+
+        // Act
+        const result = generator.generateSection(
+          formatterAdapter,
+          manifest,
+          mockRepository
+        );
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toBe(
+          ``
         );
       });
 
@@ -282,10 +314,7 @@ describe('OutputsSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `## Outputs
-
-| **Output** | **Description** |
-| --- | --- |`
+          ``
         );
       });
     });

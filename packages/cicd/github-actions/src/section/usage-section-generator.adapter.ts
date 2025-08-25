@@ -5,7 +5,7 @@ import {
   GitHubActionsManifest,
   GitHubWorkflow,
   GitHubWorkflowInput,
-  GitHubWorkflowSecrets,
+  GitHubWorkflowSecret,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
@@ -14,7 +14,7 @@ import { basename } from 'node:path';
 
 export type UsageInput = {
   name: string;
-} & (GitHubActionInput | GitHubWorkflowInput | GitHubWorkflowSecrets);
+} & (GitHubActionInput | GitHubWorkflowInput | GitHubWorkflowSecret);
 export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Usage;
@@ -117,7 +117,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
   private generateInputsUsage(
     inputs: Record<
       string,
-      GitHubActionInput | GitHubWorkflowInput | GitHubWorkflowSecrets
+      GitHubActionInput | GitHubWorkflowInput | GitHubWorkflowSecret
     >
   ): Document | undefined {
     if (!inputs || Object.keys(inputs).length === 0) {

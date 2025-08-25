@@ -82,7 +82,8 @@ describe('InputsSectionGenerator', () => {
 | **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |
 | **\`input-name\`** | Test input description | **true** | \`default-value\` |
-| **\`optional-input\`** | Optional input description | **false** | \`\` |`
+| **\`optional-input\`** | Optional input description | **false** | \`\` |
+`
         );
       });
 
@@ -108,7 +109,8 @@ describe('InputsSectionGenerator', () => {
           `## Inputs
 
 | **Input** | **Description** | **Required** | **Default** |
-| --- | --- | --- | --- |`
+| --- | --- | --- | --- |
+`
         );
       });
 
@@ -135,7 +137,8 @@ describe('InputsSectionGenerator', () => {
           `## Inputs
 
 | **Input** | **Description** | **Required** | **Default** |
-| --- | --- | --- | --- |`
+| --- | --- | --- | --- |
+`
         );
       });
 
@@ -165,7 +168,8 @@ describe('InputsSectionGenerator', () => {
 
 | **Input** | **Description** | **Required** | **Default** |
 | --- | --- | --- | --- |
-| **\`minimal-input\`** |  | **false** | \`\` |`
+| **\`minimal-input\`** |  | **false** | \`\` |
+`
         );
       });
     });
@@ -213,7 +217,8 @@ describe('InputsSectionGenerator', () => {
 | --- | --- | --- | --- | --- |
 | **\`environment\`** | Environment to deploy to | **true** | **choice** | \`staging\` |
 |  | Options: \`staging\`, \`production\` |  |  |  |
-| **\`version\`** | Version to deploy | **false** | **string** | \`\` |`
+| **\`version\`** | Version to deploy | **false** | **string** | \`\` |
+`
         );
       });
 
@@ -241,7 +246,8 @@ describe('InputsSectionGenerator', () => {
           `## Inputs
 
 | **Input** | **Description** | **Required** | **Type** | **Default** |
-| --- | --- | --- | --- | --- |`
+| --- | --- | --- | --- | --- |
+`
         );
       });
 
@@ -269,7 +275,8 @@ describe('InputsSectionGenerator', () => {
           `## Inputs
 
 | **Input** | **Description** | **Required** | **Type** | **Default** |
-| --- | --- | --- | --- | --- |`
+| --- | --- | --- | --- | --- |
+`
         );
       });
 
@@ -305,7 +312,8 @@ describe('InputsSectionGenerator', () => {
 
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
-| **\`minimal-input\`** | Minimal input | **false** | **string** | \`\` |`
+| **\`minimal-input\`** | Minimal input | **false** | **string** | \`\` |
+`
         );
       });
 
@@ -343,7 +351,8 @@ describe('InputsSectionGenerator', () => {
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
 | **\`choice-input\`** |  | **false** | **choice** | \`\` |
-|  | Options: \`option1\`, \`option2\`, \`option3\` |  |  |  |`
+|  | Options: \`option1\`, \`option2\`, \`option3\` |  |  |  |
+`
         );
       });
     });

@@ -4,14 +4,10 @@ import {
   GitHubActionOutput,
   GitHubActionsManifest,
   GitHubWorkflow,
+  GitHubWorkflowOutput,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-
-type OutputsTable = {
-  headers: Buffer[];
-  rows: Buffer[][];
-};
 
 export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
@@ -23,30 +19,57 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     manifest: GitHubActionsManifest,
     _repository: Repository
   ): Buffer {
-    let table: OutputsTable;
-
+    let manifestOutputsContent: Buffer;
     if (this.isGitHubAction(manifest)) {
-      table = this.generateActionOutputsTable(formatterAdapter, manifest);
+      manifestOutputsContent = this.generateActionOutputsTable(formatterAdapter, manifest);
     } else if (this.isGitHubWorkflow(manifest)) {
-      table = this.generateWorkflowOutputsTable(formatterAdapter, manifest);
+      manifestOutputsContent = this.generateWorkflowOutputsTable(formatterAdapter, manifest);
     } else {
       throw new Error('Unsupported manifest type for OutputsSectionGenerator');
+    }
+
+    if (!manifestOutputsContent || manifestOutputsContent.length === 0) {
+      return Buffer.alloc(0);
     }
 
     return Buffer.concat([
       formatterAdapter.heading(Buffer.from('Outputs'), 2),
       formatterAdapter.lineBreak(),
-      formatterAdapter.table(table.headers, table.rows),
+      manifestOutputsContent,
     ]);
   }
 
   private generateActionOutputsTable(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubAction
-  ): OutputsTable {
-    const headers = [Buffer.from('**Output**'), Buffer.from('**Description**')];
+  ): Buffer {
+    return this.generateOutputsTable(
+      formatterAdapter,
+      Object.entries(manifest.outputs || {})
+    );
+  }
 
-    const rows = Object.entries(manifest.outputs || {}).map(
+  private generateWorkflowOutputsTable(
+    formatterAdapter: FormatterAdapter,
+    manifest: GitHubWorkflow
+  ): Buffer {
+    return this.generateOutputsTable(
+      formatterAdapter,
+      Object.entries(manifest?.on?.workflow_call?.outputs || {})
+    );
+  }
+
+  private generateOutputsTable(
+    formatterAdapter: FormatterAdapter,
+    outputs: [string, GitHubActionOutput | GitHubWorkflowOutput][]
+  ): Buffer {
+    if (outputs.length === 0) {
+      return Buffer.alloc(0);
+    }
+
+    const headers = this.getHeaders(formatterAdapter);
+
+    const rows = outputs.map(
       ([name, output]) => {
         return [
           this.getOutputName(name, formatterAdapter),
@@ -55,14 +78,14 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       }
     );
 
-    return { headers, rows };
+    return formatterAdapter.table(headers, rows);
   }
 
-  private generateWorkflowOutputsTable(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubWorkflow
-  ): OutputsTable {
-    throw new Error('Must be implemented');
+  private getHeaders(formatterAdapter: FormatterAdapter): Buffer[] {
+    return [
+      formatterAdapter.bold(Buffer.from('Output')),
+      formatterAdapter.bold(Buffer.from('Description')),
+    ];
   }
 
   private getOutputName(
@@ -74,7 +97,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     );
   }
 
-  private getOutputDescription(output: GitHubActionOutput): Buffer {
+  private getOutputDescription(output: GitHubActionOutput | GitHubWorkflowOutput): Buffer {
     return Buffer.from(output.description || '');
   }
 }

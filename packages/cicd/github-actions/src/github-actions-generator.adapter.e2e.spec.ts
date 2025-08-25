@@ -140,16 +140,19 @@ on:
     branches: [main]
   schedule:
     - cron: '0 2 * * 1'
-  workflow_dispatch:
+  workflow_call:
     inputs:
       environment:
         description: 'Deployment environment'
         required: true
         default: 'staging'
-        type: choice
-        options:
-          - staging
-          - production
+        type: string
+    outputs:
+      deployment-url:
+        description: 'URL of the deployed application'
+    secrets:
+      github-token:
+        description: 'GitHub token for authentication'
 
 env:
   NODE_VERSION: '18'

@@ -70,7 +70,8 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       this.lineBreak(),
       input,
       this.lineBreak(),
-      Buffer.from(`\`\`\``)
+      Buffer.from(`\`\`\``),
+      this.lineBreak(),
     ]);
   }
 
@@ -181,7 +182,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       }
     });
 
-    return Buffer.from(result.trimEnd());
+    return Buffer.concat([Buffer.from(result.trimEnd()), this.lineBreak()]);
   }
 
   badge(label: Buffer, url: Buffer): Buffer {

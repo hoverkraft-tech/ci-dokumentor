@@ -59,6 +59,7 @@ export type GitHubWorkflow = {
   on: {
     [key: string]: unknown;
     workflow_dispatch?: GitHubWorkflowDispatchEvent;
+    workflow_call?: GitHubWorkflowCallEvent;
   }; // Event triggers
   permissions?: Record<string, string>; // Permissions for the workflow
   jobs: Record<string, GitHubWorkflowJob>; // Jobs in the workflow
@@ -66,7 +67,12 @@ export type GitHubWorkflow = {
 
 export type GitHubWorkflowDispatchEvent = {
   inputs?: Record<string, GitHubWorkflowInput>;
-  secrets?: Record<string, GitHubWorkflowSecrets>;
+};
+
+export type GitHubWorkflowCallEvent = {
+  inputs?: Record<string, GitHubWorkflowCallInput>;
+  secrets?: Record<string, GitHubWorkflowSecret>;
+  outputs?: Record<string, GitHubWorkflowOutput>;
 };
 
 export type GitHubWorkflowInput = {
@@ -74,12 +80,20 @@ export type GitHubWorkflowInput = {
   required?: boolean;
   default?: string;
   type: string;
+};
+
+export type GitHubWorkflowCallInput = GitHubWorkflowInput & {
   options?: string[];
 };
 
-export type GitHubWorkflowSecrets = {
+export type GitHubWorkflowSecret = {
   description?: string;
   required?: boolean;
+};
+
+export type GitHubWorkflowOutput = {
+  description?: string;
+  value: string;
 };
 
 export type GitHubActionsManifest = GitHubAction | GitHubWorkflow;

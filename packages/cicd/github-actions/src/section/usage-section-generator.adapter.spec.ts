@@ -5,7 +5,7 @@ import {
   GitHubWorkflow,
   GitHubActionInput,
   GitHubWorkflowInput,
-  GitHubWorkflowSecrets,
+  GitHubWorkflowSecret,
 } from '../github-actions-parser.js';
 import {
   FormatterAdapter,
@@ -71,7 +71,8 @@ describe('UsageSectionGenerator', () => {
 \`\`\`yaml
 - uses: owner/repo
 
-\`\`\``
+\`\`\`
+`
         );
       });
 
@@ -119,7 +120,8 @@ describe('UsageSectionGenerator', () => {
     # Default: \`30\`
     timeout: "30"
 
-\`\`\``
+\`\`\`
+`
         );
       });
 
@@ -174,7 +176,8 @@ describe('UsageSectionGenerator', () => {
     # An optional input
     optional-input: ""
 
-\`\`\``
+\`\`\`
+`
         );
       });
     });
@@ -214,7 +217,8 @@ jobs:
   workflow.yml:
     uses: owner/repo/.github/workflows/workflow.yml
 
-\`\`\``
+\`\`\`
+`
         );
       });
 
@@ -239,7 +243,7 @@ jobs:
           },
         };
 
-        const secrets: Record<string, GitHubWorkflowSecrets> = {
+        const secrets: Record<string, GitHubWorkflowSecret> = {
           DEPLOY_TOKEN: {
             description: 'Token for deployment',
             required: true,
@@ -314,7 +318,8 @@ jobs:
       # Default: \`false\`
       debug: false
 
-\`\`\``
+\`\`\`
+`
         );
       });
 
@@ -357,7 +362,8 @@ jobs:
   ci.yml:
     uses: owner/repo/.github/workflows/ci.yml
 
-\`\`\``
+\`\`\`
+`
         );
       });
 
@@ -398,7 +404,8 @@ jobs:
   release.yml:
     uses: owner/repo/.github/workflows/release.yml
 
-\`\`\``
+\`\`\`
+`
         );
       });
 
@@ -435,7 +442,8 @@ jobs:
   test.yml:
     uses: owner/repo/.github/workflows/test.yml
 
-\`\`\``
+\`\`\`
+`
         );
       });
     });

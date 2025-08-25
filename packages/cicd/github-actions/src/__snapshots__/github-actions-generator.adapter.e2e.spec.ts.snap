@@ -65,6 +65,7 @@ Builds the application and deploys it to the specified environment
     version: latest
     dry-run: false
 \`\`\`
+
 ### Advanced Usage
 
 \`\`\`yaml
@@ -76,6 +77,7 @@ Builds the application and deploys it to the specified environment
     dry-run: false
     config-file: config/deploy.yml
 \`\`\`
+
 ### Using Outputs
 
 \`\`\`yaml
@@ -155,6 +157,7 @@ Please include the requested information listed below (as much as you can provid
 
 This information will help us triage your report more quickly.
 \`\`\`
+
 ### Security Best Practices
 
 - Always use the latest version of the action/workflow
@@ -192,6 +195,7 @@ exports[`GitHubActionsGeneratorAdapter - Integration Tests > generateDocumentati
 | \`test\` | ubuntu-latest | 5 | None |
 | \`build\` | ubuntu-latest | 5 | test |
 | \`deploy\` | ubuntu-latest | 1 | build |
+
 ### Job: test
 
 **Name: **Run Tests
@@ -241,34 +245,38 @@ on:
       - main
   schedule:
     - cron: 0 2 * * 1
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        default: staging
+        type: string
+    outputs:
+      deployment-url:
+        description: URL of the deployed application
+    secrets:
+      github-token:
+        description: GitHub token for authentication
 jobs:
   ci-cd.yml:
     uses: test-owner/test-action/test/.github/workflows/ci-cd.yml
-    with:
-      # Deployment environment
-      # This input is required.
-      # Default: \`staging\`
-      # Options:
-      # - \`staging\`
-      # - \`production\`
-      environment: staging
 
 \`\`\`
 ## Inputs
 
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
-| **\`environment\`** | Deployment environment | **true** | **choice** | \`staging\` |
-|  | Options: \`staging\`, \`production\` |  |  |  |
 ## Outputs
 
 | **Output** | **Description** |
 | --- | --- |
+| **\`deployment-url\`** | URL of the deployed application |
 ## Secrets
 
 | **Secret** | **Description** | **Required** |
 | --- | --- | --- |
-| **\`environment\`** | Deployment environment | **true** |
+| **\`github-token\`** | GitHub token for authentication | **false** |
 ## Examples
 
 ### Basic Workflow
@@ -293,6 +301,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 \`\`\`
+
 ### Multi-Job Workflow
 
 \`\`\`yaml
@@ -382,6 +391,7 @@ Please include the requested information listed below (as much as you can provid
 
 This information will help us triage your report more quickly.
 \`\`\`
+
 ### Security Best Practices
 
 - Always use the latest version of the action/workflow
