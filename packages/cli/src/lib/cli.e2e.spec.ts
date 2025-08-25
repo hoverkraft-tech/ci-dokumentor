@@ -28,8 +28,8 @@ describe('CLI', () => {
       // Mock implementation - intentionally empty
     });
 
-    const processExitMock = (() => {
-      // Do nothing on exit
+    const processExitMock = ((code?: number | string | null | undefined) => {
+      throw new Error('process.exit: ' + code);
     }) as unknown as typeof process.exit;
 
     processExitSpy = vi
@@ -49,7 +49,7 @@ describe('CLI', () => {
       process.argv = ['node', 'ci-dokumentor', 'help'];
 
       // Act
-      await cli();
+      await expect(cli()).rejects.toThrow("process.exit: 0");
 
       // Assert
       expect(consoleErrorSpy).not.toHaveBeenCalled();

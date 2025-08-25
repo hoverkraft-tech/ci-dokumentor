@@ -21,11 +21,11 @@
 
 ### Quick Links
 
-- 🚀 [Getting Started](./docs/docs/getting-started/installation.md) - Installation and quick start
-- 📦 [Packages](./docs/docs/packages/core.md) - Package documentation
-- 🐳 [Docker](./docs/docs/integrations/docker.md) - Docker integration guide
-- 🔧 [GitHub Action](./docs/docs/integrations/github-action.md) - GitHub Actions integration
-- 👨‍💻 [Contributing](./docs/docs/developers/contributing.md) - How to contribute
+- 🚀 [Getting Started](./docs/content/getting-started/installation.md) - Installation and quick start
+- 📦 [Packages](./docs/content/packages/core.md) - Package documentation
+- 🐳 [Docker](./docs/content/integrations/docker.md) - Docker integration guide
+- 🔧 [GitHub Action](./docs/content/integrations/github-action.md) - GitHub Actions integration
+- 👨‍💻 [Contributing](./docs/content/developers/contributing.md) - How to contribute
 
 ## Usage
 

@@ -238,7 +238,7 @@ jobs:
       - name: Combine Documentation
         run: |
           mkdir -p final-docs
-          cp -r all-docs/docs-*/* final-docs/
+          cp -r all-docs/content-*/* final-docs/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
