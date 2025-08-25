@@ -49,43 +49,6 @@ graph TD
 
 ## Shared CI Workflow
 
-### Configuration
-
-```yaml title=".github/workflows/__shared-ci.yml"
-name: Common Continuous Integration tasks
-
-on:
-  workflow_call:
-
-permissions:
-  actions: read
-  contents: read
-  packages: read
-  security-events: write
-  statuses: write
-  id-token: write
-
-jobs:
-  linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@6857ef6d10f704e0998aa4955282f27d1b9be778 # 0.23.1
-    with:
-      linter-env: |
-        FILTER_REGEX_EXCLUDE=dist/**/*
-        VALIDATE_JSCPD=false
-        VALIDATE_TYPESCRIPT_STANDARD=false
-        VALIDATE_TYPESCRIPT_ES=false
-        VALIDATE_TYPESCRIPT_PRETTIER=false
-        VALIDATE_JAVASCRIPT_ES=false
-        VALIDATE_JAVASCRIPT_STANDARD=false
-
-  nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@51de90c148d4cc86d7c63bb9ac4fb75935d71d26 # 0.13.0
-    permissions:
-      id-token: write
-      security-events: write
-      contents: read
-```
-
 ### What It Does
 
 #### Linting Stage
@@ -106,44 +69,14 @@ jobs:
 
 ## Pull Request Workflow
 
-### Trigger Configuration
-
-```yaml title=".github/workflows/pull-request-ci.yml"
-name: Pull request - Continuous Integration
-
-on:
-  merge_group:
-  pull_request:
-    branches: [main]
-
-permissions:
-  actions: read
-  contents: read
-  packages: read
-  statuses: write
-  security-events: write
-  id-token: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  ci:
-    uses: ./.github/workflows/__shared-ci.yml
-    secrets: inherit
-```
-
 ### What Happens on PRs
 
 1. **Trigger Conditions**:
-
    - Pull request opened/updated
    - Merge queue integration
    - Branch protection rules
 
 2. **Validation Steps**:
-
    - Code quality checks
    - Unit and integration tests
    - Build verification
@@ -167,89 +100,6 @@ To pass CI, your PR must:
 - ✅ **Follow semantic PR titles** - Use conventional commit format
 
 ## Main Branch Workflow
-
-### Comprehensive Pipeline
-
-```yaml title=".github/workflows/main-ci.yml"
-name: Internal - Main - Continuous Integration
-
-on:
-  push:
-    branches: [main]
-    tags: ['*']
-  workflow_dispatch:
-  schedule:
-    - cron: '25 8 * * 1' # Weekly scheduled run
-
-permissions:
-  actions: read
-  contents: read
-  packages: write
-  security-events: write
-  statuses: write
-  id-token: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  ci:
-    uses: ./.github/workflows/__shared-ci.yml
-    secrets: inherit
-
-  docker:
-    needs: ci
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@d9615e8f03feb5d9a3d96bbdd3b5617277395899 # 0.26.0
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    secrets:
-      oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      images: |
-        [
-          {
-            "name": "ci-dokumentor",
-            "context": ".",
-            "dockerfile": "docker/Dockerfile",
-            "target": "production",
-            "platforms": [
-              "linux/amd64",
-              "linux/arm64"
-            ]
-          }
-        ]
-
-  release:
-    needs: ci
-    if: github.event_name != 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: bitflight-devops/github-action-readme-generator@f750ff0ac8a4b68a3c2d622cc50a5ad20bcebaa1 # v1.8.0
-        with:
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
-
-      - uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
-        id: generate-token
-        with:
-          app-id: ${{ vars.CI_BOT_APP_ID }}
-          private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
-
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@6857ef6d10f704e0998aa4955282f27d1b9be778 # 0.23.1
-        with:
-          github-token: ${{ steps.generate-token.outputs.token }}
-          branch: docs/actions-workflows-documentation-update
-          title: 'docs: update actions and workflows documentation'
-          body: Update actions and workflows documentation
-          commit-message: |
-            docs: update actions and workflows documentation
-
-            [skip ci]
-```
 
 ### Main Branch Jobs
 
@@ -276,50 +126,6 @@ jobs:
 
 ## Docker Build Pipeline
 
-### Multi-Stage Dockerfile
-
-The Docker build uses a multi-stage approach:
-
-```dockerfile title="docker/Dockerfile"
-# Stage 1: Builder
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json pnpm-lock.yaml ./
-RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile
-COPY . .
-RUN pnpm build
-
-# Stage 2: Production
-FROM node:20-alpine AS production
-RUN addgroup -g 1001 -S ci-dokumentor && \
-    adduser -S ci-dokumentor -u 1001 -G ci-dokumentor
-WORKDIR /app
-COPY --from=builder --chown=ci-dokumentor:ci-dokumentor /app/dist ./dist
-COPY --from=builder --chown=ci-dokumentor:ci-dokumentor /app/node_modules ./node_modules
-COPY --chown=ci-dokumentor:ci-dokumentor docker/ ./docker/
-USER ci-dokumentor
-ENTRYPOINT ["node", "dist/bin/ci-dokumentor.js"]
-```
-
-### Build Configuration
-
-```yaml
-images: |
-  [
-    {
-      "name": "ci-dokumentor",
-      "context": ".",
-      "dockerfile": "docker/Dockerfile", 
-      "target": "production",
-      "platforms": [
-        "linux/amd64",
-        "linux/arm64"
-      ]
-    }
-  ]
-```
-
 ### Image Registry
 
 Images are published to GitHub Container Registry:
@@ -328,7 +134,7 @@ Images are published to GitHub Container Registry:
 - **Tags**:
   - `latest` - Latest stable release
   - `main` - Latest main branch build
-  - `v1.0.0` - Specific version tags
+  - `1.0.0` - Specific version tags
   - `sha-abcd123` - Commit SHA tags
 
 ## Release Automation
@@ -376,13 +182,6 @@ The pipeline automatically maintains documentation:
 
 #### Readme Updates
 
-```yaml
-- uses: bitflight-devops/github-action-readme-generator@f750ff0ac8a4b68a3c2d622cc50a5ad20bcebaa1
-  with:
-    owner: ${{ github.repository_owner }}
-    repo: ${{ github.event.repository.name }}
-```
-
 This generates:
 
 - **Action documentation** - From action.yml files
@@ -391,19 +190,6 @@ This generates:
 - **Badge updates** - CI status, coverage, version badges
 
 #### Documentation PR Creation
-
-```yaml
-- uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@6857ef6d10f704e0998aa4955282f27d1b9be778
-  with:
-    github-token: ${{ steps.generate-token.outputs.token }}
-    branch: docs/actions-workflows-documentation-update
-    title: 'docs: update actions and workflows documentation'
-    body: Update actions and workflows documentation
-    commit-message: |
-      docs: update actions and workflows documentation
-
-      [skip ci]
-```
 
 ### Docusaurus Deployment
 

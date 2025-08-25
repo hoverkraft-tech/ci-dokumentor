@@ -30,7 +30,7 @@ jobs:
 
   docker:
     needs: ci
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@d9615e8f03feb5d9a3d96bbdd3b5617277395899 # 0.26.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@f9e149b6cdfa8443994994f10085691a57b8cf0e # 0.27.1
     permissions:
       contents: read
       packages: write
@@ -57,19 +57,19 @@ jobs:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: bitflight-devops/github-action-readme-generator@f750ff0ac8a4b68a3c2d622cc50a5ad20bcebaa1 # v1.8.0
         with:
           owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}
 
-      - uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+      - uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: generate-token
         with:
           app-id: ${{ vars.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@6857ef6d10f704e0998aa4955282f27d1b9be778 # 0.23.1
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@b4883995e100e291a1fed68678d47a560328ed08 # 0.24.0
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           branch: docs/actions-workflows-documentation-update
@@ -94,7 +94,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@f13e51c76d00932ad7a9ad02606a7ba96ea97f68 # main
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@6d9e5d48da1a80c085e8ed867d680a5e99b28217 # main
         with:
           source-path: docs/build
           build-artifact-name: documentation-build

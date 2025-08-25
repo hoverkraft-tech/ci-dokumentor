@@ -10,7 +10,6 @@ lint-fix: ## Execute linting and fix
 	$(call run_linter, \
 		-e FIX_JSON_PRETTIER=true \
 		-e FIX_JAVASCRIPT_PRETTIER=true \
-		-e FIX_JAVASCRIPT_STANDARD=true \
 		-e FIX_YAML_PRETTIER=true \
 		-e FIX_MARKDOWN=true \
 		-e FIX_MARKDOWN_PRETTIER=true \
@@ -44,7 +43,6 @@ define run_linter
 		-e DEFAULT_WORKSPACE="$$DEFAULT_WORKSPACE" \
 		-e FILTER_REGEX_INCLUDE="$(filter-out $@,$(MAKECMDGOALS))" \
 		-e IGNORE_GITIGNORED_FILES=true \
-		-e KUBERNETES_KUBECONFORM_OPTIONS="--schema-location default --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'" \
 		$(1) \
 		-v $$VOLUME \
 		--rm \
