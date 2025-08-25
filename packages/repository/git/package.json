@@ -22,6 +22,6 @@
     "simple-git": "^3.28.0"
   },
   "devDependencies": {
-    "@types/git-url-parse": "^9.0.3"
+    "@types/git-url-parse": "^16.0.2"
   }
 }
