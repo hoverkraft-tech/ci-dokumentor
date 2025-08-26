@@ -99,11 +99,11 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
 
       await outputAdapter.writeSection(
         sectionGeneratorAdapter.getSectionIdentifier(),
-        Buffer.concat([
+        sectionContent.length ? Buffer.concat([
           sectionContent,
           formatterAdapter.lineBreak(),
           formatterAdapter.lineBreak(),
-        ])
+        ]) : Buffer.alloc(0)
       );
     }
   }

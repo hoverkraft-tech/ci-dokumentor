@@ -31,7 +31,7 @@ describe('OutputsSectionGenerator', () => {
       owner: 'owner',
       name: 'repo',
       fullName: 'owner/repo',
-    };
+    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {

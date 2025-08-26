@@ -4,8 +4,8 @@ import {
   GitHubAction,
   GitHubWorkflow,
   GitHubActionInput,
-  GitHubWorkflowInput,
   GitHubWorkflowSecret,
+  GitHubWorkflowCallInput,
 } from '../github-actions-parser.js';
 import {
   FormatterAdapter,
@@ -32,7 +32,7 @@ describe('UsageSectionGenerator', () => {
       owner: 'owner',
       name: 'repo',
       fullName: 'owner/repo',
-    };
+    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -224,11 +224,10 @@ jobs:
 
       it('should generate usage section for workflow with inputs and secrets', () => {
         // Arrange
-        const inputs: Record<string, GitHubWorkflowInput> = {
+        const inputs: Record<string, GitHubWorkflowCallInput> = {
           environment: {
             description: 'Deployment environment',
-            type: 'choice',
-            options: ['development', 'staging', 'production'],
+            type: 'string',
             required: true,
           },
           version: {
@@ -258,7 +257,7 @@ jobs:
           name: 'Deploy Workflow',
           on: {
             push: { branches: ['main'] },
-            workflow_dispatch: {
+            workflow_call: {
               inputs,
               secrets,
             },
@@ -304,11 +303,7 @@ jobs:
     with:
       # Deployment environment
       # This input is required.
-      # Options:
-      # - \`development\`
-      # - \`staging\`
-      # - \`production\`
-      environment: development
+      environment: ""
 
       # Version to deploy
       # Default: \`latest\`

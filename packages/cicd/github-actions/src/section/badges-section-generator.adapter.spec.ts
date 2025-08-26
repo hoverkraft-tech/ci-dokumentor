@@ -26,7 +26,7 @@ describe('BadgesSectionGenerator', () => {
       owner: 'owner',
       name: 'repo',
       fullName: 'owner/repo',
-    };
+    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -63,7 +63,8 @@ describe('BadgesSectionGenerator', () => {
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
 [![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
-[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)`
+[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+`
         );
       });
     });
@@ -90,7 +91,8 @@ describe('BadgesSectionGenerator', () => {
         expect(result.toString()).toEqual(
           `[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
 [![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
-[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)`
+[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+`
         );
       });
     });

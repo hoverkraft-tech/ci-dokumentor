@@ -26,7 +26,7 @@ describe('HeaderSectionGenerator', () => {
       owner: 'owner',
       name: 'repo',
       fullName: 'owner/repo',
-    };
+    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -372,7 +372,7 @@ describe('HeaderSectionGenerator', () => {
         name: 'repo',
         fullName: 'owner/repo',
         // No logo property
-      };
+      } as Repository;
 
       // Act
       const result = generator.generateSection(

@@ -4,8 +4,8 @@ import {
   GitHubAction,
   GitHubWorkflow,
   GitHubActionInput,
-  GitHubWorkflowInput,
   GitHubActionsManifest,
+  GitHubWorkflowDispatchInput,
 } from '../github-actions-parser.js';
 import {
   FormatterAdapter,
@@ -32,7 +32,7 @@ describe('InputsSectionGenerator', () => {
       owner: 'owner',
       name: 'repo',
       fullName: 'owner/repo',
-    };
+    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -175,20 +175,19 @@ describe('InputsSectionGenerator', () => {
     });
 
     describe('with GitHub Workflow manifest', () => {
-      it('should generate inputs section for GitHub Workflow with workflow_dispatch inputs', () => {
+      it('should generate inputs section for GitHub Workflow with workflow_call inputs', () => {
         // Arrange
         const manifest: GitHubWorkflow = {
           usesName: 'owner/repo/.github/workflows/test.yml',
           name: 'Test Workflow',
           on: {
-            workflow_dispatch: {
+            workflow_call: {
               inputs: {
                 environment: {
                   description: 'Environment to deploy to',
                   required: true,
-                  type: 'choice',
+                  type: 'string',
                   default: 'staging',
-                  options: ['staging', 'production'],
                 },
                 version: {
                   description: 'Version to deploy',
@@ -213,10 +212,11 @@ describe('InputsSectionGenerator', () => {
         expect(result.toString()).toBe(
           `## Inputs
 
+### Workflow Call Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
-| **\`environment\`** | Environment to deploy to | **true** | **choice** | \`staging\` |
-|  | Options: \`staging\`, \`production\` |  |  |  |
+| **\`environment\`** | Environment to deploy to | **true** | **string** | \`staging\` |
 | **\`version\`** | Version to deploy | **false** | **string** | \`\` |
 `
         );
@@ -243,11 +243,7 @@ describe('InputsSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `## Inputs
-
-| **Input** | **Description** | **Required** | **Type** | **Default** |
-| --- | --- | --- | --- | --- |
-`
+          ``
         );
       });
 
@@ -272,11 +268,7 @@ describe('InputsSectionGenerator', () => {
         // Assert
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toBe(
-          `## Inputs
-
-| **Input** | **Description** | **Required** | **Type** | **Default** |
-| --- | --- | --- | --- | --- |
-`
+          ``
         );
       });
 
@@ -291,7 +283,7 @@ describe('InputsSectionGenerator', () => {
                 'minimal-input': {
                   description: 'Minimal input',
                   type: 'string',
-                } as GitHubWorkflowInput,
+                } as GitHubWorkflowDispatchInput,
               },
             },
           },
@@ -310,6 +302,8 @@ describe('InputsSectionGenerator', () => {
         expect(result.toString()).toBe(
           `## Inputs
 
+### Workflow Dispatch Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
 | **\`minimal-input\`** | Minimal input | **false** | **string** | \`\` |
@@ -325,10 +319,9 @@ describe('InputsSectionGenerator', () => {
           on: {
             workflow_dispatch: {
               inputs: {
-                'choice-input': {
+                'no-description-input': {
                   description: '',
-                  type: 'choice',
-                  options: ['option1', 'option2', 'option3'],
+                  type: 'string',
                 },
               },
             },
@@ -348,10 +341,11 @@ describe('InputsSectionGenerator', () => {
         expect(result.toString()).toBe(
           `## Inputs
 
+### Workflow Dispatch Inputs
+
 | **Input** | **Description** | **Required** | **Type** | **Default** |
 | --- | --- | --- | --- | --- |
-| **\`choice-input\`** |  | **false** | **choice** | \`\` |
-|  | Options: \`option1\`, \`option2\`, \`option3\` |  |  |  |
+| **\`no-description-input\`** |  | **false** | **string** | \`\` |
 `
         );
       });

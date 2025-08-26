@@ -1,5 +1,5 @@
 import { Repository } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
@@ -114,15 +114,14 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       return Buffer.from('');
     }
 
-    return linkedBadges.reduce((acc, linkedBadge, index) => {
+    const badgeCollectionContent = linkedBadges.map((linkedBadge) => {
       const badgeBuffer = formatterAdapter.link(
         formatterAdapter.badge(Buffer.from(linkedBadge.badge.label), Buffer.from(linkedBadge.badge.url)),
         Buffer.from(linkedBadge.url)
       );
-      if (index === 0) {
-        return badgeBuffer;
-      }
-      return Buffer.concat([acc, formatterAdapter.lineBreak(), badgeBuffer]);
-    }, Buffer.from(''));
+      return [badgeBuffer, formatterAdapter.lineBreak()];
+    }).flat();
+
+    return Buffer.concat(badgeCollectionContent);
   }
 }

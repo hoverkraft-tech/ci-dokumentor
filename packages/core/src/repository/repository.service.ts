@@ -15,6 +15,9 @@ export type Repository = {
     spdxId: string | null;
     url: string | null;
   }; // Optional license information
+  contributing?: {
+    url: string;
+  }; // Optional contributing information
 };
 
 @injectable()
@@ -23,7 +26,7 @@ export class RepositoryService {
     @multiInject(REPOSITORY_PROVIDER_IDENTIFIER)
     @optional()
     private providers: RepositoryProvider[] = []
-  ) {}
+  ) { }
 
   /**
    * Get list of supported repository platforms based on registered providers

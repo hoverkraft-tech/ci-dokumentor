@@ -75,16 +75,19 @@ export type GitHubWorkflowCallEvent = {
   outputs?: Record<string, GitHubWorkflowOutput>;
 };
 
-export type GitHubWorkflowInput = {
+type GitHubWorkflowInput = {
   description: string;
   required?: boolean;
-  default?: string;
   type: string;
+  default?: string;
 };
 
-export type GitHubWorkflowCallInput = GitHubWorkflowInput & {
+export type GitHubWorkflowDispatchInput = GitHubWorkflowInput & {
+  deprecationMessage?: string;
   options?: string[];
 };
+
+export type GitHubWorkflowCallInput = GitHubWorkflowInput;
 
 export type GitHubWorkflowSecret = {
   description?: string;

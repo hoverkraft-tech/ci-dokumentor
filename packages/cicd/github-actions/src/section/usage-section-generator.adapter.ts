@@ -4,7 +4,8 @@ import {
   GitHubActionInput,
   GitHubActionsManifest,
   GitHubWorkflow,
-  GitHubWorkflowInput,
+  GitHubWorkflowCallInput,
+  GitHubWorkflowDispatchInput,
   GitHubWorkflowSecret,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
@@ -14,7 +15,7 @@ import { basename } from 'node:path';
 
 export type UsageInput = {
   name: string;
-} & (GitHubActionInput | GitHubWorkflowInput | GitHubWorkflowSecret);
+} & (GitHubActionInput | GitHubWorkflowCallInput | GitHubWorkflowSecret);
 export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Usage;
@@ -78,8 +79,10 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     workflow: GitHubWorkflow,
     _repository: Repository
   ): Document {
+    const filteredOnAllowList = ['workflow_call', 'workflow_dispatch'];
+
     const filteredOn = Object.keys(workflow.on || {})
-      .filter((key) => key !== 'workflow_dispatch')
+      .filter((key) => !filteredOnAllowList.includes(key))
       .reduce((acc, key) => {
         acc[key] = workflow.on[key as keyof typeof workflow.on] || {};
         return acc;
@@ -92,10 +95,10 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
     const permissions = workflow.permissions || undefined;
 
-    const secrets = workflow.on?.workflow_dispatch?.secrets || {};
+    const secrets = workflow.on?.workflow_call?.secrets || {};
     const secretsUsage = this.generateInputsUsage(secrets);
 
-    const inputs = workflow.on?.workflow_dispatch?.inputs || {};
+    const inputs = workflow.on?.workflow_call?.inputs || workflow.on?.workflow_dispatch?.inputs || {};
     const withUsage = this.generateInputsUsage(inputs) || undefined;
 
     const jobName = basename(workflow.usesName);
@@ -117,7 +120,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
   private generateInputsUsage(
     inputs: Record<
       string,
-      GitHubActionInput | GitHubWorkflowInput | GitHubWorkflowSecret
+      GitHubActionInput | GitHubWorkflowCallInput | GitHubWorkflowDispatchInput | GitHubWorkflowSecret
     >
   ): Document | undefined {
     if (!inputs || Object.keys(inputs).length === 0) {
@@ -157,7 +160,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
           continue;
         }
 
-        const inputData = inputComments.find((c) => c.key === item.key.value);
+        const inputData = inputComments.find((c) => item.key && c.key === item.key.value);
         if (!inputData) {
           continue;
         }
@@ -178,10 +181,10 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     comment?: string;
   } {
     let defaultValue: unknown = (
-      input as GitHubActionInput | GitHubWorkflowInput
+      input as GitHubActionInput | GitHubWorkflowCallInput | GitHubWorkflowDispatchInput
     ).default;
-    const typeValue = (input as GitHubWorkflowInput).type || 'string';
-    const optionsValue = (input as GitHubWorkflowInput).options;
+    const typeValue = (input as GitHubWorkflowCallInput | GitHubWorkflowDispatchInput).type || 'string';
+    const optionsValue = (input as GitHubWorkflowDispatchInput).options;
 
     // Define comments for the input
     let commentBefore = ``;

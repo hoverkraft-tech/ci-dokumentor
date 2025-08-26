@@ -49,7 +49,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     }
 
     const logoAltText = this.getDisplayName(manifest, repository);
-    const logoImage = formatterAdapter.image(logoPath, logoAltText, {
+    const logoImage = formatterAdapter.image(Buffer.from(logoPath), logoAltText, {
       width: '60px',
       align: 'center',
     });

@@ -12,7 +12,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Automated Documentation',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('@site/static/img/automated-documentation.svg').default,
     description: (
       <>
         Generate comprehensive documentation automatically from your CI/CD configuration files.
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Professional Output',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/professional-output.svg').default,
     description: (
       <>
         Generates comprehensive, professional documentation in Markdown format.
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Multiple Platforms',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('@site/static/img/multiple-platforms.svg').default,
     description: (
       <>
         Works with GitHub Actions, Docker, NPX, and GitHub workflows.

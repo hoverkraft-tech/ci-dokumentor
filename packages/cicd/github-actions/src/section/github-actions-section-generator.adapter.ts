@@ -16,27 +16,27 @@ export abstract class GitHubActionsSectionGeneratorAdapter
     repository: Repository
   ): Buffer;
 
-  protected isGitHubAction(parsed: any): parsed is GitHubAction {
+  protected isGitHubAction(parsed: unknown): parsed is GitHubAction {
     // Validate all required fields for a GitHub Action
     return (
-      'name' in parsed &&
-      typeof parsed.name === 'string' &&
-      'runs' in parsed &&
-      typeof parsed.runs === 'object' &&
-      'using' in parsed.runs &&
-      typeof parsed.runs.using === 'string'
+      'name' in (parsed as GitHubAction) &&
+      typeof (parsed as GitHubAction).name === 'string' &&
+      'runs' in (parsed as GitHubAction) &&
+      typeof (parsed as GitHubAction).runs === 'object' &&
+      'using' in (parsed as GitHubAction).runs &&
+      typeof (parsed as GitHubAction).runs.using === 'string'
     );
   }
 
-  protected isGitHubWorkflow(parsed: any): parsed is GitHubWorkflow {
+  protected isGitHubWorkflow(parsed: unknown): parsed is GitHubWorkflow {
     // Validate all required fields for a GitHub Workflow
     return (
-      'name' in parsed &&
-      typeof parsed.name === 'string' &&
-      'on' in parsed &&
-      (typeof parsed.on === 'object' ||
-        Array.isArray(parsed.on) ||
-        typeof parsed.on === 'string')
+      'name' in (parsed as GitHubWorkflow) &&
+      typeof (parsed as GitHubWorkflow).name === 'string' &&
+      'on' in (parsed as GitHubWorkflow) &&
+      (typeof (parsed as GitHubWorkflow).on === 'object' ||
+        Array.isArray((parsed as GitHubWorkflow).on) ||
+        typeof (parsed as GitHubWorkflow).on === 'string')
     );
   }
 }
