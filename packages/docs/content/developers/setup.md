@@ -218,7 +218,7 @@ ci-dokumentor --help
 ```text
 ci-dokumentor/
 ├── .github/                 # GitHub workflows and templates
-├── docs/                   # Architecture documentation
+├── packages/docs/          # Architecture documentation
 ├── docker/                 # Docker configuration
 ├── packages/               # Monorepo packages
 │   ├── core/              # Core abstractions

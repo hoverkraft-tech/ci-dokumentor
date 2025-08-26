@@ -15,7 +15,7 @@ updates:
   - package-ecosystem: npm
     directory: '/'
     open-pull-requests-limit: 20
-    versioning-strategy: widen
+    versioning-strategy: increase
     schedule:
       interval: weekly
       day: friday
@@ -23,19 +23,6 @@ updates:
     groups:
       npm-dev-dependencies:
         dependency-type: development
-
-  - package-ecosystem: npm
-    directory: '/docs'
-    open-pull-requests-limit: 20
-    versioning-strategy: increase
-    schedule:
-      interval: weekly
-      day: friday
-      time: '04:00'
-    groups:
-      docs-dependencies:
-        patterns:
-          - '*'
 
   - package-ecosystem: 'devcontainers'
     open-pull-requests-limit: 20
@@ -46,5 +33,19 @@ updates:
       time: '04:00'
     groups:
       devcontainers-dependencies:
+        patterns:
+          - '*'
+
+  - package-ecosystem: 'docker'
+    open-pull-requests-limit: 20
+    directories:
+      - '/'
+      - '/docker'
+    schedule:
+      interval: 'weekly'
+      day: friday
+      time: '04:00'
+    groups:
+      docker-dependencies:
         patterns:
           - '*'

@@ -48,6 +48,9 @@ vitest.config.*.timestamp*
 *.tsbuildinfo
 
 # Docusaurus build output
-docs/build
+packages/docs/build
+packages/docs/.docusaurus
+
+# AI config
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md

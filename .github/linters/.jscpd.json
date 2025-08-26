@@ -1,0 +1,10 @@
+{
+  "threshold": 5,
+  "ignore": [
+    "packages/**/package.json",
+    "packages/**/eslint.config.mjs",
+    "packages/**/vite.config.ts",
+    "packages/**/tsconfig.spec.json",
+    "packages/**/tsconfig.lib.json"
+  ]
+}

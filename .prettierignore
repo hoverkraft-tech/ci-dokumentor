@@ -1,6 +1,9 @@
 # Add files here to ignore them from prettier formatting
 /dist
 **/dist/
+/packages/docs/build
+/packages/docs/.docusaurus
 /coverage
 /.nx/cache
 /.nx/workspace-data
+/pnpm-lock.yaml

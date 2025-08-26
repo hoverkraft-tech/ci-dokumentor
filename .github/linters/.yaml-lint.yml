@@ -1,0 +1,9 @@
+---
+extends: default
+
+ignore:
+  - pnpm-lock.yaml
+
+rules:
+  line-length:
+    max: 170
