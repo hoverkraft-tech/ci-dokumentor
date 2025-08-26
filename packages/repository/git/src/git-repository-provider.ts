@@ -52,7 +52,7 @@ export class GitRepositoryProvider implements RepositoryProvider {
    * Get the parsed remote URL for the repository
    * This is a public method that can be used by other providers
    */
-  async getRemoteParsedUrl(): Promise<any> {
+  async getRemoteParsedUrl(): Promise<gitUrlParse.GitUrl> {
     const remoteUrl = await this.getRemoteUrl();
     return gitUrlParse(remoteUrl);
   }

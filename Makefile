@@ -13,7 +13,9 @@ lint-fix: ## Execute linting and fix
 		-e FIX_YAML_PRETTIER=true \
 		-e FIX_MARKDOWN=true \
 		-e FIX_MARKDOWN_PRETTIER=true \
-		-e FIX_NATURAL_LANGUAGE=true)
+		-e FIX_NATURAL_LANGUAGE=true \
+		-e FIX_CSS_PRETTIER=true \
+	)
 
 ci: ## Execute all formats and checks
 	@pnpm run all

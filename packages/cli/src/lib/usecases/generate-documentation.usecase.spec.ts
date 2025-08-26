@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mocked } from 'vitest';
 import { Container } from 'inversify';
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
-import { LOGGER_IDENTIFIER } from '../interfaces/logger.interface.js';
+import { Logger, LOGGER_IDENTIFIER } from '../interfaces/logger.interface.js';
 import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
 
 describe('GenerateDocumentationUseCase', () => {
   let container: Container;
   let useCase: GenerateDocumentationUseCase;
-  let mockLogger: any;
-  let mockGeneratorService: any;
-  let mockRepositoryService: any;
+  let mockLogger: Mocked<Logger>;
+  let mockGeneratorService: Mocked<GeneratorService>;
+  let mockRepositoryService: Mocked<RepositoryService>;
 
   beforeEach(() => {
     container = new Container();
@@ -19,7 +19,7 @@ describe('GenerateDocumentationUseCase', () => {
       info: vi.fn(),
       error: vi.fn(),
       warn: vi.fn(),
-    };
+    } as unknown as Mocked<Logger>;
 
     mockGeneratorService = {
       generateDocumentationForPlatform: vi.fn().mockResolvedValue(undefined),
@@ -39,7 +39,7 @@ describe('GenerateDocumentationUseCase', () => {
         getSupportedSections: () => ['header', 'overview'],
       }),
       getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions']),
-    };
+    } as unknown as Mocked<GeneratorService>;
 
     mockRepositoryService = {
       getRepository: vi.fn().mockResolvedValue({
@@ -52,7 +52,7 @@ describe('GenerateDocumentationUseCase', () => {
       getSupportedRepositoryPlatforms: vi
         .fn()
         .mockReturnValue(['git', 'github']),
-    };
+    } as unknown as Mocked<RepositoryService>;
 
     // Bind mocks to container
     container.bind(LOGGER_IDENTIFIER).toConstantValue(mockLogger);
@@ -99,7 +99,7 @@ describe('GenerateDocumentationUseCase', () => {
         source: './src',
         output: './docs',
         repository: {
-          platform: 'invalid-platform' as any,
+          platform: 'invalid-platform',
         },
       };
 
@@ -115,7 +115,7 @@ describe('GenerateDocumentationUseCase', () => {
         source: './src',
         output: './docs',
         cicd: {
-          platform: 'invalid-platform' as any,
+          platform: 'invalid-platform',
         },
       };
 
@@ -343,17 +343,17 @@ describe('GenerateDocumentationUseCase', () => {
 
     it('should throw error when specified CI/CD platform adapter is not found', async () => {
       // Arrange
-      // Mock that platform is valid during validation but adapter lookup returns null
+      // Mock that platform is valid during validation but adapter lookup returns undefined
       mockGeneratorService.getSupportedCicdPlatforms.mockReturnValue([
         'github-actions',
         'test-platform',
       ]);
-      mockGeneratorService.getGeneratorAdapterByPlatform.mockReturnValue(null);
+      mockGeneratorService.getGeneratorAdapterByPlatform.mockReturnValue(undefined);
       const input = {
         source: './src',
         output: './docs',
         cicd: {
-          platform: 'test-platform' as any,
+          platform: 'test-platform',
         },
       };
 

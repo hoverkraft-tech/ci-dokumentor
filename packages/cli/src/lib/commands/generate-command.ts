@@ -6,6 +6,15 @@ import {
   GenerateDocumentationUseCaseInput,
 } from '../usecases/generate-documentation.usecase.js';
 
+export type GenerateCommandOptions = {
+  source: string;
+  output: string;
+  repository?: string;
+  cicd?: string;
+  includeSections?: string;
+  excludeSections?: string;
+};
+
 /**
  * Generate command implementation that extends Commander Command
  * Self-configures and calls the GenerateDocumentationUseCase
@@ -64,7 +73,7 @@ export class GenerateCommand extends BaseCommand {
         '--exclude-sections <sections>',
         'Comma-separated list of sections to exclude'
       )
-      .action(async (options: any) => {
+      .action(async (options: GenerateCommandOptions) => {
         const generateOptions: GenerateDocumentationUseCaseInput = {
           source: options.source,
           output: options.output,

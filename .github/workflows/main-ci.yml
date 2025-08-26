@@ -87,16 +87,15 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@6d9e5d48da1a80c085e8ed867d680a5e99b28217 # main
         with:
-          source-path: docs/build
-          build-artifact-name: documentation-build
+          build-path: packages/docs/build
+          build-artifact-name: build

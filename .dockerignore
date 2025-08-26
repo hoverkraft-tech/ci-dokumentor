@@ -1,125 +1,58 @@
-# Docker ignore file for CI Dokumentor
-# Optimize build context by excluding unnecessary files
+.git/
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
-# Git
-.git
-.gitignore
-.gitattributes
+# compiled output
+**/dist
+**/tmp
+**/out-tsc
 
-# Node.js
-node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-*.log
+# dependencies
+**/node_modules
 
-# Coverage directory used by tools like istanbul
+# IDEs and editors
+.idea
+**/.project
+**/.classpath
+**/.c9/
+**/*.launch
+**/.settings/
+**/*.sublime-workspace
+
+# IDE - VSCode
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+
+# misc
+.sass-cache
+connect.lock
 coverage
-*.lcov
-.nyc_output
+libpeerconnection.log
+**/npm-debug.log
+**/yarn-error.log
+**/testem.log
+typings
 
-# Dependency directories
-jspm_packages/
+# System Files
+**/.DS_Store
+**/Thumbs.db
 
-# Optional npm cache directory
-.npm
+**/.nx/cache
+**/.nx/workspace-data
 
-# Optional eslint cache
-.eslintcache
+**/vite.config.*.timestamp*
+**/vitest.config.*.timestamp*
 
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
+# TypeScript build info files
+**/*.tsbuildinfo
 
-# Optional REPL history
-.node_repl_history
+# Docusaurus build output
+**/packages/docs/build
+**/packages/docs/.docusaurus
 
-# Output of 'npm pack'
-*.tgz
+# AI config
+**/.cursor/rules/nx-rules.mdc
+**/.github/instructions/nx.instructions.md
 
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env*
-
-# parcel-bundler cache
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
-tmp/
-temp/
-
-# Editor directories and files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Documentation
-docs/
-*.md
-!README.md
-
-# Test files
-**/*.test.ts
-**/*.test.js
-**/*.spec.ts
-**/*.spec.js
-test/
-tests/
-__tests__/
-coverage/
-
-# GitHub workflows (not needed in container)
-.github/
-
-# Build artifacts that will be rebuilt in container
-packages/*/dist/
-dist/
-
-# Config files not needed in runtime
-vitest.workspace.ts
-eslint.config.mjs
-tsconfig*.json
-.prettierrc
-.prettierignore
-
-# Docker files (avoid recursion)
-Dockerfile*
-.dockerignore
-docker-compose*.yml
-
-# NX cache
-.nx/
-
-# IDE
-*.code-workspace

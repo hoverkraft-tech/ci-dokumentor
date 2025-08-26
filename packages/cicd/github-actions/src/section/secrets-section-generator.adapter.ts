@@ -7,11 +7,6 @@ import {
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 
-type SecretsTable = {
-  headers: Buffer[];
-  rows: Buffer[][];
-};
-
 export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Secrets;

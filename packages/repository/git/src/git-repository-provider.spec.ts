@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, vi, Mocked, MockInstance } from 'vitest';
 import { GitRepositoryProvider } from './git-repository-provider.js';
 import { simpleGit } from 'simple-git';
 import gitUrlParse from 'git-url-parse';
@@ -10,7 +10,7 @@ vi.mock('git-url-parse');
 describe('GitRepositoryProvider', () => {
   let provider: GitRepositoryProvider;
   let mockGit: Mocked<ReturnType<typeof simpleGit>>;
-  let mockGitUrlParse: Mocked<typeof gitUrlParse>;
+  let mockGitUrlParse: MockInstance<typeof gitUrlParse>;
 
   beforeEach(() => {
     provider = new GitRepositoryProvider();
@@ -24,7 +24,8 @@ describe('GitRepositoryProvider', () => {
     vi.mocked(simpleGit).mockReturnValue(mockGit);
 
     // Mock gitUrlParse
-    mockGitUrlParse = vi.mocked(gitUrlParse);
+    mockGitUrlParse = vi.mocked(gitUrlParse) as unknown as MockInstance<typeof gitUrlParse>;
+
   });
 
   describe('getPlatformName', () => {
@@ -132,7 +133,7 @@ describe('GitRepositoryProvider', () => {
         toString: vi
           .fn()
           .mockReturnValue('https://github.com/test-owner/test-repo.git'),
-      };
+      } as unknown as gitUrlParse.GitUrl;
       mockGitUrlParse.mockReturnValue(mockParsedUrl);
 
       // Act
@@ -170,7 +171,7 @@ describe('GitRepositoryProvider', () => {
         toString: vi
           .fn()
           .mockReturnValue('https://github.com/test-owner/test-repo'),
-      };
+      } as unknown as gitUrlParse.GitUrl;
       mockGitUrlParse.mockReturnValue(mockParsedUrl);
 
       // Act
@@ -205,7 +206,7 @@ describe('GitRepositoryProvider', () => {
         toString: vi
           .fn()
           .mockReturnValue('https://github.com/test-owner/test-repo.git'),
-      };
+      } as unknown as gitUrlParse.GitUrl;
       mockGitUrlParse.mockReturnValue(mockParsedUrl);
 
       // Act
@@ -253,7 +254,7 @@ describe('GitRepositoryProvider', () => {
         owner: 'test-owner',
         name: 'test-repo',
         source: 'github.com',
-      };
+      } as unknown as gitUrlParse.GitUrl;
       mockGitUrlParse.mockReturnValue(mockParsedUrl);
 
       // Act
@@ -268,8 +269,7 @@ describe('GitRepositoryProvider', () => {
 
     it('should throw error when no origin remote found', async () => {
       // Arrange
-      const mockRemotes: any[] = [];
-      mockGit.getRemotes.mockResolvedValue(mockRemotes);
+      mockGit.getRemotes.mockResolvedValue([]);
 
       // Act & Assert
       await expect(provider.getRemoteParsedUrl()).rejects.toThrow(
