@@ -12,7 +12,13 @@ WORKDIR /app
 
 # Copy package manager files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/*/package.json ./packages/*/
+
+# Copy all packages package.json files
+COPY packages/core/package.json ./packages/core/
+COPY packages/cli/package.json ./packages/cli/
+COPY packages/repository/git/package.json ./packages/repository/git/
+COPY packages/repository/github/package.json ./packages/repository/github/
+COPY packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
 
 # Install all dependencies (including dev dependencies for building)
 RUN pnpm install --frozen-lockfile
@@ -20,8 +26,8 @@ RUN pnpm install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build the application
-RUN pnpm build
+# Build all packages, except docs
+RUN pnpm build --exclude=docs
 
 # Production stage - minimal runtime image
 FROM node:22-alpine AS production

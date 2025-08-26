@@ -38,9 +38,9 @@ export class RepositoryService {
   /**
    * Auto-detect repository platform for the current context
    */
-  async autoDetectRepositoryPlatform(): Promise<string | null> {
+  async autoDetectRepositoryPlatform(): Promise<string | undefined> {
     const detectedProvider = await this.autoDetectProvider();
-    return detectedProvider ? detectedProvider.getPlatformName() : null;
+    return detectedProvider ? detectedProvider.getPlatformName() : undefined;
   }
 
   async getRepository(): Promise<Repository> {
