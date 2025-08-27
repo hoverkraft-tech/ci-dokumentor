@@ -7,6 +7,7 @@ import {
   GitHubActionsManifest,
   GitHubWorkflowDispatchInput,
 } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -14,6 +15,7 @@ import {
   Repository,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
+import { GitHubWorkflowMockFactory } from '../test-utils/github-workflow-mock.factory.js';
 
 describe('InputsSectionGenerator', () => {
   let formatterAdapter: FormatterAdapter;
@@ -49,11 +51,7 @@ describe('InputsSectionGenerator', () => {
     describe('with GitHub Action manifest', () => {
       it('should generate inputs section for GitHub Action with inputs', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
           inputs: {
             'input-name': {
               description: 'Test input description',
@@ -65,7 +63,7 @@ describe('InputsSectionGenerator', () => {
               required: false,
             },
           },
-        };
+        });
 
         // Act
         const result = generator.generateSection(
@@ -89,12 +87,7 @@ describe('InputsSectionGenerator', () => {
 
       it('should generate inputs section for GitHub Action without inputs', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
         const result = generator.generateSection(
@@ -116,13 +109,7 @@ describe('InputsSectionGenerator', () => {
 
       it('should generate inputs section for GitHub Action with empty inputs object', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-          inputs: {},
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs: {} });
 
         // Act
         const result = generator.generateSection(
@@ -144,15 +131,9 @@ describe('InputsSectionGenerator', () => {
 
       it('should handle inputs with missing optional properties', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-          inputs: {
-            'minimal-input': {} as GitHubActionInput,
-          },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          inputs: { 'minimal-input': {} as GitHubActionInput },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -177,9 +158,7 @@ describe('InputsSectionGenerator', () => {
     describe('with GitHub Workflow manifest', () => {
       it('should generate inputs section for GitHub Workflow with workflow_call inputs', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test.yml',
-          name: 'Test Workflow',
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: {
             workflow_call: {
               inputs: {
@@ -197,8 +176,7 @@ describe('InputsSectionGenerator', () => {
               },
             },
           },
-          jobs: {}
-        };
+        });
 
         // Act
         const result = generator.generateSection(
@@ -224,14 +202,9 @@ describe('InputsSectionGenerator', () => {
 
       it('should generate inputs section for GitHub Workflow without workflow_dispatch', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test.yml',
-          name: 'Test Workflow',
-          on: {
-            push: {},
-          },
-          jobs: {}
-        };
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          on: { push: {} },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -249,14 +222,9 @@ describe('InputsSectionGenerator', () => {
 
       it('should generate inputs section for GitHub Workflow with workflow_dispatch but no inputs', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test.yml',
-          name: 'Test Workflow',
-          on: {
-            workflow_dispatch: {},
-          },
-          jobs: {}
-        };
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          on: { workflow_dispatch: {} },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -274,9 +242,7 @@ describe('InputsSectionGenerator', () => {
 
       it('should handle workflow inputs with missing optional properties', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test.yml',
-          name: 'Test Workflow',
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: {
             workflow_dispatch: {
               inputs: {
@@ -287,8 +253,7 @@ describe('InputsSectionGenerator', () => {
               },
             },
           },
-          jobs: {},
-        };
+        });
 
         // Act
         const result = generator.generateSection(
@@ -313,9 +278,7 @@ describe('InputsSectionGenerator', () => {
 
       it('should handle workflow inputs with options but no description', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test.yml',
-          name: 'Test Workflow',
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: {
             workflow_dispatch: {
               inputs: {
@@ -326,8 +289,7 @@ describe('InputsSectionGenerator', () => {
               },
             },
           },
-          jobs: {}
-        };
+        });
 
         // Act
         const result = generator.generateSection(

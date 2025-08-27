@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate Documentation
-        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
         with:
           args: 'action.yml --output docs'
 ```
@@ -38,7 +38,7 @@ jobs:
 
 ```yaml
 - name: Generate Action Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
     args: 'action.yml --output docs'
 ```
@@ -47,7 +47,7 @@ jobs:
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
     args: '.github/workflows/ci.yml --output docs'
 ```
@@ -56,7 +56,7 @@ jobs:
 
 ```yaml
 - name: Generate All Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
     args: 'action.yml .github/workflows/*.yml --output docs'
 ```
@@ -67,7 +67,7 @@ jobs:
 
 ```yaml
 - name: Generate Enhanced Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
     args: 'action.yml --output docs --include-repo-info'
   env:
@@ -78,7 +78,7 @@ jobs:
 
 ```yaml
 - name: Generate Documentation with Custom Info
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
     args: 'action.yml --output docs --author "My Team" --license "MIT"'
 ```
@@ -87,7 +87,7 @@ jobs:
 
 ```yaml
 - name: Generate Documentation (Verbose)
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
     args: 'action.yml --output docs --verbose'
 ```
@@ -121,7 +121,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Documentation
-        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
         with:
           args: 'action.yml --output docs --include-repo-info'
         env:
@@ -167,7 +167,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate Documentation
-        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
         with:
           args: 'action.yml --output temp-docs'
         env:
@@ -178,7 +178,7 @@ jobs:
           if ! diff -r docs/ temp-docs/ > /dev/null; then
             echo "❌ Documentation is out of date!"
             echo "📝 Please run the following command to update:"
-            echo "   docker run --rm -v \$(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest /workspace/action.yml --output /workspace/docs"
+            echo "   docker run --rm -v \$(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest /workspace/action.yml --output /workspace/docs"
             echo ""
             echo "📋 Differences found:"
             diff -r docs/ temp-docs/ || true

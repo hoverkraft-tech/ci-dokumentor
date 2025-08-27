@@ -119,17 +119,6 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     ]);
   }
 
-  list(items: Buffer[], ordered = false): Buffer {
-    const prefix = ordered ? '1. ' : '- ';
-    const listItems = items
-      .map((item, index) => {
-        const actualPrefix = ordered ? `${index + 1}. ` : prefix;
-        return `${actualPrefix}${item.toString()}`;
-      })
-      .join('\n');
-    return Buffer.from(listItems);
-  }
-
   table(headers: Buffer[], rows: Buffer[][]): Buffer {
     const normalizeCell = (cell: Buffer): string => {
       return cell.toString().replace(/\|/g, '\\|');
@@ -189,26 +178,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return Buffer.from(`![${label.toString()}](${url.toString()})`);
   }
 
-  blockquote(input: Buffer): Buffer {
-    const lines = input.toString().split(this.lineBreak().toString());
-    const quotedLines = lines.map((line) => [
-      Buffer.from(`> ${line}`),
-      this.lineBreak()
-    ]).flat();
-    return Buffer.concat(quotedLines);
-  }
-
-  details(summary: Buffer, content: Buffer): Buffer {
-    return Buffer.from(
-      `<details>\n<summary>${summary.toString()}</summary>\n\n${content.toString()}\n\n</details>`
-    );
-  }
-
   lineBreak(): Buffer {
     return Buffer.from('\n');
-  }
-
-  horizontalRule(): Buffer {
-    return Buffer.from('---');
   }
 }

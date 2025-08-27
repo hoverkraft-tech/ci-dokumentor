@@ -6,6 +6,7 @@ import {
   GitHubActionOutput,
   GitHubActionsManifest,
 } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -13,6 +14,7 @@ import {
   Repository,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
+import { GitHubWorkflowMockFactory } from '../test-utils/github-workflow-mock.factory.js';
 
 describe('OutputsSectionGenerator', () => {
   let formatterAdapter: FormatterAdapter;
@@ -48,11 +50,7 @@ describe('OutputsSectionGenerator', () => {
     describe('with GitHub Action manifest', () => {
       it('should generate outputs section for GitHub Action with outputs', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
           outputs: {
             'output-name': {
               description: 'Test output description',
@@ -63,7 +61,7 @@ describe('OutputsSectionGenerator', () => {
               value: 'static-value',
             },
           },
-        };
+        });
 
         // Act
         const result = generator.generateSection(
@@ -87,12 +85,7 @@ describe('OutputsSectionGenerator', () => {
 
       it('should generate outputs section for GitHub Action without outputs', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
         const result = generator.generateSection(
@@ -110,13 +103,7 @@ describe('OutputsSectionGenerator', () => {
 
       it('should generate outputs section for GitHub Action with empty outputs object', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-          outputs: {},
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({ outputs: {} });
 
         // Act
         const result = generator.generateSection(
@@ -132,15 +119,9 @@ describe('OutputsSectionGenerator', () => {
 
       it('should handle outputs with missing optional properties', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-          outputs: {
-            'minimal-output': {} as GitHubActionOutput,
-          },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          outputs: { 'minimal-output': {} as GitHubActionOutput },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -163,17 +144,9 @@ describe('OutputsSectionGenerator', () => {
 
       it('should handle outputs with only description', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-          outputs: {
-            'description-only': {
-              description: 'Output with description only',
-            },
-          },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          outputs: { 'description-only': { description: 'Output with description only' } },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -196,17 +169,9 @@ describe('OutputsSectionGenerator', () => {
 
       it('should handle outputs with no description', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-          outputs: {
-            'no-description': {
-              value: '${{ steps.build.outputs.version }}',
-            },
-          },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          outputs: { 'no-description': { value: '${{ steps.build.outputs.version }}' } },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -231,21 +196,9 @@ describe('OutputsSectionGenerator', () => {
     describe('with GitHub Workflow manifest', () => {
       it('should generate outputs section for GitHub Workflow with outputs', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test.yml',
-          name: 'Test Workflow',
-          on: {
-            workflow_call: {
-              outputs: {
-                'workflow-output': {
-                  description: 'A workflow output',
-                  value: '${{ steps.build.outputs.version }}',
-                },
-              },
-            },
-          },
-          jobs: {}
-        };
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          on: { workflow_call: { outputs: { 'workflow-output': { description: 'A workflow output', value: '${{ steps.build.outputs.version }}' } } } },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -268,16 +221,9 @@ describe('OutputsSectionGenerator', () => {
 
       it('should generate empty outputs section for GitHub Workflow', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test.yml',
-          name: 'Test Workflow',
-          on: {
-            workflow_call: {
-              outputs: {},
-            },
-          },
-          jobs: {}
-        };
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          on: { workflow_call: { outputs: {} } },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -295,14 +241,11 @@ describe('OutputsSectionGenerator', () => {
 
       it('should generate empty outputs section for GitHub Workflow with push trigger', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           usesName: 'owner/repo/.github/workflows/ci.yml',
           name: 'CI Workflow',
-          on: {
-            push: {},
-          },
-          jobs: {}
-        };
+          on: { push: {} },
+        });
 
         // Act
         const result = generator.generateSection(

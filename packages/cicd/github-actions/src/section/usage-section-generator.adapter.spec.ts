@@ -7,6 +7,7 @@ import {
   GitHubWorkflowSecret,
   GitHubWorkflowCallInput,
 } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -14,6 +15,7 @@ import {
   Repository,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
+import { GitHubWorkflowMockFactory } from '../test-utils/github-workflow-mock.factory.js';
 
 describe('UsageSectionGenerator', () => {
   let formatterAdapter: FormatterAdapter;
@@ -49,12 +51,7 @@ describe('UsageSectionGenerator', () => {
     describe('with GitHub Action manifest', () => {
       it('should generate usage section for simple GitHub Action without inputs', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
         const result = generator.generateSection(
@@ -89,13 +86,7 @@ describe('UsageSectionGenerator', () => {
           },
         };
 
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          inputs,
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs });
 
         // Act
         const result = generator.generateSection(
@@ -142,13 +133,7 @@ describe('UsageSectionGenerator', () => {
           },
         };
 
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          inputs,
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs });
 
         // Act
         const result = generator.generateSection(
@@ -185,15 +170,11 @@ describe('UsageSectionGenerator', () => {
     describe('with GitHub Workflow manifest', () => {
       it('should generate usage section for simple workflow without inputs', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           usesName: 'owner/repo/.github/workflows/workflow.yml',
           name: 'Test Workflow',
-          on: {
-            push: { branches: ['main'] },
-            workflow_dispatch: {},
-          },
-          jobs: {}
-        };
+          on: { push: { branches: ['main'] }, workflow_dispatch: {} },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -252,22 +233,12 @@ jobs:
           },
         };
 
-        const manifest: GitHubWorkflow = {
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           usesName: 'owner/repo/.github/workflows/deploy.yml',
           name: 'Deploy Workflow',
-          on: {
-            push: { branches: ['main'] },
-            workflow_call: {
-              inputs,
-              secrets,
-            },
-          },
-          permissions: {
-            contents: 'read',
-            deployments: 'write',
-          },
-          jobs: {}
-        };
+          on: { push: { branches: ['main'] }, workflow_call: { inputs, secrets } },
+          permissions: { contents: 'read', deployments: 'write' },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -320,7 +291,7 @@ jobs:
 
       it('should generate usage section for workflow with only push trigger', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           usesName: 'owner/repo/.github/workflows/ci.yml',
           name: 'CI Workflow',
           on: {
@@ -328,8 +299,7 @@ jobs:
             pull_request: { branches: ['main'] },
             workflow_dispatch: {},
           },
-          jobs: {}
-        };
+        });
 
         // Act
         const result = generator.generateSection(
@@ -364,16 +334,11 @@ jobs:
 
       it('should generate usage section for workflow with complex on triggers', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           usesName: 'owner/repo/.github/workflows/release.yml',
           name: 'Release Workflow',
-          on: {
-            release: { types: ['published'] },
-            schedule: [{ cron: '0 0 * * 0' }],
-            workflow_dispatch: {},
-          },
-          jobs: {}
-        };
+          on: { release: { types: ['published'] }, schedule: [{ cron: '0 0 * * 0' }], workflow_dispatch: {} },
+        });
 
         // Act
         const result = generator.generateSection(
@@ -406,14 +371,11 @@ jobs:
 
       it('should handle workflow with no on triggers gracefully', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           usesName: 'owner/repo/.github/workflows/test.yml',
           name: 'Test Workflow',
-          on: {
-            workflow_dispatch: {},
-          },
-          jobs: {}
-        };
+          on: { workflow_dispatch: {} },
+        });
 
         // Act
         const result = generator.generateSection(

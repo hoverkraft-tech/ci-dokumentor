@@ -80,15 +80,22 @@ export class FileOutputAdapter implements OutputAdapter {
       const sectionEndString = sectionEnd.toString();
 
       readLine.on('line', (line) => {
-        if (line.trim() === sectionStartString.trim()) {
+        const isSectionStart = line.trim() === sectionStartString.trim();
+        if (isSectionStart) {
           sectionFound = true;
           inSection = true;
           output = Buffer.concat([output, sectionContent]);
-        } else if (line.trim() === sectionEndString.trim() && inSection) {
+          return;
+        }
+
+        const isSectionEnd = line.trim() === sectionEndString.trim();
+        if (isSectionEnd && inSection) {
           inSection = false;
           // Skip the end marker as it's already included above
           return;
-        } else if (!inSection) {
+        }
+
+        if (!inSection) {
           output = Buffer.concat([output, Buffer.from(line), this.formatter.lineBreak()]);
         }
         // Skip lines inside the section (they get replaced)

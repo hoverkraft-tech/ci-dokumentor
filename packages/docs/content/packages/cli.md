@@ -171,26 +171,13 @@ The CLI provides helpful error messages for common issues:
 
 ## Development
 
-### Building
+### Building and testing
 
-```bash
-# Build the CLI package
-nx build cli
+Build and test the CLI via the workspace commands so behavior matches the actual package configuration. Examples:
 
-# Run tests
-nx test cli
-
-# Run linting
-nx lint cli
-```
-
-### Testing
-
-```bash
-# Test the CLI locally
-nx build cli
-node dist/packages/cli/bin/ci-dokumentor.js --help
-```
+- Build the CLI: `nx build cli` or run the workspace build with `pnpm build`.
+- Run tests for the CLI package: `nx test cli` or run all package tests with `pnpm test`.
+- After building, the CLI entrypoint is `packages/cli/dist/bin/ci-dokumentor.js` — refer to this file when documenting CLI runtime behavior rather than copying runtime snippets into docs.
 
 ## Related Packages
 
@@ -555,55 +542,16 @@ docs-serve: docs
 
 ## CLI Testing
 
-The CLI package includes comprehensive testing utilities:
+Testing for the CLI package is implemented under `packages/cli/src` using Vitest. Tests include unit tests for command classes, integration tests that exercise command wiring, and end-to-end tests that run the built CLI binary.
 
-### Command Testing
+Run tests via the workspace scripts:
 
-```typescript
-describe('GenerateCommand', () => {
-  let command: GenerateCommand;
-  let mockDocumentationService: IDocumentationService;
+- Run all tests: `pnpm test`
+- Run CLI package tests only: `nx test cli`
 
-  beforeEach(() => {
-    mockDocumentationService = mock<IDocumentationService>();
-    command = new GenerateCommand(instance(mockDocumentationService));
-  });
+For testing guidance and canonical test commands, see the centralized developer testing guide: `../developers/testing` (located at `packages/docs/content/developers/testing.md`).
 
-  it('should generate documentation for valid input', async () => {
-    // Setup
-    when(mockDocumentationService.generate(anything())).thenResolve(
-      '# Generated Documentation',
-    );
-
-    // Execute
-    await command.execute(['action.yml', '--output', 'docs/']);
-
-    // Verify
-    verify(mockDocumentationService.generate(anything())).once();
-  });
-});
-```
-
-### Integration Testing
-
-```typescript
-describe('CLI Integration', () => {
-  it('should generate documentation end-to-end', async () => {
-    // Setup test files
-    fs.writeFileSync('test-action.yml', testActionContent);
-
-    // Execute CLI
-    const result = await runCli(['generate', 'test-action.yml']);
-
-    // Verify output
-    expect(result.exitCode).toBe(0);
-    expect(fs.existsSync('docs/README.md')).toBe(true);
-
-    const generatedContent = fs.readFileSync('docs/README.md', 'utf8');
-    expect(generatedContent).toContain('# Test Action');
-  });
-});
-```
+When you need concrete examples, link to the authoritative spec files under `packages/cli/src/**/*.spec.ts` rather than embedding full test code in the docs.
 
 ## Building and Development
 
@@ -681,13 +629,7 @@ container
 
 3. **Add Tests**:
 
-```typescript
-describe('MyCommand', () => {
-  it('should execute successfully', async () => {
-    // Test implementation
-  });
-});
-```
+Add unit and integration tests beside the implementation in `packages/cli/src`. Reference the spec file paths in docs rather than embedding full test code.
 
 ## CLI Related Packages
 

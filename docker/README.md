@@ -36,14 +36,14 @@ The Dockerfile uses a two-stage build:
 
 ```bash
 # Show help
-docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor:latest --help
+docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest --help
 
 # Process a CI/CD file
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   /workspace/.github/workflows/ci.yml
 
 # With output directory
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   /workspace/.github/workflows/ci.yml --output /workspace/docs
 ```
 

@@ -511,10 +511,10 @@ Create `.vscode/launch.json`:
 ```bash
 # Debug specific test
 cd packages/core
-npm run test -- --grep "specific test name" --inspect-brk
+pnpm test -- --grep "specific test name" --inspect-brk
 
-# Run single test file
-npm run test src/specific-test.spec.ts
+# Run single test file (from package root)
+pnpm test -- packages/core/src/specific-test.spec.ts
 ```
 
 ### Docker Debugging

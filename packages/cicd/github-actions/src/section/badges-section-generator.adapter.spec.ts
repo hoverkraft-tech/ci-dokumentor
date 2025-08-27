@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -8,6 +9,7 @@ import {
   MarkdownFormatterAdapter,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
+import { GitHubWorkflowMockFactory } from '../test-utils/github-workflow-mock.factory.js';
 
 describe('BadgesSectionGenerator', () => {
   let formatterAdapter: FormatterAdapter;
@@ -43,12 +45,7 @@ describe('BadgesSectionGenerator', () => {
     describe('with GitHub Action manifest', () => {
       it('should generate badges section for GitHub Action', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
         const result = generator.generateSection(
@@ -72,12 +69,7 @@ describe('BadgesSectionGenerator', () => {
     describe('with GitHub Workflow manifest', () => {
       it('should generate badges section for GitHub Workflow', () => {
         // Arrange
-        const manifest: GitHubWorkflow = {
-          usesName: 'owner/repo/.github/workflows/test-workflow.yml',
-          name: 'Test Workflow',
-          on: { push: {} },
-          jobs: {}
-        };
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create();
 
         // Act
         const result = generator.generateSection(

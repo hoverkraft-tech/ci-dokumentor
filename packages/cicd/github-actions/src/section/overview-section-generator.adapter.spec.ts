@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifier } from '@ci-dokumentor/core';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
+import { GitHubWorkflowMockFactory } from '../test-utils/github-workflow-mock.factory.js';
 
 describe('OverviewSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
@@ -38,12 +40,9 @@ describe('OverviewSectionGenerator', () => {
         describe('with GitHub Action manifest', () => {
             it('should generate overview section for GitHub Action with description', () => {
                 // Arrange
-                const manifest: GitHubAction = {
-                    usesName: 'owner/repo',
-                    name: 'Test Action',
+                const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: 'A comprehensive test action for CI/CD workflows',
-                    runs: { using: 'node20' },
-                };
+                });
 
                 // Act
                 const result = generator.generateSection(
@@ -64,11 +63,9 @@ A comprehensive test action for CI/CD workflows
 
             it('should return empty buffer for GitHub Action without description', () => {
                 // Arrange
-                const manifest: GitHubAction = {
-                    usesName: 'owner/repo',
-                    name: 'Test Action',
-                    runs: { using: 'node20' },
-                };
+                const manifest: GitHubAction = GitHubActionMockFactory.create({
+                    description: undefined as any,
+                });
 
                 // Act
                 const result = generator.generateSection(
@@ -84,12 +81,9 @@ A comprehensive test action for CI/CD workflows
 
             it('should return empty buffer for GitHub Action with empty description', () => {
                 // Arrange
-                const manifest: GitHubAction = {
-                    usesName: 'owner/repo',
-                    name: 'Test Action',
+                const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: '',
-                    runs: { using: 'node20' },
-                };
+                });
 
                 // Act
                 const result = generator.generateSection(
@@ -105,12 +99,9 @@ A comprehensive test action for CI/CD workflows
 
             it('should handle multiline descriptions correctly', () => {
                 // Arrange
-                const manifest: GitHubAction = {
-                    usesName: 'owner/repo',
-                    name: 'Test Action',
+                const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: 'A test action with\nmultiple lines\nof description',
-                    runs: { using: 'node20' },
-                };
+                });
 
                 // Act
                 const result = generator.generateSection(
@@ -133,12 +124,9 @@ of description
 
             it('should handle descriptions with special characters', () => {
                 // Arrange
-                const manifest: GitHubAction = {
-                    usesName: 'owner/repo',
-                    name: 'Test Action',
+                const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: 'A test action with **bold**, *italic*, and `code` formatting',
-                    runs: { using: 'node20' },
-                };
+                });
 
                 // Act
                 const result = generator.generateSection(
@@ -162,16 +150,16 @@ A test action with **bold**, *italic*, and \`code\` formatting
             it('should generate overview section for GitHub Workflow with description only', () => {
                 // Arrange
                 const manifest = {
-                    usesName: 'owner/repo/.github/workflows/ci.yml',
-                    name: 'CI Workflow',
-                    description: 'Continuous integration workflow for the project',
-                    on: { push: { branches: ['main'] } },
-                    jobs: {
-                        test: {
-                            'runs-on': 'ubuntu-latest',
-                            steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        jobs: {
+                            test: {
+                                'runs-on': 'ubuntu-latest',
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
                         },
-                    },
+                    }),
+                    description: 'Continuous integration workflow for the project',
                 } as GitHubWorkflow & { description: string };
 
                 // Act
@@ -197,21 +185,21 @@ Continuous integration workflow for the project
             it('should generate overview section for GitHub Workflow with description and permissions', () => {
                 // Arrange
                 const manifest = {
-                    usesName: 'owner/repo/.github/workflows/ci.yml',
-                    name: 'CI Workflow',
-                    description: 'Continuous integration workflow with permissions',
-                    on: { push: { branches: ['main'] } },
-                    permissions: {
-                        contents: 'read',
-                        'pull-requests': 'write',
-                        'id-token': 'write',
-                    },
-                    jobs: {
-                        test: {
-                            'runs-on': 'ubuntu-latest',
-                            steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        permissions: {
+                            contents: 'read',
+                            'pull-requests': 'write',
+                            'id-token': 'write',
                         },
-                    },
+                        jobs: {
+                            test: {
+                                'runs-on': 'ubuntu-latest',
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
+                        },
+                    }),
+                    description: 'Continuous integration workflow with permissions',
                 } as GitHubWorkflow & { description: string };
 
                 // Act
@@ -240,17 +228,17 @@ Continuous integration workflow with permissions
             it('should handle GitHub Workflow with empty permissions object', () => {
                 // Arrange
                 const manifest = {
-                    usesName: 'owner/repo/.github/workflows/ci.yml',
-                    name: 'CI Workflow',
-                    description: 'Workflow with empty permissions',
-                    on: { push: { branches: ['main'] } },
-                    permissions: {},
-                    jobs: {
-                        test: {
-                            'runs-on': 'ubuntu-latest',
-                            steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        permissions: {},
+                        jobs: {
+                            test: {
+                                'runs-on': 'ubuntu-latest',
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
                         },
-                    },
+                    }),
+                    description: 'Workflow with empty permissions',
                 } as GitHubWorkflow & { description: string };
 
                 // Act
@@ -276,16 +264,16 @@ Workflow with empty permissions
             it('should handle GitHub Workflow without permissions', () => {
                 // Arrange
                 const manifest = {
-                    usesName: 'owner/repo/.github/workflows/ci.yml',
-                    name: 'CI Workflow',
-                    description: 'Workflow without permissions',
-                    on: { push: { branches: ['main'] } },
-                    jobs: {
-                        test: {
-                            'runs-on': 'ubuntu-latest',
-                            steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        jobs: {
+                            test: {
+                                'runs-on': 'ubuntu-latest',
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
                         },
-                    },
+                    }),
+                    description: 'Workflow without permissions',
                 } as GitHubWorkflow & { description: string };
 
                 // Act
@@ -310,20 +298,10 @@ Workflow without permissions
 
             it('should return empty buffer for GitHub Workflow without description', () => {
                 // Arrange
-                const manifest: GitHubWorkflow = {
-                    usesName: 'owner/repo/.github/workflows/ci.yml',
-                    name: 'CI Workflow',
+                const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
                     on: { push: { branches: ['main'] } },
-                    permissions: {
-                        contents: 'read',
-                    },
-                    jobs: {
-                        test: {
-                            'runs-on': 'ubuntu-latest',
-                            steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                        },
-                    },
-                };
+                    permissions: { contents: 'read' },
+                });
 
                 // Act
                 const result = generator.generateSection(
@@ -340,34 +318,31 @@ Workflow without permissions
             it('should handle GitHub Workflow with complex permissions structure', () => {
                 // Arrange
                 const manifest = {
-                    usesName: 'owner/repo/.github/workflows/release.yml',
-                    name: 'Release Workflow',
+                    ...GitHubWorkflowMockFactory.create({
+                        usesName: 'owner/repo/.github/workflows/release.yml',
+                        name: 'Release Workflow',
+                        on: { push: { tags: ['v*'] }, workflow_dispatch: {} },
+                        permissions: {
+                            contents: 'write',
+                            packages: 'write',
+                            'pull-requests': 'read',
+                            'id-token': 'write',
+                            'security-events': 'write',
+                            actions: 'read',
+                            checks: 'read',
+                            deployments: 'write',
+                        },
+                        jobs: {
+                            release: {
+                                'runs-on': 'ubuntu-latest',
+                                steps: [
+                                    { name: 'Checkout', uses: 'actions/checkout@v4' },
+                                    { name: 'Build', run: 'npm run build' },
+                                ],
+                            },
+                        },
+                    }),
                     description: 'Automated release workflow',
-                    on: {
-                        push: {
-                            tags: ['v*']
-                        },
-                        workflow_dispatch: {}
-                    },
-                    permissions: {
-                        contents: 'write',
-                        packages: 'write',
-                        'pull-requests': 'read',
-                        'id-token': 'write',
-                        'security-events': 'write',
-                        actions: 'read',
-                        checks: 'read',
-                        deployments: 'write',
-                    },
-                    jobs: {
-                        release: {
-                            'runs-on': 'ubuntu-latest',
-                            steps: [
-                                { name: 'Checkout', uses: 'actions/checkout@v4' },
-                                { name: 'Build', run: 'npm run build' },
-                            ],
-                        },
-                    },
                 } as GitHubWorkflow & { description: string };
 
                 // Act
