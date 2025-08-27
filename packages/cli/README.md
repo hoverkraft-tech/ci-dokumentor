@@ -161,18 +161,11 @@ private setupMyCommand(myCommand: MyCommand): void {
 }
 ```
 
-### Running Tests
+### Testing
 
-```bash
-# Run all tests
-pnpm test
+Testing guidance and canonical commands are centralized in the developer testing guide: `packages/docs/content/developers/testing.md`.
 
-# Run tests in watch mode
-pnpm test --watch
-
-# Run tests with coverage
-pnpm test --coverage
-```
+Refer to that guide for workspace test commands, snapshot update instructions, debugging tips, and recommendations about linking to canonical spec files. For package-level tests see the spec files under `packages/cli/src/**/*.spec.ts`.
 
 ### Building
 

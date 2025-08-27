@@ -16,7 +16,7 @@ For complete contributing guidelines, please see our main [Contributing Guide](h
 2. **Clone**: `git clone https://github.com/hoverkraft-tech/ci-dokumentor.git`
 3. **Install**: `pnpm install`
 4. **Build**: `pnpm build`
-5. **Test**: `pnpm test`
+5. **Test**: See the centralized developer testing guide: `../developers/testing` (`packages/docs/content/developers/testing.md`).
 
 ## Development Workflow
 
@@ -75,7 +75,7 @@ CI Dokumentor follows clean architecture principles with these packages:
 2. **Create** a feature branch: `git checkout -b feature/my-feature`
 3. **Make** your changes following the coding standards
 4. **Add** tests for new functionality
-5. **Run** the full test suite: `pnpm test`
+5. **Run** the full test suite: See `packages/docs/content/developers/testing.md` for the canonical commands (`pnpm test`, `pnpm test:ci`, using `nx`, and debugging guidance).
 6. **Commit** using conventional commits: `feat: add new feature`
 7. **Push** to your fork and create a pull request
 

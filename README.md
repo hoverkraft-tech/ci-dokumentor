@@ -57,10 +57,10 @@ CI Dokumentor is available as a Docker image that provides a lightweight, contai
 
 ```bash
 # Show available options
-docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor:latest --help
+docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest --help
 
 # Generate documentation from CI/CD file
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   /workspace/.github/workflows/ci.yml --output /workspace/docs
 ```
 
@@ -68,7 +68,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:lates
 
 ```yaml
 - name: Generate CI Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
     args: '.github/workflows/ci.yml --output docs'
 ```
@@ -78,7 +78,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor:lates
 ```yaml
 generate-docs:
   stage: docs
-  image: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  image: ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   script:
     - ci-dokumentor .gitlab-ci.yml --output docs
   artifacts:
@@ -91,7 +91,7 @@ generate-docs:
 ```go
 func (m *MyModule) GenerateDocs(ctx context.Context, source *dagger.Directory) *dagger.Directory {
     return dag.Container().
-        From("ghcr.io/hoverkraft-tech/ci-dokumentor:latest").
+  From("ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest").
         WithMountedDirectory("/workspace", source).
         WithWorkdir("/workspace").
         WithExec([]string{"ci-dokumentor", ".github/workflows/ci.yml", "--output", "docs"}).

@@ -29,17 +29,9 @@ export interface FormatterAdapter {
     options?: { width?: string; align?: string }
   ): Buffer;
 
-  list(items: Buffer[], ordered?: boolean): Buffer;
-
   table(headers: Buffer[], rows: Buffer[][]): Buffer;
 
   badge(label: Buffer, message: Buffer, color?: Buffer): Buffer;
 
-  blockquote(input: Buffer): Buffer;
-
-  details(summary: Buffer, content: Buffer): Buffer;
-
   lineBreak(): Buffer;
-
-  horizontalRule(): Buffer;
 }

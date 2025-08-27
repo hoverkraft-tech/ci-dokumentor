@@ -27,7 +27,7 @@ Choose your preferred installation method:
 **Docker (Recommended):**
 
 ```bash
-docker pull ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+docker pull ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
 ```
 
 **NPX (No Installation):**
@@ -67,7 +67,7 @@ runs:
 ```bash
 # Using Docker
 docker run --rm -v $(pwd):/workspace \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml --output /workspace/docs
 
 # Using NPX

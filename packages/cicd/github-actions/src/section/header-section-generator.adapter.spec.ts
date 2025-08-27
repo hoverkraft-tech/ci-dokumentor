@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { HeaderSectionGenerator } from './header-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -43,12 +44,7 @@ describe('HeaderSectionGenerator', () => {
     describe('with GitHub Action manifest', () => {
       it('should generate header section for GitHub Action without logo', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
         const result = generator.generateSection(
@@ -69,12 +65,7 @@ describe('HeaderSectionGenerator', () => {
 
       it('should generate header section for GitHub Action with logo', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
         const repositoryWithLogo: Repository = {
           ...mockRepository,
           logo: 'https://example.com/logo.png',
@@ -100,16 +91,9 @@ describe('HeaderSectionGenerator', () => {
 
       it('should generate header section for GitHub Action with branding icon', () => {
         // Arrange
-        const manifest: GitHubAction = {
-          usesName: 'owner/repo',
-          name: 'Test Action',
-          description: 'A test action',
-          runs: { using: 'node20' },
-          branding: {
-            icon: 'activity',
-            color: 'blue',
-          },
-        };
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          branding: { icon: 'activity', color: 'blue' },
+        });
 
         // Act
         const result = generator.generateSection(

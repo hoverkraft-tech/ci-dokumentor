@@ -14,6 +14,7 @@ permissions:
   actions: read
   contents: read
   packages: write
+  pull-requests: read
   security-events: write
   statuses: write
   # FIXME: This is a workaround for having workflow ref. See https://github.com/orgs/community/discussions/38659

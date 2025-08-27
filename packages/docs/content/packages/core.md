@@ -164,6 +164,10 @@ nx test core
 nx lint core
 ```
 
+### Testing
+
+Testing for the core package is covered by the centralized developer testing guide: `../developers/testing` (see `packages/docs/content/developers/testing.md`). For package-specific tests, open the spec files under `packages/core/src/**/*.spec.ts`.
+
 ## Related Packages
 
 - [CLI Package](./cli) - Command-line interface built on core

@@ -130,7 +130,7 @@ To pass CI, your PR must:
 
 Images are published to GitHub Container Registry:
 
-- **Registry**: `ghcr.io/hoverkraft-tech/ci-dokumentor`
+- **Registry**: `ghcr.io/hoverkraft-tech/ci-dokumentor/cli`
 - **Tags**:
   - `latest` - Latest stable release
   - `main` - Latest main branch build

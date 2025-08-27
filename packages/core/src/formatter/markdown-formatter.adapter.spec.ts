@@ -540,80 +540,6 @@ describe('MarkdownFormatterAdapter', () => {
     });
   });
 
-  describe('list', () => {
-    it('should format as unordered list by default', () => {
-      // Arrange
-      const items = [
-        Buffer.from('First item'),
-        Buffer.from('Second item'),
-        Buffer.from('Third item'),
-      ];
-
-      // Act
-      const result = adapter.list(items);
-
-      // Assert
-      expect(result.toString()).toBe(
-        '- First item\n- Second item\n- Third item'
-      );
-    });
-
-    it('should format as ordered list when specified', () => {
-      // Arrange
-      const items = [
-        Buffer.from('First item'),
-        Buffer.from('Second item'),
-        Buffer.from('Third item'),
-      ];
-
-      // Act
-      const result = adapter.list(items, true);
-
-      // Assert
-      expect(result.toString()).toBe(
-        '1. First item\n2. Second item\n3. Third item'
-      );
-    });
-
-    it('should handle empty list', () => {
-      // Arrange
-      const items: Buffer[] = [];
-
-      // Act
-      const result = adapter.list(items);
-
-      // Assert
-      expect(result.toString()).toBe('');
-    });
-
-    it('should handle single item list', () => {
-      // Arrange
-      const items = [Buffer.from('Only item')];
-
-      // Act
-      const result = adapter.list(items);
-
-      // Assert
-      expect(result.toString()).toBe('- Only item');
-    });
-
-    it('should handle items with special characters', () => {
-      // Arrange
-      const items = [
-        Buffer.from('Item with "quotes"'),
-        Buffer.from('Item with & symbols!'),
-      ];
-
-      // Act
-      const result = adapter.list(items, true);
-
-      // Assert
-      expect(result.toString()).toBe(
-        '1. Item with "quotes"\n2. Item with & symbols!'
-      );
-    });
-  });
-
   describe('table', () => {
     it('should format basic table with headers and rows', () => {
       // Arrange
@@ -822,98 +748,6 @@ describe('MarkdownFormatterAdapter', () => {
     });
   });
 
-  describe('blockquote', () => {
-    it('should format single line as blockquote', () => {
-      // Arrange
-      const input = Buffer.from('This is a quote');
-
-      // Act
-      const result = adapter.blockquote(input);
-
-      // Assert
-      expect(result.toString()).toBe('> This is a quote\n');
-    });
-
-    it('should format multi-line text as blockquote', () => {
-      // Arrange
-      const input = Buffer.from('First line\nSecond line\nThird line');
-
-      // Act
-      const result = adapter.blockquote(input);
-
-      // Assert
-      expect(result.toString()).toBe(
-        '> First line\n> Second line\n> Third line\n'
-      );
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const input = Buffer.from('');
-
-      // Act
-      const result = adapter.blockquote(input);
-
-      // Assert
-      expect(result.toString()).toBe('> \n');
-    });
-
-    it('should handle text with special characters', () => {
-      // Arrange
-      const input = Buffer.from('Quote with "nested quotes" & symbols!');
-
-      // Act
-      const result = adapter.blockquote(input);
-
-      // Assert
-      expect(result.toString()).toBe('> Quote with "nested quotes" & symbols!\n');
-    });
-  });
-
-  describe('details', () => {
-    it('should format as HTML details element', () => {
-      // Arrange
-      const summary = Buffer.from('Click to expand');
-      const content = Buffer.from('Hidden content here');
-
-      // Act
-      const result = adapter.details(summary, content);
-
-      // Assert
-      expect(result.toString()).toBe(
-        '<details>\n<summary>Click to expand</summary>\n\nHidden content here\n\n</details>'
-      );
-    });
-
-    it('should handle empty summary and content', () => {
-      // Arrange
-      const summary = Buffer.from('');
-      const content = Buffer.from('');
-
-      // Act
-      const result = adapter.details(summary, content);
-
-      // Assert
-      expect(result.toString()).toBe(
-        '<details>\n<summary></summary>\n\n\n\n</details>'
-      );
-    });
-
-    it('should handle multi-line content', () => {
-      // Arrange
-      const summary = Buffer.from('Code Example');
-      const content = Buffer.from('function test() {\n  return true;\n}');
-
-      // Act
-      const result = adapter.details(summary, content);
-
-      // Assert
-      expect(result.toString()).toBe(
-        '<details>\n<summary>Code Example</summary>\n\nfunction test() {\n  return true;\n}\n\n</details>'
-      );
-    });
-  });
-
   describe('lineBreak', () => {
     it('should return newline character', () => {
       // Act
@@ -921,16 +755,6 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe('\n');
-    });
-  });
-
-  describe('horizontalRule', () => {
-    it('should return horizontal rule', () => {
-      // Act
-      const result = adapter.horizontalRule();
-
-      // Assert
-      expect(result.toString()).toBe('---');
     });
   });
 });

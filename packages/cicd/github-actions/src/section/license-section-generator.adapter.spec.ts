@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { LicenseSectionGenerator } from './license-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifier } from '@ci-dokumentor/core';
 import { GitHubAction } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 
 describe('LicenseSectionGenerator - Enhanced License Support', () => {
@@ -37,12 +38,7 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
   describe('generateSection', () => {
     it('should generate license section with GitHub API license information', () => {
       // Arrange
-      const manifest: GitHubAction = {
-        usesName: 'owner/repo',
-        name: 'Test Action',
-        description: 'A test action',
-        runs: { using: 'node20' },
-      };
+      const manifest: GitHubAction = GitHubActionMockFactory.create();
 
       // Act
       const result = generator.generateSection(
@@ -76,12 +72,7 @@ For more details, see the [license](https://api.github.com/licenses/apache-2.0).
 
     it('should return empty buffer when no license information is available', () => {
       // Arrange
-      const manifest: GitHubAction = {
-        usesName: 'owner/repo',
-        name: 'Test Action',
-        description: 'A test action',
-        runs: { using: 'node20' },
-      };
+      const manifest: GitHubAction = GitHubActionMockFactory.create();
 
       // Act
       const result = generator.generateSection(
