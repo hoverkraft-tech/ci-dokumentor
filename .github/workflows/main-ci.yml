@@ -67,6 +67,30 @@ jobs:
 
       #       [skip ci]
 
+  npm-publish:
+    needs: ci
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Setup Node.js
+        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@1d00c9eb280acbee5df4b4a2087f786e66b13d87 # 0.14.1
+        with:
+          registry-url: 'https://registry.npmjs.org'
+      - name: Download package tarball
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: package-tarball
+          path: .
+      - name: Publish CLI to npm
+        run: |
+          npm publish ci-dokumentor-cli-*.tgz --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   docs-deploy:
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'

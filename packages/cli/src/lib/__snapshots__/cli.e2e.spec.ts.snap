@@ -3,7 +3,8 @@
 exports[`CLI > cli function > should create and run CLI application 1`] = `
 "Usage: @ci-dokumentor/cli [options] [command]
 
-Command Line Interface for CI Dokumentor
+Command Line Interface for CI Dokumentor - Automated documentation generator for
+CI/CD components
 
 Options:
   -V, --version                 output the version number
