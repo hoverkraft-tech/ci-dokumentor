@@ -5,7 +5,6 @@ This directory contains the Docker implementation for the CI Dokumentor command-
 ## Files
 
 - `Dockerfile` - Production-grade multi-stage build
-- `validate-structure.js` - Validation script for container health checks
 - `README.md` - This documentation file
 
 ## Docker Image Features
@@ -86,7 +85,7 @@ Until the bundling issue is resolved, the Docker image includes a validation scr
 docker build -f docker/Dockerfile -t ci-dokumentor:local .
 
 # Test the image
-docker run --rm ci-dokumentor:local node docker/validate-structure.js
+docker run --rm ci-dokumentor:local --version
 
 # Run with shell access for debugging
 docker run --rm -it --entrypoint /bin/sh ci-dokumentor:local
@@ -107,7 +106,7 @@ docker run --rm -it --entrypoint /bin/sh ci-dokumentor:local
 ### Container Won't Start
 
 1. Check container logs: `docker logs <container-id>`
-2. Run validation: `docker run --rm <image> node docker/validate-structure.js`
+2. Run cli: `docker run --rm <image> --version`
 3. Check file permissions in mounted volumes
 
 ### Build Failures

@@ -2,6 +2,10 @@ name: Common Continuous Integration tasks
 
 on:
   workflow_call:
+    inputs:
+      sign-images:
+        required: true
+        type: boolean
 
 permissions:
   actions: read
@@ -35,3 +39,40 @@ jobs:
           "commands": ["build"],
           "artifact": ["packages/docs/build"]
         }
+
+  docker:
+    needs: [linter, nodejs]
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@f9e149b6cdfa8443994994f10085691a57b8cf0e # 0.27.1
+    permissions:
+      contents: read
+      issues: read
+      packages: write
+      pull-requests: read
+      id-token: write
+    secrets:
+      oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      sign: ${{ inputs.sign-images }}
+      images: |
+        [
+          {
+            "name": "cli",
+            "context": ".",
+            "dockerfile": "docker/Dockerfile",
+            "target": "production",
+            "platforms": [
+              "linux/amd64",
+              "linux/arm64"
+            ]
+          }
+        ]
+
+  docker-test:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          docker run --rm "$IMAGE" --version
+          docker run --rm "$IMAGE" --help
+        env:
+          IMAGE: ${{ fromJSON(needs.docker.outputs.built-images).cli.images[0] }}

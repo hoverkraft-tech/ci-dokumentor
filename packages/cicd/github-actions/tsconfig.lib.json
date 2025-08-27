@@ -12,10 +12,10 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../../repository/github/tsconfig.lib.json"
+      "path": "../../repository/git/tsconfig.lib.json"
     },
     {
-      "path": "../../repository/git/tsconfig.lib.json"
+      "path": "../../repository/github/tsconfig.lib.json"
     },
     {
       "path": "../../core/tsconfig.lib.json"

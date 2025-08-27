@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CLI > cli function > should create and run CLI application 1`] = `
+"Usage: @ci-dokumentor/cli [options] [command]
+
+Command Line Interface for CI Dokumentor
+
+Options:
+  -V, --version           output the version number
+  -h, --help              display help for command
+
+Commands:
+  generate|gen [options]  Generate documentation from CI/CD configuration files
+  help [command]          display help for command
+"
+`;
+
+exports[`CLI > cli function > should display generate command usage 1`] = `
+"Usage: @ci-dokumentor/cli generate|gen [options]
+
+Generate documentation from CI/CD configuration files
+
+Options:
+  -s, --source <dir>             Source directory containing CI/CD files
+                                 (default: ".")
+  -o, --output <dir>             Output directory for generated documentation
+                                 (default: "./docs")
+  -r, --repository <platform>    Repository platform (choices: "git", "github")
+  -c, --cicd <platform>          CI/CD platform (choices: "github-actions")
+  --include-sections <sections>  Comma-separated list of sections to include
+  --exclude-sections <sections>  Comma-separated list of sections to exclude
+  -h, --help                     display help for command
+"
+`;

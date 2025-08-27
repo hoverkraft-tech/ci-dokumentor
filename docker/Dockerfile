@@ -21,13 +21,13 @@ COPY packages/repository/github/package.json ./packages/repository/github/
 COPY packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
 
 # Install all dependencies (including dev dependencies for building)
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build all packages, except docs
-RUN pnpm build --exclude=docs
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build --exclude=docs
 
 # Production stage - minimal runtime image
 FROM node:22-alpine AS production
@@ -41,10 +41,19 @@ WORKDIR /app
 
 # Copy only the built CLI and its dependencies from builder
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cli/dist ./packages/cli/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cli/node_modules ./packages/cli/node_modules
+
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/core/dist ./packages/core/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/core/node_modules ./packages/core/node_modules
+
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/dist ./packages/repository/git/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/node_modules ./packages/repository/git/node_modules
+
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/dist ./packages/repository/github/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/node_modules ./packages/repository/github/node_modules
+
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/dist ./packages/cicd/github-actions/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/node_modules ./packages/cicd/github-actions/node_modules
 
 # Copy runtime dependencies
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/node_modules ./node_modules
@@ -57,9 +66,6 @@ COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/pa
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/package.json ./packages/repository/github/
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
 
-# Copy validation script for health checks
-COPY --from=builder --chown=ci-dokumentor:nodejs /app/docker/validate-structure.js ./docker/
-
 # Switch to non-root user
 USER ci-dokumentor
 
@@ -70,9 +76,9 @@ ENV NODE_OPTIONS="--unhandled-rejections=strict"
 # Expose no ports (CLI tool)
 EXPOSE 0
 
-# Health check to ensure the CLI structure is valid and can start
+# Health check to ensure the CLI is functional
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node /app/docker/validate-structure.js || exit 1
+    CMD node /app/packages/cli/dist/bin/ci-dokumentor.js --version || exit 1
 
 # Set entrypoint so users can use the image exactly as they would use the nodejs package
 ENTRYPOINT ["node", "packages/cli/dist/bin/ci-dokumentor.js"]
