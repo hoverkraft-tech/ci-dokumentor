@@ -1,0 +1,19 @@
+name: 'CI Dokumentor'
+description: 'Automatically generate documentation for CI/CD components like GitHub Actions and workflows'
+author: 'Hoverkraft Technologies'
+
+branding:
+  icon: 'book-open'
+  color: 'blue'
+
+inputs:
+  args:
+    description: 'Arguments to pass to the CI Dokumentor CLI (e.g., "action.yml --output docs")'
+    required: false
+    default: '--help'
+
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest'
+  args:
+    - ${{ inputs.args }}
