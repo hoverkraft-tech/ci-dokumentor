@@ -8,7 +8,33 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ## Quick Start
 
-Add CI Dokumentor to your GitHub workflow:
+CI Dokumentor can be used in two ways in GitHub Actions:
+
+### Option 1: Use the GitHub Action (Recommended)
+
+```yaml
+name: Generate Documentation
+
+on:
+  push:
+    paths:
+      - 'action.yml'
+      - '.github/workflows/*.yml'
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate Documentation
+        uses: hoverkraft-tech/ci-dokumentor@main
+        with:
+          args: 'generate action.yml --output docs'
+```
+
+### Option 2: Use the Docker Image Directly
 
 ```yaml
 name: Generate Documentation
@@ -29,27 +55,38 @@ jobs:
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
         with:
-          args: 'action.yml --output docs'
+          args: 'generate action.yml --output docs'
 ```
 
 ## Basic Usage
 
 ### Simple Documentation Generation
 
+Using the GitHub Action:
+
+```yaml
+- name: Generate Action Documentation
+  uses: hoverkraft-tech/ci-dokumentor@main
+  with:
+    args: 'generate action.yml --output docs'
+```
+
+Or using the Docker image directly:
+
 ```yaml
 - name: Generate Action Documentation
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
-    args: 'action.yml --output docs'
+    args: 'generate action.yml --output docs'
 ```
 
 ### Generate Documentation for Workflows
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
+  uses: hoverkraft-tech/ci-dokumentor@main
   with:
-    args: '.github/workflows/ci.yml --output docs'
+    args: 'generate .github/workflows/ci.yml --output docs'
 ```
 
 ### Multiple Files
@@ -58,11 +95,12 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
 
 ```yaml
 - name: Generate All Documentation
-  run: |
-    for f in action.yml .github/workflows/*.yml; do
-      docker run --rm -v "${{ github.workspace }}":/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest generate --source "/workspace/$f" --output "/workspace/docs/$(basename "$f" .yml)"
-    done
+  uses: hoverkraft-tech/ci-dokumentor@main
+  with:
+    args: 'generate action.yml .github/workflows/*.yml --output docs'
 ```
+
+````
 
 ## Advanced Configuration
 
@@ -75,7 +113,7 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
     args: 'action.yml --output docs --include-repo-info'
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
+````
 
 ### Custom Author and License
 

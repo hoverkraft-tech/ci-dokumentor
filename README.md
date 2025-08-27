@@ -66,6 +66,17 @@ generate --source /workspace/.github/workflows/ci.yml
 
 #### GitHub Actions Integration
 
+Using the GitHub Action:
+
+```yaml
+- name: Generate CI Documentation
+  uses: hoverkraft-tech/ci-dokumentor@main
+  with:
+    args: 'generate .github/workflows/ci.yml --output docs'
+```
+
+Or using the Docker image directly:
+
 ```yaml
 - name: Generate CI Documentation
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
