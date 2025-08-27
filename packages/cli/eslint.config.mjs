@@ -12,6 +12,13 @@ export default [
             '{projectRoot}/eslint.config.{js,cjs,mjs}',
             '{projectRoot}/vite.config.{js,ts,mjs,mts}',
           ],
+          // Ignore workspace dependencies that are bundled for npm publishing
+          ignoredDependencies: [
+            '@ci-dokumentor/core',
+            '@ci-dokumentor/repository-git',
+            '@ci-dokumentor/repository-github',
+            '@ci-dokumentor/cicd-github-actions',
+          ],
         },
       ],
     },

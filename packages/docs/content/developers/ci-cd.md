@@ -163,7 +163,7 @@ The release process is triggered by:
 4. **Docker Image** - Build and tag container images
 5. **Documentation** - Update documentation and readme
 6. **GitHub Release** - Create release with notes and assets
-7. **NPM Publish** - Publish packages to npm registry (future)
+7. **NPM Publish** - Publish CLI package to npm registry (triggered on tags)
 
 ### Release Artifacts
 
