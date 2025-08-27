@@ -18,7 +18,6 @@ export default defineConfig(() => {
         formats: ['es' as const],
       },
       rollupOptions: {
-        ...sharedConfig.build.rollupOptions,
         input: {
           'bin/ci-dokumentor': 'src/bin/ci-dokumentor.ts',
         },
@@ -26,6 +25,13 @@ export default defineConfig(() => {
           entryFileNames: '[name].js',
           format: 'es' as const,
         },
+        // Bundle workspace dependencies for npm publishing
+        external: [
+          "commander",
+          "inversify", 
+          "reflect-metadata"
+          // All @ci-dokumentor/* workspace dependencies are bundled (not external)
+        ],
       },
     },
   })
