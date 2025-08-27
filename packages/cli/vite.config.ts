@@ -26,6 +26,13 @@ export default defineConfig(() => {
           entryFileNames: '[name].js',
           format: 'es' as const,
         },
+        // Bundle workspace dependencies for npm publishing
+        external: [
+          "inversify",
+          "reflect-metadata",
+          "commander",
+          // Remove workspace dependencies from external to bundle them
+        ],
       },
     },
   })
