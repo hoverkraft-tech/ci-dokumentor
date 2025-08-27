@@ -164,21 +164,26 @@ export class GitHubActionsParser {
     throw new Error(`Unsupported source file: ${source}`);
   }
 
-  private isGitHubAction(parsed: any): parsed is GitHubAction {
+  private isGitHubAction(parsed: unknown): parsed is GitHubAction {
     // Validate all required fields for a GitHub Action
     return (
+      typeof parsed === 'object' &&
+      parsed !== null &&
       'name' in parsed &&
       typeof parsed.name === 'string' &&
       'runs' in parsed &&
       typeof parsed.runs === 'object' &&
+      parsed.runs !== null &&
       'using' in parsed.runs &&
       typeof parsed.runs.using === 'string'
     );
   }
 
-  private isGitHubWorkflow(parsed: any): parsed is GitHubWorkflow {
+  private isGitHubWorkflow(parsed: unknown): parsed is GitHubWorkflow {
     // Validate all required fields for a GitHub Workflow
     return (
+      typeof parsed === 'object' &&
+      parsed !== null &&
       'name' in parsed &&
       typeof parsed.name === 'string' &&
       'on' in parsed &&

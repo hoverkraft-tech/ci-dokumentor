@@ -113,6 +113,6 @@ export class GenerateCommand extends BaseCommand {
         }
 
         await this.generateDocumentationUseCase.execute(generateOptions);
-      });
+      })
   }
 }

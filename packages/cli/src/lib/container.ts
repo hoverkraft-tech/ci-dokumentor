@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { Container } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
 import {
@@ -46,6 +45,11 @@ export function initContainer(
     container = new InversifyContainer() as Container;
   }
 
+  // Return early if services are already bound
+  if (container.isBound(LOGGER_IDENTIFIER)) {
+    return container;
+  }
+
   // Bind CLI-specific services
   container
     .bind<Logger>(LOGGER_IDENTIFIER)
@@ -55,6 +59,7 @@ export function initContainer(
     .bind<PackageService>(PACKAGE_SERVICE_IDENTIFIER)
     .to(FilePackageService)
     .inSingletonScope();
+
   container
     .bind<Program>(PROGRAM_IDENTIFIER)
     .toConstantValue(new CommanderCommand());

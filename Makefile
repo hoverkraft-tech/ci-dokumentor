@@ -20,6 +20,8 @@ lint-fix: ## Execute linting and fix
 ci: ## Execute all formats and checks
 	@pnpm run all
 	$(MAKE) lint-fix
+	$(MAKE) docker-build
+	$(MAKE) docker-test
 
 docker-build: ## Build Docker image
 	@echo "🐳 Building CI Dokumentor Docker image..."

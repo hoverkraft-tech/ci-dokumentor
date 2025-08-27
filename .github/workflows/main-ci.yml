@@ -24,35 +24,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  clean:
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@f9e149b6cdfa8443994994f10085691a57b8cf0e # 0.27.1
+    with:
+      images: '["cli"]'
+
   ci:
     uses: ./.github/workflows/__shared-ci.yml
     secrets: inherit
-
-  docker:
-    needs: ci
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@f9e149b6cdfa8443994994f10085691a57b8cf0e # 0.27.1
-    permissions:
-      contents: read
-      issues: read
-      packages: write
-      pull-requests: read
-      id-token: write
-    secrets:
-      oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
     with:
-      images: |
-        [
-          {
-            "name": "ci-dokumentor",
-            "context": ".",
-            "dockerfile": "docker/Dockerfile",
-            "target": "production",
-            "platforms": [
-              "linux/amd64",
-              "linux/arm64"
-            ]
-          }
-        ]
+      sign-images: true
 
   release:
     needs: ci

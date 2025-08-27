@@ -4,16 +4,16 @@
   "include": [],
   "references": [
     {
-      "path": "../repository/github"
-    },
-    {
       "path": "../repository/git"
     },
     {
-      "path": "../cicd/github-actions"
+      "path": "../repository/github"
     },
     {
       "path": "../core"
+    },
+    {
+      "path": "../cicd/github-actions"
     },
     {
       "path": "./tsconfig.lib.json"

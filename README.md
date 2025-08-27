@@ -6,7 +6,7 @@
   <a href="https://github.com/hoverkraft-tech/ci-dokumentor" target="_blank"><img src="https://repository-images.githubusercontent.com/967387766/275872f7-f4bc-40f8-b3d2-4a39496728bc" width="600" alt="CI Dokumentor - Automated documentation generator for CI/CD components" /></a>
 </p>
 
-[![Continuous integration](https://github.com/hoverkraft-tech/ci-dokumentor/workflows/Continuous%20integration/badge.svg)](https://github.com/hoverkraft-tech/ci-dokumentor/actions?query=workflow%3A%22Continuous+integration%22)
+[![Continuous Integration](https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml/badge.svg)](https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml)
 [![Coverage Status](https://codecov.io/gh/hoverkraft-tech/ci-dokumentor/branch/main/graph/badge.svg)](https://codecov.io/gh/hoverkraft-tech/ci-dokumentor)
 [![Latest Stable Version](https://poser.pugx.org/hoverkraft-tech/ci-dokumentor/v/stable)](https://packagist.org/packages/hoverkraft-tech/ci-dokumentor)
 [![Total Downloads](https://poser.pugx.org/hoverkraft-tech/ci-dokumentor/downloads)](https://npm.org/packages/hoverkraft-tech/ci-dokumentor)

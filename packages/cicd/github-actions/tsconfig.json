@@ -4,10 +4,10 @@
   "include": [],
   "references": [
     {
-      "path": "../../repository/github"
+      "path": "../../repository/git"
     },
     {
-      "path": "../../repository/git"
+      "path": "../../repository/github"
     },
     {
       "path": "../../core"

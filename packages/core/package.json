@@ -1,5 +1,6 @@
 {
   "name": "@ci-dokumentor/core",
+  "description": "Core library for CI Dokumentor",
   "version": "0.0.1",
   "private": true,
   "type": "module",

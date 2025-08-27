@@ -8,10 +8,12 @@ on:
 permissions:
   actions: read
   contents: read
-  packages: read
-  statuses: write
-  security-events: write
   id-token: write
+  issues: read
+  packages: write
+  pull-requests: read
+  security-events: write
+  statuses: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,3 +23,5 @@ jobs:
   ci:
     uses: ./.github/workflows/__shared-ci.yml
     secrets: inherit
+    with:
+      sign-images: false
