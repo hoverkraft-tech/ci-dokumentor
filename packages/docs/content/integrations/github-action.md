@@ -54,11 +54,14 @@ jobs:
 
 ### Multiple Files
 
+The CLI accepts a single `--source <file>` per invocation. To generate documentation for multiple files in a workflow, run the action multiple times or script the Docker/CLI call for each file. Example using a shell step to process multiple manifest files:
+
 ```yaml
 - name: Generate All Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
-  with:
-    args: 'action.yml .github/workflows/*.yml --output docs'
+  run: |
+    for f in action.yml .github/workflows/*.yml; do
+      docker run --rm -v "${{ github.workspace }}":/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest generate --source "/workspace/$f" --output "/workspace/docs/$(basename "$f" .yml)"
+    done
 ```
 
 ## Advanced Configuration

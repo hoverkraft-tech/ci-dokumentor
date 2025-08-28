@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify';
+import { existsSync, statSync } from 'fs';
 import {
   LOGGER_IDENTIFIER,
   type Logger,
@@ -7,14 +8,17 @@ import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
-   * Source directory containing CI/CD files
+   * Source manifest file path for the CI/CD platform to handle (required)
+   * This should point to a CI/CD manifest file such as `action.yml` or a
+   * workflow file like `.github/workflows/ci.yml`.
    */
   source: string;
 
   /**
-   * Output directory for generated documentation
+   * Output path for generated documentation (optional)
+   * If not provided, the generator adapter will auto-detect the destination path
    */
-  output: string;
+  output?: string;
 
   /**
    * Repository platform options
@@ -78,7 +82,7 @@ export class GenerateDocumentationUseCase {
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
     private readonly repositoryService: RepositoryService
-  ) {}
+  ) { }
 
   async execute(
     input: GenerateDocumentationUseCaseInput
@@ -87,8 +91,10 @@ export class GenerateDocumentationUseCase {
     this.validateInput(input);
 
     this.logger.info('Starting documentation generation...');
-    this.logger.info(`Source directory: ${input.source}`);
-    this.logger.info(`Output directory: ${input.output}`);
+    this.logger.info(`Source manifest: ${input.source}`);
+    if (input.output) {
+      this.logger.info(`Output path: ${input.output}`);
+    }
 
     // Auto-detect repository platform if not provided
     let repositoryPlatform = input.repository?.platform;
@@ -142,28 +148,31 @@ export class GenerateDocumentationUseCase {
     }
 
     // Generate documentation using the specific CI/CD platform adapter
-    await this.generatorService.generateDocumentationForPlatform(
+    // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
+    const destinationPath = await this.generatorService.generateDocumentationForPlatform(
+      adapter,
       input.source,
-      adapter
+      input.output
     );
 
     this.logger.info('Documentation generated successfully!');
-    this.logger.info(`Output saved to: ${input.output}`);
+    this.logger.info(`Output saved to: ${destinationPath}`);
 
     return {
       success: true,
       message: 'Documentation generated successfully',
-      outputPath: input.output,
+      outputPath: destinationPath,
     };
   }
 
   private validateInput(input: GenerateDocumentationUseCaseInput): void {
     if (!input.source) {
-      throw new Error('Source directory is required');
+      throw new Error('Source manifest file path is required');
     }
 
-    if (!input.output) {
-      throw new Error('Output directory is required');
+    // Validate that the source exists and is a file
+    if (!existsSync(input.source) || !statSync(input.source).isFile()) {
+      throw new Error(`Source manifest file does not exist or is not a file: ${input.source}`);
     }
 
     // Validate repository platform if provided
@@ -171,8 +180,7 @@ export class GenerateDocumentationUseCase {
       const validRepositoryPlatforms = this.getSupportedRepositoryPlatforms();
       if (!validRepositoryPlatforms.includes(input.repository.platform)) {
         throw new Error(
-          `Invalid repository platform '${
-            input.repository.platform
+          `Invalid repository platform '${input.repository.platform
           }'. Valid platforms: ${validRepositoryPlatforms.join(', ')}`
         );
       }
@@ -183,8 +191,7 @@ export class GenerateDocumentationUseCase {
       const validCicdPlatforms = this.getSupportedCicdPlatforms();
       if (!validCicdPlatforms.includes(input.cicd.platform)) {
         throw new Error(
-          `Invalid CI/CD platform '${
-            input.cicd.platform
+          `Invalid CI/CD platform '${input.cicd.platform
           }'. Valid platforms: ${validCicdPlatforms.join(', ')}`
         );
       }

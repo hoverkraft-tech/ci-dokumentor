@@ -39,12 +39,12 @@ The Dockerfile uses a two-stage build:
 docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest --help
 
 # Process a CI/CD file
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
-  /workspace/.github/workflows/ci.yml
+docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest generate \
+generate --source /workspace/.github/workflows/ci.yml
 
-# With output directory
+# With output path
 docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
-  /workspace/.github/workflows/ci.yml --output /workspace/docs
+generate --source /workspace/.github/workflows/ci.yml --output /workspace/docs/ci.md
 ```
 
 ### Development with Make
@@ -99,7 +99,6 @@ docker run --rm -it --entrypoint /bin/sh ci-dokumentor:local
 ## Volumes
 
 - `/workspace` - Recommended mount point for project files
-- `/output` - Recommended mount point for generated documentation
 
 ## Troubleshooting
 
@@ -117,12 +116,9 @@ docker run --rm -it --entrypoint /bin/sh ci-dokumentor:local
 
 ### Permission Issues
 
-The container runs as non-root user (UID 1001). Ensure mounted volumes have appropriate permissions:
+The container runs as non-root user (UID 1001).
 
-```bash
-# Fix permissions for output directory
-chmod 755 ./docs
-```
+Ensure mounted volumes have appropriate permissions: `755`.
 
 ## Contributing
 

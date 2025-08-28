@@ -81,8 +81,8 @@ ci-dokumentor generate --source action.yml --output docs
 
 The main command is `generate` with these key options:
 
-- `--source <dir>` - Source directory (default: current directory)
-- `--output <dir>` - Output directory (default: `./docs`)
+- `--source <file>` - Source manifest file path to handle (required)
+- `--output <dir>` - Output directory (optional; destination is auto-detected by the CI/CD adapter when omitted)
 - `--repository <platform>` - Repository platform (auto-detected)
 - `--cicd <platform>` - CI/CD platform (auto-detected)
 

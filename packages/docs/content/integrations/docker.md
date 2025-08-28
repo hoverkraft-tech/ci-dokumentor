@@ -9,10 +9,11 @@ CI Dokumentor provides a production-ready Docker image for easy integration with
 ## Quick Start
 
 ```bash
-# Generate documentation for a GitHub Action
+# Generate documentation for a CI/CD manifest file (required)
+# Pass a manifest file path inside the container, for example `/workspace/action.yml`
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace/action.yml --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 ## Docker Image
@@ -27,12 +28,12 @@ The official Docker image is available on GitHub Container Registry:
 
 ### Volume Mounting
 
-Mount your project directory to `/workspace` for both input and output:
+Mount your project directory to `/workspace` for both input (and output if different):
 
 ```bash
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 ### File Permissions
@@ -42,7 +43,7 @@ For correct file ownership on Linux/macOS:
 ```bash
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 ## Platform-Specific Examples
@@ -52,7 +53,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 ```bash
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace/action.yml --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 ### Windows PowerShell
@@ -60,7 +61,7 @@ docker run --rm -v $(pwd):/workspace \
 ```powershell
 docker run --rm -v ${PWD}:/workspace `
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest `
-  generate --source /workspace/action.yml --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 ### Windows Command Prompt
@@ -68,7 +69,7 @@ docker run --rm -v ${PWD}:/workspace `
 ```cmd
 docker run --rm -v %cd%:/workspace ^
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest ^
-  generate --source /workspace/action.yml --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 ## CI/CD Integration
@@ -93,13 +94,13 @@ jobs:
       - name: Generate Documentation
         uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
         with:
-          args: 'generate --source . --output docs'
+          args: 'generate'
 
       - name: Upload Documentation
         uses: actions/upload-artifact@v4
         with:
           name: documentation
-          path: docs/
+          path: README.md
 ```
 
 ### GitLab CI
@@ -113,14 +114,14 @@ generate-docs:
   script:
     - docker run --rm -v $PWD:/workspace
       ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-      generate --source /workspace --output /workspace/docs
+      generate --source /workspace/templates/my-component/template.yml
   artifacts:
     paths:
-      - docs/
+      - templates/my-component/docs.md
     expire_in: 1 week
   rules:
     - changes:
-        - action.yml
+        - templates/my-component/template.yml
 ```
 
 ## Volume Configuration
@@ -128,7 +129,6 @@ generate-docs:
 ### Recommended Mount Points
 
 - **`/workspace`** - Primary mount point for project files
-- **`/workspace/docs`** - Default output directory (can be customized)
 
 ### Mount Examples
 
@@ -137,7 +137,7 @@ generate-docs:
 ```bash
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 #### Separate Input/Output Mounts
@@ -147,7 +147,7 @@ docker run --rm \
   -v $(pwd):/workspace:ro \
   -v $(pwd)/output:/output \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /output
+  generate --source /workspace/action.yml --output /output/README.md
 ```
 
 ## Troubleshooting
@@ -160,7 +160,7 @@ docker run --rm \
 # Solution: Run with user mapping
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs
+  generate --source /workspace/action.yml
 ```
 
 #### Platform Detection Failed
@@ -169,7 +169,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 # Solution: Specify platform explicitly
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace --output /workspace/docs \
+  generate --source /workspace/action.yml \
   --cicd github-actions
 ```
 
@@ -191,7 +191,7 @@ services:
     image: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
     volumes:
       - .:/workspace
-    command: generate --source /workspace --output /workspace/docs
+  command: generate --source /workspace/action.yml
 ```
 
 ```bash

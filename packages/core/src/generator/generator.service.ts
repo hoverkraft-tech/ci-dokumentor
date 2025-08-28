@@ -13,7 +13,7 @@ export class GeneratorService {
     private readonly formatterService: FormatterService,
     @multiInject(GENERATOR_ADAPTER_IDENTIFIER)
     private readonly generatorAdapters: GeneratorAdapter[]
-  ) {}
+  ) { }
 
   /**
    * Get list of supported CI/CD platforms based on registered generator adapters
@@ -69,9 +69,10 @@ export class GeneratorService {
    * Generates documentation for the given path using a specific CI/CD platform adapter.
    */
   async generateDocumentationForPlatform(
+    adapter: GeneratorAdapter,
     source: string,
-    adapter: GeneratorAdapter
-  ): Promise<void> {
+    output?: string
+  ): Promise<string> {
     // Check if the adapter supports the source path
     if (!adapter.supportsSource(source)) {
       throw new Error(
@@ -79,7 +80,7 @@ export class GeneratorService {
       );
     }
 
-    const destinationPath = adapter.getDocumentationPath(source);
+    const destinationPath = output ?? adapter.getDocumentationPath(source);
     const formatterAdapter =
       this.formatterService.getFormatterAdapterForFile(destinationPath);
 
@@ -94,5 +95,7 @@ export class GeneratorService {
       formatterAdapter,
       outputAdapter
     );
+
+    return destinationPath;
   }
 }
