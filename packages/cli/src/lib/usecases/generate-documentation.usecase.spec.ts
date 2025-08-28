@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest'
 import mockFs from 'mock-fs';
 
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
-import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
+import { GeneratorService, RepositoryService, OutputService, FormatterService } from '@ci-dokumentor/core';
 import { Logger } from '../interfaces/logger.interface.js';
 
 describe('GenerateDocumentationUseCase', () => {
@@ -10,6 +10,8 @@ describe('GenerateDocumentationUseCase', () => {
   let mockLogger: Mocked<Logger>;
   let mockGeneratorService: Mocked<GeneratorService>;
   let mockRepositoryService: Mocked<RepositoryService>;
+  let mockOutputService: Mocked<OutputService>;
+  let mockFormatterService: Mocked<FormatterService>;
 
   beforeEach(() => {
     // Set up mock filesystem for tests. Use mock-fs so imports receive mocked fs behavior.
@@ -55,10 +57,26 @@ describe('GenerateDocumentationUseCase', () => {
       getSupportedRepositoryPlatforms: vi.fn().mockReturnValue(['git', 'github']),
     } as unknown as Mocked<RepositoryService>;
 
+    mockOutputService = {
+      clearAdapters: vi.fn(),
+      registerAdapter: vi.fn(),
+      writeSection: vi.fn().mockResolvedValue(undefined),
+      getAdapterIdentifiers: vi.fn().mockReturnValue([]),
+    } as unknown as Mocked<OutputService>;
+
+    mockFormatterService = {
+      getFormatterAdapterForFile: vi.fn().mockReturnValue({
+        comment: vi.fn(),
+        lineBreak: vi.fn(),
+      }),
+    } as unknown as Mocked<FormatterService>;
+
     useCase = new GenerateDocumentationUseCase(
       mockLogger,
       mockGeneratorService,
-      mockRepositoryService
+      mockRepositoryService,
+      mockOutputService,
+      mockFormatterService
     );
   });
 
@@ -99,7 +117,7 @@ describe('GenerateDocumentationUseCase', () => {
       expect(mockLogger.info).toHaveBeenCalledWith('Starting documentation generation...');
       expect(mockLogger.info).toHaveBeenCalledWith('Source manifest: ./action.yml');
       expect(mockLogger.info).toHaveBeenCalledWith('Documentation generated successfully!');
-      expect(mockLogger.info).toHaveBeenCalledWith('Output saved to: ./README.md');
+      expect(mockLogger.info).toHaveBeenCalledWith('Primary output saved to: ./README.md');
 
       expect(result).toEqual({ success: true, message: 'Documentation generated successfully', outputPath: './README.md' });
     });

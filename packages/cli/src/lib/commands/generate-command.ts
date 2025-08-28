@@ -13,6 +13,8 @@ export type GenerateCommandOptions = {
   cicd?: string;
   includeSections?: string;
   excludeSections?: string;
+  format?: string; // Comma-separated list of formats: text,json,github-action
+  formatDestination?: string; // Format-specific destinations: format:destination,format:destination
 };
 
 /**
@@ -71,6 +73,15 @@ export class GenerateCommand extends BaseCommand {
         '--exclude-sections <sections>',
         'Comma-separated list of sections to exclude'
       )
+      .option(
+        '--format <formats>',
+        'Comma-separated list of output formats (text,json,github-action)',
+        'text'
+      )
+      .option(
+        '--format-destination <destinations>',
+        'Format-specific destinations (format:destination,format:destination). Use stdout/stderr for console output.'
+      )
       .action(async (options: GenerateCommandOptions) => {
         const generateOptions: GenerateDocumentationUseCaseInput = {
           source: options.source,
@@ -108,6 +119,43 @@ export class GenerateCommand extends BaseCommand {
               .map((s: string) => s.trim())
               .filter((s: string) => s.length > 0);
           }
+        }
+
+        // Handle output format options
+        if (options.format) {
+          const formats = options.format
+            .split(',')
+            .map((f: string) => f.trim())
+            .filter((f: string) => f.length > 0);
+
+          const validFormats = ['text', 'json', 'github-action'];
+          for (const format of formats) {
+            if (!validFormats.includes(format)) {
+              throw new Error(`Invalid output format '${format}'. Valid formats: ${validFormats.join(', ')}`);
+            }
+          }
+
+          // Parse format destinations
+          const formatDestinations: Record<string, string> = {};
+          if (options.formatDestination) {
+            const destinations = options.formatDestination
+              .split(',')
+              .map((d: string) => d.trim())
+              .filter((d: string) => d.length > 0);
+
+            for (const dest of destinations) {
+              const [format, destination] = dest.split(':');
+              if (format && destination) {
+                formatDestinations[format.trim()] = destination.trim();
+              }
+            }
+          }
+
+          // Build output formats array
+          generateOptions.outputFormats = formats.map(format => ({
+            type: format as 'text' | 'json' | 'github-action',
+            destination: formatDestinations[format]
+          }));
         }
 
         await this.generateDocumentationUseCase.execute(generateOptions);

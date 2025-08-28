@@ -79,6 +79,7 @@ describe('GenerateCommand', () => {
       expect(mockUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -103,6 +104,7 @@ describe('GenerateCommand', () => {
         repository: {
           platform: 'github',
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -127,6 +129,7 @@ describe('GenerateCommand', () => {
         cicd: {
           platform: 'github-actions',
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -151,6 +154,7 @@ describe('GenerateCommand', () => {
         sections: {
           includeSections: ['header', 'overview', 'badges'],
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -175,6 +179,7 @@ describe('GenerateCommand', () => {
         sections: {
           excludeSections: ['license', 'security'],
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -202,6 +207,7 @@ describe('GenerateCommand', () => {
           includeSections: ['header', 'overview'],
           excludeSections: ['license'],
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -226,6 +232,7 @@ describe('GenerateCommand', () => {
         sections: {
           includeSections: ['header', 'overview', 'badges'],
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -250,6 +257,7 @@ describe('GenerateCommand', () => {
         sections: {
           includeSections: ['header', 'overview'],
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
 
@@ -279,6 +287,7 @@ describe('GenerateCommand', () => {
         cicd: {
           platform: 'github-actions',
         },
+        outputFormats: [{ type: 'text', destination: undefined }],
       });
     });
   });

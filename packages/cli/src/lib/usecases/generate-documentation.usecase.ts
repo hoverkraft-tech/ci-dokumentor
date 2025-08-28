@@ -4,7 +4,15 @@ import {
   LOGGER_IDENTIFIER,
   type Logger,
 } from '../interfaces/logger.interface.js';
-import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
+import { 
+  GeneratorService, 
+  RepositoryService,
+  OutputService,
+  FileOutputAdapter,
+  JsonOutputAdapter,
+  GithubActionOutputAdapter,
+  FormatterService
+} from '@ci-dokumentor/core';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -62,6 +70,14 @@ export interface GenerateDocumentationUseCaseInput {
      */
     sectionConfig?: Record<string, Record<string, unknown>>;
   };
+
+  /**
+   * Output format configuration
+   */
+  outputFormats?: Array<{
+    type: 'text' | 'json' | 'github-action';
+    destination?: string; // File path, 'stdout', or 'stderr'
+  }>;
 }
 
 export interface GenerateDocumentationUseCaseOutput {
@@ -81,7 +97,11 @@ export class GenerateDocumentationUseCase {
     @inject(GeneratorService)
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
-    private readonly repositoryService: RepositoryService
+    private readonly repositoryService: RepositoryService,
+    @inject(OutputService)
+    private readonly outputService: OutputService,
+    @inject(FormatterService)
+    private readonly formatterService: FormatterService
   ) { }
 
   async execute(
@@ -147,21 +167,59 @@ export class GenerateDocumentationUseCase {
       );
     }
 
+    // Set up output formats
+    this.outputService.clearAdapters();
+    const outputFormats = input.outputFormats || [{ type: 'text' }];
+    const destinationPath = input.output ?? adapter.getDocumentationPath(input.source);
+    
+    // Log format options
+    const formatNames = outputFormats.map(f => f.type).join(', ');
+    this.logger.info(`Output formats: ${formatNames}`);
+
+    // Configure output adapters based on requested formats
+    for (const format of outputFormats) {
+      const adapterId = `${format.type}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      switch (format.type) {
+        case 'text': {
+          const filePath = format.destination || destinationPath;
+          const formatterAdapter = this.formatterService.getFormatterAdapterForFile(filePath);
+          const adapter = new FileOutputAdapter(filePath, formatterAdapter);
+          this.outputService.registerAdapter(adapterId, adapter);
+          this.logger.info(`Text output: ${filePath}`);
+          break;
+        }
+        case 'json': {
+          const destination = format.destination || 'stdout';
+          const adapter = new JsonOutputAdapter(destination);
+          this.outputService.registerAdapter(adapterId, adapter);
+          this.logger.info(`JSON output: ${destination}`);
+          break;
+        }
+        case 'github-action': {
+          const adapter = new GithubActionOutputAdapter();
+          this.outputService.registerAdapter(adapterId, adapter);
+          this.logger.info('GitHub Action output: stdout');
+          break;
+        }
+      }
+    }
+
     // Generate documentation using the specific CI/CD platform adapter
     // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
-    const destinationPath = await this.generatorService.generateDocumentationForPlatform(
+    const finalDestinationPath = await this.generatorService.generateDocumentationForPlatform(
       adapter,
       input.source,
       input.output
     );
 
     this.logger.info('Documentation generated successfully!');
-    this.logger.info(`Output saved to: ${destinationPath}`);
+    this.logger.info(`Primary output saved to: ${finalDestinationPath}`);
 
     return {
       success: true,
       message: 'Documentation generated successfully',
-      outputPath: destinationPath,
+      outputPath: finalDestinationPath,
     };
   }
 
