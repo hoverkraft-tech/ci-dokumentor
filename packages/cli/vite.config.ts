@@ -18,7 +18,6 @@ export default defineConfig(() => {
         formats: ['es' as const],
       },
       rollupOptions: {
-        ...sharedConfig.build.rollupOptions,
         input: {
           'bin/ci-dokumentor': 'src/bin/ci-dokumentor.ts',
         },
@@ -27,7 +26,12 @@ export default defineConfig(() => {
           format: 'es' as const,
         },
         // Bundle workspace dependencies for npm publishing
-        // external configuration is inherited from vite.shared.ts
+        external: [
+          "commander",
+          "inversify", 
+          "reflect-metadata"
+          // All @ci-dokumentor/* workspace dependencies are bundled (not external)
+        ],
       },
     },
   })
