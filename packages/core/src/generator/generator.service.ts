@@ -3,7 +3,8 @@ import {
   GeneratorAdapter,
 } from './generator.adapter.js';
 import { FileOutputAdapter } from '../output/file-output.adapter.js';
-import { inject, injectable, multiInject } from 'inversify';
+import { OutputService } from '../output/output.service.js';
+import { inject, injectable, multiInject, optional } from 'inversify';
 import { FormatterService } from '../formatter/formatter.service.js';
 
 @injectable()
@@ -12,7 +13,9 @@ export class GeneratorService {
     @inject(FormatterService)
     private readonly formatterService: FormatterService,
     @multiInject(GENERATOR_ADAPTER_IDENTIFIER)
-    private readonly generatorAdapters: GeneratorAdapter[]
+    private readonly generatorAdapters: GeneratorAdapter[],
+    @optional() @inject(OutputService)
+    private readonly outputService?: OutputService
   ) { }
 
   /**
@@ -67,6 +70,7 @@ export class GeneratorService {
 
   /**
    * Generates documentation for the given path using a specific CI/CD platform adapter.
+   * Uses OutputService if available, otherwise falls back to FileOutputAdapter.
    */
   async generateDocumentationForPlatform(
     adapter: GeneratorAdapter,
@@ -84,17 +88,26 @@ export class GeneratorService {
     const formatterAdapter =
       this.formatterService.getFormatterAdapterForFile(destinationPath);
 
-    // Create an output adapter for the destination path
-    const outputAdapter = new FileOutputAdapter(
-      destinationPath,
-      formatterAdapter
-    );
+    // Use OutputService if available, otherwise fall back to FileOutputAdapter
+    if (this.outputService) {
+      await adapter.generateDocumentation(
+        source,
+        formatterAdapter,
+        this.outputService
+      );
+    } else {
+      // Legacy behavior - create FileOutputAdapter
+      const outputAdapter = new FileOutputAdapter(
+        destinationPath,
+        formatterAdapter
+      );
 
-    await adapter.generateDocumentation(
-      source,
-      formatterAdapter,
-      outputAdapter
-    );
+      await adapter.generateDocumentation(
+        source,
+        formatterAdapter,
+        outputAdapter
+      );
+    }
 
     return destinationPath;
   }
