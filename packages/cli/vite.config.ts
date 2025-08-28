@@ -27,12 +27,7 @@ export default defineConfig(() => {
           format: 'es' as const,
         },
         // Bundle workspace dependencies for npm publishing
-        external: [
-          "inversify",
-          "reflect-metadata",
-          "commander",
-          // Remove workspace dependencies from external to bundle them
-        ],
+        // external configuration is inherited from vite.shared.ts
       },
     },
   })
