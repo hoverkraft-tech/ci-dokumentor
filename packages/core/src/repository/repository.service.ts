@@ -26,7 +26,10 @@ export class RepositoryService {
     @multiInject(REPOSITORY_PROVIDER_IDENTIFIER)
     @optional()
     private providers: RepositoryProvider[] = []
-  ) { }
+  ) {
+    // Sort providers by priority in descending order (highest priority first)
+    this.providers = this.providers.sort((a, b) => b.getPriority() - a.getPriority());
+  }
 
   /**
    * Get list of supported repository platforms based on registered providers
