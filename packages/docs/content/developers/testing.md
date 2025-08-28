@@ -25,7 +25,6 @@ CI Dokumentor follows these testing principles:
 ### Testing Utilities
 
 - **[mock-fs](https://github.com/tschaub/mock-fs)** - File system mocking
-- **[jest-serializer-html](https://github.com/rayrutjes/jest-serializer-html)** - HTML snapshot testing
 
 ## Test Structure
 

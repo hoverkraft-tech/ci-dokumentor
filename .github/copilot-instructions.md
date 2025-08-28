@@ -116,15 +116,19 @@ export function initContainer(): Container {
 
 ## Documentation Standards
 
-### Readme Files
+### Main documentation
 
-- Each package must have a README.md with purpose, API, and usage examples
-- Keep documentation concise but comprehensive
+- Documentation content is stored in the `/packages/docs/content` folder.
 - Include code examples for public APIs
 - Document breaking changes and migration guides
 
+### Readme Files
+
+- Each package must have a README.md with very concise description and a link the its related documentation in the `/packages/docs/content` folder.
+
 ### Code Comments
 
+- Limit the use of inline comments
 - Document complex business logic and algorithms
 - Explain "why" not "what" in comments
 - Use JSDoc for public APIs
@@ -132,7 +136,7 @@ export function initContainer(): Container {
 
 ### Architecture Documentation
 
-- Document architectural decisions in `/docs` folder
+- Document architectural decisions in `/packages/docs/content/developers` folder
 - Explain design patterns and their rationale
 - Maintain up-to-date architecture diagrams
 

@@ -1,10 +1,5 @@
-import { describe, it, expect, vi, beforeEach, Mocked } from 'vitest';
-
-// Hoisted mock so imports in the use case module receive the mocked functions
-vi.mock('fs', () => ({
-  existsSync: vi.fn(() => true),
-  statSync: vi.fn(() => ({ isFile: () => true })),
-}));
+import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
+import mockFs from 'mock-fs';
 
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
 import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
@@ -17,10 +12,11 @@ describe('GenerateDocumentationUseCase', () => {
   let mockRepositoryService: Mocked<RepositoryService>;
 
   beforeEach(() => {
-    // Mock filesystem checks used by the use case
-    const fs = require('fs');
-    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
-    vi.spyOn(fs, 'statSync').mockReturnValue({ isFile: () => true } as any);
+    // Set up mock filesystem for tests. Use mock-fs so imports receive mocked fs behavior.
+    mockFs({
+      './action.yml': 'name: test-action\n',
+      './README.md': '',
+    });
     mockLogger = {
       info: vi.fn(),
       error: vi.fn(),
@@ -64,6 +60,12 @@ describe('GenerateDocumentationUseCase', () => {
       mockGeneratorService,
       mockRepositoryService
     );
+  });
+
+  afterEach(() => {
+    // Restore real filesystem after each test
+    mockFs.restore();
+    vi.resetAllMocks();
   });
 
   describe('input validation', () => {

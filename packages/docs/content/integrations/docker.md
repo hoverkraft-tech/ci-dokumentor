@@ -11,10 +11,12 @@ CI Dokumentor provides a production-ready Docker image for easy integration with
 ```bash
 # Generate documentation for a CI/CD manifest file (required)
 # Pass a manifest file path inside the container, for example `/workspace/action.yml`
-docker run --rm -v $(pwd):/workspace \
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml
 ```
+
+Note: the Docker image uses `/workspace` as the default working directory. The `ci-dokumentor` CLI is installed at `/usr/local/bin/ci-dokumentor` and is available on the container PATH (so you can invoke it as `/usr/local/bin/ci-dokumentor` or simply `ci-dokumentor`).
 
 ## Docker Image
 
@@ -51,7 +53,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 ### Linux/macOS (Bash)
 
 ```bash
-docker run --rm -v $(pwd):/workspace \
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml
 ```
@@ -60,6 +62,7 @@ docker run --rm -v $(pwd):/workspace \
 
 ```powershell
 docker run --rm -v ${PWD}:/workspace `
+  -u $(id -u):$(id -g) `
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest `
   generate --source /workspace/action.yml
 ```
@@ -68,60 +71,9 @@ docker run --rm -v ${PWD}:/workspace `
 
 ```cmd
 docker run --rm -v %cd%:/workspace ^
+  -u %USERPROFILE%:$(id -g) ^
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest ^
   generate --source /workspace/action.yml
-```
-
-## CI/CD Integration
-
-### GitHub Actions
-
-```yaml
-name: Generate Documentation
-
-on:
-  push:
-    paths:
-      - 'action.yml'
-
-jobs:
-  generate-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Generate Documentation
-        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-        with:
-          args: 'generate'
-
-      - name: Upload Documentation
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentation
-          path: README.md
-```
-
-### GitLab CI
-
-```yaml
-generate-docs:
-  stage: docs
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - docker run --rm -v $PWD:/workspace
-      ghcr.io/hoverkraft-tech/ci-dokumentor:latest
-      generate --source /workspace/templates/my-component/template.yml
-  artifacts:
-    paths:
-      - templates/my-component/docs.md
-    expire_in: 1 week
-  rules:
-    - changes:
-        - templates/my-component/template.yml
 ```
 
 ## Volume Configuration
@@ -130,12 +82,14 @@ generate-docs:
 
 - **`/workspace`** - Primary mount point for project files
 
+Note: `/workspace` is the image's default working directory. When you mount your project there, commands executed inside the container will run with `/workspace` as the current working directory.
+
 ### Mount Examples
 
 #### Single Directory (Read/Write)
 
 ```bash
-docker run --rm -v $(pwd):/workspace \
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml
 ```
@@ -146,6 +100,7 @@ docker run --rm -v $(pwd):/workspace \
 docker run --rm \
   -v $(pwd):/workspace:ro \
   -v $(pwd)/output:/output \
+  -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml --output /output/README.md
 ```
@@ -167,7 +122,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 
 ```bash
 # Solution: Specify platform explicitly
-docker run --rm -v $(pwd):/workspace \
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml \
   --cicd github-actions

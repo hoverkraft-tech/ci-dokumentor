@@ -32,6 +32,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build --exclude=docs
 # Production stage - minimal runtime image
 FROM node:24-alpine AS production
 
+# Install git
+# hadolint ignore=DL3018
+RUN apk add --no-cache git
+
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S ci-dokumentor -u 1001
@@ -66,6 +70,9 @@ COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/pa
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/package.json ./packages/repository/github/
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
 
+# Create executable from CLI
+RUN ln -s /app/packages/cli/dist/bin/ci-dokumentor.js /usr/local/bin/ci-dokumentor && chmod +x /usr/local/bin/ci-dokumentor
+
 # Switch to non-root user
 USER ci-dokumentor
 
@@ -78,10 +85,13 @@ EXPOSE 0
 
 # Health check to ensure the CLI is functional
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node /app/packages/cli/dist/bin/ci-dokumentor.js --version || exit 1
+    CMD /usr/local/bin/ci-dokumentor --version || exit 1
 
 # Set entrypoint so users can use the image exactly as they would use the nodejs package
-ENTRYPOINT ["node", "packages/cli/dist/bin/ci-dokumentor.js"]
+ENTRYPOINT ["/usr/local/bin/ci-dokumentor"]
+
+WORKDIR /workspace
+RUN git config --global --add safe.directory /workspace
 
 # Default to help when no arguments provided
 CMD ["--help"]

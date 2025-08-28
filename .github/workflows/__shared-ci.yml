@@ -6,6 +6,10 @@ on:
       sign-images:
         required: true
         type: boolean
+    outputs:
+      image-tag:
+        description: The image tag for the CI Dokumentor CLI
+        value: ${{ fromJson(jobs.docker.outputs.built-images).cli.tags[0] }}
 
 permissions:
   actions: read

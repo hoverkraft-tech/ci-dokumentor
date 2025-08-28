@@ -22,24 +22,9 @@
 ### Quick Links
 
 - 🚀 [Getting Started](./docs/content/getting-started/installation.md) - Installation and quick start
-- 📦 [Packages](./docs/content/packages/core.md) - Package documentation
 - 🐳 [Docker](./docs/content/integrations/docker.md) - Docker integration guide
 - 🔧 [GitHub Action](./docs/content/integrations/github-action.md) - GitHub Actions integration
 - 👨‍💻 [Contributing](./docs/content/developers/contributing.md) - How to contribute
-
-## Usage
-
-### Writing
-
-### Linting
-
-## Supported CI/CD components
-
-### GitHub Actions
-
-#### Actions
-
-#### Workflows
 
 ## Integrations
 
@@ -53,39 +38,28 @@ npx ci-dokumentor /path/to/ci-cd/component.yml
 
 CI Dokumentor is available as a Docker image that provides a lightweight, containerized way to generate documentation for your CI/CD components.
 
-#### Quick Start
-
 ```bash
 # Show available options
 docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest --help
 
 # Generate documentation from CI/CD file
-docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
-generate --source /workspace/.github/workflows/ci.yml
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest generate --source /workspace/action.yml
 ```
 
-#### GitHub Actions Integration
+> **📖 Full Documentation**: See [docker/README.md](docker/README.md) for complete Docker usage guide, troubleshooting, and advanced configurations.
 
-Using the GitHub Action:
+### GitHub Actions
 
 ```yaml
 - name: Generate CI Documentation
   uses: hoverkraft-tech/ci-dokumentor@main
   with:
-    source: '.github/workflows/ci.yml'
-    output: 'docs'
+    source: 'action.yml'
 ```
 
-Or using the Docker image directly:
+> **📖 Full Documentation**: For more details on GitHub Actions integration, see our [GitHub Action documentation](./packages/docs/content/integrations/github-action.md).
 
-```yaml
-- name: Generate CI Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
-  with:
-    args: 'generate --source .github/workflows/ci.yml'
-```
-
-#### GitLab CI Integration
+### GitLab CI
 
 ```yaml
 generate-docs:
@@ -98,7 +72,9 @@ generate-docs:
       - templates/my-component/docs.md
 ```
 
-#### Dagger.io Integration
+> **📖 Full Documentation**: For more details on GitLab CI integration, see our [GitLab CI documentation](./packages/docs/content/integrations/gitlab-ci.md).
+
+### Dagger.io
 
 ```go
 func (m *MyModule) GenerateDocs(ctx context.Context, source *dagger.Directory) *dagger.Directory {
@@ -106,14 +82,12 @@ func (m *MyModule) GenerateDocs(ctx context.Context, source *dagger.Directory) *
   From("ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest").
         WithMountedDirectory("/workspace", source).
         WithWorkdir("/workspace").
-        WithExec([]string{"ci-dokumentor", ".github/workflows/ci.yml", "--output", "docs"}).
+        WithExec([]string{"ci-dokumentor", "generate", "--source", "action.yml"}).
         Directory("docs")
 }
 ```
 
-> **📖 Full Documentation**: See [docker/README.md](docker/README.md) for complete Docker usage guide, troubleshooting, and advanced configurations.
-
-### GitHub Action
+> **📖 Full Documentation**: For more details on Dagger.io integration, see our [Dagger.io documentation](./packages/docs/content/integrations/dagger.md).
 
 ## 👨‍💻 Contributing
 

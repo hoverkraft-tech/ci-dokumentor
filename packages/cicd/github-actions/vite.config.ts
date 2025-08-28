@@ -18,9 +18,5 @@ export default defineConfig(() => {
         formats: ['es' as const],
       },
     },
-    test: {
-      ...sharedConfig.test,
-      snapshotSerializers: ['jest-serializer-html'],
-    },
   });
 });

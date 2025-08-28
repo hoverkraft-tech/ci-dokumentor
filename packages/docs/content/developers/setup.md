@@ -266,47 +266,7 @@ This means:
 
 The repository includes Visual Studio Code configuration in `.vscode/`:
 
-```json title=".vscode/settings.json"
-{
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  },
-  "files.exclude": {
-    "**/node_modules": true,
-    "**/dist": true,
-    "**/.nx": true
-  },
-  "search.exclude": {
-    "**/dist": true,
-    "**/node_modules": true
-  }
-}
-```
-
-```json title=".vscode/extensions.json"
-{
-  "recommendations": [
-    "ms-vscode.vscode-typescript-next",
-    "esbenp.prettier-vscode",
-    "ms-vscode.vscode-eslint",
-    "eamodio.gitlens",
-    "nrwl.angular-console"
-  ]
-}
-```
-
 #### Install Recommended Extensions
-
-```bash
-# Install all recommended extensions
-code --install-extension ms-vscode.vscode-typescript-next
-code --install-extension esbenp.prettier-vscode
-code --install-extension ms-vscode.vscode-eslint
-code --install-extension eamodio.gitlens
-code --install-extension nrwl.angular-console
-```
 
 ### Environment Variables
 
@@ -315,10 +275,6 @@ Create a `.env` file in the root directory for development:
 ```bash title=".env"
 # GitHub token for enhanced repository information (optional)
 GITHUB_TOKEN=ghp_your_token_here
-
-# Development settings
-NODE_ENV=development
-CI_DOKUMENTOR_VERBOSE=true
 
 # Docker settings (if using Docker)
 DOCKER_BUILDKIT=1
@@ -520,11 +476,8 @@ pnpm test -- packages/core/src/specific-test.spec.ts
 ### Docker Debugging
 
 ```bash
-# Build debug image
-docker build -f docker/Dockerfile --target development -t ci-dokumentor:debug .
-
-# Run with shell access
-docker run --rm -it -v $(pwd):/workspace --entrypoint /bin/sh ci-dokumentor:debug
+# Build and run Docker container with shell access
+make docker-shell
 
 # Inside container:
 # node dist/bin/ci-dokumentor.js --help
@@ -560,6 +513,10 @@ pnpm install
 **Solution**:
 
 ```bash
+
+# Clean NX cache
+pnpm nx reset
+
 # Clean TypeScript cache
 rm -rf packages/*/dist
 rm -rf packages/*/.tsbuildinfo
