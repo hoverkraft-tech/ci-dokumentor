@@ -50,33 +50,11 @@ type Repository = {
 
 #### GeneratorService
 
-Manages CI/CD platform adapters and documentation generation:
-
-```typescript
-class GeneratorService {
-  getSupportedCicdPlatforms(): string[];
-  getGeneratorAdapterByPlatform(platform: string): GeneratorAdapter | undefined;
-  getSupportedSectionsForPlatform(platform: string): string[];
-  autoDetectCicdPlatform(source: string): string | null;
-  autoDetectCicdAdapter(source: string): GeneratorAdapter | null;
-  generateDocumentationForPlatform(
-    adapter: GeneratorAdapter,
-    source: string,
-    output?: string,
-  ): Promise<string>;
-}
-```
+Manages CI/CD platform adapters and documentation generation
 
 #### FormatterService
 
-Handles content formatting and output adapters:
-
-```typescript
-class FormatterService {
-  getFormatterAdapterForFile(filePath: string): FormatterAdapter;
-  // Additional formatting utilities
-}
-```
+Handles content formatting and output adapters
 
 ### Interfaces
 
@@ -85,8 +63,14 @@ class FormatterService {
 Interface for repository platform providers:
 
 ```typescript
-interface RepositoryProvider {
+interface RepositoryProvider<
+  Options extends Record<string, unknown> = Record<string, unknown>,
+> {
   getPlatformName(): string;
+  // Returns a record keyed by option names where each key maps to an OptionDescriptor
+  getOptions(): Record<keyof Options, OptionDescriptor>;
+  // Apply runtime options (partial) to the provider
+  setOptions(options: Partial<Options>): void;
   supports(): Promise<boolean>;
   getRepository(): Promise<Repository>;
 }

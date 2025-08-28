@@ -6,41 +6,25 @@ import {
   beforeEach,
   afterEach,
   MockInstance,
+  Mocked,
 } from 'vitest';
 import { cli } from './cli.js';
 import { resetGlobalContainer } from './global-container.js';
+import { ConsoleMockFactory } from '../../__tests__/console-mock.factory.js';
 
 describe('CLI', () => {
   const originalArgv = process.argv.slice();
-  let consoleLogSpy: MockInstance<typeof console.log>;
-  let consoleDebugSpy: MockInstance<typeof console.debug>;
-  let consoleErrorSpy: MockInstance<typeof console.error>;
-  let processStdoutSpy: MockInstance<typeof process.stdout.write>;
+  let consoleMock: Mocked<Console>;
   let processExitSpy: MockInstance<typeof process.exit>;
 
   beforeEach(() => {
-    // Reset console mocks
-    vi.clearAllMocks();
+    // Reset mocks before each test
+    vi.resetAllMocks();
 
     resetGlobalContainer();
 
-    // Mock console.log to capture output
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-      // Mock implementation - intentionally empty
-    });
-
-    consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {
-      // Mock implementation - intentionally empty
-    });
-
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
-      // Mock implementation - intentionally empty
-    });
-
-    processStdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => {
-      // Mock implementation - intentionally empty
-      return true;
-    });
+    // Mock console methods
+    consoleMock = ConsoleMockFactory.create();
 
     const processExitMock = ((code?: number | string | null | undefined) => {
       throw new Error('process.exit: ' + code);
@@ -67,11 +51,11 @@ describe('CLI', () => {
       await expect(cli()).rejects.toThrow("process.exit: 0");
 
       // Assert
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
-      expect(consoleDebugSpy).not.toHaveBeenCalled();
+      expect(consoleMock.error).not.toHaveBeenCalled();
+      expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(consoleLogSpy).toBeCalledTimes(1);
-      expect(consoleLogSpy.mock.calls[0][0]).toMatchSnapshot();
+      expect(consoleMock.log).toBeCalledTimes(1);
+      expect(consoleMock.log.mock.calls[0][0]).toMatchSnapshot();
 
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
@@ -84,12 +68,10 @@ describe('CLI', () => {
       await expect(cli()).rejects.toThrow("process.exit: 0");
 
       // Assert
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
-      expect(consoleDebugSpy).not.toHaveBeenCalled();
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(consoleMock.error).not.toHaveBeenCalled();
+      expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(processStdoutSpy).toHaveBeenCalled();
-      expect(processStdoutSpy.mock.calls[0][0]).toMatchSnapshot();
+      expect(consoleMock.log.mock.calls[0][0]).toMatchSnapshot();
 
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });

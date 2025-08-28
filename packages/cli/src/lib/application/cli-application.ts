@@ -49,13 +49,9 @@ export class CliApplication {
     this.program
       .name(packageInfo.name)
       .description(packageInfo.description)
-      .version(packageInfo.version)
-      .showHelpAfterError()
-      .showSuggestionAfterError()
-      .configureOutput({
-        writeOut: (str: string) => this.logger.log(str),
-        writeErr: (str: string) => this.logger.error(str),
-      });
+      .version(packageInfo.version);
+
+    this.configureOutput(this.program);
   }
 
   /**
@@ -67,8 +63,19 @@ export class CliApplication {
       // Configure the command (this sets up name, description, options, action)
       command.configure();
 
+      this.configureOutput(command);
+
       // Add the configured command to the main program
       this.program.addCommand(command);
     });
+  }
+
+  private configureOutput(command: Command | Program): void {
+    command.configureOutput({
+      writeOut: (str: string) => this.logger.log(str),
+      writeErr: (str: string) => this.logger.error(str),
+    });
+    command.showHelpAfterError();
+    command.showSuggestionAfterError();
   }
 }

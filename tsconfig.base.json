@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "composite": true,
     "declaration": true,
     "declarationMap": true,
@@ -19,6 +20,9 @@
     "target": "es2022",
     "customConditions": ["development"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "@ci-dokumentor/core/tests": ["packages/core/__tests__/index.ts"]
+    }
   }
 }

@@ -10,3 +10,4 @@ export * from './repository/repository.provider.js';
 export * from './repository/repository.service.js';
 export * from './repository/license.service.js';
 export * from './container.js';
+export * from './options/options.js';

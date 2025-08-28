@@ -1,6 +1,6 @@
 
 
-import type { GitHubAction } from 'src/github-actions-parser.js';
+import type { GitHubAction } from '../src/github-actions-parser.js';
 
 export class GitHubActionMockFactory {
     static create(overrides: Partial<GitHubAction> = {}): GitHubAction {

@@ -38,17 +38,9 @@ export class RepositoryService {
     return this.providers.map((provider) => provider.getPlatformName());
   }
 
-  /**
-   * Auto-detect repository platform for the current context
-   */
-  async autoDetectRepositoryPlatform(): Promise<string | undefined> {
-    const detectedProvider = await this.autoDetectProvider();
-    return detectedProvider ? detectedProvider.getPlatformName() : undefined;
-  }
-
   async getRepository(): Promise<Repository> {
     // Try to auto-detect using providers first
-    const detectedProvider = await this.autoDetectProvider();
+    const detectedProvider = await this.autoDetectRepositoryProvider();
     if (detectedProvider) {
       return await detectedProvider.getRepository();
     }
@@ -62,12 +54,19 @@ export class RepositoryService {
   /**
    * Auto-detect the appropriate repository provider for the current context
    */
-  private async autoDetectProvider(): Promise<RepositoryProvider | null> {
+  async autoDetectRepositoryProvider(): Promise<RepositoryProvider | undefined> {
     for (const provider of this.providers) {
       if (await provider.supports()) {
         return provider;
       }
     }
-    return null;
+    return undefined;
+  }
+
+  /**
+   * Get the repository provider by platform name
+   */
+  getRepositoryProviderByPlatform(platform: string): RepositoryProvider | undefined {
+    return this.providers.find((provider) => provider.getPlatformName() === platform);
   }
 }

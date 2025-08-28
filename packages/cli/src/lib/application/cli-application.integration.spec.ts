@@ -5,21 +5,25 @@ import {
     vi,
     beforeEach,
     afterEach,
+    Mocked,
     MockInstance,
 } from 'vitest';
 import { CliApplication } from './cli-application.js';
 import { initGlobalContainer, resetGlobalContainer } from '../global-container.js';
 import type { Container } from '@ci-dokumentor/core';
+import { ConsoleMockFactory } from '../../../__tests__/console-mock.factory.js';
 
 describe('CliApplication Integration Tests', () => {
     let container: Container;
     let cliApp: CliApplication;
-    let consoleLogSpy: MockInstance<typeof console.log>;
-    let consoleErrorSpy: MockInstance<typeof console.error>;
+    let consoleMock: Mocked<Console>;
     let processExitSpy: MockInstance<typeof process.exit>;
     const originalArgv = process.argv.slice();
 
     beforeEach(() => {
+        // Reset mocks before each test
+        vi.resetAllMocks();
+
         // Reset all containers before each test
         resetGlobalContainer();
 
@@ -28,17 +32,10 @@ describe('CliApplication Integration Tests', () => {
         cliApp = container.get(CliApplication);
 
         // Mock console methods
-        consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-            // Mock implementation - intentionally empty
-        });
+        consoleMock = ConsoleMockFactory.create();
 
-        consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
-            // Mock implementation - intentionally empty
-        });
-
-        // Mock process.exit to prevent actual exit during tests
-        const processExitMock = (() => {
-            // Do nothing on exit
+        const processExitMock = ((code?: number | string | null | undefined) => {
+            throw new Error('process.exit: ' + code);
         }) as unknown as typeof process.exit;
 
         processExitSpy = vi
@@ -79,11 +76,14 @@ describe('CliApplication Integration Tests', () => {
             const helpArgs = ['node', 'ci-dokumentor', '--help'];
 
             // Act
-            await cliApp.run(helpArgs);
+            await expect(cliApp.run(helpArgs)).rejects.toThrow("process.exit: 0");
 
             // Assert
-            expect(consoleLogSpy).toHaveBeenCalled();
-            expect(consoleLogSpy).toHaveBeenCalledWith(
+            expect(consoleMock.error).not.toHaveBeenCalled();
+            expect(consoleMock.debug).not.toHaveBeenCalled();
+
+            expect(consoleMock.log).toHaveBeenCalled();
+            expect(consoleMock.log).toHaveBeenCalledWith(
                 expect.stringContaining('Usage:')
             );
             expect(processExitSpy).toHaveBeenCalledWith(0);
@@ -94,12 +94,15 @@ describe('CliApplication Integration Tests', () => {
             const versionArgs = ['node', 'ci-dokumentor', '--version'];
 
             // Act
-            await cliApp.run(versionArgs);
+            await expect(cliApp.run(versionArgs)).rejects.toThrow("process.exit: 0");
 
             // Assert
-            expect(consoleLogSpy).toHaveBeenCalled();
+            expect(consoleMock.error).not.toHaveBeenCalled();
+            expect(consoleMock.debug).not.toHaveBeenCalled();
+
+            expect(consoleMock.log).toHaveBeenCalled();
             // Should output version information
-            expect(consoleLogSpy).toHaveBeenCalledWith(
+            expect(consoleMock.log).toHaveBeenCalledWith(
                 expect.stringMatching(/\d+\.\d+\.\d+/)
             );
             expect(processExitSpy).toHaveBeenCalledWith(0);
@@ -110,11 +113,14 @@ describe('CliApplication Integration Tests', () => {
             const helpArgs = ['node', 'ci-dokumentor', '--help'];
 
             // Act
-            await cliApp.run(helpArgs);
+            await expect(cliApp.run(helpArgs)).rejects.toThrow("process.exit: 0");
 
             // Assert
-            expect(consoleLogSpy).toHaveBeenCalled();
-            const helpOutput = consoleLogSpy.mock.calls
+            expect(consoleMock.error).not.toHaveBeenCalled();
+            expect(consoleMock.debug).not.toHaveBeenCalled();
+
+            expect(consoleMock.log).toHaveBeenCalled();
+            const helpOutput = consoleMock.log.mock.calls
                 .map(call => call[0])
                 .join('\n');
 
@@ -131,11 +137,13 @@ describe('CliApplication Integration Tests', () => {
             const unknownArgs = ['node', 'ci-dokumentor', 'unknown-command'];
 
             // Act
-            await cliApp.run(unknownArgs);
+            await expect(cliApp.run(unknownArgs)).rejects.toThrow("process.exit: 1");
 
             // Assert
-            expect(consoleErrorSpy).toHaveBeenCalled();
-            const errorOutput = consoleErrorSpy.mock.calls
+            expect(consoleMock.debug).not.toHaveBeenCalled();
+
+            expect(consoleMock.error).toHaveBeenCalled();
+            const errorOutput = consoleMock.error.mock.calls
                 .map(call => call[0])
                 .join('\n');
 
@@ -150,7 +158,7 @@ describe('CliApplication Integration Tests', () => {
             const noArgs = ['node', 'ci-dokumentor'];
 
             // Act
-            await cliApp.run(noArgs);
+            await expect(cliApp.run(noArgs)).rejects.toThrow("process.exit: 1");
 
             // Assert
             // When no command is provided, it should show help or do nothing
@@ -163,11 +171,13 @@ describe('CliApplication Integration Tests', () => {
             const invalidArgs = ['node', 'ci-dokumentor', '--invalid-option'];
 
             // Act
-            await cliApp.run(invalidArgs);
+            await expect(cliApp.run(invalidArgs)).rejects.toThrow("process.exit: 1");
 
             // Assert
-            expect(consoleErrorSpy).toHaveBeenCalled();
-            const errorOutput = consoleErrorSpy.mock.calls
+            expect(consoleMock.debug).not.toHaveBeenCalled();
+
+            expect(consoleMock.error).toHaveBeenCalled();
+            const errorOutput = consoleMock.error.mock.calls
                 .map(call => call[0])
                 .join('\n');
 
@@ -182,14 +192,17 @@ describe('CliApplication Integration Tests', () => {
             const versionArgs = ['node', 'ci-dokumentor', '--version'];
 
             // Act
-            await cliApp.run(versionArgs);
+            await expect(cliApp.run(versionArgs)).rejects.toThrow("process.exit: 0");
 
             // Assert
-            expect(consoleLogSpy).toHaveBeenCalled();
+            expect(consoleMock.error).not.toHaveBeenCalled();
+            expect(consoleMock.debug).not.toHaveBeenCalled();
+
+            expect(consoleMock.log).toHaveBeenCalled();
             expect(processExitSpy).toHaveBeenCalledWith(0);
 
             // Version should be a valid semver format
-            const versionOutput = consoleLogSpy.mock.calls[0][0];
+            const versionOutput = consoleMock.log.mock.calls[0][0];
             expect(versionOutput).toMatch(/^\d+\.\d+\.\d+/);
         });
     });
@@ -200,11 +213,11 @@ describe('CliApplication Integration Tests', () => {
             const helpArgs = ['node', 'ci-dokumentor', '--help'];
 
             // Act
-            await cliApp.run(helpArgs);
+            await expect(cliApp.run(helpArgs)).rejects.toThrow("process.exit: 0");
 
             // Assert
             // Logger should output through console.log (mocked)
-            expect(consoleLogSpy).toHaveBeenCalled();
+            expect(consoleMock.log).toHaveBeenCalled();
             // Note: some help output may go to stderr, so we don't assert no error calls
         });
 

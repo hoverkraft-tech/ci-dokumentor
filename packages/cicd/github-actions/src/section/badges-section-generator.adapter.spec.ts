@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
+import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -9,7 +9,7 @@ import {
   MarkdownFormatterAdapter,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
-import { GitHubWorkflowMockFactory } from '../test-utils/github-workflow-mock.factory.js';
+import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
 
 describe('BadgesSectionGenerator', () => {
   let formatterAdapter: FormatterAdapter;

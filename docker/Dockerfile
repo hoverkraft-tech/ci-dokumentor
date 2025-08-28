@@ -29,12 +29,17 @@ COPY . .
 # Build all packages, except docs
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build --exclude=docs
 
+# Removes unnecessary packages
+# FIXME: The prune command does not support recursive execution on a monorepo currently. See https://pnpm.io/cli/prune.
+RUN rm -fr /app/node_modules /app/**/node_modules
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --no-optional --prod --frozen-lockfile
+
 # Production stage - minimal runtime image
 FROM node:24-alpine AS production
 
-# Install git
 # hadolint ignore=DL3018
-RUN apk add --no-cache git
+RUN --mount=type=cache,id=apk-cache,target=/var/cache/apk \
+    apk add --no-cache dumb-init git
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
@@ -44,19 +49,19 @@ RUN addgroup -g 1001 -S nodejs && \
 WORKDIR /app
 
 # Copy only the built CLI and its dependencies from builder
-COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cli/dist ./packages/cli/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cli/dist/bin/ci-dokumentor.js ./packages/cli/dist/bin/ci-dokumentor.js
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cli/node_modules ./packages/cli/node_modules
 
-COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/core/dist ./packages/core/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/core/dist/index.js ./packages/core/dist/index.js
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/core/node_modules ./packages/core/node_modules
 
-COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/dist ./packages/repository/git/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/dist/index.js ./packages/repository/git/dist/index.js
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/git/node_modules ./packages/repository/git/node_modules
 
-COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/dist ./packages/repository/github/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/dist/index.js ./packages/repository/github/dist/index.js
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/repository/github/node_modules ./packages/repository/github/node_modules
 
-COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/dist ./packages/cicd/github-actions/dist
+COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/dist/index.js ./packages/cicd/github-actions/dist/index.js
 COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actions/node_modules ./packages/cicd/github-actions/node_modules
 
 # Copy runtime dependencies
@@ -73,6 +78,10 @@ COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actio
 # Create executable from CLI
 RUN ln -s /app/packages/cli/dist/bin/ci-dokumentor.js /usr/local/bin/ci-dokumentor && chmod +x /usr/local/bin/ci-dokumentor
 
+# Create Docker entrypoint
+COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
 # Switch to non-root user
 USER ci-dokumentor
 
@@ -88,7 +97,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD /usr/local/bin/ci-dokumentor --version || exit 1
 
 # Set entrypoint so users can use the image exactly as they would use the nodejs package
-ENTRYPOINT ["/usr/local/bin/ci-dokumentor"]
+ENTRYPOINT ["dumb-init", "/usr/local/bin/entrypoint"]
 
 WORKDIR /workspace
 RUN git config --global --add safe.directory /workspace
