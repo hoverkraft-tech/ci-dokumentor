@@ -78,22 +78,15 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       
       - name: Setup Node.js
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@1d00c9eb280acbee5df4b4a2087f786e66b13d87 # 0.14.1
         with:
-          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           
-      - name: Install pnpm
-        uses: pnpm/action-setup@129abb77bf5884e578fcaf1f37628e41622cc371 # v4.0.0
+      - name: Download build artifacts
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          version: latest
-          run_install: false
-          
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        
-      - name: Build packages
-        run: pnpm build
+          name: build
+          path: .
         
       - name: Publish CLI to npm
         run: |
