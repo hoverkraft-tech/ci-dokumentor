@@ -17,10 +17,17 @@ lint-fix: ## Execute linting and fix
 		-e FIX_CSS_PRETTIER=true \
 	)
 
+build:
+	@pnpm run build
+	$(MAKE) docker-build
+
+test:
+	@pnpm run test
+	$(MAKE) docker-test
+
 ci: ## Execute all formats and checks
 	@pnpm run all
 	$(MAKE) lint-fix
-	$(MAKE) docker-build
 	$(MAKE) docker-test
 
 docker-build: ## Build Docker image
@@ -38,6 +45,10 @@ docker-test: docker-build ## Test Docker image functionality
 	@echo "📊 Image information:"
 	@docker images ci-dokumentor:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
 
+docker-shell: docker-build ## Open a shell in the Docker image
+	@echo "🐳 Opening shell in CI Dokumentor Docker image..."
+	@docker run --rm -it -v "$(CURDIR):/workspace" --user $(shell id -u):$(shell id -g) --entrypoint /bin/sh ci-dokumentor:latest
+
 define run_linter
 	DEFAULT_WORKSPACE="$(CURDIR)"; \
 	LINTER_IMAGE="linter:latest"; \
@@ -47,6 +58,11 @@ define run_linter
 		-e DEFAULT_WORKSPACE="$$DEFAULT_WORKSPACE" \
 		-e FILTER_REGEX_INCLUDE="$(filter-out $@,$(MAKECMDGOALS))" \
 		-e IGNORE_GITIGNORED_FILES=true \
+        -e VALIDATE_JSCPD=false \
+        -e VALIDATE_TYPESCRIPT_ES=false \
+        -e VALIDATE_TYPESCRIPT_PRETTIER=false \
+        -e VALIDATE_JAVASCRIPT_ES=false \
+        -e VALIDATE_TSX=false \
 		$(1) \
 		-v $$VOLUME \
 		--rm \

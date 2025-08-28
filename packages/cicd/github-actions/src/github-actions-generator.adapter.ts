@@ -101,8 +101,6 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
         sectionGeneratorAdapter.getSectionIdentifier(),
         sectionContent.length ? Buffer.concat([
           sectionContent,
-          formatterAdapter.lineBreak(),
-          formatterAdapter.lineBreak(),
         ]) : Buffer.alloc(0)
       );
     }

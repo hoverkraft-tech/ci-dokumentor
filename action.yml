@@ -1,32 +1,33 @@
 name: 'CI Dokumentor'
 description: 'Automatically generate documentation for CI/CD components like GitHub Actions and workflows'
-author: 'Hoverkraft Technologies'
-
+author: hoverkraft
 branding:
   icon: 'book-open'
   color: 'blue'
 
 inputs:
   source:
-    description: 'Source directory containing CI/CD files'
-    required: false
-    default: '.'
+    description: 'Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).'
+    required: true
   output:
-    description: 'Output directory for generated documentation'
+    description: 'Output path for generated documentation (optional; destination is auto-detected if not specified by the adapter).'
     required: false
-    default: './docs'
   repository:
-    description: 'Repository platform (github, gitlab, etc.)'
+    description: 'Repository platform (auto-detected if not specified).'
     required: false
   cicd:
-    description: 'CI/CD platform (github-actions, gitlab-ci, etc.)'
+    description: 'CI/CD platform (github-actions, gitlab-ci, etc.).'
     required: false
   include-sections:
-    description: 'Comma-separated list of sections to include'
+    description: 'Comma-separated list of sections to include.'
     required: false
   exclude-sections:
-    description: 'Comma-separated list of sections to exclude'
+    description: 'Comma-separated list of sections to exclude.'
     required: false
+  version:
+    description: 'Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.'
+    required: false
+    default: 'latest'
 
 runs:
   using: 'composite'
@@ -46,4 +47,4 @@ runs:
         if [ -n "${{ inputs.exclude-sections }}" ]; then
           args="$args --exclude-sections '${{ inputs.exclude-sections }}'"
         fi
-        docker run --rm -v "$PWD:/workspace" -w /workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest $args
+        docker run --rm -v "$PWD:/workspace" -w /workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:${{ inputs.version }} $args

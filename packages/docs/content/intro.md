@@ -20,7 +20,9 @@ CI Dokumentor is a powerful TypeScript-based tool that automatically generates c
 
 ## Quick Start
 
-### Installation
+### Run Locally
+
+#### Installation
 
 Choose your preferred installation method:
 
@@ -42,7 +44,7 @@ npx ci-dokumentor --help
 npm install -g @ci-dokumentor/cli
 ```
 
-### Generate Your First Documentation
+#### Generate Your First Documentation
 
 Create a simple GitHub Action file and generate its documentation:
 
@@ -66,7 +68,7 @@ runs:
 
 ```bash
 # Using Docker
-docker run --rm -v $(pwd):/workspace \
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml --output /workspace/docs
 
@@ -77,7 +79,15 @@ npx ci-dokumentor generate --source action.yml --output docs
 ci-dokumentor generate --source action.yml --output docs
 ```
 
-### CLI Usage
+### Using a CI/CD platform
+
+Integrate CI Dokumentor into your CI/CD pipeline:
+
+- ✅ [**GitHub Actions**](./integrations/github-action.md) - Action files (`action.yml`) and workflow files (`.github/workflows/*.yml`)
+- 🚧 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI configuration files (`.gitlab-ci.yml`)
+- 🚧 [**Dagger.io**](./integrations/dagger.md) - Dagger.io configuration files (`dagger.yml`)
+
+## CLI Usage
 
 The main command is `generate` with these key options:
 
@@ -86,22 +96,22 @@ The main command is `generate` with these key options:
 - `--repository <platform>` - Repository platform (auto-detected)
 - `--cicd <platform>` - CI/CD platform (auto-detected)
 
-## Supported Platforms
+> **📖 Full Documentation**: For more details on CLI usage, see our [CLI documentation](./packages/cli).
 
-### CI/CD Platforms
+## Supported Repository Platforms
 
-- ✅ **GitHub Actions** - Action files (`action.yml`) and workflow files (`.github/workflows/*.yml`)
-
-### Repository Platforms
-
-- ✅ **GitHub** - Repository information and metadata
 - ✅ **Git** - Basic repository information
+- ✅ **GitHub** - GitHub Repository information and metadata
+- 🚧 **GitLab** - GitLab Repository information and metadata
 
 ## Next Steps
 
 For detailed information, explore these guides:
 
-- 🔧 [CLI Package](./packages/cli) - Complete command-line reference
-- 📦 [Core Architecture](./packages/core) - Learn about the internal architecture
 - 🐳 [Docker Integration](./integrations/docker) - Advanced Docker usage patterns
+- 🐙 [GitHub Actions](./integrations/github-action) - GitHub Actions integration guide
+- 🦊 [GitLab CI](./integrations/gitlab-ci) - GitLab CI integration guide
+- 🗡️ [Dagger.io](./integrations/dagger) - Dagger.io integration guide
+- 💻 [CLI Package](./packages/cli) - Complete command-line reference
+- 📦 [Core Architecture](./packages/core) - Learn about the internal architecture
 - 👨‍💻 [Developer Guide](./developers/contributing) - Contribute to the project

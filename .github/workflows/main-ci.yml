@@ -37,16 +37,19 @@ jobs:
     with:
       sign-images: true
 
-  release:
+  docs-action:
     needs: ci
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: bitflight-devops/github-action-readme-generator@f750ff0ac8a4b68a3c2d622cc50a5ad20bcebaa1 # v1.8.0
+
+      - name: Generate GitHub Action Documentation
+        uses: ./
         with:
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
+          version: ${{  needs.ci.outputs.image-tag }}
+          source: 'action.yml'
+          output: 'packages/docs/content/integrations/github-action.md'
 
       - uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: generate-token
@@ -54,16 +57,17 @@ jobs:
           app-id: ${{ vars.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@b4883995e100e291a1fed68678d47a560328ed08 # 0.24.0
-        with:
-          github-token: ${{ steps.generate-token.outputs.token }}
-          branch: docs/actions-workflows-documentation-update
-          title: 'docs: update actions and workflows documentation'
-          body: Update actions and workflows documentation
-          commit-message: |
-            docs: update actions and workflows documentation
+      # FIXME: enable when working
+      # - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@b4883995e100e291a1fed68678d47a560328ed08 # 0.24.0
+      #   with:
+      #     github-token: ${{ steps.generate-token.outputs.token }}
+      #     branch: docs/action-documentation-update
+      #     title: 'docs: update action documentation'
+      #     body: Update action documentation
+      #     commit-message: |
+      #       docs: update action documentation
 
-            [skip ci]
+      #       [skip ci]
 
   docs-deploy:
     needs: ci

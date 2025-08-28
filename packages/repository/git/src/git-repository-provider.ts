@@ -18,12 +18,9 @@ export class GitRepositoryProvider implements RepositoryProvider {
    */
   async supports(): Promise<boolean> {
     try {
-      const git = simpleGit();
-      const remotes = await git.getRemotes(true);
-      const originRemote = remotes.find((remote) => remote.name === 'origin');
-
-      return !!(originRemote && originRemote.refs.fetch);
-    } catch {
+      await this.getOriginRemote();
+      return true;
+    } catch (error) {
       return false;
     }
   }
@@ -57,7 +54,7 @@ export class GitRepositoryProvider implements RepositoryProvider {
     return gitUrlParse(remoteUrl);
   }
 
-  private async getRemoteUrl(): Promise<string> {
+  private async getOriginRemote() {
     const git = simpleGit();
     const remotes = await git.getRemotes(true);
     const originRemote = remotes.find((remote) => remote.name === 'origin');
@@ -66,6 +63,11 @@ export class GitRepositoryProvider implements RepositoryProvider {
       throw new Error('No remote "origin" found');
     }
 
+    return originRemote;
+  }
+
+  private async getRemoteUrl(): Promise<string> {
+    const originRemote = await this.getOriginRemote();
     return originRemote.refs.fetch;
   }
 }
