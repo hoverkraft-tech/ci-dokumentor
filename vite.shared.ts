@@ -1,12 +1,13 @@
 /// <reference types='vitest' />
 import type { UserConfig } from 'vite';
-import * as path from 'path';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import dts from 'vite-plugin-dts';
+import { join } from 'path';
 
 // Common shared Vite configuration for all packages. Keep this file limited to
 // settings that are identical across packages (build/test defaults).
-const packagesPath = path.join(__dirname, 'packages');
+const packagesPath = join(__dirname, 'packages');
 export function createSharedConfig(packageDirPath: string): UserConfig {
     if (!packageDirPath.startsWith(packagesPath)) {
         throw new Error(`Invalid package directory: ${packageDirPath}`);
@@ -16,12 +17,14 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
 
     return {
         root: packageDirPath,
-        cacheDir: path.join(__dirname, 'node_modules/.vite/packages/', packageDirname),
+        cacheDir: join(__dirname, 'node_modules/.vite/packages/', packageDirname),
         plugins: [
+            // enable TS path mapping resolution during dev/test
+            tsconfigPaths(),
             nxCopyAssetsPlugin(['*.md', 'package.json']),
             dts({
                 entryRoot: 'src',
-                tsconfigPath: path.join(packageDirPath, 'tsconfig.lib.json'),
+                tsconfigPath: join(packageDirPath, 'tsconfig.lib.json'),
             }),
         ],
         build: {
@@ -49,10 +52,9 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
             watch: false,
             globals: true,
             environment: 'node',
-            include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+            include: ['{src,__tests__}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
             reporters: ['default'],
             coverage: {
-                reportsDirectory: './test-output/vitest/coverage',
                 provider: 'v8' as const,
             },
         },

@@ -1,41 +1,43 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Container } from 'inversify';
+import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
 import { GenerateCommand } from './generate-command.js';
 import { GenerateDocumentationUseCase } from '../usecases/generate-documentation.usecase.js';
+import { CommandTester } from '../../../__tests__/command-tester.js';
 
 describe('GenerateCommand', () => {
-  let container: Container;
   let generateCommand: GenerateCommand;
-  let mockUseCase: Partial<GenerateDocumentationUseCase>;
+  let commandTester: CommandTester;
+  let mockGenerateDocumentationUseCase: Mocked<GenerateDocumentationUseCase>;
 
   beforeEach(() => {
-    container = new Container();
+    vi.resetAllMocks();
 
     // Create mock use case
-    mockUseCase = {
+    mockGenerateDocumentationUseCase = {
       execute: vi.fn().mockResolvedValue({
         success: true,
         message: 'Documentation generated successfully',
         outputPath: './README.md',
-      }),
+      }) as Mocked<GenerateDocumentationUseCase['execute']>,
       getSupportedRepositoryPlatforms: vi
         .fn()
-        .mockReturnValue(['git', 'github']),
-      getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions']),
-      getSupportedSectionsForCicdPlatform: vi
+        .mockReturnValue(['git', 'github']) as Mocked<GenerateDocumentationUseCase['getSupportedRepositoryPlatforms']>,
+      getSupportedCicdPlatforms: vi.fn().mockReturnValue(['github-actions']) as Mocked<GenerateDocumentationUseCase['getSupportedCicdPlatforms']>,
+      getSupportedSections: vi
         .fn()
-        .mockReturnValue(['header', 'overview', 'usage', 'inputs', 'outputs']),
-    };
+        .mockReturnValue(['header', 'overview', 'usage', 'inputs', 'outputs']) as Mocked<GenerateDocumentationUseCase['getSupportedSections']>,
+      getRepositorySupportedOptions: vi.fn().mockResolvedValue([]) as Mocked<GenerateDocumentationUseCase['getRepositorySupportedOptions']>,
+    } as Mocked<GenerateDocumentationUseCase>;
 
-    // Bind mocks to container
-    container
-      .bind(GenerateDocumentationUseCase)
-      .toConstantValue(mockUseCase as GenerateDocumentationUseCase);
-    container.bind(GenerateCommand).to(GenerateCommand);
+    const processExitMock = ((code?: number | string | null | undefined) => {
+      throw new Error('process.exit: ' + code);
+    }) as unknown as typeof process.exit;
 
-    // Get the command instance
-    generateCommand = container.get(GenerateCommand);
-    generateCommand.configure();
+    vi
+      .spyOn(process, 'exit')
+      .mockImplementation(processExitMock);
+
+    generateCommand = new GenerateCommand(mockGenerateDocumentationUseCase);
+    commandTester = new CommandTester(generateCommand);
   });
 
   afterEach(() => {
@@ -62,8 +64,8 @@ describe('GenerateCommand', () => {
       expect(optionFlags).toContain('-o, --output <dir>');
       expect(optionFlags).toContain('-r, --repository <platform>');
       expect(optionFlags).toContain('-c, --cicd <platform>');
-      expect(optionFlags).toContain('--include-sections <sections>');
-      expect(optionFlags).toContain('--exclude-sections <sections>');
+      expect(optionFlags).toContain('-i, --include-sections <sections>');
+      expect(optionFlags).toContain('-e, --exclude-sections <sections>');
     });
   });
 
@@ -73,10 +75,10 @@ describe('GenerateCommand', () => {
       const args = ['--source', './test-source', '--output', './test-output'];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
       });
@@ -94,10 +96,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         repository: {
@@ -118,10 +120,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         cicd: {
@@ -142,10 +144,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         sections: {
@@ -166,10 +168,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         sections: {
@@ -192,10 +194,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         sections: {
@@ -217,10 +219,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         sections: {
@@ -241,10 +243,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         sections: {
@@ -267,10 +269,10 @@ describe('GenerateCommand', () => {
       ];
 
       // Act
-      await generateCommand.parseAsync(args, { from: 'user' });
+      await commandTester.test(args);
 
       // Assert
-      expect(mockUseCase.execute).toHaveBeenCalledWith({
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         output: './test-output',
         repository: {
@@ -280,6 +282,136 @@ describe('GenerateCommand', () => {
           platform: 'github-actions',
         },
       });
+    });
+
+    it('preAction should add provider options', async () => {
+      // Arrange - mock a provider option
+      mockGenerateDocumentationUseCase.getRepositorySupportedOptions.mockResolvedValue({
+        foo: {
+          flags: '--foo <value>',
+          description: 'Foo description',
+        }
+      });
+
+      // Act - parse with the dynamically added option
+      const args = [
+        '--source',
+        './test-source',
+        '--repository',
+        'github',
+        '--foo',
+        'bar',
+      ];
+
+      await commandTester.test(args);
+
+      expect(commandTester.getLogger().error).not.toHaveBeenCalled();
+      expect(commandTester.getLogger().debug).not.toHaveBeenCalled();
+      expect(commandTester.getLogger().warn).not.toHaveBeenCalled();
+
+      // Assert - dynamic option was added and use case executed
+      expect(mockGenerateDocumentationUseCase.getRepositorySupportedOptions).toHaveBeenCalledWith('github');
+
+      const optionFlags = generateCommand.options.map((opt) => opt.flags);
+      expect(optionFlags).toContain('--foo <value>');
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
+        source: './test-source',
+        output: undefined,
+        repository: {
+          platform: 'github',
+          options: { foo: 'bar' }
+        },
+      });
+    });
+
+    it('preAction should set handle provider options with env', async () => {
+      // Arrange - mock a provider option
+      mockGenerateDocumentationUseCase.getRepositorySupportedOptions.mockResolvedValue({
+        foo: {
+          flags: '--foo <value>',
+          description: 'Foo description',
+          env: 'FOO_ENV',
+        }
+      });
+
+      // Act - parse with the dynamically added option and a valid section
+      const args = [
+        '--source',
+        './test-source',
+        '--repository',
+        'github',
+      ];
+
+      process.env.FOO_ENV = 'bar-from-env';
+
+      await commandTester.test(args);
+
+      // Assert - dynamic option was added and use case executed
+      expect(mockGenerateDocumentationUseCase.getRepositorySupportedOptions).toHaveBeenCalledWith('github');
+
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
+        source: './test-source',
+        output: undefined,
+        repository: {
+          platform: 'github',
+          options: {
+            foo: 'bar-from-env'
+          },
+        },
+      });
+
+    });
+
+    it('preAction should set section choices', async () => {
+      // Arrange - mock supported sections via service mocks
+      mockGenerateDocumentationUseCase.getSupportedSections.mockReturnValue(['header', 'overview']);
+
+      // Act - parse with the dynamically added option and a valid section
+      const args = [
+        '--source',
+        './test-source',
+        '--include-sections',
+        'header',
+      ];
+
+      await commandTester.test(args);
+
+      expect(commandTester.getLogger().error).not.toHaveBeenCalled();
+      expect(commandTester.getLogger().debug).not.toHaveBeenCalled();
+      expect(commandTester.getLogger().warn).not.toHaveBeenCalled();
+
+      // Assert - dynamic option was added and use case executed
+      expect(mockGenerateDocumentationUseCase.getSupportedSections).toHaveBeenCalled();
+
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
+        source: './test-source',
+        output: undefined,
+        sections: {
+          includeSections: ['header'],
+        },
+      });
+
+    });
+
+    it('unknown option should return an error', async () => {
+      // Arrange
+      const args = [
+        '--source',
+        './test-source',
+        '--output',
+        './test-output',
+        '--unknown-option',
+        'some-value',
+      ];
+
+      // Act
+      await expect(commandTester.test(args)).rejects.toThrow('process.exit: 1');
+
+      expect(commandTester.getLogger().error).toHaveBeenCalledWith(`error: unknown option '--unknown-option'\n`);
+      expect(commandTester.getLogger().debug).not.toHaveBeenCalled();
+      expect(commandTester.getLogger().warn).not.toHaveBeenCalled();
+
+      expect(mockGenerateDocumentationUseCase.execute).not.toHaveBeenCalled();
     });
   });
 });

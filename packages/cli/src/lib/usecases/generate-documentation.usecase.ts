@@ -4,7 +4,7 @@ import {
   LOGGER_IDENTIFIER,
   type Logger,
 } from '../interfaces/logger.interface.js';
-import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
+import { GeneratorAdapter, GeneratorService, OptionDescriptor, RepositoryOptions, RepositoryProvider, RepositoryService } from '@ci-dokumentor/core';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -29,6 +29,11 @@ export interface GenerateDocumentationUseCaseInput {
      * If not specified, auto-detected from the repository
      */
     platform?: string;
+
+    /**
+     * Provider-specific option values.
+     */
+    options?: RepositoryOptions;
   };
 
   /**
@@ -84,10 +89,82 @@ export class GenerateDocumentationUseCase {
     private readonly repositoryService: RepositoryService
   ) { }
 
+
+  /**
+   * Get list of supported repository platforms based on registered providers
+   */
+  getSupportedRepositoryPlatforms(): string[] {
+    return this.repositoryService.getSupportedRepositoryPlatforms();
+  }
+
+  /**
+   * Get list of supported CI/CD platforms based on registered generator adapters
+   */
+  getSupportedCicdPlatforms(): string[] {
+    return this.generatorService.getSupportedCicdPlatforms();
+  }
+
+  /**
+   * Detect some extra options for current context and return any CLI options it exposes
+   */
+  async getRepositorySupportedOptions(repositoryPlatform?: string): Promise<
+    Record<string, OptionDescriptor>
+  > {
+    const options: Record<string, OptionDescriptor> = {};
+
+    let repositoryProvider: RepositoryProvider | undefined;
+    if (repositoryPlatform) {
+      repositoryProvider = this.repositoryService.getRepositoryProviderByPlatform(repositoryPlatform);
+    } else {
+      repositoryProvider = await this.repositoryService.autoDetectRepositoryProvider();
+    }
+
+    if (repositoryProvider) {
+      const repositoryProviderOptions = repositoryProvider.getOptions();
+      // Ensure option unicity. Prefer canonical `key` when provided by the
+      // provider; fall back to `flags` otherwise.      
+      const seenByKey = new Set<string>();
+      for (const optionKey of Object.keys(repositoryProviderOptions)) {
+        const option = repositoryProviderOptions[optionKey];
+        if (seenByKey.has(option.flags)) {
+          throw new Error(`Duplicate option flags found: ${option.flags} - Repository provider: ${repositoryProvider.getPlatformName()}`);
+        }
+        seenByKey.add(option.flags);
+
+        options[optionKey] = option;
+      }
+    }
+
+    return options;
+  }
+
+  /**
+   * Get supported sections for a current context
+   */
+  getSupportedSections({
+    cicdPlatform,
+    source
+  }: {
+    cicdPlatform?: string;
+    source?: string;
+  }): string[] | undefined {
+    let generatorAdapter: GeneratorAdapter | undefined;
+    if (cicdPlatform) {
+      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
+    } else if (source) {
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(source);
+    }
+
+    if (generatorAdapter) {
+      return generatorAdapter.getSupportedSections();
+    }
+
+    return undefined;
+  }
+
   async execute(
     input: GenerateDocumentationUseCaseInput
   ): Promise<GenerateDocumentationUseCaseOutput> {
-    // Validate input
     this.validateInput(input);
 
     this.logger.info('Starting documentation generation...');
@@ -96,44 +173,15 @@ export class GenerateDocumentationUseCase {
       this.logger.info(`Output path: ${input.output}`);
     }
 
-    // Auto-detect repository platform if not provided
-    let repositoryPlatform = input.repository?.platform;
-    if (!repositoryPlatform) {
-      repositoryPlatform =
-        await this.repositoryService.autoDetectRepositoryPlatform();
-      if (repositoryPlatform) {
-        this.logger.info(
-          `Auto-detected repository platform: ${repositoryPlatform}`
-        );
-      }
-    } else {
-      this.logger.info(`Repository platform: ${repositoryPlatform}`);
+    const repositoryProviderAdapter = await this.resolveRepositoryProvider(input);
+
+    // If repository provider options were provided, apply them to the provider
+    const repositoryOptions = input.repository?.options;
+    if (repositoryOptions) {
+      repositoryProviderAdapter.setOptions(repositoryOptions);
     }
 
-    // Get CI/CD adapter (either from platform input or auto-detect)
-    let adapter;
-    if (input.cicd?.platform) {
-      this.logger.info(`CI/CD platform: ${input.cicd.platform}`);
-      adapter = this.generatorService.getGeneratorAdapterByPlatform(
-        input.cicd.platform
-      );
-      if (!adapter) {
-        throw new Error(
-          `No generator adapter found for CI/CD platform '${input.cicd.platform}'`
-        );
-      }
-    } else {
-      adapter = this.generatorService.autoDetectCicdAdapter(input.source);
-      if (adapter) {
-        this.logger.info(
-          `Auto-detected CI/CD platform: ${adapter.getPlatformName()}`
-        );
-      } else {
-        throw new Error(
-          `No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`
-        );
-      }
-    }
+    const generatorAdapter = this.resolveGeneratorAdapter(input);
 
     // Log section options if provided
     if (input.sections?.includeSections?.length) {
@@ -150,7 +198,7 @@ export class GenerateDocumentationUseCase {
     // Generate documentation using the specific CI/CD platform adapter
     // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
     const destinationPath = await this.generatorService.generateDocumentationForPlatform(
-      adapter,
+      generatorAdapter,
       input.source,
       input.output
     );
@@ -164,6 +212,64 @@ export class GenerateDocumentationUseCase {
       outputPath: destinationPath,
     };
   }
+
+  /**
+   * Auto-detect repository platform if not provided    
+   */
+  private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput) {
+    let repositoryProviderAdapter: RepositoryProvider | undefined;
+    if (input.repository?.platform) {
+      this.logger.info(`Repository platform: ${input.repository.platform}`);
+      repositoryProviderAdapter = this.repositoryService.getRepositoryProviderByPlatform(input.repository.platform);
+      if (!repositoryProviderAdapter) {
+        throw new Error(
+          `No repository platform found for '${input.repository.platform}'. Please specify a valid one.`
+        );
+      }
+
+    } else {
+      repositoryProviderAdapter = await this.repositoryService.autoDetectRepositoryProvider();
+      if (!repositoryProviderAdapter) {
+        throw new Error(
+          `No repository platform could be auto-detected. Please specify one using --repository option.`
+        );
+      }
+      this.logger.info(
+        `Auto-detected repository platform: ${repositoryProviderAdapter.getPlatformName()}`
+      );
+    }
+    return repositoryProviderAdapter;
+  }
+
+  /**
+   * Get CI/CD adapter (either from platform input or auto-detect)
+   */
+  private resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput) {
+    let generatorAdapter: GeneratorAdapter | undefined;
+    if (input.cicd?.platform) {
+      this.logger.info(`CI/CD platform: ${input.cicd.platform}`);
+      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(
+        input.cicd.platform
+      );
+      if (!generatorAdapter) {
+        throw new Error(
+          `No generator adapter found for CI/CD platform '${input.cicd.platform}'`
+        );
+      }
+    } else {
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(input.source);
+      if (!generatorAdapter) {
+        throw new Error(
+          `No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`
+        );
+      }
+      this.logger.info(
+        `Auto-detected CI/CD platform: ${generatorAdapter.getPlatformName()}`
+      );
+    }
+    return generatorAdapter;
+  }
+
 
   private validateInput(input: GenerateDocumentationUseCaseInput): void {
     if (!input.source) {
@@ -198,24 +304,4 @@ export class GenerateDocumentationUseCase {
     }
   }
 
-  /**
-   * Get list of supported repository platforms based on registered providers
-   */
-  getSupportedRepositoryPlatforms(): string[] {
-    return this.repositoryService.getSupportedRepositoryPlatforms();
-  }
-
-  /**
-   * Get list of supported CI/CD platforms based on registered generator adapters
-   */
-  getSupportedCicdPlatforms(): string[] {
-    return this.generatorService.getSupportedCicdPlatforms();
-  }
-
-  /**
-   * Get supported sections for a specific CI/CD platform
-   */
-  getSupportedSectionsForCicdPlatform(platform: string): string[] {
-    return this.generatorService.getSupportedSectionsForPlatform(platform);
-  }
 }

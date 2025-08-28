@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { RepositoryService } from './repository.service.js';
-import { RepositoryProvider } from './repository.provider.js';
+import { RepositoryProviderMockFactory } from '../../__tests__/repository-provider-mock.factory.js';
 
 describe('RepositoryService', () => {
   let repositoryService: RepositoryService;
@@ -25,24 +25,23 @@ describe('RepositoryService', () => {
 
     it('should use first supporting provider', async () => {
       // Arrange
-      const mockProvider1: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn().mockResolvedValue(false),
-        getRepository: vi.fn(),
-      };
+      const mockProvider1 = RepositoryProviderMockFactory.create({
+        getPlatformName: 'git',
+        getPriority: 0,
+        supports: false,
+      });
 
-      const mockProvider2: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('github'),
-        getPriority: vi.fn().mockReturnValue(100),
-        supports: vi.fn().mockResolvedValue(true),
-        getRepository: vi.fn().mockResolvedValue({
+      const mockProvider2 = RepositoryProviderMockFactory.create({
+        getPlatformName: 'github',
+        getPriority: 100,
+        supports: true,
+        getRepository: {
           owner: 'test-owner',
           name: 'test-repo',
           url: 'https://github.com/test-owner/test-repo',
           fullName: 'test-owner/test-repo',
-        }),
-      };
+        }
+      });
 
       repositoryService = new RepositoryService([mockProvider1, mockProvider2]);
 
@@ -66,12 +65,11 @@ describe('RepositoryService', () => {
 
     it('should throw error when no provider supports current context', async () => {
       // Arrange
-      const mockProvider: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn().mockResolvedValue(false),
-        getRepository: vi.fn(),
-      };
+      const mockProvider = RepositoryProviderMockFactory.create({
+        getPlatformName: 'git',
+        getPriority: 0,
+        supports: false,
+      });
 
       repositoryService = new RepositoryService([mockProvider]);
 
@@ -85,12 +83,11 @@ describe('RepositoryService', () => {
 
     it('should propagate provider errors from supports method', async () => {
       // Arrange
-      const mockProvider: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn().mockRejectedValue(new Error('Provider error')),
-        getRepository: vi.fn(),
-      };
+      const mockProvider = RepositoryProviderMockFactory.create({
+        getPlatformName: 'git',
+        getPriority: 0,
+      });
+      mockProvider.supports.mockRejectedValue(new Error('Provider error'));
 
       repositoryService = new RepositoryService([mockProvider]);
 
@@ -104,12 +101,12 @@ describe('RepositoryService', () => {
 
     it('should propagate provider errors from getRepository method', async () => {
       // Arrange
-      const mockProvider: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn().mockResolvedValue(true),
-        getRepository: vi.fn().mockRejectedValue(new Error('Repository error')),
-      };
+      const mockProvider = RepositoryProviderMockFactory.create({
+        getPlatformName: 'git',
+        getPriority: 0,
+        supports: true,
+      });
+      mockProvider.getRepository.mockRejectedValue(new Error('Repository error'));
 
       repositoryService = new RepositoryService([mockProvider]);
 
@@ -135,19 +132,15 @@ describe('RepositoryService', () => {
 
     it('should return platform names from all providers', () => {
       // Arrange
-      const mockProvider1: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn(),
-        getRepository: vi.fn(),
-      };
+      const mockProvider1 = RepositoryProviderMockFactory.create({
+        getPlatformName: 'git',
+        getPriority: 0
+      });
 
-      const mockProvider2: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('github'),
-        getPriority: vi.fn().mockReturnValue(100),
-        supports: vi.fn(),
-        getRepository: vi.fn(),
-      };
+      const mockProvider2 = RepositoryProviderMockFactory.create({
+        getPlatformName: 'github',
+        getPriority: 100
+      });
 
       repositoryService = new RepositoryService([mockProvider1, mockProvider2]);
 
@@ -165,31 +158,32 @@ describe('RepositoryService', () => {
     it('should check providers in priority order (highest first)', async () => {
       // Arrange
       const callOrder: string[] = [];
-      
-      const lowPriorityProvider: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn().mockImplementation(async () => {
-          callOrder.push('git');
-          return false;
-        }),
-        getRepository: vi.fn(),
-      };
 
-      const highPriorityProvider: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('github'),
-        getPriority: vi.fn().mockReturnValue(100),
-        supports: vi.fn().mockImplementation(async () => {
-          callOrder.push('github');
-          return true;
-        }),
-        getRepository: vi.fn().mockResolvedValue({
+      const lowPriorityProvider = RepositoryProviderMockFactory.create({
+        getPlatformName: 'git',
+        getPriority: 0,
+      });
+
+      lowPriorityProvider.supports.mockImplementation(async () => {
+        callOrder.push('git');
+        return false;
+      });
+
+      const highPriorityProvider = RepositoryProviderMockFactory.create({
+        getPlatformName: 'github',
+        getPriority: 100,
+        getRepository: {
           owner: 'test-owner',
           name: 'test-repo',
           url: 'https://github.com/test-owner/test-repo',
           fullName: 'test-owner/test-repo',
-        }),
-      };
+        }
+      });
+
+      highPriorityProvider.supports.mockImplementation(async () => {
+        callOrder.push('github');
+        return true;
+      });
 
       // Pass providers in reverse priority order to test sorting
       repositoryService = new RepositoryService([lowPriorityProvider, highPriorityProvider]);
@@ -207,31 +201,30 @@ describe('RepositoryService', () => {
     it('should fallback to lower priority provider when higher priority does not support', async () => {
       // Arrange
       const callOrder: string[] = [];
-      
-      const lowPriorityProvider: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn().mockImplementation(async () => {
-          callOrder.push('git');
-          return true;
-        }),
-        getRepository: vi.fn().mockResolvedValue({
+
+      const lowPriorityProvider = RepositoryProviderMockFactory.create({
+        getPlatformName: 'git',
+        getPriority: 0,
+        getRepository: {
           owner: 'test-owner',
           name: 'test-repo',
           url: 'https://example.com/test-owner/test-repo',
           fullName: 'test-owner/test-repo',
-        }),
-      };
+        },
+      });
+      lowPriorityProvider.supports.mockImplementation(async () => {
+        callOrder.push('git');
+        return true;
+      });
 
-      const highPriorityProvider: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('github'),
-        getPriority: vi.fn().mockReturnValue(100),
-        supports: vi.fn().mockImplementation(async () => {
-          callOrder.push('github');
-          return false;
-        }),
-        getRepository: vi.fn(),
-      };
+      const highPriorityProvider = RepositoryProviderMockFactory.create({
+        getPlatformName: 'github',
+        getPriority: 100,
+      });
+      highPriorityProvider.supports.mockImplementation(async () => {
+        callOrder.push('github');
+        return false;
+      });
 
       repositoryService = new RepositoryService([lowPriorityProvider, highPriorityProvider]);
 
@@ -249,26 +242,9 @@ describe('RepositoryService', () => {
 
     it('should sort providers by priority during construction', () => {
       // Arrange
-      const provider1: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('git'),
-        getPriority: vi.fn().mockReturnValue(0),
-        supports: vi.fn(),
-        getRepository: vi.fn(),
-      };
-
-      const provider2: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('github'),
-        getPriority: vi.fn().mockReturnValue(100),
-        supports: vi.fn(),
-        getRepository: vi.fn(),
-      };
-
-      const provider3: RepositoryProvider = {
-        getPlatformName: vi.fn().mockReturnValue('gitlab'),
-        getPriority: vi.fn().mockReturnValue(50),
-        supports: vi.fn(),
-        getRepository: vi.fn(),
-      };
+      const provider1 = RepositoryProviderMockFactory.create({ getPlatformName: 'git', getPriority: 0 });
+      const provider2 = RepositoryProviderMockFactory.create({ getPlatformName: 'github', getPriority: 100 });
+      const provider3 = RepositoryProviderMockFactory.create({ getPlatformName: 'gitlab', getPriority: 50 });
 
       // Pass providers in random order
       repositoryService = new RepositoryService([provider1, provider3, provider2]);

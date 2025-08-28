@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { HeaderSectionGenerator } from './header-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
+import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,

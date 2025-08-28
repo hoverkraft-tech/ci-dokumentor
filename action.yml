@@ -28,23 +28,69 @@ inputs:
     description: 'Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.'
     required: false
     default: 'latest'
+  github-token:
+    description: The GitHub token used to fetch repository information.
+    default: ${{ github.token }}
+    required: false
 
 runs:
   using: 'composite'
   steps:
     - shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
-        args="generate --source '${{ inputs.source }}' --output '${{ inputs.output }}'"
-        if [ -n "${{ inputs.repository }}" ]; then
-          args="$args --repository '${{ inputs.repository }}'"
+        source="${{ inputs.source }}"
+        echo "::debug::Source path set to: $source"
+        envs=""
+        args="generate --source "$source""
+
+        output="${{ inputs.output }}"
+        if [ -n "$output" ]; then
+          args="$args --output "$output""
+          echo "::debug::Output path set to: $output"
         fi
-        if [ -n "${{ inputs.cicd }}" ]; then
-          args="$args --cicd '${{ inputs.cicd }}'"
+
+        repository="${{ inputs.repository }}"
+        if [ -n "$repository" ]; then
+          args="$args --repository "$repository""
+          echo "::debug::Repository set to: $repository"
         fi
-        if [ -n "${{ inputs.include-sections }}" ]; then
-          args="$args --include-sections '${{ inputs.include-sections }}'"
+
+        cicd="${{ inputs.cicd }}"
+        if [ -n "$cicd" ]; then
+          args="$args --cicd "$cicd""
+          echo "::debug::CI/CD set to: $cicd"
         fi
-        if [ -n "${{ inputs.exclude-sections }}" ]; then
-          args="$args --exclude-sections '${{ inputs.exclude-sections }}'"
+
+        include_sections="${{ inputs.include_sections }}"
+        if [ -n "$include_sections" ]; then
+          args="$args --include-sections "$include_sections""
+          echo "::debug::Include sections set to: $include_sections"
         fi
-        docker run --rm -v "$PWD:/workspace" -w /workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:${{ inputs.version }} $args
+
+        exclude_sections="${{ inputs.exclude_sections }}"
+        if [ -n "$exclude_sections" ]; then
+          args="$args --exclude-sections "$exclude_sections""
+          echo "::debug::Exclude sections set to: $exclude_sections"
+        fi
+
+        echo "::debug::Args set to: $args"
+
+        if [ -n "$GITHUB_TOKEN" ]; then
+          envs="$envs -e GITHUB_TOKEN"
+          echo "::debug::GitHub token provided"
+        fi
+
+        echo "::debug::Env args set to: $envs"
+
+        version="${{ inputs.version }}"
+        echo "::debug::Version set to: $version"
+
+        docker run --rm \
+          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+          -u "$(id -u):$(id -g)" \
+          -w "$GITHUB_WORKSPACE" \
+          $envs \
+          ghcr.io/hoverkraft-tech/ci-dokumentor/cli:$version \
+          $args

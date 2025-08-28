@@ -34,14 +34,6 @@ export class GeneratorService {
   }
 
   /**
-   * Get supported sections for a specific CI/CD platform
-   */
-  getSupportedSectionsForPlatform(platform: string): string[] {
-    const adapter = this.getGeneratorAdapterByPlatform(platform);
-    return adapter ? adapter.getSupportedSections() : [];
-  }
-
-  /**
    * Auto-detect CI/CD platform for a given source
    */
   autoDetectCicdPlatform(source: string): string | null {
@@ -56,13 +48,13 @@ export class GeneratorService {
   /**
    * Auto-detect CI/CD adapter for a given source
    */
-  autoDetectCicdAdapter(source: string): GeneratorAdapter | null {
+  autoDetectCicdAdapter(source: string): GeneratorAdapter | undefined {
     for (const adapter of this.generatorAdapters) {
       if (adapter.supportsSource(source)) {
         return adapter;
       }
     }
-    return null;
+    return undefined;
   }
 
   /**

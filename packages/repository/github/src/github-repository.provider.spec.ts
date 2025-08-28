@@ -1,33 +1,19 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
-import { GitHubRepositoryProvider } from './github-repository.provider.js';
-import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
+import { GitRepositoryProvider, ParsedRemoteUrl } from '@ci-dokumentor/repository-git';
 import { LicenseService } from '@ci-dokumentor/core';
+import { OcktokitMockFactory } from '../__tests__/octokit-mock.factory.js';
+import { GitHubRepositoryProvider } from './github-repository.provider.js'
 
-// Mock the GitRepositoryProvider
-vi.mock('@ci-dokumentor/repository-git', () => ({
-  GitRepositoryProvider: vi.fn(),
-}));
-
-// Mock the LicenseService
-vi.mock('@ci-dokumentor/core', () => ({
-  LicenseService: vi.fn(),
-}));
-
-// Mock @octokit/graphql
-vi.mock('@octokit/graphql', () => ({
-  graphql: vi.fn(),
-}));
+const { graphqlMock } = OcktokitMockFactory.create();
 
 describe('GitHubRepositoryProvider', () => {
   let gitHubRepositoryProvider: GitHubRepositoryProvider;
   let mockGitRepositoryService: Mocked<GitRepositoryProvider>;
   let mockLicenseService: Mocked<LicenseService>;
-  let mockGraphql: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    // Import the mocked graphql function
-    const { graphql } = await import('@octokit/graphql');
-    mockGraphql = vi.mocked(graphql);
+    // Reset mocks before each test
+    vi.resetAllMocks();
 
     // Create a mock git repository service
     mockGitRepositoryService = {
@@ -46,9 +32,6 @@ describe('GitHubRepositoryProvider', () => {
       mockGitRepositoryService,
       mockLicenseService
     );
-
-    // Reset all mocks
-    vi.resetAllMocks();
   });
 
   describe('getPlatformName', () => {
@@ -69,7 +52,7 @@ describe('GitHubRepositoryProvider', () => {
         source: 'github.com',
         owner: 'owner',
         name: 'repo',
-      };
+      } as ParsedRemoteUrl;
       mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
         mockParsedUrl
       );
@@ -88,7 +71,7 @@ describe('GitHubRepositoryProvider', () => {
         source: 'github.com',
         owner: 'owner',
         name: 'repo',
-      };
+      } as ParsedRemoteUrl;
       mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
         mockParsedUrl
       );
@@ -107,7 +90,7 @@ describe('GitHubRepositoryProvider', () => {
         source: 'gitlab.com',
         owner: 'owner',
         name: 'repo',
-      };
+      } as ParsedRemoteUrl;
       mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
         mockParsedUrl
       );
@@ -126,7 +109,7 @@ describe('GitHubRepositoryProvider', () => {
         source: 'bitbucket.org',
         owner: 'owner',
         name: 'repo',
-      };
+      } as ParsedRemoteUrl;
       mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
         mockParsedUrl
       );
@@ -181,7 +164,7 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should extend base repository with logo and license information from GitHub API', async () => {
       // Arrange
-      mockGraphql
+      graphqlMock
         .mockResolvedValueOnce({
           repository: {
             openGraphImageUrl:
@@ -216,18 +199,8 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should fallback to license service when GitHub API has no license info', async () => {
       // Arrange
-      mockGraphql
-        .mockResolvedValueOnce({
-          repository: {
-            openGraphImageUrl:
-              'https://github.com/test-owner/test-repo/social-preview.png',
-          },
-        })
-        .mockResolvedValueOnce({
-          repository: {
-            licenseInfo: null,
-          },
-        });
+      graphqlMock.mockResolvedValueOnce({ repository: { openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png' } });
+      graphqlMock.mockResolvedValueOnce({ repository: { licenseInfo: null } });
 
       mockLicenseService.detectLicenseFromFile.mockReturnValue({
         name: 'Apache License 2.0',
@@ -253,7 +226,7 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should handle case when no license info is available from either source', async () => {
       // Arrange
-      mockGraphql
+      graphqlMock
         .mockResolvedValueOnce({
           repository: {
             openGraphImageUrl:
@@ -282,7 +255,7 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should let GitHub API errors bubble up when fetching license info', async () => {
       // Arrange
-      mockGraphql
+      graphqlMock
         .mockResolvedValueOnce({
           repository: {
             openGraphImageUrl:
@@ -300,7 +273,7 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should handle missing repository data from GitHub API', async () => {
       // Arrange
-      mockGraphql
+      graphqlMock
         .mockResolvedValueOnce({
           repository: {
             openGraphImageUrl:
@@ -335,7 +308,7 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should use local license service when GitHub license API returns empty object', async () => {
       // Arrange
-      mockGraphql
+      graphqlMock
         .mockResolvedValueOnce({
           repository: {
             openGraphImageUrl:

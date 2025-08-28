@@ -21,15 +21,18 @@ exports[`CLI > cli function > should display generate command usage 1`] = `
 Generate documentation from CI/CD configuration files
 
 Options:
-  -s, --source <file>            Source manifest file path to handle
-  -o, --output <dir>             Output path for generated documentation
-                                 (auto-detected if not specified)
-  -r, --repository <platform>    Repository platform (auto-detected if not
-                                 specified) (choices: "github", "git")
-  -c, --cicd <platform>          CI/CD platform (auto-detected if not specified)
-                                 (choices: "github-actions")
-  --include-sections <sections>  Comma-separated list of sections to include
-  --exclude-sections <sections>  Comma-separated list of sections to exclude
-  -h, --help                     display help for command
+  -s, --source <file>                Source manifest file path to handle
+  -o, --output <dir>                 Output path for generated documentation
+                                     (auto-detected if not specified)
+  -r, --repository <platform>        Repository platform (auto-detected if not
+                                     specified) (choices: "github", "git")
+  -c, --cicd <platform>              CI/CD platform (auto-detected if not
+                                     specified) (choices: "github-actions")
+  -i, --include-sections <sections>  Comma-separated list of sections to include
+  -e, --exclude-sections <sections>  Comma-separated list of sections to exclude
+  -h, --help                         display help for command
+
+Commands:
+  help [command]                     display help for command
 "
 `;

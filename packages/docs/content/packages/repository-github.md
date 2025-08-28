@@ -15,6 +15,16 @@ This package provides:
 - **License Information** - Retrieves license details from GitHub
 - **Repository Metadata** - Basic repository information like name, description, URL
 
+## Options
+
+### GitHub Token
+
+- **Description**: Personal access token for GitHub API authentication.
+- **Required**: Yes (if using private repositories or avoiding rate limits)
+- **Example**:
+  - As CLI option `--github-token=your_token_here`
+  - As environment variable `GITHUB_TOKEN=your_token_here`
+
 ## Installation
 
 ```bash

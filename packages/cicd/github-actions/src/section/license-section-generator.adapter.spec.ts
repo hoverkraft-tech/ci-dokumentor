@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { LicenseSectionGenerator } from './license-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifier } from '@ci-dokumentor/core';
 import { GitHubAction } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
+import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 
 describe('LicenseSectionGenerator - Enhanced License Support', () => {

@@ -15,6 +15,7 @@ lint-fix: ## Execute linting and fix
 		-e FIX_MARKDOWN_PRETTIER=true \
 		-e FIX_NATURAL_LANGUAGE=true \
 		-e FIX_CSS_PRETTIER=true \
+		-e FIX_SHELL_SHFMT=true \
 	)
 
 build:
@@ -38,16 +39,19 @@ docker-build: ## Build Docker image
 docker-test: docker-build ## Test Docker image functionality
 	@echo "🧪 Testing Docker image..."
 	@echo "Testing --help command:"
-	@docker run --rm ci-dokumentor:latest --help
-	@echo "Testing with volume mount:"
-	@docker run --rm -v "$(CURDIR):/workspace" ci-dokumentor:latest --help
+	$(MAKE) docker-run -- --help
+	@echo "Testing generate --help command:"
+	$(MAKE) docker-run -- generate --help
 	@echo "✅ All tests passed!"
 	@echo "📊 Image information:"
 	@docker images ci-dokumentor:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
 
 docker-shell: docker-build ## Open a shell in the Docker image
-	@echo "🐳 Opening shell in CI Dokumentor Docker image..."
+	@echo "🐳 Opening shell in CI Dokumentor Docker image..."	
 	@docker run --rm -it -v "$(CURDIR):/workspace" --user $(shell id -u):$(shell id -g) --entrypoint /bin/sh ci-dokumentor:latest
+
+docker-run: ## Run a command in the Docker container
+	@docker run --rm -v "$(CURDIR):/workspace" --user $(shell id -u):$(shell id -g) ci-dokumentor:latest $(1)
 
 define run_linter
 	DEFAULT_WORKSPACE="$(CURDIR)"; \

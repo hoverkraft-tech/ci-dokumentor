@@ -18,6 +18,7 @@
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/repository-git": "workspace:*",
+    "@octokit/auth-token": "^6.0.0",
     "@octokit/graphql": "^9.0.1",
     "inversify": "^7.9.1"
   }

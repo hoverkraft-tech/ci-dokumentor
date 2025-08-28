@@ -91,14 +91,18 @@ ci-dokumentor generate --source ./my-project/action.yml --output ./my-docs
 
 #### Supported Platforms
 
+Some extra options may be available depending on the specific repository or CI/CD configuration.
+
+Depending on the context, the following platforms are supported:
+
 **Repository Platforms:**
 
-- `git` - Git repository support
-- `github` - GitHub-specific features
+- [`git`](./repository-git) - Git repository support
+- [`github`](./repository-github) - GitHub-specific features
 
 **CI/CD Platforms:**
 
-- `github-actions` - GitHub Actions workflows and action files
+- [`github-actions`](./repository-github) - GitHub Actions workflows and action files
 
 #### Examples
 
@@ -110,7 +114,7 @@ ci-dokumentor generate --source ./actions/action.yml
 ci-dokumentor generate --source ./actions/action.yml --output ./action-docs
 
 # Specify platforms explicitly
-ci-dokumentor generate --source ./actions/action.yml --repository github --cicd github-actions
+ci-dokumentor generate --source ./actions/action.yml --repository github --cicd github-actions --github-token xxx
 ```
 
 #### Multiple files

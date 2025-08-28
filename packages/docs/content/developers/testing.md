@@ -72,7 +72,7 @@ Each package has its own `vitest.config.ts`.
 ### Mock Data Factories
 
 Use mock data factories to create consistent and controlled test data.
-See `packages/cicd/github-actions/src/test-utils/github-action-mock.factory.ts` for examples.
+See `packages/cicd/github-actions/__tests__/github-action-mock.factory.ts` for examples.
 
 ### File System Mocking
 
@@ -194,7 +194,7 @@ pnpm build
 
 ## Test maintenance
 
-Follow standard practices: mock external services, keep tests deterministic, parallelize where safe, and clean up state in hooks. For concrete examples, open the spec files and test-utils under `packages/*/src/test-utils`.
+Follow standard practices: mock external services, keep tests deterministic, parallelize where safe, and clean up state in hooks. For concrete examples, open the spec files and **tests** under `packages/*/__tests__`.
 
 ### Keeping Tests Fast
 

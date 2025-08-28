@@ -1,6 +1,6 @@
 
 
-import type { GitHubWorkflow } from 'src/github-actions-parser.js';
+import type { GitHubWorkflow } from '../src/github-actions-parser.js';
 
 export class GitHubWorkflowMockFactory {
 

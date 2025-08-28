@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifier } from '@ci-dokumentor/core';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../test-utils/github-action-mock.factory.js';
+import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
-import { GitHubWorkflowMockFactory } from '../test-utils/github-workflow-mock.factory.js';
+import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
 
 describe('OverviewSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;

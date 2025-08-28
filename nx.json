@@ -8,9 +8,14 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/.eslintrc.json",
-      "!{projectRoot}/eslint.config.mjs"
+      "!{projectRoot}/eslint.config.mjs",
+      "!{projectRoot}/__tests__/**/*"
     ],
-    "sharedGlobals": ["{workspaceRoot}/vite.shared.ts"]
+    "sharedGlobals": ["{workspaceRoot}/vite.shared.ts"],
+    "tests": [
+      "{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "{projectRoot}/__tests__/**/*"
+    ]
   },
   "plugins": [
     {
@@ -50,7 +55,8 @@
   ],
   "targetDefaults": {
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "inputs": ["default", "tests", "^default"]
     }
   }
 }

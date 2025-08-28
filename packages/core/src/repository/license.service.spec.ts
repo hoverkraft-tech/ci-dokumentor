@@ -14,12 +14,11 @@ describe('LicenseService', () => {
   let mockReadFileSync: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     licenseService = new LicenseService();
     mockExistsSync = vi.mocked(existsSync);
     mockReadFileSync = vi.mocked(readFileSync);
-
-    // Reset all mocks before each test
-    vi.resetAllMocks();
   });
 
   afterEach(() => {

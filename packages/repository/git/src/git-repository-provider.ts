@@ -1,15 +1,39 @@
-import { Repository, RepositoryProvider } from '@ci-dokumentor/core';
+import { Repository, RepositoryOptionsDescriptors, RepositoryProvider } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import gitUrlParse from 'git-url-parse';
 import { simpleGit } from 'simple-git';
 
+export type ParsedRemoteUrl = {
+  source: string;
+  owner: string;
+  name: string;
+  full_name: string;
+  toString: (format?: string) => string;
+};
+
+type GitRepositoryProviderOptions = Record<string, never>;
+
 @injectable()
-export class GitRepositoryProvider implements RepositoryProvider {
+export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryProviderOptions> {
+
   /**
    * Get the platform name identifier for this provider
    */
   getPlatformName(): string {
     return 'git';
+  }
+
+  getOptions(): RepositoryOptionsDescriptors<GitRepositoryProviderOptions> {
+    return {};
+  }
+
+  /**
+   * No provider-specific options for the plain git provider. Keep method for
+   * interface compatibility.
+   */
+  setOptions(options: GitRepositoryProviderOptions): void {
+    // no-op for git provider
+    return;
   }
 
   /**
@@ -57,7 +81,7 @@ export class GitRepositoryProvider implements RepositoryProvider {
    * Get the parsed remote URL for the repository
    * This is a public method that can be used by other providers
    */
-  async getRemoteParsedUrl(): Promise<gitUrlParse.GitUrl> {
+  async getRemoteParsedUrl(): Promise<ParsedRemoteUrl> {
     const remoteUrl = await this.getRemoteUrl();
     return gitUrlParse(remoteUrl);
   }

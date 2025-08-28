@@ -9,7 +9,7 @@ on:
     outputs:
       image-tag:
         description: The image tag for the CI Dokumentor CLI
-        value: ${{ fromJson(jobs.docker.outputs.built-images).cli.tags[0] }}
+        value: ${{ fromJSON(jobs.docker.outputs.built-images).cli.tags[0] }}
 
 permissions:
   actions: read
@@ -74,9 +74,44 @@ jobs:
   docker-test:
     needs: docker
     runs-on: ubuntu-latest
+    env:
+      IMAGE: ${{ fromJSON(needs.docker.outputs.built-images).cli.images[0] }}
     steps:
+      # Test version command
+      - run: docker run --rm "$IMAGE" --version
+
+      # Test help command
+      - run: docker run --rm "$IMAGE" --help
+
+      # Test generate command
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: |
-          docker run --rm "$IMAGE" --version
-          docker run --rm "$IMAGE" --help
+          docker run --rm \
+          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+          -u "$(id -u):$(id -g)" \
+          -w "$GITHUB_WORKSPACE" \
+          -e GITHUB_TOKEN \
+          "$IMAGE" \
+          generate \
+          --source "action.yml" \
+          --output "packages/docs/content/integrations/github-action.md"
         env:
-          IMAGE: ${{ fromJSON(needs.docker.outputs.built-images).cli.images[0] }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  action-test:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - uses: ./
+        with:
+          version: ${{ fromJSON(needs.docker.outputs.built-images).cli.tags[0] }}
+          source: action.yml
+          output: packages/docs/content/integrations/github-action.md
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: github-action-documentation
+          path: packages/docs/content/integrations/github-action.md
