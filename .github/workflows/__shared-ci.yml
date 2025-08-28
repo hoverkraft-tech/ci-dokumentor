@@ -104,14 +104,24 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - uses: ./
+      - id: generate-docs
+        uses: ./
         with:
           version: ${{ fromJSON(needs.docker.outputs.built-images).cli.tags[0] }}
           source: action.yml
-          output: packages/docs/content/integrations/github-action.md
+          destination: packages/docs/content/integrations/github-action.md
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: |
+          # Assert generate-docs action ouputs
+          output_destination="${{ steps.generate-docs.outputs.destination }}"
+          expected_output_destination="packages/docs/content/integrations/github-action.md"
+          if [ "$output_destination" != "$expected_output_destination" ]; then
+            echo "Error: Unexpected output destination"
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: github-action-documentation
-          path: packages/docs/content/integrations/github-action.md
+          path: ${{ steps.generate-docs.outputs.destination }}

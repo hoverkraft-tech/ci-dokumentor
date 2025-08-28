@@ -14,6 +14,7 @@ The CLI package provides:
 - **Platform Auto-detection** - Automatically detects supported CI/CD platforms
 - **Repository Integration** - Works with Git and GitHub repositories
 - **Configurable Output** - Flexible output options and sections
+- **Output Format Selection** - Choose between text, JSON, or GitHub Action output formats
 
 ## Installation
 
@@ -35,6 +36,35 @@ npx ci-dokumentor --help
 
 ```bash
 npx ci-dokumentor --help
+```
+
+## Global Options
+
+The CLI provides global options that can be used with any command:
+
+| Option                     | Alias | Description                                                 | Default |
+| -------------------------- | ----- | ----------------------------------------------------------- | ------- |
+| `--output-format <format>` | -     | Output format for the CLI (`text`, `json`, `github-action`) | `text`  |
+
+### Output Format
+
+The `--output-format` option controls how the CLI outputs information and results:
+
+- **`text`** (default) - Traditional console output with emojis and formatting
+- **`json`** - Structured JSON output for programmatic processing
+- **`github-action`** - GitHub Actions workflow-compatible output using workflow commands
+
+Examples:
+
+```bash
+# Default text output
+ci-dokumentor generate -s action.yml
+
+# JSON output for programmatic processing
+ci-dokumentor --output-format json generate -s action.yml
+
+# GitHub Action output for CI workflows
+ci-dokumentor --output-format github-action generate -s action.yml
 ```
 
 ## Commands
@@ -74,20 +104,23 @@ The main command for generating documentation from CI/CD files.
 # Generate documentation for a single manifest file (required)
 ci-dokumentor generate --source ./my-project/action.yml
 
-# Generate with specific source and explicit output
-ci-dokumentor generate --source ./my-project/action.yml --output ./my-docs
+# Generate with specific source and explicit destination
+ci-dokumentor generate --source ./my-project/action.yml --destination ./my-docs
+
+# Generate with JSON output format
+ci-dokumentor --output-format json generate --source ./my-project/action.yml
 ```
 
 #### Command Options
 
-| Option                          | Alias | Description                                                                                                      | Default    |
-| ------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------- | ---------- |
-| `--source <file>`               | `-s`  | Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`)                              | (required) |
-| `--output <dir>`                | `-o`  | Output path for generated documentation (optional; destination is auto-detected if not specified by the adapter) | -          |
-| `--repository <platform>`       | `-r`  | Repository platform (auto-detected if not specified)                                                             | -          |
-| `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)                                                                  | -          |
-| `--include-sections <sections>` | -     | Comma-separated list of sections to include                                                                      | -          |
-| `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude                                                                      | -          |
+| Option                          | Alias | Description                                                                         | Default    |
+| ------------------------------- | ----- | ----------------------------------------------------------------------------------- | ---------- |
+| `--source <file>`               | `-s`  | Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`) | (required) |
+| `--destination <dir>`           | `-d`  | Destination path for generated documentation (auto-detected if not specified)       | -          |
+| `--repository <platform>`       | `-r`  | Repository platform (auto-detected if not specified)                                | -          |
+| `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)                                     | -          |
+| `--include-sections <sections>` | -     | Comma-separated list of sections to include                                         | -          |
+| `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude                                         | -          |
 
 #### Supported Platforms
 
@@ -110,11 +143,15 @@ Depending on the context, the following platforms are supported:
 # Generate documentation for a specific manifest file
 ci-dokumentor generate --source ./actions/action.yml
 
-# Generate with explicit output
-ci-dokumentor generate --source ./actions/action.yml --output ./action-docs
+# Generate with explicit destination
+ci-dokumentor generate --source ./actions/action.yml --destination ./action-docs
 
 # Specify platforms explicitly
 ci-dokumentor generate --source ./actions/action.yml --repository github --cicd github-actions --github-token xxx
+
+# Generate with different output formats
+ci-dokumentor --output-format json generate --source ./actions/action.yml
+ci-dokumentor --output-format github-action generate --source ./actions/action.yml
 ```
 
 #### Multiple files

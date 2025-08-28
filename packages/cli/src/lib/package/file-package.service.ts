@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import type {
   PackageInfo,
   PackageService,
-} from '../interfaces/package-service.interface.js';
+} from './package-service.js';
 
 /**
  * Package service implementation that reads package.json

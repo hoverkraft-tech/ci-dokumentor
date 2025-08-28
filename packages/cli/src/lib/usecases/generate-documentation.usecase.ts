@@ -1,12 +1,21 @@
 import { inject, injectable } from 'inversify';
 import { existsSync, statSync } from 'fs';
 import {
-  LOGGER_IDENTIFIER,
-  type Logger,
-} from '../interfaces/logger.interface.js';
-import { GeneratorAdapter, GeneratorService, OptionDescriptor, RepositoryOptions, RepositoryProvider, RepositoryService } from '@ci-dokumentor/core';
+  GeneratorAdapter,
+  GeneratorService,
+  OptionDescriptor,
+  RepositoryOptions,
+  RepositoryProvider,
+  RepositoryService
+} from '@ci-dokumentor/core';
+import { LoggerService } from '../logger/logger.service.js';
 
 export interface GenerateDocumentationUseCaseInput {
+  /**
+   * Output format for the generated documentation (required)
+   */
+  outputFormat: string | undefined;
+
   /**
    * Source manifest file path for the CI/CD platform to handle (required)
    * This should point to a CI/CD manifest file such as `action.yml` or a
@@ -15,10 +24,10 @@ export interface GenerateDocumentationUseCaseInput {
   source: string;
 
   /**
-   * Output path for generated documentation (optional)
+   * Destination path for generated documentation (optional)
    * If not provided, the generator adapter will auto-detect the destination path
    */
-  output?: string;
+  destination?: string;
 
   /**
    * Repository platform options
@@ -72,7 +81,7 @@ export interface GenerateDocumentationUseCaseInput {
 export interface GenerateDocumentationUseCaseOutput {
   success: boolean;
   message: string;
-  outputPath?: string;
+  destination?: string;
 }
 
 /**
@@ -82,7 +91,7 @@ export interface GenerateDocumentationUseCaseOutput {
 @injectable()
 export class GenerateDocumentationUseCase {
   constructor(
-    @inject(LOGGER_IDENTIFIER) private readonly logger: Logger,
+    @inject(LoggerService) private readonly loggerService: LoggerService,
     @inject(GeneratorService)
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
@@ -167,10 +176,10 @@ export class GenerateDocumentationUseCase {
   ): Promise<GenerateDocumentationUseCaseOutput> {
     this.validateInput(input);
 
-    this.logger.info('Starting documentation generation...');
-    this.logger.info(`Source manifest: ${input.source}`);
-    if (input.output) {
-      this.logger.info(`Output path: ${input.output}`);
+    this.loggerService.info('Starting documentation generation...', input.outputFormat);
+    this.loggerService.info(`Source manifest: ${input.source}`, input.outputFormat);
+    if (input.destination) {
+      this.loggerService.info(`Destination path: ${input.destination}`, input.outputFormat);
     }
 
     const repositoryProviderAdapter = await this.resolveRepositoryProvider(input);
@@ -185,32 +194,41 @@ export class GenerateDocumentationUseCase {
 
     // Log section options if provided
     if (input.sections?.includeSections?.length) {
-      this.logger.info(
-        `Including sections: ${input.sections.includeSections.join(', ')}`
+      this.loggerService.info(
+        `Including sections: ${input.sections.includeSections.join(', ')}`,
+        input.outputFormat
       );
     }
     if (input.sections?.excludeSections?.length) {
-      this.logger.info(
-        `Excluding sections: ${input.sections.excludeSections.join(', ')}`
+      this.loggerService.info(
+        `Excluding sections: ${input.sections.excludeSections.join(', ')}`,
+        input.outputFormat
       );
     }
 
     // Generate documentation using the specific CI/CD platform adapter
     // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
-    const destinationPath = await this.generatorService.generateDocumentationForPlatform(
+    const destination = await this.generatorService.generateDocumentationForPlatform(
       generatorAdapter,
       input.source,
-      input.output
+      input.destination
     );
 
-    this.logger.info('Documentation generated successfully!');
-    this.logger.info(`Output saved to: ${destinationPath}`);
+    this.loggerService.info('Documentation generated successfully!', input.outputFormat);
+    this.loggerService.info(`Documentation saved to: ${destination}`, input.outputFormat);
 
-    return {
+    // Output the result using the logger
+    const result: GenerateDocumentationUseCaseOutput = {
       success: true,
       message: 'Documentation generated successfully',
-      outputPath: destinationPath,
+      destination,
     };
+
+
+    // Log the result at the command level
+    this.loggerService.result(result, input.outputFormat);
+
+    return result;
   }
 
   /**
@@ -219,7 +237,7 @@ export class GenerateDocumentationUseCase {
   private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput) {
     let repositoryProviderAdapter: RepositoryProvider | undefined;
     if (input.repository?.platform) {
-      this.logger.info(`Repository platform: ${input.repository.platform}`);
+      this.loggerService.info(`Repository platform: ${input.repository.platform}`, input.outputFormat);
       repositoryProviderAdapter = this.repositoryService.getRepositoryProviderByPlatform(input.repository.platform);
       if (!repositoryProviderAdapter) {
         throw new Error(
@@ -234,8 +252,9 @@ export class GenerateDocumentationUseCase {
           `No repository platform could be auto-detected. Please specify one using --repository option.`
         );
       }
-      this.logger.info(
-        `Auto-detected repository platform: ${repositoryProviderAdapter.getPlatformName()}`
+      this.loggerService.info(
+        `Auto-detected repository platform: ${repositoryProviderAdapter.getPlatformName()}`,
+        input.outputFormat
       );
     }
     return repositoryProviderAdapter;
@@ -247,7 +266,7 @@ export class GenerateDocumentationUseCase {
   private resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput) {
     let generatorAdapter: GeneratorAdapter | undefined;
     if (input.cicd?.platform) {
-      this.logger.info(`CI/CD platform: ${input.cicd.platform}`);
+      this.loggerService.info(`CI/CD platform: ${input.cicd.platform}`, input.outputFormat);
       generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(
         input.cicd.platform
       );
@@ -263,8 +282,9 @@ export class GenerateDocumentationUseCase {
           `No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`
         );
       }
-      this.logger.info(
-        `Auto-detected CI/CD platform: ${generatorAdapter.getPlatformName()}`
+      this.loggerService.info(
+        `Auto-detected CI/CD platform: ${generatorAdapter.getPlatformName()}`,
+        input.outputFormat
       );
     }
     return generatorAdapter;

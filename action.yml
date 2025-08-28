@@ -1,54 +1,60 @@
-name: 'CI Dokumentor'
-description: 'Automatically generate documentation for CI/CD components like GitHub Actions and workflows'
+name: CI Dokumentor
+description: Automatically generate documentation for CI/CD components like GitHub Actions and workflows
 author: hoverkraft
 branding:
-  icon: 'book-open'
-  color: 'blue'
+  icon: book-open
+  color: blue
 
 inputs:
   source:
-    description: 'Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).'
+    description: Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     required: true
-  output:
-    description: 'Output path for generated documentation (optional; destination is auto-detected if not specified by the adapter).'
+  destination:
+    description: Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
     required: false
   repository:
-    description: 'Repository platform (auto-detected if not specified).'
+    description: Repository platform (auto-detected if not specified).
     required: false
   cicd:
-    description: 'CI/CD platform (github-actions, gitlab-ci, etc.).'
+    description: CI/CD platform (github-actions, gitlab-ci, etc.).
     required: false
   include-sections:
-    description: 'Comma-separated list of sections to include.'
+    description: Comma-separated list of sections to include.
     required: false
   exclude-sections:
-    description: 'Comma-separated list of sections to exclude.'
+    description: Comma-separated list of sections to exclude.
     required: false
   version:
-    description: 'Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.'
+    description: Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
     required: false
-    default: 'latest'
+    default: latest
   github-token:
     description: The GitHub token used to fetch repository information.
     default: ${{ github.token }}
     required: false
 
+outputs:
+  destination:
+    description: Destination path for generated documentation.
+    value: ${{ steps.generate.outputs.destination }}
+
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    - shell: bash
+    - id: generate
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         source="${{ inputs.source }}"
         echo "::debug::Source path set to: $source"
         envs=""
-        args="generate --source "$source""
+        args="generate --output-format "github-action" --source "$source""
 
-        output="${{ inputs.output }}"
-        if [ -n "$output" ]; then
-          args="$args --output "$output""
-          echo "::debug::Output path set to: $output"
+        destination="${{ inputs.destination }}"
+        if [ -n "$destination" ]; then
+          args="$args --destination "$destination""
+          echo "::debug::Destination path set to: $destination"
         fi
 
         repository="${{ inputs.repository }}"

@@ -16,7 +16,7 @@ describe('GenerateCommand', () => {
       execute: vi.fn().mockResolvedValue({
         success: true,
         message: 'Documentation generated successfully',
-        outputPath: './README.md',
+        destination: './README.md',
       }) as Mocked<GenerateDocumentationUseCase['execute']>,
       getSupportedRepositoryPlatforms: vi
         .fn()
@@ -32,6 +32,7 @@ describe('GenerateCommand', () => {
       throw new Error('process.exit: ' + code);
     }) as unknown as typeof process.exit;
 
+    // Bind mocks to container
     vi
       .spyOn(process, 'exit')
       .mockImplementation(processExitMock);
@@ -61,7 +62,7 @@ describe('GenerateCommand', () => {
       const optionFlags = options.map((opt) => opt.flags);
 
       expect(optionFlags).toContain('-s, --source <file>');
-      expect(optionFlags).toContain('-o, --output <dir>');
+      expect(optionFlags).toContain('-d, --destination <dir>');
       expect(optionFlags).toContain('-r, --repository <platform>');
       expect(optionFlags).toContain('-c, --cicd <platform>');
       expect(optionFlags).toContain('-i, --include-sections <sections>');
@@ -72,7 +73,7 @@ describe('GenerateCommand', () => {
   describe('option parsing', () => {
     it('should parse basic options correctly', async () => {
       // Arrange
-      const args = ['--source', './test-source', '--output', './test-output'];
+      const args = ['--source', './test-source', '--destination', './test-destination'];
 
       // Act
       await commandTester.test(args);
@@ -80,7 +81,7 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
       });
     });
 
@@ -89,8 +90,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--repository',
         'github',
       ];
@@ -101,7 +102,7 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         repository: {
           platform: 'github',
         },
@@ -113,8 +114,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--cicd',
         'github-actions',
       ];
@@ -125,7 +126,7 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         cicd: {
           platform: 'github-actions',
         },
@@ -137,8 +138,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--include-sections',
         'header,overview,badges',
       ];
@@ -149,10 +150,11 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview', 'badges'],
         },
+
       });
     });
 
@@ -161,8 +163,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--exclude-sections',
         'license,security',
       ];
@@ -173,10 +175,11 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         sections: {
           excludeSections: ['license', 'security'],
         },
+
       });
     });
 
@@ -185,8 +188,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--include-sections',
         'header,overview',
         '--exclude-sections',
@@ -199,11 +202,12 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview'],
           excludeSections: ['license'],
         },
+
       });
     });
 
@@ -212,8 +216,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--include-sections',
         ' header , overview , badges ',
       ];
@@ -224,10 +228,11 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview', 'badges'],
         },
+
       });
     });
 
@@ -236,8 +241,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--include-sections',
         'header,,overview,',
       ];
@@ -248,10 +253,11 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview'],
         },
+
       });
     });
 
@@ -260,8 +266,8 @@ describe('GenerateCommand', () => {
       const args = [
         '-s',
         './test-source',
-        '-o',
-        './test-output',
+        '-d',
+        './test-destination',
         '-r',
         'github',
         '-c',
@@ -274,13 +280,14 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-destination',
         repository: {
           platform: 'github',
         },
         cicd: {
           platform: 'github-actions',
         },
+
       });
     });
 
@@ -305,9 +312,9 @@ describe('GenerateCommand', () => {
 
       await commandTester.test(args);
 
-      expect(commandTester.getLogger().error).not.toHaveBeenCalled();
-      expect(commandTester.getLogger().debug).not.toHaveBeenCalled();
-      expect(commandTester.getLogger().warn).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().error).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().debug).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().warn).not.toHaveBeenCalled();
 
       // Assert - dynamic option was added and use case executed
       expect(mockGenerateDocumentationUseCase.getRepositorySupportedOptions).toHaveBeenCalledWith('github');
@@ -316,7 +323,7 @@ describe('GenerateCommand', () => {
       expect(optionFlags).toContain('--foo <value>');
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: undefined,
+        destination: undefined,
         repository: {
           platform: 'github',
           options: { foo: 'bar' }
@@ -351,7 +358,7 @@ describe('GenerateCommand', () => {
 
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: undefined,
+        destination: undefined,
         repository: {
           platform: 'github',
           options: {
@@ -376,16 +383,16 @@ describe('GenerateCommand', () => {
 
       await commandTester.test(args);
 
-      expect(commandTester.getLogger().error).not.toHaveBeenCalled();
-      expect(commandTester.getLogger().debug).not.toHaveBeenCalled();
-      expect(commandTester.getLogger().warn).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().error).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().debug).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().warn).not.toHaveBeenCalled();
 
       // Assert - dynamic option was added and use case executed
       expect(mockGenerateDocumentationUseCase.getSupportedSections).toHaveBeenCalled();
 
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: undefined,
+        destination: undefined,
         sections: {
           includeSections: ['header'],
         },
@@ -398,8 +405,8 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
-        './test-output',
+        '--destination',
+        './test-destination',
         '--unknown-option',
         'some-value',
       ];
@@ -407,9 +414,9 @@ describe('GenerateCommand', () => {
       // Act
       await expect(commandTester.test(args)).rejects.toThrow('process.exit: 1');
 
-      expect(commandTester.getLogger().error).toHaveBeenCalledWith(`error: unknown option '--unknown-option'\n`);
-      expect(commandTester.getLogger().debug).not.toHaveBeenCalled();
-      expect(commandTester.getLogger().warn).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().error).toHaveBeenCalledWith(`error: unknown option '--unknown-option'\n`, undefined);
+      expect(commandTester.getLoggerService().debug).not.toHaveBeenCalled();
+      expect(commandTester.getLoggerService().warn).not.toHaveBeenCalled();
 
       expect(mockGenerateDocumentationUseCase.execute).not.toHaveBeenCalled();
     });

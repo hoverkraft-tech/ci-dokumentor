@@ -76,7 +76,7 @@ export class GeneratorService {
     const formatterAdapter =
       this.formatterService.getFormatterAdapterForFile(destinationPath);
 
-    // Create an output adapter for the destination path
+    // Use FileOutputAdapter for writing to files
     const outputAdapter = new FileOutputAdapter(
       destinationPath,
       formatterAdapter

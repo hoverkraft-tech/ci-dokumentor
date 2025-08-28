@@ -5,18 +5,17 @@ import {
     vi,
     beforeEach,
     afterEach,
-    Mocked,
     MockInstance,
 } from 'vitest';
 import { CliApplication } from './cli-application.js';
 import { initGlobalContainer, resetGlobalContainer } from '../global-container.js';
 import type { Container } from '@ci-dokumentor/core';
-import { ConsoleMockFactory } from '../../../__tests__/console-mock.factory.js';
+import { ConsoleMockFactory, MockedConsole } from '../../../__tests__/console-mock.factory.js';
 
 describe('CliApplication Integration Tests', () => {
     let container: Container;
     let cliApp: CliApplication;
-    let consoleMock: Mocked<Console>;
+    let consoleMock: MockedConsole;
     let processExitSpy: MockInstance<typeof process.exit>;
     const originalArgv = process.argv.slice();
 
@@ -82,8 +81,7 @@ describe('CliApplication Integration Tests', () => {
             expect(consoleMock.error).not.toHaveBeenCalled();
             expect(consoleMock.debug).not.toHaveBeenCalled();
 
-            expect(consoleMock.log).toHaveBeenCalled();
-            expect(consoleMock.log).toHaveBeenCalledWith(
+            expect(consoleMock.info).toHaveBeenCalledWith(
                 expect.stringContaining('Usage:')
             );
             expect(processExitSpy).toHaveBeenCalledWith(0);
@@ -100,9 +98,8 @@ describe('CliApplication Integration Tests', () => {
             expect(consoleMock.error).not.toHaveBeenCalled();
             expect(consoleMock.debug).not.toHaveBeenCalled();
 
-            expect(consoleMock.log).toHaveBeenCalled();
             // Should output version information
-            expect(consoleMock.log).toHaveBeenCalledWith(
+            expect(consoleMock.info).toHaveBeenCalledWith(
                 expect.stringMatching(/\d+\.\d+\.\d+/)
             );
             expect(processExitSpy).toHaveBeenCalledWith(0);
@@ -119,8 +116,8 @@ describe('CliApplication Integration Tests', () => {
             expect(consoleMock.error).not.toHaveBeenCalled();
             expect(consoleMock.debug).not.toHaveBeenCalled();
 
-            expect(consoleMock.log).toHaveBeenCalled();
-            const helpOutput = consoleMock.log.mock.calls
+            expect(consoleMock.info).toHaveBeenCalled();
+            const helpOutput = consoleMock.info.mock.calls
                 .map(call => call[0])
                 .join('\n');
 
@@ -198,11 +195,11 @@ describe('CliApplication Integration Tests', () => {
             expect(consoleMock.error).not.toHaveBeenCalled();
             expect(consoleMock.debug).not.toHaveBeenCalled();
 
-            expect(consoleMock.log).toHaveBeenCalled();
             expect(processExitSpy).toHaveBeenCalledWith(0);
 
             // Version should be a valid semver format
-            const versionOutput = consoleMock.log.mock.calls[0][0];
+            expect(consoleMock.info).toHaveBeenCalled();
+            const versionOutput = consoleMock.info.mock.calls[0][0];
             expect(versionOutput).toMatch(/^\d+\.\d+\.\d+/);
         });
     });
@@ -216,8 +213,8 @@ describe('CliApplication Integration Tests', () => {
             await expect(cliApp.run(helpArgs)).rejects.toThrow("process.exit: 0");
 
             // Assert
-            // Logger should output through console.log (mocked)
-            expect(consoleMock.log).toHaveBeenCalled();
+            // Logger should output through console.info (mocked)
+            expect(consoleMock.info).toHaveBeenCalled();
             // Note: some help output may go to stderr, so we don't assert no error calls
         });
 

@@ -6,12 +6,15 @@ exports[`CLI > cli function > should create and run CLI application 1`] = `
 Command Line Interface for CI Dokumentor
 
 Options:
-  -V, --version           output the version number
-  -h, --help              display help for command
+  -V, --version                 output the version number
+  -o, --output-format <format>  Output format for the CLI (choices: "text",
+                                "json", "github-action", default: "text")
+  -h, --help                    display help for command
 
 Commands:
-  generate|gen [options]  Generate documentation from CI/CD configuration files
-  help [command]          display help for command
+  generate|gen [options]        Generate documentation from CI/CD configuration
+                                files
+  help [command]                display help for command
 "
 `;
 
@@ -22,8 +25,9 @@ Generate documentation from CI/CD configuration files
 
 Options:
   -s, --source <file>                Source manifest file path to handle
-  -o, --output <dir>                 Output path for generated documentation
-                                     (auto-detected if not specified)
+  -d, --destination <dir>            Destination path for generated
+                                     documentation (auto-detected if not
+                                     specified)
   -r, --repository <platform>        Repository platform (auto-detected if not
                                      specified) (choices: "github", "git")
   -c, --cicd <platform>              CI/CD platform (auto-detected if not

@@ -8,8 +8,9 @@ import {
 import { RepositoryOptions } from '@ci-dokumentor/core';
 
 export type GenerateCommandOptions = {
+  outputFormat: string;
   source: string;
-  output: string;
+  destination?: string;
   repository?: string;
   cicd?: string;
   includeSections?: string;
@@ -28,7 +29,7 @@ export type GenerateCommandOptions = {
 export class GenerateCommand extends BaseCommand {
   constructor(
     @inject(GenerateDocumentationUseCase)
-    private readonly generateDocumentationUseCase: GenerateDocumentationUseCase
+    private readonly generateDocumentationUseCase: GenerateDocumentationUseCase,
   ) {
     super();
   }
@@ -51,8 +52,8 @@ export class GenerateCommand extends BaseCommand {
         'Source manifest file path to handle'
       )
       .option(
-        '-o, --output <dir>',
-        'Output path for generated documentation (auto-detected if not specified)',
+        '-d, --destination <dir>',
+        'Destination path for generated documentation (auto-detected if not specified)',
       )
       .addOption(
         new Option(
@@ -104,7 +105,7 @@ export class GenerateCommand extends BaseCommand {
 
   private async populateSupportedOptions(thisCommand: Command) {
     const repositorySupportedOptions = await this.generateDocumentationUseCase.getRepositorySupportedOptions(
-      thisCommand.opts().repository
+      thisCommand.getOptionValue('repository')
     );
 
     for (const optionKey of Object.keys(repositorySupportedOptions)) {
@@ -120,8 +121,8 @@ export class GenerateCommand extends BaseCommand {
     }
 
     const supportedSections = await this.generateDocumentationUseCase.getSupportedSections({
-      cicdPlatform: thisCommand.opts().cicd,
-      source: thisCommand.opts().source,
+      cicdPlatform: thisCommand.getOptionValue('cicd'),
+      source: thisCommand.getOptionValue('source'),
     });
 
     if (supportedSections) {
@@ -133,7 +134,8 @@ export class GenerateCommand extends BaseCommand {
   private mapGenerateCommandOptions(options: GenerateCommandOptions): GenerateDocumentationUseCaseInput {
     const generateOptions: GenerateDocumentationUseCaseInput = {
       source: options.source,
-      output: options.output,
+      destination: options.destination,
+      outputFormat: this.getOutputFormatOption(this)
     };
 
     // Handle repository platform options
@@ -151,6 +153,18 @@ export class GenerateCommand extends BaseCommand {
     }
 
     return generateOptions;
+  }
+
+  private getOutputFormatOption(command: Command): string | undefined {
+    const format = command.opts().outputFormat;
+    if (format !== undefined) {
+      return format;
+    }
+
+    if (command.parent) {
+      return this.getOutputFormatOption(command.parent);
+    }
+    return undefined;
   }
 
   private async mapSupportedOptions(

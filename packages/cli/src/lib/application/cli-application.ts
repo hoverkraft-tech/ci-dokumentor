@@ -1,20 +1,19 @@
 import { inject, injectable, multiInject } from 'inversify';
+import { Option } from 'commander';
 import {
   COMMAND_IDENTIFIER,
   type Command,
-} from '../interfaces/command.interface.js';
-import {
-  LOGGER_IDENTIFIER,
-  type Logger,
-} from '../interfaces/logger.interface.js';
+} from '../commands/command.js';
 import {
   PACKAGE_SERVICE_IDENTIFIER,
   type PackageService,
-} from '../interfaces/package-service.interface.js';
+} from '../package/package-service.js';
 import {
   PROGRAM_IDENTIFIER,
   type Program,
-} from '../interfaces/program.interface.js';
+} from './program.js';
+import { LoggerService } from '../logger/logger.service.js';
+import { ProgramConfiguratorService } from './program-configurator.service.js';
 
 /**
  * Main CLI application class that orchestrates command execution
@@ -27,7 +26,8 @@ export class CliApplication {
     @multiInject(COMMAND_IDENTIFIER) private readonly commands: Command[],
     @inject(PACKAGE_SERVICE_IDENTIFIER)
     private readonly packageService: PackageService,
-    @inject(LOGGER_IDENTIFIER) private readonly logger: Logger
+    @inject(LoggerService) private readonly loggerService: LoggerService,
+    @inject(ProgramConfiguratorService) private readonly programConfiguratorService: ProgramConfiguratorService
   ) {
     this.setupProgram();
     this.registerCommands();
@@ -51,7 +51,20 @@ export class CliApplication {
       .description(packageInfo.description)
       .version(packageInfo.version);
 
-    this.configureOutput(this.program);
+    const supportedFormats = this.loggerService.getSupportedFormats();
+    const outputFormatOption = new Option(
+      '-o, --output-format <format>',
+      'Output format for the CLI'
+    ).choices(supportedFormats);
+    outputFormatOption.default(supportedFormats[0]);
+    this.program.addOption(outputFormatOption);
+
+    this.configureProgram(this.program);
+  }
+
+  private configureProgram(program: Program): void {
+    this.programConfiguratorService.configureOutput(program);
+    this.programConfiguratorService.configureHelp(program);
   }
 
   /**
@@ -60,22 +73,12 @@ export class CliApplication {
    */
   private registerCommands(): void {
     this.commands.forEach((command) => {
-      // Configure the command (this sets up name, description, options, action)
+      // Configure the command (this should sets up name, description, options, action...)
       command.configure();
-
-      this.configureOutput(command);
+      this.configureProgram(command);
 
       // Add the configured command to the main program
       this.program.addCommand(command);
     });
-  }
-
-  private configureOutput(command: Command | Program): void {
-    command.configureOutput({
-      writeOut: (str: string) => this.logger.log(str),
-      writeErr: (str: string) => this.logger.error(str),
-    });
-    command.showHelpAfterError();
-    command.showSuggestionAfterError();
   }
 }
