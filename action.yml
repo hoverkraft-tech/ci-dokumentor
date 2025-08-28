@@ -7,13 +7,43 @@ branding:
   color: 'blue'
 
 inputs:
-  args:
-    description: 'Arguments to pass to the CI Dokumentor CLI (e.g., "action.yml --output docs")'
+  source:
+    description: 'Source directory containing CI/CD files'
     required: false
-    default: '--help'
+    default: '.'
+  output:
+    description: 'Output directory for generated documentation'
+    required: false
+    default: './docs'
+  repository:
+    description: 'Repository platform (github, gitlab, etc.)'
+    required: false
+  cicd:
+    description: 'CI/CD platform (github-actions, gitlab-ci, etc.)'
+    required: false
+  include-sections:
+    description: 'Comma-separated list of sections to include'
+    required: false
+  exclude-sections:
+    description: 'Comma-separated list of sections to exclude'
+    required: false
 
 runs:
-  using: 'docker'
-  image: 'docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest'
-  args:
-    - ${{ inputs.args }}
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        args="generate --source '${{ inputs.source }}' --output '${{ inputs.output }}'"
+        if [ -n "${{ inputs.repository }}" ]; then
+          args="$args --repository '${{ inputs.repository }}'"
+        fi
+        if [ -n "${{ inputs.cicd }}" ]; then
+          args="$args --cicd '${{ inputs.cicd }}'"
+        fi
+        if [ -n "${{ inputs.include-sections }}" ]; then
+          args="$args --include-sections '${{ inputs.include-sections }}'"
+        fi
+        if [ -n "${{ inputs.exclude-sections }}" ]; then
+          args="$args --exclude-sections '${{ inputs.exclude-sections }}'"
+        fi
+        docker run --rm -v "$PWD:/workspace" -w /workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest $args

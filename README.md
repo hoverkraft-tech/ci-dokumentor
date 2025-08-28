@@ -72,7 +72,8 @@ Using the GitHub Action:
 - name: Generate CI Documentation
   uses: hoverkraft-tech/ci-dokumentor@main
   with:
-    args: 'generate .github/workflows/ci.yml --output docs'
+    source: '.github/workflows/ci.yml'
+    output: 'docs'
 ```
 
 Or using the Docker image directly:

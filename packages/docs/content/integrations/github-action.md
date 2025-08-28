@@ -31,7 +31,8 @@ jobs:
       - name: Generate Documentation
         uses: hoverkraft-tech/ci-dokumentor@main
         with:
-          args: 'generate action.yml --output docs'
+          source: 'action.yml'
+          output: 'docs'
 ```
 
 ### Option 2: Use the Docker Image Directly
@@ -68,7 +69,8 @@ Using the GitHub Action:
 - name: Generate Action Documentation
   uses: hoverkraft-tech/ci-dokumentor@main
   with:
-    args: 'generate action.yml --output docs'
+    source: 'action.yml'
+    output: 'docs'
 ```
 
 Or using the Docker image directly:
@@ -86,21 +88,25 @@ Or using the Docker image directly:
 - name: Generate Workflow Documentation
   uses: hoverkraft-tech/ci-dokumentor@main
   with:
-    args: 'generate .github/workflows/ci.yml --output docs'
+    source: '.github/workflows/ci.yml'
+    output: 'docs'
 ```
 
-### Multiple Files
+### Advanced Usage with All Options
 
 The CLI accepts a single `--source <file>` per invocation. To generate documentation for multiple files in a workflow, run the action multiple times or script the Docker/CLI call for each file. Example using a shell step to process multiple manifest files:
 
 ```yaml
-- name: Generate All Documentation
+- name: Generate Enhanced Documentation
   uses: hoverkraft-tech/ci-dokumentor@main
   with:
-    args: 'generate action.yml .github/workflows/*.yml --output docs'
+    source: 'action.yml'
+    output: 'docs/README.md'
+    repository: 'github'
+    cicd: 'github-actions'
+    include-sections: 'inputs,outputs,runs'
+    exclude-sections: 'examples'
 ```
-
-````
 
 ## Advanced Configuration
 
@@ -113,7 +119,7 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
     args: 'action.yml --output docs --include-repo-info'
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-````
+```
 
 ### Custom Author and License
 
@@ -162,11 +168,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Documentation
-        uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
+        uses: hoverkraft-tech/ci-dokumentor@main
         with:
-          args: 'action.yml --output docs --include-repo-info'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source: 'action.yml'
+          output: 'docs'
 
       - name: Check for Documentation Changes
         id: verify-changed-files
@@ -331,43 +336,54 @@ jobs:
           asset_content_type: application/gzip
 ```
 
-## Input Arguments
+## Input Parameters
 
-### Available Arguments
+The GitHub Action supports the following input parameters that map directly to the CLI generate command options:
 
-All CLI arguments can be passed through the `args` input:
+### Required Parameters
+
+None - all parameters have sensible defaults.
+
+### Optional Parameters
+
+| Parameter          | Description                                  | Default       | Example                                 |
+| ------------------ | -------------------------------------------- | ------------- | --------------------------------------- |
+| `source`           | Source directory containing CI/CD files      | `.`           | `action.yml`, `.github/workflows/`, `.` |
+| `output`           | Output directory for generated documentation | `./docs`      | `docs`, `documentation`, `./output`     |
+| `repository`       | Repository platform                          | Auto-detected | `github`, `gitlab`                      |
+| `cicd`             | CI/CD platform                               | Auto-detected | `github-actions`, `gitlab-ci`           |
+| `include-sections` | Comma-separated list of sections to include  | All sections  | `inputs,outputs,runs`                   |
+| `exclude-sections` | Comma-separated list of sections to exclude  | None          | `examples,troubleshooting`              |
+
+### Basic Usage Examples
 
 ```yaml
+# Minimal configuration - uses defaults
 - name: Generate Documentation
-  uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+  uses: hoverkraft-tech/ci-dokumentor@main
+
+# Specify source and output
+- name: Generate Documentation
+  uses: hoverkraft-tech/ci-dokumentor@main
   with:
-    args: |
-      action.yml
-      --output docs
-      --type github-actions
-      --author "My Team"
-      --license "MIT"
-      --include-repo-info
-      --verbose
-```
+    source: 'action.yml'
+    output: 'docs'
 
-### Common Argument Patterns
+# Generate for specific platform
+- name: Generate Documentation
+  uses: hoverkraft-tech/ci-dokumentor@main
+  with:
+    source: '.github/workflows/ci.yml'
+    output: 'docs'
+    cicd: 'github-actions'
 
-```yaml
-# Basic usage
-args: 'action.yml'
-
-# With output directory
-args: 'action.yml --output docs'
-
-# Multiple files
-args: 'action.yml .github/workflows/ci.yml --output docs'
-
-# With enhanced features
-args: 'action.yml --output docs --include-repo-info --verbose'
-
-# Custom metadata
-args: 'action.yml --output docs --author "Team Name" --license "Apache-2.0"'
+# Control sections
+- name: Generate Documentation
+  uses: hoverkraft-tech/ci-dokumentor@main
+  with:
+    source: 'action.yml'
+    output: 'docs'
+    include-sections: 'inputs,outputs,description'
 ```
 
 ## Environment Variables
