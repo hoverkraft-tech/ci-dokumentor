@@ -35,8 +35,8 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/multiple-platforms.svg').default,
     description: (
       <>
-        Works with GitHub Actions, Docker, NPX, and GitHub workflows.
-        Available as CLI tool, Docker image, and GitHub Action for flexible integration.
+        Works with GitHub Actions, GitHub workflows, GitLab templates, GitLab components and Dagger modules.
+        Available as NPM CLI tool, Docker image, GitHub Action, and GitLab component for flexible integration.
       </>
     ),
   },

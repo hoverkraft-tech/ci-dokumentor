@@ -33,8 +33,17 @@ import { GitHubActionsGeneratorAdapter } from '@ci-dokumentor/cicd-github-action
 
 class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
   getPlatformName(): string; // Returns 'github-actions'
-  canGenerate(filePath: string): boolean; // Checks if file is supported
-  generateDocumentationForPlatform(source: string): Promise<void>;
+  supportsSource(source: string): boolean; // Checks if file is supported
+  // Generates documentation for the provided source using the provided
+  // FormatterAdapter and OutputAdapter. The adapter writes files via the
+  // OutputAdapter and does not return the destination path. The higher-level
+  // GeneratorService determines the destination (using the adapter's
+  // `getDocumentationPath`) and returns it to callers.
+  generateDocumentation(
+    source: string,
+    formatterAdapter: FormatterAdapter,
+    outputAdapter: OutputAdapter,
+  ): Promise<void>;
 }
 ```
 

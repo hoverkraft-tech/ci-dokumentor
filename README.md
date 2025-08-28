@@ -61,7 +61,7 @@ docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest --help
 
 # Generate documentation from CI/CD file
 docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
-  /workspace/.github/workflows/ci.yml --output /workspace/docs
+generate --source /workspace/.github/workflows/ci.yml
 ```
 
 #### GitHub Actions Integration
@@ -70,7 +70,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/hoverkraft-tech/ci-dokumentor/cli:l
 - name: Generate CI Documentation
   uses: docker://ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   with:
-    args: '.github/workflows/ci.yml --output docs'
+    args: 'generate --source .github/workflows/ci.yml'
 ```
 
 #### GitLab CI Integration
@@ -80,10 +80,10 @@ generate-docs:
   stage: docs
   image: ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
   script:
-    - ci-dokumentor .gitlab-ci.yml --output docs
+    - ci-dokumentor generate --source templates/my-component/template.yml
   artifacts:
     paths:
-      - docs/
+      - templates/my-component/docs.md
 ```
 
 #### Dagger.io Integration

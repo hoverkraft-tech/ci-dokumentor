@@ -44,24 +44,22 @@ export class GenerateCommand extends BaseCommand {
     return this.name('generate')
       .alias('gen')
       .description('Generate documentation from CI/CD configuration files')
-      .option(
-        '-s, --source <dir>',
-        'Source directory containing CI/CD files',
-        '.'
+      .requiredOption(
+        '-s, --source <file>',
+        'Source manifest file path to handle'
       )
       .option(
         '-o, --output <dir>',
-        'Output directory for generated documentation',
-        './docs'
+        'Output path for generated documentation (auto-detected if not specified)',
       )
       .addOption(
         new Option(
           '-r, --repository <platform>',
-          'Repository platform'
+          'Repository platform (auto-detected if not specified)'
         ).choices(supportedRepositoryPlatforms)
       )
       .addOption(
-        new Option('-c, --cicd <platform>', 'CI/CD platform').choices(
+        new Option('-c, --cicd <platform>', 'CI/CD platform (auto-detected if not specified)').choices(
           supportedCicdPlatforms
         )
       )

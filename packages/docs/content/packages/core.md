@@ -60,9 +60,10 @@ class GeneratorService {
   autoDetectCicdPlatform(source: string): string | null;
   autoDetectCicdAdapter(source: string): GeneratorAdapter | null;
   generateDocumentationForPlatform(
-    source: string,
     adapter: GeneratorAdapter,
-  ): Promise<void>;
+    source: string,
+    output?: string,
+  ): Promise<string>;
 }
 ```
 

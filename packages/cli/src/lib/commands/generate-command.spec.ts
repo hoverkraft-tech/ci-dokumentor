@@ -16,7 +16,7 @@ describe('GenerateCommand', () => {
       execute: vi.fn().mockResolvedValue({
         success: true,
         message: 'Documentation generated successfully',
-        outputPath: './docs',
+        outputPath: './README.md',
       }),
       getSupportedRepositoryPlatforms: vi
         .fn()
@@ -58,7 +58,7 @@ describe('GenerateCommand', () => {
       const options = generateCommand.options;
       const optionFlags = options.map((opt) => opt.flags);
 
-      expect(optionFlags).toContain('-s, --source <dir>');
+      expect(optionFlags).toContain('-s, --source <file>');
       expect(optionFlags).toContain('-o, --output <dir>');
       expect(optionFlags).toContain('-r, --repository <platform>');
       expect(optionFlags).toContain('-c, --cicd <platform>');
