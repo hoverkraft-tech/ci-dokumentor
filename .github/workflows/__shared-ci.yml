@@ -41,7 +41,7 @@ jobs:
       build: |
         {
           "commands": ["build"],
-          "artifact": ["packages/docs/build"]
+          "artifact": ["packages/docs/build", "packages/cli/dist"]
         }
 
   docker:
