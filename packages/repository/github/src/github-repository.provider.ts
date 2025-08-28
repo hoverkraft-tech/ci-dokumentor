@@ -24,6 +24,14 @@ export class GitHubRepositoryProvider implements RepositoryProvider {
   }
 
   /**
+   * Get the priority of this provider for auto-detection
+   * GitHub provider has higher priority than basic git provider
+   */
+  getPriority(): number {
+    return 100;
+  }
+
+  /**
    * Check if this provider supports the current repository context
    * Checks if the repository is hosted on GitHub
    */

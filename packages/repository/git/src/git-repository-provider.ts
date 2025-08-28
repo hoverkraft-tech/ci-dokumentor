@@ -13,6 +13,14 @@ export class GitRepositoryProvider implements RepositoryProvider {
   }
 
   /**
+   * Get the priority of this provider for auto-detection
+   * Basic git provider has default priority
+   */
+  getPriority(): number {
+    return 0;
+  }
+
+  /**
    * Check if this provider supports the current repository context
    * This basic provider supports any git repository
    */
@@ -20,7 +28,7 @@ export class GitRepositoryProvider implements RepositoryProvider {
     try {
       await this.getOriginRemote();
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

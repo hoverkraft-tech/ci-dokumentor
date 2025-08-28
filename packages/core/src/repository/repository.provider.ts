@@ -11,6 +11,13 @@ export interface RepositoryProvider {
   getPlatformName(): string;
 
   /**
+   * Get the priority of this provider for auto-detection
+   * Higher values indicate higher priority and will be checked first
+   * @returns number the priority value (default: 0)
+   */
+  getPriority(): number;
+
+  /**
    * Check if this provider supports the current repository context
    * @returns Promise<boolean> true if this provider can handle the current repository
    */
