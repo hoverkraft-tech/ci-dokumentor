@@ -5,6 +5,7 @@ import {
   type Logger,
 } from '../interfaces/logger.interface.js';
 import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
+import { dirname } from 'path/win32';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -171,6 +172,14 @@ export class GenerateDocumentationUseCase {
     }
 
     // Validate that the source exists and is a file
+    console.log({
+      cwd: process.cwd(),
+      source: input.source,
+      dirEqual: process.cwd() === dirname(input.source),
+      dirExists: existsSync(dirname(input.source)),
+      sourceExists: existsSync(input.source),
+    });
+
     if (!existsSync(input.source) || !statSync(input.source).isFile()) {
       throw new Error(`Source manifest file does not exist or is not a file: ${input.source}`);
     }

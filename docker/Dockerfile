@@ -32,9 +32,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build --exclude=docs
 # Production stage - minimal runtime image
 FROM node:24-alpine AS production
 
-# Install git
 # hadolint ignore=DL3018
-RUN apk add --no-cache git
+RUN --mount=type=cache,id=apk-cache,target=/var/cache/apk \
+    apk add --no-cache dumb-init git
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
@@ -73,6 +73,10 @@ COPY --from=builder --chown=ci-dokumentor:nodejs /app/packages/cicd/github-actio
 # Create executable from CLI
 RUN ln -s /app/packages/cli/dist/bin/ci-dokumentor.js /usr/local/bin/ci-dokumentor && chmod +x /usr/local/bin/ci-dokumentor
 
+# Create Docker entrypoint
+COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
 # Switch to non-root user
 USER ci-dokumentor
 
@@ -88,7 +92,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD /usr/local/bin/ci-dokumentor --version || exit 1
 
 # Set entrypoint so users can use the image exactly as they would use the nodejs package
-ENTRYPOINT ["/usr/local/bin/ci-dokumentor"]
+ENTRYPOINT ["dumb-init", "/usr/local/bin/entrypoint"]
 
 WORKDIR /workspace
 RUN git config --global --add safe.directory /workspace
