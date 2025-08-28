@@ -3,13 +3,13 @@ import mockFs from 'mock-fs';
 
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
 import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
-import { Logger } from '../interfaces/logger.interface.js';
-import { LoggerMockFactory } from '../../../__tests__/logger-mock.factory.js';
 import { GeneratorServiceMockFactory, RepositoryServiceMockFactory, RepositoryProviderMockFactory, GeneratorAdapterMockFactory } from '@ci-dokumentor/core/tests';
+import { LoggerService } from '../logger/logger.service.js';
+import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
 
 describe('GenerateDocumentationUseCase', () => {
-  let useCase: GenerateDocumentationUseCase;
-  let mockLogger: Mocked<Logger>;
+  let generateDocumentationUseCase: GenerateDocumentationUseCase;
+  let mockLoggerService: Mocked<LoggerService>;
   let mockGeneratorService: Mocked<GeneratorService>;
   let mockRepositoryService: Mocked<RepositoryService>;
 
@@ -21,7 +21,7 @@ describe('GenerateDocumentationUseCase', () => {
       './README.md': '',
     });
 
-    mockLogger = LoggerMockFactory.create();
+    mockLoggerService = LoggerServiceMockFactory.create();
     mockGeneratorService = GeneratorServiceMockFactory.create();
 
     mockRepositoryService = RepositoryServiceMockFactory.create({
@@ -33,8 +33,8 @@ describe('GenerateDocumentationUseCase', () => {
       }
     });
 
-    useCase = new GenerateDocumentationUseCase(
-      mockLogger,
+    generateDocumentationUseCase = new GenerateDocumentationUseCase(
+      mockLoggerService,
       mockGeneratorService,
       mockRepositoryService
     );
@@ -54,7 +54,7 @@ describe('GenerateDocumentationUseCase', () => {
         'gitlab',
       ]);
 
-      const result = useCase.getSupportedRepositoryPlatforms();
+      const result = generateDocumentationUseCase.getSupportedRepositoryPlatforms();
 
       expect(result).toEqual(['github', 'gitlab']);
       expect(mockRepositoryService.getSupportedRepositoryPlatforms).toHaveBeenCalled();
@@ -69,7 +69,7 @@ describe('GenerateDocumentationUseCase', () => {
         'github-actions',
       ]);
 
-      const result = useCase.getSupportedCicdPlatforms();
+      const result = generateDocumentationUseCase.getSupportedCicdPlatforms();
 
       expect(result).toEqual(['github-actions']);
       expect(mockGeneratorService.getSupportedCicdPlatforms).toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe('GenerateDocumentationUseCase', () => {
 
       mockRepositoryService.getRepositoryProviderByPlatform.mockReturnValue(providerMock);
 
-      const result = await useCase.getRepositorySupportedOptions('github');
+      const result = await generateDocumentationUseCase.getRepositorySupportedOptions('github');
 
       expect(result).toEqual({ foo: { flags: '--foo', description: 'x' } });
       expect(mockRepositoryService.getRepositoryProviderByPlatform).toHaveBeenCalledWith('github');
@@ -99,7 +99,7 @@ describe('GenerateDocumentationUseCase', () => {
       });
       mockRepositoryService.autoDetectRepositoryProvider.mockResolvedValue(providerMock);
 
-      const result = await useCase.getRepositorySupportedOptions();
+      const result = await generateDocumentationUseCase.getRepositorySupportedOptions();
 
       expect(result).toEqual({
         auto: {
@@ -119,7 +119,7 @@ describe('GenerateDocumentationUseCase', () => {
       const adapterMock: any = { getSupportedSections: vi.fn().mockReturnValue(['intro', 'usage']) };
       mockGeneratorService.getGeneratorAdapterByPlatform.mockReturnValue(adapterMock);
 
-      const result = useCase.getSupportedSections({ cicdPlatform: 'github-actions' });
+      const result = generateDocumentationUseCase.getSupportedSections({ cicdPlatform: 'github-actions' });
 
       expect(result).toEqual(['intro', 'usage']);
       expect(mockGeneratorService.getGeneratorAdapterByPlatform).toHaveBeenCalledWith('github-actions');
@@ -130,7 +130,7 @@ describe('GenerateDocumentationUseCase', () => {
       const adapterMock: any = { getSupportedSections: vi.fn().mockReturnValue(['a', 'b']) };
       mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(adapterMock);
 
-      const result = useCase.getSupportedSections({ source: './action.yml' });
+      const result = generateDocumentationUseCase.getSupportedSections({ source: './action.yml' });
 
       expect(result).toEqual(['a', 'b']);
       expect(mockGeneratorService.autoDetectCicdAdapter).toHaveBeenCalledWith('./action.yml');
@@ -140,7 +140,7 @@ describe('GenerateDocumentationUseCase', () => {
     it('returns undefined when no adapter is found', () => {
       mockGeneratorService.getGeneratorAdapterByPlatform.mockReturnValue(undefined);
 
-      const result = useCase.getSupportedSections({ cicdPlatform: 'unknown' });
+      const result = generateDocumentationUseCase.getSupportedSections({ cicdPlatform: 'unknown' });
 
       expect(result).toBeUndefined();
     });
@@ -162,31 +162,31 @@ describe('GenerateDocumentationUseCase', () => {
       mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(generatorAdapterMock);
       mockGeneratorService.generateDocumentationForPlatform.mockResolvedValue('/tmp/out/README.md');
 
-      const result = await useCase.execute({ source: './action.yml' });
+      const result = await generateDocumentationUseCase.execute({ source: './action.yml' });
 
       expect(result.success).toBe(true);
-      expect(result.outputPath).toBe('/tmp/out/README.md');
+      expect(result.destination).toBe('/tmp/out/README.md');
       expect(mockGeneratorService.generateDocumentationForPlatform).toHaveBeenCalledWith(
         generatorAdapterMock,
         './action.yml',
         undefined
       );
-      expect(mockLogger.info).toHaveBeenCalled();
+      expect(mockLoggerService.info).toHaveBeenCalled();
     });
 
     it('throws when source is missing', async () => {
-      await expect(useCase.execute({ source: '' })).rejects.toThrow('Source manifest file path is required');
+      await expect(generateDocumentationUseCase.execute({ source: '' })).rejects.toThrow('Source manifest file path is required');
     });
 
     it('throws when source file does not exist', async () => {
-      await expect(useCase.execute({ source: './no-such-file.yml' })).rejects.toThrow('Source manifest file does not exist');
+      await expect(generateDocumentationUseCase.execute({ source: './no-such-file.yml' })).rejects.toThrow('Source manifest file does not exist');
     });
 
     it('throws when provided repository platform is invalid', async () => {
       mockRepositoryService.getSupportedRepositoryPlatforms.mockReturnValue(['github']);
 
       await expect(
-        useCase.execute({ source: './action.yml', repository: { platform: 'unknown' } })
+        generateDocumentationUseCase.execute({ source: './action.yml', repository: { platform: 'unknown' } })
       ).rejects.toThrow("Invalid repository platform 'unknown'");
     });
 
@@ -194,14 +194,14 @@ describe('GenerateDocumentationUseCase', () => {
       mockGeneratorService.getSupportedCicdPlatforms.mockReturnValue(['github-actions']);
 
       await expect(
-        useCase.execute({ source: './action.yml', cicd: { platform: 'invalid' } })
+        generateDocumentationUseCase.execute({ source: './action.yml', cicd: { platform: 'invalid' } })
       ).rejects.toThrow("Invalid CI/CD platform 'invalid'");
     });
 
     it('throws when repository cannot be auto-detected', async () => {
       mockRepositoryService.autoDetectRepositoryProvider.mockResolvedValue(undefined);
 
-      await expect(useCase.execute({ source: './action.yml' })).rejects.toThrow('No repository platform could be auto-detected');
+      await expect(generateDocumentationUseCase.execute({ source: './action.yml' })).rejects.toThrow('No repository platform could be auto-detected');
     });
 
     it('throws when cicd adapter cannot be auto-detected', async () => {
@@ -212,7 +212,7 @@ describe('GenerateDocumentationUseCase', () => {
       mockRepositoryService.autoDetectRepositoryProvider.mockResolvedValue(repositoryProviderMock);
       mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(undefined);
 
-      await expect(useCase.execute({ source: './action.yml' })).rejects.toThrow("No CI/CD platform could be auto-detected for source './action.yml'");
+      await expect(generateDocumentationUseCase.execute({ source: './action.yml' })).rejects.toThrow("No CI/CD platform could be auto-detected for source './action.yml'");
     });
 
   })

@@ -3,25 +3,29 @@ import { Container as InversifyContainer } from 'inversify';
 import {
   COMMAND_IDENTIFIER,
   type Command,
-} from './interfaces/command.interface.js';
+} from './commands/command.js';
 import {
-  LOGGER_IDENTIFIER,
-  type Logger,
-} from './interfaces/logger.interface.js';
+  LOGGER_ADAPTER_IDENTIFIER,
+  type LoggerAdapter,
+} from './logger/adapters/logger.adapter.js';
 import {
   PACKAGE_SERVICE_IDENTIFIER,
   type PackageService,
-} from './interfaces/package-service.interface.js';
+} from './package/package-service.js';
 import {
   PROGRAM_IDENTIFIER,
   type Program,
-} from './interfaces/program.interface.js';
+} from './application/program.js';
 import { CliApplication } from './application/cli-application.js';
 import { GenerateCommand } from './commands/generate-command.js';
 import { GenerateDocumentationUseCase } from './usecases/generate-documentation.usecase.js';
-import { ConsoleLogger } from './services/console-logger.service.js';
-import { FilePackageService } from './services/file-package.service.js';
+import { LoggerService } from './logger/logger.service.js';
+import { FilePackageService } from './package/file-package.service.js';
 import { Command as CommanderCommand } from 'commander';
+import { TextLoggerAdapter } from './logger/adapters/text-logger.adapter.js';
+import { JsonLoggerAdapter } from './logger/adapters/json-logger.adapter.js';
+import { GitHubActionLoggerAdapter } from './logger/adapters/github-action-logger.adapter.js';
+import { ProgramConfiguratorService } from './application/program-configurator.service.js';
 
 let container: Container | null = null;
 
@@ -46,17 +50,29 @@ export function initContainer(
   }
 
   // Return early if services are already bound
-  if (container.isBound(LOGGER_IDENTIFIER)) {
+  if (container.isBound(LOGGER_ADAPTER_IDENTIFIER)) {
     return container;
   }
 
-  // Bind CLI-specific services
-  container
-    .bind<Logger>(LOGGER_IDENTIFIER)
-    .to(ConsoleLogger)
+  // Bind logging-specific services
+  container.bind(LoggerService).toSelf().inSingletonScope();
+
+  container.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
+    .to(TextLoggerAdapter)
     .inSingletonScope();
-  container
-    .bind<PackageService>(PACKAGE_SERVICE_IDENTIFIER)
+
+  container.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
+    .to(JsonLoggerAdapter)
+    .inSingletonScope();
+
+  container.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
+    .to(GitHubActionLoggerAdapter)
+    .inSingletonScope();
+
+  // Bind CLI-specific services
+  container.bind(ProgramConfiguratorService).toSelf().inSingletonScope();
+
+  container.bind<PackageService>(PACKAGE_SERVICE_IDENTIFIER)
     .to(FilePackageService)
     .inSingletonScope();
 
@@ -65,7 +81,7 @@ export function initContainer(
     .toConstantValue(new CommanderCommand());
 
   // Bind use cases
-  container.bind(GenerateDocumentationUseCase).toSelf();
+  container.bind(GenerateDocumentationUseCase).toSelf().inSingletonScope();
 
   // Bind commands (using multiInject pattern)
   container

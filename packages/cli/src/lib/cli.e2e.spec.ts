@@ -6,15 +6,14 @@ import {
   beforeEach,
   afterEach,
   MockInstance,
-  Mocked,
 } from 'vitest';
 import { cli } from './cli.js';
 import { resetGlobalContainer } from './global-container.js';
-import { ConsoleMockFactory } from '../../__tests__/console-mock.factory.js';
+import { ConsoleMockFactory, MockedConsole } from '../../__tests__/console-mock.factory.js';
 
 describe('CLI', () => {
   const originalArgv = process.argv.slice();
-  let consoleMock: Mocked<Console>;
+  let consoleMock: MockedConsole;
   let processExitSpy: MockInstance<typeof process.exit>;
 
   beforeEach(() => {
@@ -54,8 +53,8 @@ describe('CLI', () => {
       expect(consoleMock.error).not.toHaveBeenCalled();
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(consoleMock.log).toBeCalledTimes(1);
-      expect(consoleMock.log.mock.calls[0][0]).toMatchSnapshot();
+      expect(consoleMock.info).toBeCalledTimes(1);
+      expect(consoleMock.info.mock.calls[0][0]).toMatchSnapshot();
 
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
@@ -71,7 +70,7 @@ describe('CLI', () => {
       expect(consoleMock.error).not.toHaveBeenCalled();
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(consoleMock.log.mock.calls[0][0]).toMatchSnapshot();
+      expect(consoleMock.info.mock.calls[0][0]).toMatchSnapshot();
 
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });

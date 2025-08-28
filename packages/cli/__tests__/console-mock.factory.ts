@@ -1,11 +1,11 @@
 import type { Mocked } from "vitest";
 
+export type MockedConsole = Mocked<Pick<Console, 'info' | 'debug' | 'error'>>;
+
 export class ConsoleMockFactory {
 
-    static create(): Mocked<Console> {
-
-        // Mock console.log to capture output
-        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+    static create(): MockedConsole {
+        const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {
             // Mock implementation - intentionally empty
         });
 
@@ -18,9 +18,9 @@ export class ConsoleMockFactory {
         });
 
         return {
-            log: consoleLogSpy,
-            debug: consoleDebugSpy,
-            error: consoleErrorSpy,
-        } as Mocked<Console>
+            info: consoleInfoSpy as Mocked<Console>['info'],
+            debug: consoleDebugSpy as Mocked<Console>['debug'],
+            error: consoleErrorSpy as Mocked<Console>['error'],
+        }
     }
 }

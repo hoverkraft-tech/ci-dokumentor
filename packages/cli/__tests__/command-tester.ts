@@ -1,28 +1,29 @@
 import { Command as CommanderCommand } from 'commander';
-import { LoggerMockFactory } from "./logger-mock.factory.js";
-import { Logger } from "../src/lib/interfaces/logger.interface.js";
-import { Command } from '../src/lib/interfaces/command.interface.js';
+import { Mocked } from 'vitest';
+import { Command } from '../src/lib/commands/command.js';
+import { LoggerService } from '../src/lib/logger/logger.service.js';
+import { ProgramConfiguratorService } from '../src/lib/application/program-configurator.service.js';
+import { Program } from '../src/lib/application/program.js';
+import { LoggerServiceMockFactory } from './logger-service-mock.factory.js';
 
 export class CommandTester {
 
-    private readonly program: CommanderCommand;
+    private readonly program: Program;
 
-    private readonly logger: Logger;
+    private readonly loggerService: Mocked<LoggerService>;
 
     constructor(private readonly command: Command) {
-        this.logger = LoggerMockFactory.create();
+        this.loggerService = LoggerServiceMockFactory.create({
+            getSupportedFormats: ["test"]
+        });
+        const programConfiguratorService = new ProgramConfiguratorService(this.loggerService);
 
         this.program = new CommanderCommand();
-        this.program.configureOutput({
-            writeOut: (str: string) => this.logger.log(str),
-            writeErr: (str: string) => this.logger.error(str),
-        });
+        programConfiguratorService.configureOutput(this.program);
 
         this.command.configure();
-        this.command.configureOutput({
-            writeOut: (str: string) => this.logger.log(str),
-            writeErr: (str: string) => this.logger.error(str),
-        });
+        programConfiguratorService.configureOutput(this.command);
+
         this.program.addCommand(this.command);
     }
 
@@ -30,7 +31,7 @@ export class CommandTester {
         return this.program.parseAsync([this.command.name(), ...args], { from: 'user' });
     }
 
-    getLogger() {
-        return this.logger;
+    getLoggerService() {
+        return this.loggerService;
     }
 }
