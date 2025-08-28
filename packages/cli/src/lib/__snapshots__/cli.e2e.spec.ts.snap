@@ -25,7 +25,7 @@ Options:
   -o, --output <dir>             Output path for generated documentation
                                  (auto-detected if not specified)
   -r, --repository <platform>    Repository platform (auto-detected if not
-                                 specified) (choices: "git", "github")
+                                 specified) (choices: "github", "git")
   -c, --cicd <platform>          CI/CD platform (auto-detected if not specified)
                                  (choices: "github-actions")
   --include-sections <sections>  Comma-separated list of sections to include
