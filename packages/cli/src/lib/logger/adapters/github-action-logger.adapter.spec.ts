@@ -1,17 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GitHubActionLoggerAdapter } from './github-action-logger.adapter.js';
+import { ConsoleMockFactory, MockedConsole } from '../../../../__tests__/console-mock.factory.js';
 
 describe('GitHubActionLoggerAdapter', () => {
   let githubActionLoggerAdapter: GitHubActionLoggerAdapter;
-  let consoleLogSpy: any;
-  let consoleErrorSpy: any;
+  let consoleMock: MockedConsole;
 
   beforeEach(() => {
     githubActionLoggerAdapter = new GitHubActionLoggerAdapter();
-    
-    // Mock console methods
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleMock = ConsoleMockFactory.create();
   });
 
   afterEach(() => {
@@ -29,7 +26,7 @@ describe('GitHubActionLoggerAdapter', () => {
       const message = 'Debug message';
       githubActionLoggerAdapter.debug(message);
       
-      expect(consoleErrorSpy).toHaveBeenCalledWith('::debug::Debug message');
+      expect(consoleMock.error).toHaveBeenCalledWith('::debug::Debug message');
     });
   });
 
@@ -38,7 +35,7 @@ describe('GitHubActionLoggerAdapter', () => {
       const message = 'Info message';
       githubActionLoggerAdapter.info(message);
       
-      expect(consoleLogSpy).toHaveBeenCalledWith('Info message');
+      expect(consoleMock.log).toHaveBeenCalledWith('Info message');
     });
   });
 
@@ -47,7 +44,7 @@ describe('GitHubActionLoggerAdapter', () => {
       const message = 'Warning message';
       githubActionLoggerAdapter.warn(message);
       
-      expect(consoleErrorSpy).toHaveBeenCalledWith('::warning::Warning message');
+      expect(consoleMock.error).toHaveBeenCalledWith('::warning::Warning message');
     });
   });
 
@@ -56,7 +53,7 @@ describe('GitHubActionLoggerAdapter', () => {
       const message = 'Error message';
       githubActionLoggerAdapter.error(message);
       
-      expect(consoleErrorSpy).toHaveBeenCalledWith('::error::Error message');
+      expect(consoleMock.error).toHaveBeenCalledWith('::error::Error message');
     });
   });
 
@@ -65,37 +62,37 @@ describe('GitHubActionLoggerAdapter', () => {
       const data = { key: 'value', number: 42, nested: { prop: 'test' } };
       githubActionLoggerAdapter.result(data);
       
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=key::value');
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=number::42');
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=nested::{"prop":"test"}');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=key::value');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=number::42');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=nested::{"prop":"test"}');
     });
 
     it('should log string result as single set-output command', () => {
       const data = 'Simple result';
       githubActionLoggerAdapter.result(data);
       
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=result::Simple result');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=result::Simple result');
     });
 
     it('should log number result as single set-output command', () => {
       const data = 123;
       githubActionLoggerAdapter.result(data);
       
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=result::123');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=result::123');
     });
 
     it('should log null result as single set-output command', () => {
       const data = null;
       githubActionLoggerAdapter.result(data);
       
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=result::null');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=result::null');
     });
 
     it('should log boolean result as single set-output command', () => {
       const data = true;
       githubActionLoggerAdapter.result(data);
       
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=result::true');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=result::true');
     });
 
     it('should handle object with string values', () => {
@@ -106,16 +103,16 @@ describe('GitHubActionLoggerAdapter', () => {
       };
       githubActionLoggerAdapter.result(data);
       
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=status::success');
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=message::Operation completed');
-      expect(consoleLogSpy).toHaveBeenCalledWith('::set-output name=count::5');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=status::success');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=message::Operation completed');
+      expect(consoleMock.log).toHaveBeenCalledWith('::set-output name=count::5');
     });
 
     it('should handle empty object', () => {
       const data = {};
       githubActionLoggerAdapter.result(data);
       
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(consoleMock.log).not.toHaveBeenCalled();
     });
   });
 });

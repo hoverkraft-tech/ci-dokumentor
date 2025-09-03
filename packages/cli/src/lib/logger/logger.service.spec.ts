@@ -4,6 +4,7 @@ import { TextLoggerAdapter } from './adapters/text-logger.adapter.js';
 import { JsonLoggerAdapter } from './adapters/json-logger.adapter.js';
 import { GitHubActionLoggerAdapter } from './adapters/github-action-logger.adapter.js';
 import type { LoggerAdapter } from './adapters/logger.adapter.js';
+import { LoggerAdapterMockFactory } from '../../../__tests__/logger-adapter-mock.factory.js';
 
 describe('LoggerService', () => {
   let loggerService: LoggerService;
@@ -13,33 +14,10 @@ describe('LoggerService', () => {
   let mockAdapters: LoggerAdapter[];
 
   beforeEach(() => {
-    // Create mock adapters
-    textAdapter = {
-      getFormat: vi.fn().mockReturnValue('text'),
-      debug: vi.fn(),
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      result: vi.fn(),
-    };
-
-    jsonAdapter = {
-      getFormat: vi.fn().mockReturnValue('json'),
-      debug: vi.fn(),
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      result: vi.fn(),
-    };
-
-    githubActionAdapter = {
-      getFormat: vi.fn().mockReturnValue('github-action'),
-      debug: vi.fn(),
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      result: vi.fn(),
-    };
+    // Create mock adapters using LoggerAdapterMockFactory
+    textAdapter = LoggerAdapterMockFactory.create({ getFormat: 'text' });
+    jsonAdapter = LoggerAdapterMockFactory.create({ getFormat: 'json' });
+    githubActionAdapter = LoggerAdapterMockFactory.create({ getFormat: 'github-action' });
 
     mockAdapters = [textAdapter, jsonAdapter, githubActionAdapter];
     loggerService = new LoggerService(mockAdapters);
