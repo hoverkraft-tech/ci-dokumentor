@@ -94,15 +94,15 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   generate --source /workspace/action.yml
 ```
 
-#### Separate Input/Output Mounts
+#### Separate Source/Destination Mounts
 
 ```bash
 docker run --rm \
   -v $(pwd):/workspace:ro \
-  -v $(pwd)/output:/output \
+  -v $(pwd)/destination:/destination \
   -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
-  generate --source /workspace/action.yml --output /output/README.md
+  generate --source /workspace/action.yml --destination /destination/README.md
 ```
 
 ## Troubleshooting

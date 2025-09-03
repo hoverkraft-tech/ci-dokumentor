@@ -15,7 +15,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/automated-documentation.svg').default,
     description: (
       <>
-        Generate comprehensive documentation automatically from your CI/CD configuration files.
+        Generate comprehensive documentation automatically from your CI/CD manifest files.
         No manual work required - just point CI Dokumentor at your files and get professional docs.
       </>
     ),
@@ -25,8 +25,10 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/professional-output.svg').default,
     description: (
       <>
-        Generates comprehensive, professional documentation in Markdown format.
-        Perfect for GitHub README files and documentation websites.
+        Generates comprehensive, professional documentation in various formats.
+        Markdown - Perfect for GitHub README files and documentation websites.
+        JSON - Ideal for further processing or integration with other tools.
+        ... more formats supported, refer to the documentation for details!
       </>
     ),
   },

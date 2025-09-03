@@ -34,7 +34,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={`${siteConfig.title} - ${siteConfig.tagline}`}
-      description="Automated documentation generator for CI/CD components. Generate professional documentation from GitHub Actions, workflows, and CI/CD configuration files.">
+      description="Automated documentation generator for CI/CD components. Generate professional documentation from CI/CD manifest files.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

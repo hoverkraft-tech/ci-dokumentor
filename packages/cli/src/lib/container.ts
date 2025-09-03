@@ -24,7 +24,7 @@ import { FilePackageService } from './package/file-package.service.js';
 import { Command as CommanderCommand } from 'commander';
 import { TextLoggerAdapter } from './logger/adapters/text-logger.adapter.js';
 import { JsonLoggerAdapter } from './logger/adapters/json-logger.adapter.js';
-import { GitHubActionLoggerAdapter } from './logger/adapters/github-action-logger.adapter.js';
+import { GITHUB_OUTPUT_IDENTIFIER, GitHubActionLoggerAdapter } from './logger/adapters/github-action-logger.adapter.js';
 import { ProgramConfiguratorService } from './application/program-configurator.service.js';
 
 let container: Container | null = null;
@@ -65,6 +65,7 @@ export function initContainer(
     .to(JsonLoggerAdapter)
     .inSingletonScope();
 
+  container.bind(GITHUB_OUTPUT_IDENTIFIER).toConstantValue(process.env.GITHUB_OUTPUT);
   container.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
     .to(GitHubActionLoggerAdapter)
     .inSingletonScope();

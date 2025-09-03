@@ -85,7 +85,7 @@ export interface GenerateDocumentationUseCaseOutput {
 }
 
 /**
- * Use case for generating documentation from CI/CD configuration files
+ * Use case for generating documentation from CI/CD manifest files
  * Following clean architecture principles
  */
 @injectable()

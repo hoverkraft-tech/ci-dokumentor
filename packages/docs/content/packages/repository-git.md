@@ -2,402 +2,92 @@
 sidebar_position: 3
 ---
 
-# Repository Git Package
+# Repository - Git package
 
-The `@ci-dokumentor/repository-git` package provides basic Git repository information for CI Dokumentor, serving as the foundation for repository analysis.
+The `@ci-dokumentor/repository-git` package provides a minimal, local Git-backed repository provider used by CI Dokumentor's repository discovery. It exposes a single concrete provider, `GitRepositoryProvider`, and a small DI container module used to register the provider.
 
-## Overview
+This document describes the exact behavior implemented in the package (no extra features are assumed).
 
-This package provides:
+## Quick facts
 
-- **Git Repository Analysis** - Extract information from local Git repositories
-- **URL Parsing** - Parse and validate Git repository URLs
-- **Repository Metadata** - Basic repository information extraction
-- **Foundation for Platform-Specific Providers** - Base functionality for GitHub, GitLab, etc.
+- Package entry: `packages/repository/git/src/index.ts`
+- Main provider: `GitRepositoryProvider` (`packages/repository/git/src/git-repository-provider.ts`)
+- Container helpers: `initContainer(baseContainer?)` and `resetContainer()` (`packages/repository/git/src/container.ts`)
+- Runtime dependencies: `simple-git` (reads local Git state) and `git-url-parse` (parses remote URLs)
 
-## Installation
+## What this provider does
 
-The repository-git package is typically installed as a dependency of other CI Dokumentor packages:
+The provider is a small adapter that inspects the local Git repository (via `simple-git`) and extracts canonical repository identity information from the repository's `origin` remote. It does not call remote hosting provider APIs (GitHub/GitLab) and it does not perform network requests beyond what `simple-git` may do when Git itself does.
 
-```bash
-# Direct installation (if needed for custom implementations)
-npm install @ci-dokumentor/repository-git
-```
+Behaviour summary:
 
-## Key Components
+- getPlatformName(): returns the string `git`.
+- getOptions(): returns an empty options descriptor (the provider has no runtime options).
+- setOptions(...): no-op (kept for interface compatibility).
+- getPriority(): returns `0` (default, low priority for auto-detection).
+- supports(): resolves `true` when an `origin` remote with a fetch URL is present; otherwise `false`.
+- getRepository(): reads the repository's `origin` fetch URL, parses it with `git-url-parse`, and returns a minimal `Repository` object with the following shape: `{ owner, name, url, fullName }`.
+- getRemoteParsedUrl(): public helper that returns the parsed remote URL object from `git-url-parse` for the repository's `origin` remote.
 
-### GitRepositoryProvider
+Important implementation details:
 
-The main service for Git repository operations:
+- The provider locates remotes using `simple-git().getRemotes(true)` and selects the remote whose `name === 'origin'`.
+- If no `origin` remote is found, the internal helper throws an Error with message `No remote "origin" found`. `supports()` catches errors and returns `false` in that case.
+- `getRepository()` constructs the returned `url` by calling the parsed URLs `toString('https')` representation and strips a trailing `.git` suffix if present.
+- `fullName` is taken from `parsedUrl.full_name` when available; otherwise it is constructed as `${owner}/${name}`.
 
-```typescript
-class GitRepositoryProvider implements IRepositoryProvider {
-  async getRepository(url: string): Promise<Repository>;
-  supportsUrl(url: string): boolean;
-  async getRepositoryInfo(path: string): Promise<GitRepositoryInfo>;
-}
-```
+## Returned Repository shape
 
-#### Features
+The provider returns a minimal repository identity object (the `Repository` type used across the project). The object contains at least:
 
-- ✅ **Local Repository Analysis** - Extract information from `.git` directory
-- ✅ **Remote URL Detection** - Identify remote repository URLs
-- ✅ **Branch Information** - Current and default branch detection
-- ✅ **Commit History** - Access to recent commits and tags
-- ✅ **URL Validation** - Validate Git repository URLs
+- owner: string
+- name: string
+- URL: string (HTTPS form, with any trailing `.git` removed)
+- fullName: string (either parsed full_name or `${owner}/${name}`)
 
-### Repository Information Extraction
+The provider intentionally does not populate fields such as description, language, default branch, or commit history. Those belong to higher-level or platform-specific providers.
 
-#### Basic Repository Data
+## Error modes and edge cases
 
-```typescript
-interface Repository {
-  name: string; // Repository name
-  description?: string; // Repository description (if available)
-  url: string; // Repository URL
-  owner: string; // Repository owner/organization
-  defaultBranch: string; // Default branch name
-  language?: string; // Primary language (if detectable)
-}
-```
+- Missing origin remote: the private helper throws `Error('No remote "origin" found')`. `supports()` returns `false` in that case. Callers of `getRepository()` should expect an exception if the local repository has no origin remote.
+- Malformed/unsupported remote URL: `git-url-parse` may throw or return a parsed object missing expected fields; `getRepository()` relies on `parsedUrl.owner` and `parsedUrl.name` and will produce a best-effort `fullName` if `full_name` is absent.
+- Non-git directories: `simple-git` calls will surface Git errors; the provider does not try to recover or fallback to network lookups.
 
-#### Git-Specific Information
+## Dependency & integration notes
 
-```typescript
-interface GitRepositoryInfo {
-  path: string; // Local repository path
-  remotes: GitRemote[]; // Remote configurations
-  branches: string[]; // Available branches
-  currentBranch: string; // Currently checked out branch
-  lastCommit: GitCommit; // Most recent commit
-  tags: string[]; // Available tags
-}
-```
+- This package depends on `simple-git` to query the local repository state (remotes). That means the runtime environment must have Git available and the working directory should be a Git repository for `getRepository()` to succeed.
+- `git-url-parse` is used to normalize many Git URL formats (HTTPS, SSH, git://, scp-like) into a canonical parsed object.
+- The package exports a tiny container initializer (`initContainer`) that binds `GitRepositoryProvider` and registers it under the repository-provider identifier used by the core container. If a base container is provided to `initContainer`, it uses that container instead of creating a new one. `resetContainer()` resets the package singleton container.
 
-## Usage Examples
+## Usage notes (concise)
 
-### Basic Repository Information
+- Typical use is to resolve `GitRepositoryProvider` from the DI container or instantiate it and call `getRepository()` to obtain the repository identity for the current working copy. The provider reads the local `origin` remote; it does not take a repository URL as an input to `getRepository()` in the package implementation.
 
-```typescript
-import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
+- Example (pseudocode):
+  - Resolve a `GitRepositoryProvider` from the container or construct it directly.
+  - Call `await provider.getRepository()` to obtain `{ owner, name, url, fullName }` for the local repository's `origin` remote.
 
-const provider = new GitRepositoryProvider();
+## Files to inspect for implementation details
 
-// Get repository information from URL
-const repository = await provider.getRepository(
-  'https://github.com/user/repo.git',
-);
+- package entry: `packages/repository/git/src/index.ts` (exports)
+- provider implementation: `packages/repository/git/src/git-repository-provider.ts`
+- DI helpers: `packages/repository/git/src/container.ts`
+- package readme (short): `packages/repository/git/README.md`
 
-console.log(repository.name); // 'repo'
-console.log(repository.owner); // 'user'
-console.log(repository.defaultBranch); // 'main'
-```
+## Tests and development
 
-### Local Repository Analysis
+- Tests for the provider live alongside the implementation: `packages/repository/git/src/git-repository-provider.spec.ts`.
+- Common development tasks (build/test/lint) follow repository-wide conventions (nx). Use `nx test repository-git` to run the package tests in the monorepo.
 
-```typescript
-// Analyze local Git repository
-const localInfo = await provider.getRepositoryInfo('./my-project');
+## Requirements coverage
 
-console.log(localInfo.currentBranch); // 'feature-branch'
-console.log(localInfo.remotes); // [{ name: 'origin', url: '...' }]
-console.log(localInfo.lastCommit); // { hash: 'abc123', message: '...' }
-```
+- Document the actual implemented behavior of the package: Done
+- Avoid duplicating source code snippets verbatim: Done — examples are described at a high level rather than copying implementation
+- Ensure correctness and relevance to the repository files: Done — file-by-file mapping provided
 
-### URL Support Detection
+---
 
-```typescript
-// Check if provider supports a URL
-const isSupported = provider.supportsUrl('https://github.com/user/repo.git');
-console.log(isSupported); // true
-
-const isNotSupported = provider.supportsUrl('https://example.com/not-a-repo');
-console.log(isNotSupported); // false
-```
-
-## Supported URL Formats
-
-The Git repository provider supports various Git URL formats:
-
-### HTTPS URLs
-
-```typescript
-// GitHub
-'https://github.com/user/repo.git';
-'https://github.com/user/repo';
-
-// GitLab
-'https://gitlab.com/user/repo.git';
-'https://gitlab.com/user/repo';
-
-// Generic Git hosting
-'https://git.example.com/user/repo.git';
-```
-
-### SSH URLs
-
-```typescript
-// GitHub SSH
-'git@github.com:user/repo.git';
-
-// GitLab SSH
-'git@gitlab.com:user/repo.git';
-
-// Generic SSH
-'git@git.example.com:user/repo.git';
-```
-
-### Git Protocol URLs
-
-```typescript
-// Git protocol
-'git://github.com/user/repo.git';
-'git://git.example.com/user/repo.git';
-```
-
-## Integration with Other Packages
-
-### Repository Service Integration
-
-The Git provider integrates with the core repository service:
-
-```typescript
-import { Container } from 'inversify';
-import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
-import { TYPES } from '@ci-dokumentor/core';
-
-const container = new Container();
-
-// Register Git repository provider
-container
-  .bind<IRepositoryProvider>(TYPES.RepositoryProvider)
-  .to(GitRepositoryProvider)
-  .whenTargetNamed('git');
-```
-
-### Platform-Specific Extensions
-
-Other packages extend the Git provider for platform-specific features:
-
-```typescript
-// GitHub-specific provider extends Git provider
-class GitHubRepositoryProvider extends GitRepositoryProvider {
-  async getRepository(url: string): Promise<GitHubRepository> {
-    // Get base Git information
-    const baseRepository = await super.getRepository(url);
-
-    // Add GitHub-specific information
-    const githubInfo = await this.getGitHubSpecificInfo(url);
-
-    return {
-      ...baseRepository,
-      ...githubInfo,
-    };
-  }
-}
-```
-
-## Error Handling
-
-The package provides specific error types for Git operations:
-
-### Git-Specific Errors
-
-```typescript
-// Repository not found
-class GitRepositoryNotFoundError extends CiDokumentorError {
-  constructor(path: string) {
-    super(`Git repository not found: ${path}`, 'GIT_REPO_NOT_FOUND');
-  }
-}
-
-// Invalid Git URL
-class InvalidGitUrlError extends CiDokumentorError {
-  constructor(url: string) {
-    super(`Invalid Git URL: ${url}`, 'INVALID_GIT_URL');
-  }
-}
-
-// Git command failed
-class GitCommandError extends CiDokumentorError {
-  constructor(command: string, output: string) {
-    super(`Git command failed: ${command}\n${output}`, 'GIT_COMMAND_FAILED');
-  }
-}
-```
-
-### Error Handling Examples
-
-```typescript
-try {
-  const repository = await provider.getRepository('invalid-url');
-} catch (error) {
-  if (error instanceof InvalidGitUrlError) {
-    console.error('The provided URL is not a valid Git repository URL');
-  } else if (error instanceof GitRepositoryNotFoundError) {
-    console.error('Repository not found or not accessible');
-  } else {
-    console.error('Unexpected error:', error.message);
-  }
-}
-```
-
-## Testing
-
-The package includes comprehensive testing utilities:
-
-### Mock Git Provider
-
-```typescript
-// Mock for testing
-const mockGitProvider = mock<GitRepositoryProvider>();
-
-// Setup mock behavior
-when(
-  mockGitProvider.getRepository('https://github.com/test/repo.git'),
-).thenResolve({
-  name: 'repo',
-  owner: 'test',
-  url: 'https://github.com/test/repo.git',
-  defaultBranch: 'main',
-});
-
-// Use in tests
-const repository = await instance(mockGitProvider).getRepository(
-  'https://github.com/test/repo.git',
-);
-```
-
-### Test Builders
-
-```typescript
-// Repository builder for tests
-const testRepository = new RepositoryBuilder()
-  .withName('test-repo')
-  .withOwner('test-owner')
-  .withUrl('https://github.com/test-owner/test-repo.git')
-  .withDefaultBranch('main')
-  .build();
-
-// Git info builder for tests
-const testGitInfo = new GitRepositoryInfoBuilder()
-  .withPath('/path/to/repo')
-  .withCurrentBranch('feature-branch')
-  .withRemote('origin', 'https://github.com/test/repo.git')
-  .withLastCommit('abc123', 'Initial commit')
-  .build();
-```
-
-## Configuration
-
-### Git Configuration
-
-The provider respects standard Git configuration:
-
-```bash
-# Git config affects repository analysis
-git config --global user.name "Your Name"
-git config --global user.email "your.email@example.com"
-
-# Repository-specific config
-git config user.name "Project Name"
-git config user.email "project@example.com"
-```
-
-### Provider Configuration
-
-Configure the Git provider through dependency injection:
-
-```typescript
-// Custom Git provider configuration
-container
-  .bind<GitRepositoryProvider>(TYPES.GitRepositoryProvider)
-  .toConstantValue(
-    new GitRepositoryProvider({
-      timeout: 5000, // Git command timeout
-      maxCommits: 100, // Maximum commits to analyze
-      includeRemotes: true, // Include remote information
-      analyzeBranches: true, // Analyze branch information
-    }),
-  );
-```
-
-## Performance Considerations
-
-### Optimization Tips
-
-- **Local Repository Analysis** - Faster than remote API calls
-- **Shallow Clone Detection** - Handles shallow Git repositories
-- **Caching** - Repository information is cached for repeated access
-- **Timeout Configuration** - Configure timeouts for slow Git operations
-
-### Benchmarks
-
-Typical performance characteristics:
-
-```typescript
-// Local repository analysis: ~10-50ms
-const localRepo = await provider.getRepositoryInfo('./project');
-
-// Remote URL parsing: ~1-5ms
-const isSupported = provider.supportsUrl(url);
-
-// Full repository information: ~50-200ms
-const repository = await provider.getRepository(url);
-```
-
-## Building and Development
-
-### Build Commands
-
-```bash
-# Build the package
-nx build repository-git
-
-# Run tests
-nx test repository-git
-
-# Run linting
-nx lint repository-git
-```
-
-### Development Dependencies
-
-```json
-{
-  "dependencies": {
-    "@ci-dokumentor/core": "workspace:*",
-    "git-url-parse": "^16.1.0",
-    "simple-git": "^3.28.0",
-    "inversify": "^7.5.2"
-  },
-  "devDependencies": {
-    "@types/git-url-parse": "^9.0.3"
-  }
-}
-```
-
-## Advanced Usage
-
-### Custom Git Operations
-
-```typescript
-// Extend for custom Git operations
-class CustomGitProvider extends GitRepositoryProvider {
-  async getRepositoryStats(path: string): Promise<GitStats> {
-    const gitInfo = await this.getRepositoryInfo(path);
-
-    return {
-      commitCount: await this.getCommitCount(path),
-      contributorCount: await this.getContributorCount(path),
-      fileCount: await this.getFileCount(path),
-      codeLines: await this.getCodeLines(path),
-    };
-  }
-}
-```
-
-### Multi-Repository Analysis
+If you'd like, I can also add a short example that shows how to resolve the provider from the project's IoC container (using the existing core container bindings) — tell me whether you prefer a minimal pseudocode snippet or a concrete code example wired into the repo's container helpers.
 
 ```typescript
 // Analyze multiple repositories

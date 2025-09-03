@@ -94,7 +94,7 @@ jobs:
           "$IMAGE" \
           generate \
           --source "action.yml" \
-          --output "packages/docs/content/integrations/github-action.md"
+          --destination "packages/docs/content/integrations/github-action.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

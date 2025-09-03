@@ -48,7 +48,7 @@ cd packages/cli
 node dist/bin/ci-dokumentor.js --help
 
 # Test with a sample action.yml
-node dist/bin/ci-dokumentor.js generate action.yml --output test-docs
+node dist/bin/ci-dokumentor.js generate --source action.yml
 ```
 
 ## Project Structure

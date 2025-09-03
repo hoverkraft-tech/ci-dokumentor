@@ -1,8 +1,10 @@
+import { injectable } from 'inversify';
 import type { LoggerAdapter } from './logger.adapter.js';
 
 /**
  * Text logger adapter for console output with emojis and formatting
  */
+@injectable()
 export class TextLoggerAdapter implements LoggerAdapter {
   getFormat(): string {
     return 'text';
@@ -33,7 +35,11 @@ export class TextLoggerAdapter implements LoggerAdapter {
    * Log an error message
    */
   error(message: string): void {
-    console.error(`❌ ${message}`);
+    if (message.trim().length > 0) {
+      console.error(`❌ ${message}`);
+    } else {
+      console.error(message);
+    }
   }
 
   /**
