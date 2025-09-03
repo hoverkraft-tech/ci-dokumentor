@@ -10,6 +10,7 @@ import {
 import { cli } from './cli.js';
 import { resetGlobalContainer } from './global-container.js';
 import { ConsoleMockFactory, MockedConsole } from '../../__tests__/console-mock.factory.js';
+import { join } from 'node:path';
 
 describe('CLI', () => {
   const originalArgv = process.argv.slice();
@@ -70,9 +71,31 @@ describe('CLI', () => {
       expect(consoleMock.error).not.toHaveBeenCalled();
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(consoleMock.info.mock.calls[0][0]).toMatchSnapshot();
+      const infoLogOutput = consoleMock.info.mock.calls.map((call) => call[0]).join('\n');
+      expect(infoLogOutput).toMatchSnapshot();
 
       expect(processExitSpy).toHaveBeenCalledWith(0);
+    });
+
+    it('should run generate command in dry-mode', async () => {
+      // Mock process.argv to simulate generate command
+      const rootPath = join(__dirname, '../../../..');
+      const manifestFilePath = join(rootPath, 'action.yml');
+
+      process.argv = ['node', 'ci-dokumentor', 'generate', '--dry-run', '--source', manifestFilePath, '--repository', 'git', '--destination', 'test.md'];
+
+      // Act
+      await cli();
+
+      // Assert
+      expect(consoleMock.error).not.toHaveBeenCalled();
+      expect(consoleMock.debug).not.toHaveBeenCalled();
+
+      const infoLogOutput = consoleMock.info.mock.calls.map((call) => call[0]).join('\n');
+      // Replace <rootPath> with the actual root path in the snapshot
+      expect(infoLogOutput.replaceAll(rootPath, '/test')).toMatchSnapshot();
+
+      expect(processExitSpy).not.toHaveBeenCalled();
     });
   });
 });

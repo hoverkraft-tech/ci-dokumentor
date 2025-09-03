@@ -25,7 +25,7 @@ describe('TextLoggerAdapter', () => {
     it('should log debug message with emoji prefix', () => {
       const message = 'Debug message';
       textLoggerAdapter.debug(message);
-      
+
       expect(consoleMock.debug).toHaveBeenCalledWith('🐛 Debug message');
     });
   });
@@ -34,7 +34,7 @@ describe('TextLoggerAdapter', () => {
     it('should log info message without prefix', () => {
       const message = 'Info message';
       textLoggerAdapter.info(message);
-      
+
       expect(consoleMock.info).toHaveBeenCalledWith('Info message');
     });
   });
@@ -43,7 +43,7 @@ describe('TextLoggerAdapter', () => {
     it('should log warning message with emoji prefix', () => {
       const message = 'Warning message';
       textLoggerAdapter.warn(message);
-      
+
       expect(consoleMock.warn).toHaveBeenCalledWith('⚠ Warning message');
     });
   });
@@ -52,7 +52,7 @@ describe('TextLoggerAdapter', () => {
     it('should log error message with emoji prefix', () => {
       const message = 'Error message';
       textLoggerAdapter.error(message);
-      
+
       expect(consoleMock.error).toHaveBeenCalledWith('❌ Error message');
     });
   });
@@ -61,36 +61,41 @@ describe('TextLoggerAdapter', () => {
     it('should log object result with JSON formatting', () => {
       const data = { key: 'value', number: 42 };
       textLoggerAdapter.result(data);
-      
-      expect(consoleMock.log).toHaveBeenCalledWith('✅ Result:\n{\n  "key": "value",\n  "number": 42\n}');
+
+      expect(consoleMock.info).toHaveBeenNthCalledWith(1, '✅ Result:');
+      expect(consoleMock.info).toHaveBeenNthCalledWith(2, '   - key: value');
+      expect(consoleMock.info).toHaveBeenNthCalledWith(3, '   - number: 42');
     });
 
     it('should log string result with simple format', () => {
       const data = 'Simple result';
       textLoggerAdapter.result(data);
-      
-      expect(consoleMock.log).toHaveBeenCalledWith('✅ Result: Simple result');
+
+      expect(consoleMock.info).toHaveBeenCalledWith('✅ Result: Simple result');
     });
 
     it('should log number result with simple format', () => {
       const data = 123;
       textLoggerAdapter.result(data);
-      
-      expect(consoleMock.log).toHaveBeenCalledWith('✅ Result: 123');
+
+      expect(consoleMock.info).toHaveBeenCalledWith('✅ Result: 123');
     });
 
     it('should log null result with simple format', () => {
       const data = null;
       textLoggerAdapter.result(data);
-      
-      expect(consoleMock.log).toHaveBeenCalledWith('✅ Result: null');
+
+      expect(consoleMock.info).toHaveBeenCalledWith('✅ Result: null');
     });
 
     it('should log array result with JSON formatting', () => {
       const data = [1, 2, 3];
       textLoggerAdapter.result(data);
-      
-      expect(consoleMock.log).toHaveBeenCalledWith('✅ Result:\n[\n  1,\n  2,\n  3\n]');
+
+      expect(consoleMock.info).toHaveBeenNthCalledWith(1, '✅ Result:');
+      expect(consoleMock.info).toHaveBeenNthCalledWith(2, '   - 1');
+      expect(consoleMock.info).toHaveBeenNthCalledWith(3, '   - 2');
+      expect(consoleMock.info).toHaveBeenNthCalledWith(4, '   - 3');
     });
   });
 });

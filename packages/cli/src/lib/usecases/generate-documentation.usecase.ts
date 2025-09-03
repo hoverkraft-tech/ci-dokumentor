@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { existsSync, statSync } from 'fs';
 import {
+  GenerateSectionsOptions,
   GeneratorAdapter,
   GeneratorService,
   OptionDescriptor,
@@ -28,6 +29,11 @@ export interface GenerateDocumentationUseCaseInput {
    * If not provided, the generator adapter will auto-detect the destination path
    */
   destination?: string;
+
+  /**
+   * Dry-run mode - when true, validate inputs and show what would be generated without writing files
+   */
+  dryRun: boolean;
 
   /**
    * Repository platform options
@@ -59,34 +65,13 @@ export interface GenerateDocumentationUseCaseInput {
   /**
    * Section generator options
    */
-  sections?: {
-    /**
-     * List of section identifiers to include in generation
-     * If not specified, all available sections are included
-     */
-    includeSections?: string[];
-
-    /**
-     * List of section identifiers to exclude from generation
-     */
-    excludeSections?: string[];
-
-    /**
-     * Section-specific configuration options
-     */
-    sectionConfig?: Record<string, Record<string, unknown>>;
-  };
-
-  /**
-   * Dry-run mode - when true, validate inputs and show what would be generated without writing files
-   */
-  dryRun?: boolean;
+  sections: GenerateSectionsOptions;
 }
 
 export interface GenerateDocumentationUseCaseOutput {
   success: boolean;
-  message: string;
   destination?: string;
+  data?: string;
 }
 
 /**
@@ -181,26 +166,12 @@ export class GenerateDocumentationUseCase {
   ): Promise<GenerateDocumentationUseCaseOutput> {
     this.validateInput(input);
 
-    if (input.dryRun) {
-      this.loggerService.info('DRY-RUN MODE: Previewing documentation generation...', input.outputFormat);
-    } else {
-      this.loggerService.info('Starting documentation generation...', input.outputFormat);
-    }
-
+    this.loggerService.info(
+      `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation generation...`, input.outputFormat);
     this.loggerService.info(`Source manifest: ${input.source}`, input.outputFormat);
     if (input.destination) {
       this.loggerService.info(`Destination path: ${input.destination}`, input.outputFormat);
     }
-
-    const repositoryProviderAdapter = await this.resolveRepositoryProvider(input);
-
-    // If repository provider options were provided, apply them to the provider
-    const repositoryOptions = input.repository?.options;
-    if (repositoryOptions) {
-      repositoryProviderAdapter.setOptions(repositoryOptions);
-    }
-
-    const generatorAdapter = this.resolveGeneratorAdapter(input);
 
     // Log section options if provided
     if (input.sections?.includeSections?.length) {
@@ -216,108 +187,39 @@ export class GenerateDocumentationUseCase {
       );
     }
 
-    if (input.dryRun) {
-      this.loggerService.info('DRY-RUN MODE: Would generate documentation with the following configuration:', input.outputFormat);
-      this.loggerService.info(`- Repository platform: ${repositoryProviderAdapter.getPlatformName()}`, input.outputFormat);
-      this.loggerService.info(`- CI/CD platform: ${generatorAdapter.getPlatformName()}`, input.outputFormat);
-
-      const supportedSections = generatorAdapter.getSupportedSections();
-      if (supportedSections) {
-        this.loggerService.info(`- Available sections: ${supportedSections.join(', ')}`, input.outputFormat);
-      }
-
-      this.loggerService.info('DRY-RUN MODE: Documentation generation preview completed successfully!', input.outputFormat);
-
-      return {
-        success: true,
-        message: 'Documentation generation preview completed successfully (dry-run mode)',
-      };
-    }
+    const generatorAdapter = await this.resolveGeneratorAdapter(input);
+    const repositoryProvider = await this.resolveRepositoryProvider(input);
 
     // Generate documentation using the specific CI/CD platform adapter
-    // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
-    const destination = await this.generatorService.generateDocumentationForPlatform(
+    const { destination, data } = await this.generatorService.generateDocumentationForPlatform({
+      source: input.source,
+      destination: input.destination,
+      dryRun: input.dryRun,
+      sections: input.sections,
       generatorAdapter,
-      input.source,
-      input.destination
-    );
+      repositoryProvider,
+    });
 
     this.loggerService.info('Documentation generated successfully!', input.outputFormat);
-    this.loggerService.info(`Documentation saved to: ${destination}`, input.outputFormat);
+
+    const message = input.dryRun
+      ? `(Dry-run) Documentation would be saved to: ${destination}`
+      : `Documentation saved to: ${destination}`;
+
+    this.loggerService.info(message, input.outputFormat);
 
     // Output the result using the logger
-    const result: GenerateDocumentationUseCaseOutput = {
+    const useCaseOutput: GenerateDocumentationUseCaseOutput = {
       success: true,
-      message: 'Documentation generated successfully',
       destination,
+      data
     };
 
-
     // Log the result at the command level
-    this.loggerService.result(result, input.outputFormat);
+    this.loggerService.result(useCaseOutput, input.outputFormat);
 
-    return result;
+    return useCaseOutput;
   }
-
-  /**
-   * Auto-detect repository platform if not provided    
-   */
-  private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput) {
-    let repositoryProviderAdapter: RepositoryProvider | undefined;
-    if (input.repository?.platform) {
-      this.loggerService.info(`Repository platform: ${input.repository.platform}`, input.outputFormat);
-      repositoryProviderAdapter = this.repositoryService.getRepositoryProviderByPlatform(input.repository.platform);
-      if (!repositoryProviderAdapter) {
-        throw new Error(
-          `No repository platform found for '${input.repository.platform}'. Please specify a valid one.`
-        );
-      }
-
-    } else {
-      repositoryProviderAdapter = await this.repositoryService.autoDetectRepositoryProvider();
-      if (!repositoryProviderAdapter) {
-        throw new Error(
-          `No repository platform could be auto-detected. Please specify one using --repository option.`
-        );
-      }
-      this.loggerService.info(
-        `Auto-detected repository platform: ${repositoryProviderAdapter.getPlatformName()}`,
-        input.outputFormat
-      );
-    }
-    return repositoryProviderAdapter;
-  }
-
-  /**
-   * Get CI/CD adapter (either from platform input or auto-detect)
-   */
-  private resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput) {
-    let generatorAdapter: GeneratorAdapter | undefined;
-    if (input.cicd?.platform) {
-      this.loggerService.info(`CI/CD platform: ${input.cicd.platform}`, input.outputFormat);
-      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(
-        input.cicd.platform
-      );
-      if (!generatorAdapter) {
-        throw new Error(
-          `No generator adapter found for CI/CD platform '${input.cicd.platform}'`
-        );
-      }
-    } else {
-      generatorAdapter = this.generatorService.autoDetectCicdAdapter(input.source);
-      if (!generatorAdapter) {
-        throw new Error(
-          `No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`
-        );
-      }
-      this.loggerService.info(
-        `Auto-detected CI/CD platform: ${generatorAdapter.getPlatformName()}`,
-        input.outputFormat
-      );
-    }
-    return generatorAdapter;
-  }
-
 
   private validateInput(input: GenerateDocumentationUseCaseInput): void {
     if (!input.source) {
@@ -350,6 +252,71 @@ export class GenerateDocumentationUseCase {
         );
       }
     }
+  }
+
+  /**
+   * Auto-detect repository platform if not provided    
+   */
+  private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput): Promise<RepositoryProvider> {
+    let repositoryProviderAdapter: RepositoryProvider | undefined;
+    if (input.repository?.platform) {
+      this.loggerService.info(`Repository platform: ${input.repository.platform}`, input.outputFormat);
+      repositoryProviderAdapter = this.repositoryService.getRepositoryProviderByPlatform(input.repository.platform);
+      if (!repositoryProviderAdapter) {
+        throw new Error(
+          `No repository platform found for '${input.repository.platform}'. Please specify a valid one.`
+        );
+      }
+    } else {
+      repositoryProviderAdapter = await this.repositoryService.autoDetectRepositoryProvider();
+      if (!repositoryProviderAdapter) {
+        throw new Error(
+          `No repository platform could be auto-detected. Please specify one using --repository option.`
+        );
+      }
+      this.loggerService.info(
+        `Auto-detected repository platform: ${repositoryProviderAdapter.getPlatformName()}`,
+        input.outputFormat
+      );
+    }
+
+    // If repository provider options were provided, apply them to the provider
+    const repositoryOptions = input.repository?.options;
+    if (repositoryOptions) {
+      repositoryProviderAdapter.setOptions(repositoryOptions);
+    }
+
+    return repositoryProviderAdapter;
+  }
+
+  /**
+ * Get CI/CD adapter (either from platform input or auto-detect)
+ */
+  private async resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput): Promise<GeneratorAdapter> {
+    let generatorAdapter: GeneratorAdapter | undefined;
+    if (input.cicd?.platform) {
+      this.loggerService.info(`CI/CD platform: ${input.cicd.platform}`, input.outputFormat);
+      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(
+        input.cicd.platform
+      );
+      if (!generatorAdapter) {
+        throw new Error(
+          `No generator adapter found for CI/CD platform '${input.cicd.platform}'`
+        );
+      }
+    } else {
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(input.source);
+      if (!generatorAdapter) {
+        throw new Error(
+          `No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`
+        );
+      }
+      this.loggerService.info(
+        `Auto-detected CI/CD platform: ${generatorAdapter.getPlatformName()}`,
+        input.outputFormat
+      );
+    }
+    return generatorAdapter;
   }
 
 }

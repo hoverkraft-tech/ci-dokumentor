@@ -122,7 +122,7 @@ describe('FilePackageService', () => {
         [packageJsonPath]: 'invalid json content',
       });
 
-      expect(() => filePackageService.getPackageInfo()).toThrow();
+      expect(() => filePackageService.getPackageInfo()).toThrow(`Unexpected token 'i', "invalid json content" is not valid JSON`);
     });
 
     it('should handle package.json with additional properties', () => {

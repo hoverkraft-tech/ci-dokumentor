@@ -4,6 +4,8 @@ import {
   GitHubActionsParser,
   GitHubAction,
   GitHubWorkflow,
+  GitHubActionInput,
+  GitHubActionOutput,
 } from './github-actions-parser.js';
 import { Repository } from '@ci-dokumentor/core';
 
@@ -79,13 +81,13 @@ runs:
         });
 
         expect(result.inputs).toBeDefined();
-        expect(result.inputs!['input-name']).toEqual({
+        expect((result.inputs as Record<string, GitHubActionInput>)['input-name']).toEqual({
           description: 'Input description',
           required: true,
           default: 'default-value',
           type: 'string',
         });
-        expect(result.inputs!['optional-input']).toEqual({
+        expect((result.inputs as Record<string, GitHubActionInput>)['optional-input']).toEqual({
           description: 'Optional input',
           required: false,
           type: 'choice',
@@ -93,7 +95,7 @@ runs:
         });
 
         expect(result.outputs).toBeDefined();
-        expect(result.outputs!['output-name']).toEqual({
+        expect((result.outputs as Record<string, GitHubActionOutput>)['output-name']).toEqual({
           description: 'Output description',
           value: '${{ steps.step-id.outputs.value }}',
         });
@@ -185,7 +187,7 @@ jobs:
         // Act & Assert
         expect(() =>
           parser.parseFile('/test/.github/workflows/invalid.yml', repository)
-        ).toThrow();
+        ).toThrow('Nested mappings are not allowed in compact mappings at line 1, column 10');
       });
 
       it('should throw error for empty file', async () => {

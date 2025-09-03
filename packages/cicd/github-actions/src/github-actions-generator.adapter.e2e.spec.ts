@@ -1,42 +1,33 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 import {
-  FormatterAdapter,
-  FileOutputAdapter,
+  FileRendererAdapter,
+  RepositoryProvider,
+  RendererAdapter,
   MarkdownFormatterAdapter,
-  RepositoryService,
-  Repository,
+  FormatterAdapter,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
+import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
+  let repositoryProvider: RepositoryProvider;
   let formatterAdapter: FormatterAdapter;
+  let rendererAdapter: RendererAdapter;
   let gitHubActionsGeneratorAdapter: GitHubActionsGeneratorAdapter;
-  let repositoryService: RepositoryService;
 
   beforeEach(async () => {
     // Use real dependencies from the container
     const container = initTestContainer();
 
+    repositoryProvider = container.get(GitRepositoryProvider);
     formatterAdapter = container.get(MarkdownFormatterAdapter);
-    repositoryService = container.get(RepositoryService);
+    rendererAdapter = container.get(FileRendererAdapter);
+
     gitHubActionsGeneratorAdapter = container.get(
       GitHubActionsGeneratorAdapter
-    );
-
-    // Mock the repository service to return consistent test data
-    const mockRepository: Repository = {
-      url: 'https://github.com/test-owner/test-action',
-      name: 'test-action',
-      owner: 'test-owner',
-      fullName: 'test-owner/test-action',
-      logo: 'https://example.com/logo.png',
-    };
-
-    vi.spyOn(repositoryService, 'getRepository').mockResolvedValue(
-      mockRepository
     );
   });
 
@@ -102,18 +93,22 @@ runs:
         '/test/action.yml': actionYaml,
       });
 
-      // Use real FileOutputAdapter for integration testing
-      const outputAdapter = new FileOutputAdapter(
-        '/test/README.md',
-        formatterAdapter
-      );
+
 
       // Act
-      await gitHubActionsGeneratorAdapter.generateDocumentation(
-        '/test/action.yml',
+      await rendererAdapter.initialize(
+        '/test/README.md',
         formatterAdapter,
-        outputAdapter
       );
+
+      await gitHubActionsGeneratorAdapter.generateDocumentation({
+        source: '/test/action.yml',
+        sections: {},
+        rendererAdapter,
+        repositoryProvider,
+      });
+
+      await rendererAdapter.finalize();
 
       // Assert
       const expectedDocumentationPath = '/test/README.md';
@@ -242,18 +237,20 @@ jobs:
         '/test/.github/workflows/ci-cd.yml': workflowYaml,
       });
 
-      // Use real FileOutputAdapter for integration testing
-      const outputAdapter = new FileOutputAdapter(
+      // Act
+      await rendererAdapter.initialize(
         '/test/.github/workflows/ci-cd.md',
-        formatterAdapter
+        formatterAdapter,
       );
 
-      // Act
-      await gitHubActionsGeneratorAdapter.generateDocumentation(
-        '/test/.github/workflows/ci-cd.yml',
-        formatterAdapter,
-        outputAdapter
-      );
+      await gitHubActionsGeneratorAdapter.generateDocumentation({
+        source: '/test/.github/workflows/ci-cd.yml',
+        sections: {},
+        rendererAdapter,
+        repositoryProvider,
+      });
+
+      await rendererAdapter.finalize();
 
       // Assert
       const expectedDocumentationPath = '/test/.github/workflows/ci-cd.md';
@@ -364,20 +361,22 @@ runs:
         '/test/action.yml': malformedYaml,
       });
 
-      // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter(
+      // Act & Assert
+      await rendererAdapter.initialize(
         '/test/README.md',
-        formatterAdapter
+        formatterAdapter,
       );
 
-      // Act & Assert
       await expect(
-        gitHubActionsGeneratorAdapter.generateDocumentation(
-          '/test/action.yml',
-          formatterAdapter,
-          outputAdapter
-        )
-      ).rejects.toThrow();
+        gitHubActionsGeneratorAdapter.generateDocumentation({
+          source: '/test/action.yml',
+          sections: {},
+          rendererAdapter,
+          repositoryProvider,
+        })
+      ).rejects.toThrow('Missing closing \'quote at line 3, column 42');
+
+      await rendererAdapter.finalize();
     });
 
     it('should handle non-existent files gracefully', async () => {
@@ -385,20 +384,23 @@ runs:
       // Setup empty mock file system
       mockFs({});
 
-      // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter(
-        '/test/README.md',
-        formatterAdapter
-      );
 
       // Act & Assert
+      await rendererAdapter.initialize(
+        '/test/README.md',
+        formatterAdapter,
+      );
+
       await expect(
-        gitHubActionsGeneratorAdapter.generateDocumentation(
-          '/test/action.yml',
-          formatterAdapter,
-          outputAdapter
-        )
-      ).rejects.toThrow();
+        gitHubActionsGeneratorAdapter.generateDocumentation({
+          source: '/test/action.yml',
+          sections: {},
+          rendererAdapter,
+          repositoryProvider,
+        })
+      ).rejects.toThrow('ENOENT, no such file or directory \'/test/action.yml\'');
+
+      await rendererAdapter.finalize();
     });
 
     it('should handle empty YAML files', async () => {
@@ -408,25 +410,22 @@ runs:
         '/test/action.yml': '',
       });
 
-      // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter(
+      // Act
+      await rendererAdapter.initialize(
         '/test/README.md',
-        formatterAdapter
+        formatterAdapter,
       );
 
-      // Act & Assert
-      // This should either work with empty content or throw a meaningful error
-      try {
-        await gitHubActionsGeneratorAdapter.generateDocumentation(
-          '/test/action.yml',
-          formatterAdapter,
-          outputAdapter
-        );
-        // If it succeeds, that's fine
-      } catch (error) {
-        // If it fails, the error should be meaningful
-        expect(error).toBeInstanceOf(Error);
-      }
+      await expect(
+        gitHubActionsGeneratorAdapter.generateDocumentation({
+          source: '/test/action.yml',
+          sections: {},
+          rendererAdapter,
+          repositoryProvider,
+        })
+      ).rejects.toThrow('Unsupported source file: /test/action.yml');
+
+      await rendererAdapter.finalize();
     });
   });
 });

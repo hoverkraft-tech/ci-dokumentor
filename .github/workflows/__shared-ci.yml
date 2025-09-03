@@ -83,7 +83,7 @@ jobs:
       # Test help command
       - run: docker run --rm "$IMAGE" --help
 
-      # Test generate command
+      # Test generate command (dry-run) on this repository's action.yml file
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: |
           docker run --rm \
@@ -94,7 +94,8 @@ jobs:
           "$IMAGE" \
           generate \
           --source "action.yml" \
-          --destination "packages/docs/content/integrations/github-action.md"
+          --destination "packages/docs/content/integrations/github-action.md" \
+          --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

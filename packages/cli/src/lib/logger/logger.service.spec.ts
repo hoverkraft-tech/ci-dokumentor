@@ -148,7 +148,7 @@ describe('LoggerService', () => {
     it('should handle case where no adapters are provided', () => {
       const emptyLoggerService = new LoggerService([]);
 
-      expect(() => emptyLoggerService.debug('test', undefined)).toThrow();
+      expect(() => emptyLoggerService.debug('test', undefined)).toThrow("No logger adapters are configured");
     });
   });
 });

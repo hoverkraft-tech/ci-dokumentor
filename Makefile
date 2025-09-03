@@ -27,6 +27,7 @@ test:
 	$(MAKE) docker-test
 
 ci: ## Execute all formats and checks
+	@pnpm i
 	@pnpm run all
 	$(MAKE) lint-fix
 	$(MAKE) docker-test

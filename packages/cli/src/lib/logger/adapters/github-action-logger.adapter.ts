@@ -50,27 +50,35 @@ export class GitHubActionLoggerAdapter implements LoggerAdapter {
   }
 
   /**
-   * Log a result message using GitHub Actions workflow commands
+   * Log a result message using GitHub Actions output file
    */
   result(data: unknown): void {
-    if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
-      // Output GitHub Actions workflow commands for object data
-      for (const [key, value] of Object.entries(data)) {
-        const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
-        this.setOutput(key, stringValue);
-      }
-    } else {
-      // Handle arrays and primitive values as single result
-      const stringValue = typeof data === 'string' ? data : JSON.stringify(data);
-      this.setOutput('result', stringValue);
+
+    if (Array.isArray(data)) {
+      return this.resultArray(data);
+    }
+    if (typeof data === 'object' && data !== null) {
+      return this.resultObject(data);
+    }
+    return this.setOutput('result', data);
+  }
+
+  private resultArray(data: unknown[]): void {
+    this.setOutput('result', data);
+  }
+
+  private resultObject(data: object): void {
+    for (const [key, value] of Object.entries(data)) {
+      this.setOutput(key, value);
     }
   }
 
-  private setOutput(key: string, value: string): void {
+  private setOutput(key: string, data: unknown): void {
     if (!this.injectedOutputPath) {
       throw new Error('GitHub Actions output path is not defined.');
     }
+    const stringValue = typeof data === 'string' ? data : JSON.stringify(data);
 
-    appendFileSync(this.injectedOutputPath, `${key}=${value}\n`, { encoding: 'utf8' });
+    appendFileSync(this.injectedOutputPath, `${key}=${stringValue}\n`, { encoding: 'utf8' });
   }
 }

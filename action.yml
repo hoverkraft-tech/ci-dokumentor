@@ -32,6 +32,10 @@ inputs:
     description: The GitHub token used to fetch repository information.
     default: ${{ github.token }}
     required: false
+  dry-run:
+    description: Whether to perform a dry run (no files are written).
+    required: false
+    default: 'false'
 
 outputs:
   destination:
@@ -79,6 +83,12 @@ runs:
         if [ -n "$exclude_sections" ]; then
           args="$args --exclude-sections "$exclude_sections""
           echo "::debug::Exclude sections set to: $exclude_sections"
+        fi
+
+        dry_run="${{ inputs.dry-run }}"
+        if [ "$dry_run" = "true" ]; then
+          args="$args --dry-run"
+          echo "::debug::Dry run enabled"
         fi
 
         echo "::debug::Args set to: $args"

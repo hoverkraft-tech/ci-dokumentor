@@ -41,8 +41,14 @@ npx ci-dokumentor --help
 **NPM Global:**
 
 ```bash
+# Using npm
 npm install -g @ci-dokumentor/cli
+
+# or using pnpm (global install)
+pnpm add -g @ci-dokumentor/cli
 ```
+
+Note: For end users we recommend Docker or NPX for quick, reproducible runs. For contributors working in this repository prefer pnpm workspace commands and building the CLI locally.
 
 #### Generate Your First Documentation
 

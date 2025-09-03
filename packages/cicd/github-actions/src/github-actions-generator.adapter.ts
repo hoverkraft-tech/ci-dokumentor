@@ -1,10 +1,10 @@
 import {
   GeneratorAdapter,
-  OutputAdapter,
   SECTION_GENERATOR_ADAPTER_IDENTIFIER,
   SectionGeneratorAdapter,
-  FormatterAdapter,
-  RepositoryService,
+  RepositoryProvider,
+  GenerateSectionsOptions,
+  RendererAdapter,
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
@@ -22,8 +22,6 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
   constructor(
     @inject(GitHubActionsParser)
     public readonly gitHubActionsParser: GitHubActionsParser,
-    @inject(RepositoryService)
-    private readonly repositoryService: RepositoryService,
     @multiInject(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<
       GitHubActionsManifest
@@ -79,30 +77,52 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     throw new Error(`Unsupported source file: ${source}`);
   }
 
-  async generateDocumentation(
-    source: string,
-    formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter
-  ): Promise<void> {
-    const repository = await this.repositoryService.getRepository();
+  async generateDocumentation({
+    source,
+    sections,
+    rendererAdapter,
+    repositoryProvider,
+  }: {
+    source: string;
+    sections: GenerateSectionsOptions;
+    rendererAdapter: RendererAdapter;
+    repositoryProvider: RepositoryProvider;
+  }): Promise<void> {
+    const repository = await repositoryProvider.getRepository();
     const gitHubActionOrWorkflow = this.gitHubActionsParser.parseFile(
       source,
       repository
     );
 
     for (const sectionGeneratorAdapter of this.sectionGeneratorAdapters) {
+      // Check if the section should be included or excluded based on the options
+      if (!this.shouldGenerateSection(sectionGeneratorAdapter, sections)) {
+        continue;
+      }
+
       const sectionContent = sectionGeneratorAdapter.generateSection(
-        formatterAdapter,
+        rendererAdapter.getFormatterAdapter(),
         gitHubActionOrWorkflow,
         repository
       );
 
-      await outputAdapter.writeSection(
+      await rendererAdapter.writeSection(
         sectionGeneratorAdapter.getSectionIdentifier(),
-        sectionContent.length ? Buffer.concat([
-          sectionContent,
-        ]) : Buffer.alloc(0)
+        sectionContent,
       );
     }
+  }
+
+  private shouldGenerateSection(
+    sectionGeneratorAdapter: SectionGeneratorAdapter<GitHubActionsManifest>,
+    options: GenerateSectionsOptions
+  ): boolean {
+    if (options.includeSections && !options.includeSections.includes(sectionGeneratorAdapter.getSectionIdentifier())) {
+      return false;
+    }
+    if (options.excludeSections && options.excludeSections.includes(sectionGeneratorAdapter.getSectionIdentifier())) {
+      return false;
+    }
+    return true;
   }
 }
