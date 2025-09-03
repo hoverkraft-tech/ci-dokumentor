@@ -76,6 +76,11 @@ export interface GenerateDocumentationUseCaseInput {
      */
     sectionConfig?: Record<string, Record<string, unknown>>;
   };
+
+  /**
+   * Dry-run mode - when true, validate inputs and show what would be generated without writing files
+   */
+  dryRun?: boolean;
 }
 
 export interface GenerateDocumentationUseCaseOutput {
@@ -176,7 +181,12 @@ export class GenerateDocumentationUseCase {
   ): Promise<GenerateDocumentationUseCaseOutput> {
     this.validateInput(input);
 
-    this.loggerService.info('Starting documentation generation...', input.outputFormat);
+    if (input.dryRun) {
+      this.loggerService.info('DRY-RUN MODE: Previewing documentation generation...', input.outputFormat);
+    } else {
+      this.loggerService.info('Starting documentation generation...', input.outputFormat);
+    }
+
     this.loggerService.info(`Source manifest: ${input.source}`, input.outputFormat);
     if (input.destination) {
       this.loggerService.info(`Destination path: ${input.destination}`, input.outputFormat);
@@ -204,6 +214,24 @@ export class GenerateDocumentationUseCase {
         `Excluding sections: ${input.sections.excludeSections.join(', ')}`,
         input.outputFormat
       );
+    }
+
+    if (input.dryRun) {
+      this.loggerService.info('DRY-RUN MODE: Would generate documentation with the following configuration:', input.outputFormat);
+      this.loggerService.info(`- Repository platform: ${repositoryProviderAdapter.getPlatformName()}`, input.outputFormat);
+      this.loggerService.info(`- CI/CD platform: ${generatorAdapter.getPlatformName()}`, input.outputFormat);
+
+      const supportedSections = generatorAdapter.getSupportedSections();
+      if (supportedSections) {
+        this.loggerService.info(`- Available sections: ${supportedSections.join(', ')}`, input.outputFormat);
+      }
+
+      this.loggerService.info('DRY-RUN MODE: Documentation generation preview completed successfully!', input.outputFormat);
+
+      return {
+        success: true,
+        message: 'Documentation generation preview completed successfully (dry-run mode)',
+      };
     }
 
     // Generate documentation using the specific CI/CD platform adapter

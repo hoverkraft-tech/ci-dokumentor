@@ -67,6 +67,7 @@ describe('GenerateCommand', () => {
       expect(optionFlags).toContain('-c, --cicd <platform>');
       expect(optionFlags).toContain('-i, --include-sections <sections>');
       expect(optionFlags).toContain('-e, --exclude-sections <sections>');
+      expect(optionFlags).toContain('--dry-run');
     });
   });
 
@@ -419,6 +420,27 @@ describe('GenerateCommand', () => {
       expect(commandTester.getLoggerService().warn).not.toHaveBeenCalled();
 
       expect(mockGenerateDocumentationUseCase.execute).not.toHaveBeenCalled();
+    });
+
+    it('should handle dry-run option correctly', async () => {
+      // Arrange
+      const args = [
+        '--source',
+        './test-source',
+        '--output',
+        './test-output',
+        '--dry-run',
+      ];
+
+      // Act
+      await commandTester.test(args);
+
+      // Assert
+      expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
+        source: './test-source',
+        output: './test-output',
+        dryRun: true,
+      });
     });
   });
 });
