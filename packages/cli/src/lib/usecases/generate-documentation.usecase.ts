@@ -1,6 +1,9 @@
 import { inject, injectable } from 'inversify';
 import { existsSync, statSync } from 'fs';
 import {
+  DryRunOutputAdapter,
+  FormatterAdapter,
+  FormatterService,
   GeneratorAdapter,
   GeneratorService,
   OptionDescriptor,
@@ -9,6 +12,7 @@ import {
   RepositoryService
 } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
+import { createMockRepository } from '../utils/mock-repository.js';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -100,7 +104,9 @@ export class GenerateDocumentationUseCase {
     @inject(GeneratorService)
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
-    private readonly repositoryService: RepositoryService
+    private readonly repositoryService: RepositoryService,
+    @inject(FormatterService)
+    private readonly formatterService: FormatterService
   ) { }
 
 
@@ -217,13 +223,56 @@ export class GenerateDocumentationUseCase {
     }
 
     if (input.dryRun) {
-      this.loggerService.info('DRY-RUN MODE: Would generate documentation with the following configuration:', input.outputFormat);
+      this.loggerService.info('DRY-RUN MODE: Previewing documentation generation...', input.outputFormat);
       this.loggerService.info(`- Repository platform: ${repositoryProviderAdapter.getPlatformName()}`, input.outputFormat);
       this.loggerService.info(`- CI/CD platform: ${generatorAdapter.getPlatformName()}`, input.outputFormat);
 
       const supportedSections = generatorAdapter.getSupportedSections();
       if (supportedSections) {
         this.loggerService.info(`- Available sections: ${supportedSections.join(', ')}`, input.outputFormat);
+      }
+
+      // Generate the actual documentation content for preview
+      const destinationPath = input.destination ?? generatorAdapter.getDocumentationPath(input.source);
+      const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
+
+      // Use dry-run output adapter to capture content instead of writing files
+      const dryRunOutputAdapter = new DryRunOutputAdapter(formatterAdapter);
+
+      try {
+        // For GitHub Actions, we can generate content using a mock repository
+        if (generatorAdapter.getPlatformName() === 'github-actions') {
+          await this.generateGitHubActionsDryRun(
+            input.source,
+            generatorAdapter,
+            formatterAdapter,
+            dryRunOutputAdapter
+          );
+        } else {
+          // For other platforms, fall back to the regular generation
+          // (which might fail with network errors)
+          await generatorAdapter.generateDocumentation(
+            input.source,
+            formatterAdapter,
+            dryRunOutputAdapter
+          );
+        }
+
+        const result = dryRunOutputAdapter.getResult();
+        const fullContent = result.getFullContent();
+
+        this.loggerService.info('DRY-RUN MODE: Generated documentation preview:', input.outputFormat);
+        this.loggerService.info('----------------------------------------', input.outputFormat);
+        this.loggerService.info(fullContent.toString(), input.outputFormat);
+        this.loggerService.info('----------------------------------------', input.outputFormat);
+      } catch (error) {
+        // If generation fails due to network issues (common in dry-run), show what we can
+        this.loggerService.warn('DRY-RUN MODE: Unable to generate full preview due to network restrictions.', input.outputFormat);
+        this.loggerService.warn('In a real environment, documentation would be generated with:', input.outputFormat);
+        this.loggerService.info(`- Output file: ${destinationPath}`, input.outputFormat);
+        if (supportedSections) {
+          this.loggerService.info(`- Sections: ${supportedSections.join(', ')}`, input.outputFormat);
+        }
       }
 
       this.loggerService.info('DRY-RUN MODE: Documentation generation preview completed successfully!', input.outputFormat);
@@ -251,7 +300,6 @@ export class GenerateDocumentationUseCase {
       message: 'Documentation generated successfully',
       destination,
     };
-
 
     // Log the result at the command level
     this.loggerService.result(result, input.outputFormat);
@@ -349,6 +397,50 @@ export class GenerateDocumentationUseCase {
           }'. Valid platforms: ${validCicdPlatforms.join(', ')}`
         );
       }
+    }
+  }
+
+  /**
+   * Generate GitHub Actions documentation in dry-run mode using mock repository
+   */
+  private async generateGitHubActionsDryRun(
+    source: string,
+    generatorAdapter: GeneratorAdapter,
+    formatterAdapter: FormatterAdapter,
+    outputAdapter: DryRunOutputAdapter
+  ): Promise<void> {
+    // Create a mock repository to avoid network calls
+    const mockRepository = createMockRepository(source);
+
+    // We need to access the GitHub Actions adapter's internals
+    // This is a type assertion since we know it's a GitHub Actions adapter
+    const githubActionsAdapter = generatorAdapter as any;
+
+    if (githubActionsAdapter.gitHubActionsParser && githubActionsAdapter.sectionGeneratorAdapters) {
+      // Parse the source file using the mock repository
+      const gitHubActionOrWorkflow = githubActionsAdapter.gitHubActionsParser.parseFile(
+        source,
+        mockRepository
+      );
+
+      // Generate sections using the mock repository
+      for (const sectionGeneratorAdapter of githubActionsAdapter.sectionGeneratorAdapters) {
+        const sectionContent = sectionGeneratorAdapter.generateSection(
+          formatterAdapter,
+          gitHubActionOrWorkflow,
+          mockRepository
+        );
+
+        await outputAdapter.writeSection(
+          sectionGeneratorAdapter.getSectionIdentifier(),
+          sectionContent.length ? Buffer.concat([
+            sectionContent,
+          ]) : Buffer.alloc(0)
+        );
+      }
+    } else {
+      // Fallback to regular generation if we can't access internals
+      throw new Error('Unable to access GitHub Actions adapter internals for dry-run');
     }
   }
 

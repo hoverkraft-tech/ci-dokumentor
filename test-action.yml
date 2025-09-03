@@ -1,0 +1,22 @@
+name: 'Test Action'
+description: 'A simple test action for dry-run testing'
+author: 'Test Author'
+
+inputs:
+  input1:
+    description: 'First input parameter'
+    required: true
+    default: 'default-value'
+  input2:
+    description: 'Second input parameter'
+    required: false
+
+outputs:
+  output1:
+    description: 'First output'
+  output2:
+    description: 'Second output'
+
+runs:
+  using: 'node20'
+  main: 'index.js'

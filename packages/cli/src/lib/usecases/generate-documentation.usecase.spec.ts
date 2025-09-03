@@ -2,7 +2,7 @@ import { describe, vi, beforeEach, afterEach, Mocked } from 'vitest';
 import mockFs from 'mock-fs';
 
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
-import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
+import { FormatterService, GeneratorService, RepositoryService } from '@ci-dokumentor/core';
 import { GeneratorServiceMockFactory, RepositoryServiceMockFactory, RepositoryProviderMockFactory, GeneratorAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
@@ -12,6 +12,7 @@ describe('GenerateDocumentationUseCase', () => {
   let mockLoggerService: Mocked<LoggerService>;
   let mockGeneratorService: Mocked<GeneratorService>;
   let mockRepositoryService: Mocked<RepositoryService>;
+  let mockFormatterService: Mocked<FormatterService>;
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -33,10 +34,20 @@ describe('GenerateDocumentationUseCase', () => {
       }
     });
 
+    // Create FormatterService mock
+    mockFormatterService = {
+      getFormatterAdapterForFile: vi.fn().mockReturnValue({
+        lineBreak: vi.fn().mockReturnValue(Buffer.from('\n')),
+        comment: vi.fn().mockReturnValue(Buffer.from('<!-- comment -->')),
+        center: vi.fn().mockImplementation((content) => content),
+      })
+    } as any;
+
     generateDocumentationUseCase = new GenerateDocumentationUseCase(
       mockLoggerService,
       mockGeneratorService,
-      mockRepositoryService
+      mockRepositoryService,
+      mockFormatterService
     );
   });
 
@@ -228,24 +239,25 @@ describe('GenerateDocumentationUseCase', () => {
       mockRepositoryService.autoDetectRepositoryProvider.mockResolvedValue(repositoryProviderMock);
       mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(generatorAdapterMock);
 
-      const result = await useCase.execute({ 
+      const result = await generateDocumentationUseCase.execute({
+        outputFormat: 'text',
         source: './action.yml',
-        dryRun: true 
+        dryRun: true
       });
 
       expect(result.success).toBe(true);
       expect(result.message).toBe('Documentation generation preview completed successfully (dry-run mode)');
-      expect(result.outputPath).toBeUndefined();
-      
+      expect(result.destination).toBeUndefined();
+
       // Verify that generation was not called
       expect(mockGeneratorService.generateDocumentationForPlatform).not.toHaveBeenCalled();
-      
+
       // Verify appropriate logging
-      expect(mockLogger.info).toHaveBeenCalledWith('DRY-RUN MODE: Previewing documentation generation...');
-      expect(mockLogger.info).toHaveBeenCalledWith('- Repository platform: github');
-      expect(mockLogger.info).toHaveBeenCalledWith('- CI/CD platform: github-actions');
-      expect(mockLogger.info).toHaveBeenCalledWith('- Available sections: intro, usage, license');
-      expect(mockLogger.info).toHaveBeenCalledWith('DRY-RUN MODE: Documentation generation preview completed successfully!');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('DRY-RUN MODE: Previewing documentation generation...');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('- Repository platform: github');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('- CI/CD platform: github-actions');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('- Available sections: intro, usage, license');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('DRY-RUN MODE: Documentation generation preview completed successfully!');
     });
 
     it('executes dry-run mode with sections correctly', async () => {
@@ -261,7 +273,8 @@ describe('GenerateDocumentationUseCase', () => {
       mockRepositoryService.autoDetectRepositoryProvider.mockResolvedValue(repositoryProviderMock);
       mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(generatorAdapterMock);
 
-      const result = await useCase.execute({ 
+      const result = await generateDocumentationUseCase.execute({
+        outputFormat: 'text',
         source: './action.yml',
         dryRun: true,
         sections: {
@@ -272,14 +285,14 @@ describe('GenerateDocumentationUseCase', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toBe('Documentation generation preview completed successfully (dry-run mode)');
-      expect(result.outputPath).toBeUndefined();
-      
+      expect(result.destination).toBeUndefined();
+
       // Verify that generation was not called
       expect(mockGeneratorService.generateDocumentationForPlatform).not.toHaveBeenCalled();
-      
+
       // Verify section logging
-      expect(mockLogger.info).toHaveBeenCalledWith('Including sections: intro, usage');
-      expect(mockLogger.info).toHaveBeenCalledWith('Excluding sections: license');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('Including sections: intro, usage');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('Excluding sections: license');
     });
 
   })
