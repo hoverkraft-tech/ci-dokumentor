@@ -20,17 +20,35 @@ The CLI package provides:
 
 ### Global Installation
 
+For end users who prefer a global install (creates a `ci-dokumentor` executable on PATH):
+
 ```bash
+# Using npm
 npm install -g @ci-dokumentor/cli
+ci-dokumentor --help
+
+# or using pnpm (global install)
+pnpm add -g @ci-dokumentor/cli
 ci-dokumentor --help
 ```
 
 ### Local Installation
 
+Install as a dev dependency for project-local usage:
+
 ```bash
+# npm
 npm install --save-dev @ci-dokumentor/cli
+
+# pnpm (preferred in this monorepo)
+pnpm add -D @ci-dokumentor/cli
+
+# Run via npx or pnpm
 npx ci-dokumentor --help
+pnpm dlx ci-dokumentor --help
 ```
+
+> Note: This repository uses pnpm workspaces. For contributors, prefer using pnpm commands and workspace builds (see Developer section).
 
 ### Using NPX (No Installation)
 
@@ -121,6 +139,7 @@ ci-dokumentor --output-format json generate --source ./my-project/action.yml
 | `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)                                     | -          |
 | `--include-sections <sections>` | -     | Comma-separated list of sections to include                                         | -          |
 | `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude                                         | -          |
+| `--dry-run`                     | -     | Preview what would be generated without writing files                               | `false`    |
 
 #### Supported Platforms
 
@@ -152,6 +171,9 @@ ci-dokumentor generate --source ./actions/action.yml --repository github --cicd 
 # Generate with different output formats
 ci-dokumentor --output-format json generate --source ./actions/action.yml
 ci-dokumentor --output-format github-action generate --source ./actions/action.yml
+
+# Preview changes without writing files (dry run)
+ci-dokumentor generate --source ./actions/action.yml --dry-run
 ```
 
 #### Multiple files

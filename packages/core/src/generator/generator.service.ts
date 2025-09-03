@@ -1,16 +1,23 @@
+import { inject, injectable, multiInject } from 'inversify';
 import {
+  GenerateSectionsOptions,
   GENERATOR_ADAPTER_IDENTIFIER,
   GeneratorAdapter,
 } from './generator.adapter.js';
-import { FileOutputAdapter } from '../output/file-output.adapter.js';
-import { inject, injectable, multiInject } from 'inversify';
+import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
+import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
 import { FormatterService } from '../formatter/formatter.service.js';
+import { RepositoryProvider } from '../repository/repository.provider.js';
 
 @injectable()
 export class GeneratorService {
   constructor(
     @inject(FormatterService)
     private readonly formatterService: FormatterService,
+    @inject(FileRendererAdapter)
+    private readonly fileRendererAdapter: FileRendererAdapter,
+    @inject(DiffRendererAdapter)
+    private readonly diffRendererAdapter: DiffRendererAdapter,
     @multiInject(GENERATOR_ADAPTER_IDENTIFIER)
     private readonly generatorAdapters: GeneratorAdapter[]
   ) { }
@@ -58,36 +65,48 @@ export class GeneratorService {
   }
 
   /**
-   * Generates documentation for the given path using a specific CI/CD platform adapter.
+   * Generates documentation for a given CI/CD platform
    */
-  async generateDocumentationForPlatform(
-    adapter: GeneratorAdapter,
-    source: string,
-    output?: string
-  ): Promise<string> {
+  async generateDocumentationForPlatform({
+    source,
+    destination,
+    dryRun,
+    sections,
+    generatorAdapter,
+    repositoryProvider,
+  }: {
+    source: string;
+    destination?: string;
+    dryRun: boolean;
+    sections: GenerateSectionsOptions;
+    generatorAdapter: GeneratorAdapter;
+    repositoryProvider: RepositoryProvider;
+  }): Promise<{ destination: string; data: string | undefined }> {
     // Check if the adapter supports the source path
-    if (!adapter.supportsSource(source)) {
+    if (!generatorAdapter.supportsSource(source)) {
       throw new Error(
-        `CI/CD platform '${adapter.getPlatformName()}' does not support source '${source}'`
+        `CI/CD platform '${generatorAdapter.getPlatformName()}' does not support source '${source}'`
       );
     }
 
-    const destinationPath = output ?? adapter.getDocumentationPath(source);
-    const formatterAdapter =
-      this.formatterService.getFormatterAdapterForFile(destinationPath);
+    const destinationPath = destination ?? generatorAdapter.getDocumentationPath(source);
+    const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
 
-    // Use FileOutputAdapter for writing to files
-    const outputAdapter = new FileOutputAdapter(
-      destinationPath,
-      formatterAdapter
-    );
+    // Use provided renderer adapter or default to FileRenderer
+    const rendererAdapter = dryRun ? this.diffRendererAdapter : this.fileRendererAdapter;
 
-    await adapter.generateDocumentation(
+    // Initialize renderer for this destination
+    await rendererAdapter.initialize(destinationPath, formatterAdapter);
+
+    await generatorAdapter.generateDocumentation({
       source,
-      formatterAdapter,
-      outputAdapter
-    );
+      sections,
+      rendererAdapter,
+      repositoryProvider
+    });
 
-    return destinationPath;
+    const data = await rendererAdapter.finalize();
+
+    return { destination: destinationPath, data };
   }
 }

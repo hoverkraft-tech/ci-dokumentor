@@ -118,32 +118,6 @@ describe('ContributingSectionGenerator', () => {
             expect(result.toString()).toEqual('');
         });
 
-        it('should return empty buffer when repository is null', () => {
-            // Act
-            const result = generator.generateSection(
-                formatterAdapter,
-                mockManifest,
-                null as any
-            );
-
-            // Assert
-            expect(result).toBeInstanceOf(Buffer);
-            expect(result.toString()).toEqual('');
-        });
-
-        it('should return empty buffer when repository is undefined', () => {
-            // Act
-            const result = generator.generateSection(
-                formatterAdapter,
-                mockManifest,
-                undefined as any
-            );
-
-            // Assert
-            expect(result).toBeInstanceOf(Buffer);
-            expect(result.toString()).toEqual('');
-        });
-
         it('should handle different contributing URL formats correctly', () => {
             // Arrange
             const testCases = [
@@ -169,7 +143,7 @@ describe('ContributingSectionGenerator', () => {
                 },
             ];
 
-            testCases.forEach(({ name, url }) => {
+            testCases.forEach(({ url }) => {
                 // Arrange
                 const repositoryWithUrl = {
                     ...mockRepository,

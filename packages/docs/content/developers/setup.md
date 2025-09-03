@@ -205,9 +205,15 @@ pnpm test
 # Run linting
 pnpm lint
 
-# Check CLI functionality
+# Check CLI functionality (development)
+# Option A: build and run the packaged CLI directly
 cd packages/cli
-npm link
+pnpm build
+node dist/bin/ci-dokumentor.js --help
+
+# Option B: create a global symlink for local development (pnpm workspace-aware)
+# This mirrors `npm link` behavior but uses pnpm. Requires pnpm installed globally.
+pnpm link --global
 ci-dokumentor --help
 ```
 
@@ -285,16 +291,6 @@ COMPOSE_DOCKER_CLI_BUILD=1
 
 ### Git Configuration
 
-#### Set up Git hooks
-
-```bash
-# Install Git hooks (optional)
-npm install -g husky
-npx husky install
-
-# This will run linting and tests before commits
-```
-
 #### Configure Git for the project
 
 ```bash
@@ -344,7 +340,7 @@ pnpm lint --fix
 
 # Test CLI functionality
 cd packages/cli
-npm link
+pnpm link --global
 ci-dokumentor --help
 ```
 
@@ -405,8 +401,8 @@ npm run build -- --watch
 ```bash
 cd packages/cli
 
-# Link for global usage
-npm link
+# Link for global usage (pnpm workspace-aware)
+pnpm link --global
 
 # Test CLI commands
 ci-dokumentor --help

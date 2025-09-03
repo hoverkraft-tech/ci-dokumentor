@@ -46,10 +46,28 @@ export class TextLoggerAdapter implements LoggerAdapter {
    * Log a result message
    */
   result(data: unknown): void {
+    if (Array.isArray(data)) {
+      return this.resultArray(data);
+    }
     if (typeof data === 'object' && data !== null) {
-      console.log(`✅ Result:\n${JSON.stringify(data, null, 2)}`);
-    } else {
-      console.log(`✅ Result: ${data}`);
+      return this.resultObject(data);
+    }
+    console.info(`✅ Result: ${data}`);
+  }
+
+  private resultArray(data: unknown[]): void {
+    console.info(`✅ Result:`);
+    data.forEach((item) => {
+      const stringValue = typeof item === 'string' ? item : JSON.stringify(item);
+      console.info(`   - ${stringValue}`);
+    });
+  }
+
+  private resultObject(data: object): void {
+    console.info(`✅ Result:`);
+    for (const [key, value] of Object.entries(data)) {
+      const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+      console.info(`   - ${key}: ${stringValue}`);
     }
   }
 }

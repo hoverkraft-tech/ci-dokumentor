@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifier } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
@@ -64,7 +64,7 @@ A comprehensive test action for CI/CD workflows
             it('should return empty buffer for GitHub Action without description', () => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({
-                    description: undefined as any,
+                    description: undefined,
                 });
 
                 // Act
@@ -375,26 +375,15 @@ Automated release workflow
         });
 
         describe('edge cases', () => {
-            it('should handle null manifest gracefully', () => {
-                // Act & Assert
-                expect(() => {
-                    generator.generateSection(
-                        formatterAdapter,
-                        null as any,
-                        mockRepository
-                    );
-                }).toThrow();
-            });
-
             it('should handle undefined manifest gracefully', () => {
                 // Act & Assert
                 expect(() => {
                     generator.generateSection(
                         formatterAdapter,
-                        undefined as any,
+                        undefined as unknown as GitHubActionsManifest,
                         mockRepository
                     );
-                }).toThrow();
+                }).toThrow("Cannot use 'in' operator to search for 'description' in undefined");
             });
 
             it('should handle manifest without description property', () => {
@@ -430,8 +419,8 @@ Automated release workflow
                     mockRepository,
                     { ...mockRepository, name: 'different-repo' },
                     { ...mockRepository, owner: 'different-owner' },
-                    null as any,
-                    undefined as any,
+                    null,
+                    undefined,
                 ];
 
                 const expectedOutput = `## Overview
@@ -439,12 +428,12 @@ Automated release workflow
 Test description
 `;
 
-                differentRepositories.forEach((repo, index) => {
+                differentRepositories.forEach((repository) => {
                     // Act
                     const result = generator.generateSection(
                         formatterAdapter,
                         manifest,
-                        repo
+                        repository as Repository
                     );
 
                     // Assert

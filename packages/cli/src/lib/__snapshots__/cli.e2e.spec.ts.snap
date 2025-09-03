@@ -34,10 +34,122 @@ Options:
   -i, --include-sections <sections>  Comma-separated list of sections to include
   -e, --exclude-sections <sections>  Comma-separated list of sections to exclude
   --dry-run                          Preview what would be generated without
-                                     writing files
+                                     writing files (default: false)
   -h, --help                         display help for command
 
 Commands:
   help [command]                     display help for command
+"
+`;
+
+exports[`CLI > cli function > should run generate command in dry-mode 1`] = `
+"[DRY RUN] Starting documentation generation...
+Source manifest: /test/action.yml
+Destination path: test.md
+Auto-detected CI/CD platform: github-actions
+Repository platform: git
+Documentation generated successfully!
+(Dry-run) Documentation would be saved to: test.md
+✅ Result:
+   - success: true
+   - destination: test.md
+   - data: Index: test.md
+===================================================================
+--- test.md
++++ test.md
+@@ -0,0 +1,93 @@
++<!-- header:start -->
++<div align="center">
++  # ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYm9vay1vcGVuIiBjb2xvcj0iYmx1ZSI+PHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhMyAzIDAgMCAwLTMtM0gyeiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMiAzaC02YTQgNCAwIDAgMC00IDR2MTRhMyAzIDAgMCAxIDMtM2g3eiI+PC9wYXRoPjwvc3ZnPg==) GitHub Action: CI Dokumentor
++</div>
++
++<!-- header:end -->
++<!-- badges:start -->
++[![Marketplace](https://img.shields.io/badge/Marketplace-ci--dokumentor-blue?logo=github-actions)](https://github.com/marketplace/actions/ci-dokumentor)
++[![Release](https://img.shields.io/github/v/release/hoverkraft-tech/ci-dokumentor)](https://github.com/hoverkraft-tech/ci-dokumentor/releases)
++[![License](https://img.shields.io/github/license/hoverkraft-tech/ci-dokumentor)](https://img.shields.io/github/license/hoverkraft-tech/ci-dokumentor)
++[![Stars](https://img.shields.io/github/stars/hoverkraft-tech/ci-dokumentor?style=social)](https://img.shields.io/github/stars/hoverkraft-tech/ci-dokumentor?style=social)
++
++<!-- badges:end -->
++<!-- overview:start -->
++## Overview
++
++Automatically generate documentation for CI/CD components like GitHub Actions and workflows
++
++<!-- overview:end -->
++<!-- usage:start -->
++## Usage
++
++\`\`\`yaml
++- uses: hoverkraft-tech/ci-dokumentor/test
++  with:
++    # Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).
++    # This input is required.
++    source: ""
++
++    # Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
++    destination: ""
++
++    # Repository platform (auto-detected if not specified).
++    repository: ""
++
++    # CI/CD platform (github-actions, gitlab-ci, etc.).
++    cicd: ""
++
++    # Comma-separated list of sections to include.
++    include-sections: ""
++
++    # Comma-separated list of sections to exclude.
++    exclude-sections: ""
++
++    # Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
++    # Default: \`latest\`
++    version: latest
++
++    # The GitHub token used to fetch repository information.
++    # Default: \`\${{ github.token }}\`
++    github-token: \${{ github.token }}
++
++    # Whether to perform a dry run (no files are written).
++    # Default: \`false\`
++    dry-run: "false"
++
++\`\`\`
++
++<!-- usage:end -->
++<!-- inputs:start -->
++## Inputs
++
++| **Input** | **Description** | **Required** | **Default** |
++| --- | --- | --- | --- |
++| **\`source\`** | Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`). | **true** | \`\` |
++| **\`destination\`** | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter). | **false** | \`\` |
++| **\`repository\`** | Repository platform (auto-detected if not specified). | **false** | \`\` |
++| **\`cicd\`** | CI/CD platform (github-actions, gitlab-ci, etc.). | **false** | \`\` |
++| **\`include-sections\`** | Comma-separated list of sections to include. | **false** | \`\` |
++| **\`exclude-sections\`** | Comma-separated list of sections to exclude. | **false** | \`\` |
++| **\`version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>. | **false** | \`latest\` |
++| **\`github-token\`** | The GitHub token used to fetch repository information. | **false** | \`\${{ github.token }}\` |
++| **\`dry-run\`** | Whether to perform a dry run (no files are written). | **false** | \`false\` |
++
++<!-- inputs:end -->
++<!-- outputs:start -->
++## Outputs
++
++| **Output** | **Description** |
++| --- | --- |
++| **\`destination\`** | Destination path for generated documentation. |
++
++<!-- outputs:end -->
++<!-- secrets:start -->
++<!-- secrets:end -->
++<!-- contributing:start -->
++<!-- contributing:end -->
++<!-- license:start -->
++<!-- license:end -->
++<!-- generated:start -->
++This documentation was automatically generated by [CI Dokumentor](https://github.com/hoverkraft-tech/ci-dokumentor).
++
++<!-- generated:end -->
 "
 `;

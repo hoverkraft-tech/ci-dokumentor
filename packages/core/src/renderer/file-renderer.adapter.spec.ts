@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'node:fs';
-import { FileOutputAdapter } from './file-output.adapter.js';
 import { MarkdownFormatterAdapter } from '../formatter/markdown-formatter.adapter.js';
+import { FileRendererAdapter } from './file-renderer.adapter.js';
 
-describe('FileOutputAdapter', () => {
-  let formatter: MarkdownFormatterAdapter;
+describe('FileRendererAdapter', () => {
+  let formatterAdapter: MarkdownFormatterAdapter;
 
-  let adapter: FileOutputAdapter;
+  let fileRendererAdapter: FileRendererAdapter;
   const testFilePath = '/test/document.md';
   const testSectionIdentifier = 'test-section';
   const testData = Buffer.from('New section content');
@@ -45,9 +45,9 @@ describe('FileOutputAdapter', () => {
       },
     });
 
-    formatter = new MarkdownFormatterAdapter();
+    formatterAdapter = new MarkdownFormatterAdapter();
 
-    adapter = new FileOutputAdapter(testFilePath, formatter);
+    fileRendererAdapter = new FileRendererAdapter();
   });
 
   afterEach(() => {
@@ -55,18 +55,11 @@ describe('FileOutputAdapter', () => {
     mockFs.restore();
   });
 
-  describe('constructor', () => {
-    it('should create an instance with the provided file path', () => {
-      const filePath = '/test/document.md';
-      const instance = new FileOutputAdapter(filePath, formatter);
-      expect(instance).toBeInstanceOf(FileOutputAdapter);
-    });
-  });
-
   describe('writeSection', () => {
     it('should append a new section when the file exists but has no matching section', async () => {
       // Act
-      await adapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -79,16 +72,11 @@ describe('FileOutputAdapter', () => {
 
     it('should replace existing section content when section already exists', async () => {
       // Arrange
-      const adapterWithExistingSection = new FileOutputAdapter(
-        '/test/existing-section.md',
-        formatter
-      );
+      const adapterWithExistingSection = new FileRendererAdapter();
 
       // Act
-      await adapterWithExistingSection.writeSection(
-        testSectionIdentifier,
-        testData
-      );
+      await adapterWithExistingSection.initialize('/test/existing-section.md', formatterAdapter);
+      await adapterWithExistingSection.writeSection(testSectionIdentifier, testData);
 
       // Assert
       const fileContent = readFileSync('/test/existing-section.md', 'utf-8');
@@ -102,12 +90,10 @@ describe('FileOutputAdapter', () => {
 
     it('should handle empty files correctly', async () => {
       // Arrange
-      const emptyFileAdapter = new FileOutputAdapter(
-        '/test/empty.md',
-        formatter
-      );
+      const emptyFileAdapter = new FileRendererAdapter();
 
       // Act
+      await emptyFileAdapter.initialize('/test/empty.md', formatterAdapter);
       await emptyFileAdapter.writeSection(testSectionIdentifier, testData);
 
       // Assert
@@ -121,13 +107,11 @@ New section content
 
     it('should handle multiple sections without affecting other sections', async () => {
       // Arrange
-      const multipleSectionsAdapter = new FileOutputAdapter(
-        '/test/multiple-sections.md',
-        formatter
-      );
+      const multipleSectionsAdapter = new FileRendererAdapter();
       const newData = Buffer.from('Updated second section');
 
       // Act
+      await multipleSectionsAdapter.initialize('/test/multiple-sections.md', formatterAdapter);
       await multipleSectionsAdapter.writeSection('second-section', newData);
 
       // Assert
@@ -157,7 +141,8 @@ New section content
       );
 
       // Act
-      await adapter.writeSection(testSectionIdentifier, complexData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, complexData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -171,7 +156,8 @@ New section content
       const emptyData = Buffer.from('');
 
       // Act
-      await adapter.writeSection(testSectionIdentifier, emptyData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, emptyData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -201,7 +187,8 @@ New section content
       const specialData = Buffer.from('Special content');
 
       // Act
-      await adapter.writeSection(specialIdentifier, specialData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(specialIdentifier, specialData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -212,7 +199,8 @@ New section content
 
     it('should preserve file content order when adding new section', async () => {
       // Act
-      await adapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -231,12 +219,10 @@ New section content
 
     it('should handle non-existent file by creating it', async () => {
       // Arrange
-      const newFileAdapter = new FileOutputAdapter(
-        '/test/new-file.md',
-        formatter
-      );
+      const newFileAdapter = new FileRendererAdapter();
 
       // Act & Assert - This should fail because the file doesn't exist
+      await newFileAdapter.initialize('/test/new-file.md', formatterAdapter);
       await newFileAdapter.writeSection(testSectionIdentifier, testData);
 
       expect(existsSync('/test/new-file.md')).toBe(true);
@@ -246,7 +232,8 @@ New section content
   describe('section markers', () => {
     it('should generate correct start markers', async () => {
       // Act
-      await adapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -255,7 +242,8 @@ New section content
 
     it('should generate correct end markers', async () => {
       // Act
-      await adapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -267,7 +255,8 @@ New section content
       const emptyIdentifier = '';
 
       // Act
-      await adapter.writeSection(emptyIdentifier, testData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(emptyIdentifier, testData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -289,28 +278,24 @@ New section content
         },
       });
 
-      const readOnlyAdapter = new FileOutputAdapter(
-        '/readonly/document.md',
-        formatter
-      );
+      const readOnlyAdapter = new FileRendererAdapter();
 
       // Act & Assert
+      await readOnlyAdapter.initialize(testFilePath, formatterAdapter);
       await expect(
         readOnlyAdapter.writeSection(testSectionIdentifier, testData)
-      ).rejects.toThrow();
+      ).rejects.toThrow('test');
     });
 
     it('should handle invalid file paths', async () => {
       // Arrange
-      const invalidPathAdapter = new FileOutputAdapter(
-        '/nonexistent/path/file.md',
-        formatter
-      );
+      const invalidPathAdapter = new FileRendererAdapter();
 
       // Act & Assert
+      await invalidPathAdapter.initialize('/nonexistent/path/file.md', formatterAdapter);
       await expect(
         invalidPathAdapter.writeSection(testSectionIdentifier, testData)
-      ).rejects.toThrow();
+      ).rejects.toThrow("ENOENT, no such file or directory '/nonexistent/path/file.md'");
     });
   });
 
@@ -322,9 +307,10 @@ New section content
       const thirdData = Buffer.from('Third content');
 
       // Act
-      await adapter.writeSection(testSectionIdentifier, firstData);
-      await adapter.writeSection(testSectionIdentifier, secondData);
-      await adapter.writeSection(testSectionIdentifier, thirdData);
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, firstData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, secondData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, thirdData);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -353,9 +339,10 @@ New section content
       const section2Data = Buffer.from('Section 2 content');
 
       // Act - Simulate concurrent writes to different sections
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
       await Promise.all([
-        adapter.writeSection('section-1', section1Data),
-        adapter.writeSection('section-2', section2Data),
+        fileRendererAdapter.writeSection('section-1', section1Data),
+        fileRendererAdapter.writeSection('section-2', section2Data),
       ]);
 
       // Assert

@@ -57,6 +57,9 @@ export class LoggerService {
    */
   private getLogger(format: string | undefined): LoggerAdapter {
     if (format === undefined) {
+      if (this.loggerAdapters.length === 0) {
+        throw new Error('No logger adapters are configured');
+      }
       return this.loggerAdapters[0];
     }
 

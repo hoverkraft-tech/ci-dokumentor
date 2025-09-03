@@ -14,9 +14,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./tests": {
+      "development": "./__tests__/index.ts",
+      "types": "./dist/__tests__/index.d.ts",
+      "import": "./dist/__tests__/index.js",
+      "default": "./dist/__tests__/index.js"
     }
   },
   "dependencies": {
-    "inversify": "^7.9.1"
+    "inversify": "^7.9.1",
+    "diff": "^8.0.2"
   }
 }

@@ -48,6 +48,8 @@ type Repository = {
 };
 ```
 
+**Note**: The runtime `Repository` type in source also includes optional `contributing` metadata (a small object with a `url` field) used by some generator adapters.
+
 #### GeneratorService
 
 Manages CI/CD platform adapters and documentation generation
@@ -64,15 +66,34 @@ Interface for repository platform providers:
 
 ```typescript
 interface RepositoryProvider<
-  Options extends Record<string, unknown> = Record<string, unknown>,
+  Options extends RepositoryOptions = RepositoryOptions,
 > {
   getPlatformName(): string;
-  // Returns a record keyed by option names where each key maps to an OptionDescriptor
-  getOptions(): Record<keyof Options, OptionDescriptor>;
-  // Apply runtime options (partial) to the provider
-  setOptions(options: Partial<Options>): void;
+
+  /**
+   * Priority used during auto-detection. Higher values are checked first.
+   */
+  getPriority(): number;
+
+  /**
+   * Check whether this provider supports the current repository context
+   */
   supports(): Promise<boolean>;
+
+  /**
+   * Return repository information
+   */
   getRepository(): Promise<Repository>;
+
+  /**
+   * Optional: provide CLI option descriptors specific to this provider
+   */
+  getOptions(): RepositoryOptionsDescriptors<Options>;
+
+  /**
+   * Optional: apply runtime option values to the provider
+   */
+  setOptions(options: Partial<Options>): void;
 }
 ```
 
@@ -83,14 +104,19 @@ Interface for CI/CD platform adapters:
 ```typescript
 interface GeneratorAdapter {
   getPlatformName(): string;
+
   getSupportedSections(): string[];
+
   supportsSource(source: string): boolean;
+
   getDocumentationPath(source: string): string;
-  generateDocumentation(
-    source: string,
-    formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter,
-  ): Promise<void>;
+
+  generateDocumentation(args: {
+    source: string;
+    sections: GenerateSectionsOptions;
+    rendererAdapter: RendererAdapter;
+    repositoryProvider: RepositoryProvider;
+  }): Promise<void>;
 }
 ```
 
@@ -100,17 +126,59 @@ Interface for content formatters:
 
 ```typescript
 interface FormatterAdapter {
-  // Formatting methods for different content types
+  supportsLanguage(language: FormatterLanguage): boolean;
+
+  heading(input: Buffer, level?: number): Buffer;
+
+  center(input: Buffer): Buffer;
+
+  comment(input: Buffer): Buffer;
+
+  paragraph(input: Buffer): Buffer;
+
+  bold(input: Buffer): Buffer;
+
+  italic(input: Buffer): Buffer;
+
+  code(input: Buffer, language?: Buffer): Buffer;
+
+  inlineCode(input: Buffer): Buffer;
+
+  link(text: Buffer, url: Buffer): Buffer;
+
+  image(
+    url: Buffer,
+    altText: Buffer,
+    options?: { width?: string; align?: string },
+  ): Buffer;
+
+  table(headers: Buffer[], rows: Buffer[][]): Buffer;
+
+  badge(label: Buffer, message: Buffer, color?: Buffer): Buffer;
+
+  lineBreak(): Buffer;
 }
 ```
 
-#### OutputAdapter
+#### RendererAdapter
 
-Interface for output handling:
+Interface for rendering/finalization adapters (used by generator adapters to produce output or diffs):
 
 ```typescript
-interface OutputAdapter {
-  // Output methods for writing generated content
+interface RendererAdapter {
+  initialize(
+    destination: string,
+    formatterAdapter: FormatterAdapter,
+  ): Promise<void>;
+
+  getFormatterAdapter(): FormatterAdapter;
+
+  writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
+
+  /**
+   * Finalize rendering and return an optional string (for example a diff)
+   */
+  finalize(): Promise<string | undefined>;
 }
 ```
 
