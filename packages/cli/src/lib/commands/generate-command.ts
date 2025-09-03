@@ -15,6 +15,7 @@ export type GenerateCommandOptions = {
   cicd?: string;
   includeSections?: string;
   excludeSections?: string;
+  dryRun?: boolean;
   [key: string]: unknown; // Allow dynamic keys for provider-specific options
 };
 
@@ -73,6 +74,10 @@ export class GenerateCommand extends BaseCommand {
       .option(
         '-e, --exclude-sections <sections>',
         'Comma-separated list of sections to exclude'
+      )
+      .option(
+        '--dry-run',
+        'Preview what would be generated without writing files'
       )
       .hook('preAction', async (thisCommand) => {
         await this.populateSupportedOptions(thisCommand);
@@ -135,7 +140,8 @@ export class GenerateCommand extends BaseCommand {
     const generateOptions: GenerateDocumentationUseCaseInput = {
       source: options.source,
       destination: options.destination,
-      outputFormat: this.getOutputFormatOption(this)
+      outputFormat: this.getOutputFormatOption(this),
+      dryRun: options.dryRun,
     };
 
     // Handle repository platform options
