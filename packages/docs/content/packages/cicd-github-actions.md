@@ -86,6 +86,7 @@ The package includes the following section generators:
 - **SecuritySectionGenerator** - Security considerations
 - **LicenseSectionGenerator** - License information
 - **ContributingSectionGenerator** - Contributing guidelines
+- **GeneratedSectionGenerator** - CI Dokumentor attribution
 
 ## Features
 
