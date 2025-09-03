@@ -20,6 +20,7 @@ import { OutputsSectionGenerator } from './section/outputs-section-generator.ada
 import { SecretsSectionGenerator } from './section/secrets-section-generator.adapter.js';
 import { ContributingSectionGenerator } from './section/contributing-section-generator.adapter.js';
 import { LicenseSectionGenerator } from './section/license-section-generator.adapter.js';
+import { GeneratedSectionGenerator } from './section/generated-section-generator.adapter.js';
 
 let container: Container | null = null;
 
@@ -83,6 +84,9 @@ export function initContainer(
   container
     .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(LicenseSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(GeneratedSectionGenerator);
 
   return container;
 }
