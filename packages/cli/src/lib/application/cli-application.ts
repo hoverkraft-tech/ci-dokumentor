@@ -56,6 +56,7 @@ export class CliApplication {
       '-o, --output-format <format>',
       'Output format for the CLI'
     ).choices(supportedFormats);
+    // Default is the first supported format
     outputFormatOption.default(supportedFormats[0]);
     this.program.addOption(outputFormatOption);
 
