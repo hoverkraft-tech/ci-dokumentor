@@ -53,7 +53,7 @@ describe('GenerateCommand', () => {
 
     it('should have correct description', () => {
       expect(generateCommand.description()).toBe(
-        'Generate documentation from CI/CD configuration files'
+        'Generate documentation from CI/CD manifest files'
       );
     });
 
@@ -62,7 +62,7 @@ describe('GenerateCommand', () => {
       const optionFlags = options.map((opt) => opt.flags);
 
       expect(optionFlags).toContain('-s, --source <file>');
-      expect(optionFlags).toContain('-d, --destination <dir>');
+      expect(optionFlags).toContain('-d, --destination <file>');
       expect(optionFlags).toContain('-r, --repository <platform>');
       expect(optionFlags).toContain('-c, --cicd <platform>');
       expect(optionFlags).toContain('-i, --include-sections <sections>');

@@ -1,8 +1,10 @@
+import { injectable } from 'inversify';
 import type { LoggerAdapter } from './logger.adapter.js';
 
 /**
  * JSON logger adapter for structured output
  */
+@injectable()
 export class JsonLoggerAdapter implements LoggerAdapter {
 
   getFormat(): string {
@@ -41,6 +43,6 @@ export class JsonLoggerAdapter implements LoggerAdapter {
    * Log a result message
    */
   result(data: unknown): void {
-    console.log({ level: 'result', data });
+    console.log(JSON.stringify({ level: 'result', data }));
   }
 }

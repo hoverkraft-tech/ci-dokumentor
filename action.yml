@@ -48,7 +48,7 @@ runs:
       run: |
         source="${{ inputs.source }}"
         echo "::debug::Source path set to: $source"
-        envs=""
+        envs="-e GITHUB_OUTPUT"
         args="generate --output-format "github-action" --source "$source""
 
         destination="${{ inputs.destination }}"
@@ -95,6 +95,7 @@ runs:
 
         docker run --rm \
           -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+          -v "$GITHUB_OUTPUT:$GITHUB_OUTPUT" \
           -u "$(id -u):$(id -g)" \
           -w "$GITHUB_WORKSPACE" \
           $envs \

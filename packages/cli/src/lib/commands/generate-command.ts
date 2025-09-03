@@ -46,14 +46,14 @@ export class GenerateCommand extends BaseCommand {
 
     return this.name('generate')
       .alias('gen')
-      .description('Generate documentation from CI/CD configuration files')
+      .description('Generate documentation from CI/CD manifest files')
       .requiredOption(
         '-s, --source <file>',
         'Source manifest file path to handle'
       )
       .option(
-        '-d, --destination <dir>',
-        'Destination path for generated documentation (auto-detected if not specified)',
+        '-d, --destination <file>',
+        'Destination file path for generated documentation (auto-detected if not specified)',
       )
       .addOption(
         new Option(

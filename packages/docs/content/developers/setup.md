@@ -353,11 +353,13 @@ ci-dokumentor --help
 ```bash
 # Test your changes with a real action.yml file
 cd /path/to/test/project
-ci-dokumentor action.yml --output docs --verbose
+ci-dokumentor generate --source action.yml
 
 # Test with Docker
-docker build -f docker/Dockerfile -t ci-dokumentor:dev .
-docker run --rm -v $(pwd):/workspace ci-dokumentor:dev /workspace/action.yml
+make docker-build
+
+cd /path/to/test/project
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) ci-dokumentor:latest generate --source /workspace/action.yml
 ```
 
 ### Working with NX
@@ -408,10 +410,10 @@ npm link
 
 # Test CLI commands
 ci-dokumentor --help
-ci-dokumentor action.yml --output docs
+ci-dokumentor generate --source action.yml
 
 # Debug CLI
-node --inspect-brk dist/bin/ci-dokumentor.js action.yml
+node --inspect-brk dist/bin/ci-dokumentor.js generate --source action.yml
 ```
 
 #### Repository Packages
@@ -419,11 +421,11 @@ node --inspect-brk dist/bin/ci-dokumentor.js action.yml
 ```bash
 cd packages/repository/github
 
-# Test with real GitHub repositories
-npm run test -- --grep "integration"
+# Run tests in watch mode
+npm run test -- --watch
 
-# Test with GitHub token
-GITHUB_TOKEN=your_token npm test
+# Build and watch for changes
+npm run build -- --watch
 ```
 
 ## Debugging
@@ -435,7 +437,7 @@ GITHUB_TOKEN=your_token npm test
 ```bash
 # Debug CLI with Node.js inspector
 cd packages/cli
-node --inspect-brk dist/bin/ci-dokumentor.js action.yml --verbose
+node --inspect-brk dist/bin/ci-dokumentor.js generate --source action.yml
 
 # Open Chrome DevTools: chrome://inspect
 ```
@@ -453,7 +455,7 @@ Create `.vscode/launch.json`:
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/packages/cli/dist/bin/ci-dokumentor.js",
-      "args": ["action.yml", "--output", "docs", "--verbose"],
+      "args": ["generate", "--source", "action.yml"],
       "cwd": "${workspaceFolder}/test-data",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
@@ -480,7 +482,7 @@ pnpm test -- packages/core/src/specific-test.spec.ts
 make docker-shell
 
 # Inside container:
-# node dist/bin/ci-dokumentor.js --help
+# node /app/dist/bin/ci-dokumentor.js --help
 ```
 
 ## Troubleshooting

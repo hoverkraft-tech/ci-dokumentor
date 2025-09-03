@@ -96,10 +96,10 @@ See `packages/cicd/github-actions/src/section-generators/usage.spec.ts` for an e
 pnpm test -- --update-snapshots
 
 # Update snapshots for specific package
-pnpm test --filter @ci-dokumentor/core -- --update-snapshots
+pnpm nx run @ci-dokumentor/cli:test --update-snapshots
 
 # Update specific snapshot
-pnpm test -- --update-snapshots --grep "usage section"
+pnpm test --update-snapshots --grep "usage section"
 ```
 
 ## Running Tests
@@ -111,7 +111,7 @@ pnpm test -- --update-snapshots --grep "usage section"
 pnpm test
 
 # Run tests for specific package
-pnpm test --filter @ci-dokumentor/core
+pnpm nx run @ci-dokumentor/cli:test
 
 # Run tests in watch mode
 pnpm test -- --watch
@@ -120,7 +120,7 @@ pnpm test -- --watch
 pnpm test:ci
 
 # Run specific test file
-pnpm test packages/core/src/services/repository.service.spec.ts
+pnpm nx run @ci-dokumentor/core:test packages/core/src/services/repository.service.spec.ts
 ```
 
 ### Advanced Test Commands

@@ -51,15 +51,14 @@ export class FilePackageService implements PackageService {
     // Get the directory of the current module
     const currentDir = dirname(fileURLToPath(import.meta.url));
 
-    // Navigate up to the package root
-    let packageJsonPath = join(currentDir, '../../package.json');
-
-    if (existsSync(packageJsonPath)) {
-      return packageJsonPath;
+    let level = 1;
+    while (level++ < 4) {
+      const potentialPath = join(currentDir, ...Array(level).fill('..'), 'package.json');
+      if (existsSync(potentialPath)) {
+        return potentialPath;
+      }
     }
 
-    // If not found, try one level up
-    packageJsonPath = join(currentDir, '../../../package.json');
-    return packageJsonPath;
+    throw new Error('package.json not found in "' + currentDir + '" parent directories');
   }
 }

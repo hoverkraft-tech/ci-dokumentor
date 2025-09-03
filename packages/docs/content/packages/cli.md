@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # CLI Package
 
-The `@ci-dokumentor/cli` package provides a command-line interface for generating documentation from CI/CD configuration files.
+The `@ci-dokumentor/cli` package provides a command-line interface for generating documentation from CI/CD manifest files.
 
 ## Overview
 
@@ -105,7 +105,7 @@ The main command for generating documentation from CI/CD files.
 ci-dokumentor generate --source ./my-project/action.yml
 
 # Generate with specific source and explicit destination
-ci-dokumentor generate --source ./my-project/action.yml --destination ./my-docs
+ci-dokumentor generate --source ./my-project/action.yml --destination ./my-docs/README.md
 
 # Generate with JSON output format
 ci-dokumentor --output-format json generate --source ./my-project/action.yml
@@ -116,7 +116,7 @@ ci-dokumentor --output-format json generate --source ./my-project/action.yml
 | Option                          | Alias | Description                                                                         | Default    |
 | ------------------------------- | ----- | ----------------------------------------------------------------------------------- | ---------- |
 | `--source <file>`               | `-s`  | Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`) | (required) |
-| `--destination <dir>`           | `-d`  | Destination path for generated documentation (auto-detected if not specified)       | -          |
+| `--destination <file>`          | `-d`  | Destination file path for generated documentation (auto-detected if not specified)  | -          |
 | `--repository <platform>`       | `-r`  | Repository platform (auto-detected if not specified)                                | -          |
 | `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)                                     | -          |
 | `--include-sections <sections>` | -     | Comma-separated list of sections to include                                         | -          |
@@ -124,7 +124,7 @@ ci-dokumentor --output-format json generate --source ./my-project/action.yml
 
 #### Supported Platforms
 
-Some extra options may be available depending on the specific repository or CI/CD configuration.
+Some extra options may be available depending on the specific repository or CI/CD manifest.
 
 Depending on the context, the following platforms are supported:
 
@@ -144,7 +144,7 @@ Depending on the context, the following platforms are supported:
 ci-dokumentor generate --source ./actions/action.yml
 
 # Generate with explicit destination
-ci-dokumentor generate --source ./actions/action.yml --destination ./action-docs
+ci-dokumentor generate --source ./actions/action.yml --destination ./action-docs/README.md
 
 # Specify platforms explicitly
 ci-dokumentor generate --source ./actions/action.yml --repository github --cicd github-actions --github-token xxx
@@ -160,7 +160,7 @@ The CLI handles a single manifest file per invocation. To generate documentation
 
 ```bash
 for f in action.yml .github/workflows/*.yml; do
-  ci-dokumentor generate --source "$f" --output "docs/$(basename "$f" .yml)" || true
+  ci-dokumentor generate --source "$f" --destination "docs/$(basename "$f" .yml)" || true
 done
 ```
 

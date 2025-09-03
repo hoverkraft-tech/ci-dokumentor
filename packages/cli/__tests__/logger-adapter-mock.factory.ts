@@ -1,5 +1,5 @@
 import { LoggerAdapter } from "../src/lib/logger/adapters/logger.adapter.js";
-import type { Mocked } from "vitest";
+import { vi, type Mocked } from "vitest";
 
 type LoggerAdapterDefaults = Partial<{
     getFormat: ReturnType<LoggerAdapter['getFormat']>;

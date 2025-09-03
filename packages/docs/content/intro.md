@@ -8,11 +8,11 @@ Welcome to **CI Dokumentor** - an automated documentation generator for CI/CD co
 
 ## What is CI Dokumentor?
 
-CI Dokumentor is a powerful TypeScript-based tool that automatically generates comprehensive, professional documentation for your CI/CD workflows, actions, and configurations.
+CI Dokumentor is a powerful TypeScript-based tool that automatically generates comprehensive, professional documentation for your CI/CD manifests (workflows, actions, components, configurations...). It supports multiple CI/CD platforms and repository providers, making it easy to maintain up-to-date documentation for your DevOps processes.
 
 ### Key Features
 
-- 📖 **Automated Generation** - Convert CI/CD configuration files into professional documentation
+- 📖 **Automated Generation** - Convert CI/CD manifest files into professional documentation
 - 🔧 **Extensible Design** - Easy to add support for new CI/CD platforms
 - 🐳 **Docker Ready** - Available as a Docker image for easy integration
 - 🚀 **GitHub Action** - Can be used directly in GitHub workflows
@@ -70,31 +70,32 @@ runs:
 # Using Docker
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
-  generate --source /workspace/action.yml --output /workspace/docs
+  generate --source /workspace/action.yml
 
 # Using NPX
-npx ci-dokumentor generate --source action.yml --output docs
+npx ci-dokumentor generate --source action.yml
 
 # Using CLI
-ci-dokumentor generate --source action.yml --output docs
+ci-dokumentor generate --source action.yml
 ```
 
 ### Using a CI/CD platform
 
 Integrate CI Dokumentor into your CI/CD pipeline:
 
-- ✅ [**GitHub Actions**](./integrations/github-action.md) - Action files (`action.yml`) and workflow files (`.github/workflows/*.yml`)
-- 🚧 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI configuration files (`.gitlab-ci.yml`)
-- 🚧 [**Dagger.io**](./integrations/dagger.md) - Dagger.io configuration files (`dagger.yml`)
+- ✅ [**GitHub Actions**](./integrations/github-action.md) - GitHub Action files (`action.yml`) and workflow files (`.github/workflows/*.yml`)
+- 🚧 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI Component files (`templates/my-component.yml`)
+- 🚧 [**Dagger.io**](./integrations/dagger.md) - Dagger.io Module files (`dagger.json`)
 
 ## CLI Usage
 
 The main command is `generate` with these key options:
 
 - `--source <file>` - Source manifest file path to handle (required)
-- `--output <dir>` - Output directory (optional; destination is auto-detected by the CI/CD adapter when omitted)
+- `--destination <file>` - Destination file path for generated documentation (auto-detected if not specified)
 - `--repository <platform>` - Repository platform (auto-detected)
 - `--cicd <platform>` - CI/CD platform (auto-detected)
+- `--output-format <format>` - Output format: `text`, `json`, `github-action` (Optional; default: `text`)
 
 > **📖 Full Documentation**: For more details on CLI usage, see our [CLI documentation](./packages/cli).
 

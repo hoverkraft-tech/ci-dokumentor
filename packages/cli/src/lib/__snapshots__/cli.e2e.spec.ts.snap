@@ -12,8 +12,7 @@ Options:
   -h, --help                    display help for command
 
 Commands:
-  generate|gen [options]        Generate documentation from CI/CD configuration
-                                files
+  generate|gen [options]        Generate documentation from CI/CD manifest files
   help [command]                display help for command
 "
 `;
@@ -21,11 +20,11 @@ Commands:
 exports[`CLI > cli function > should display generate command usage 1`] = `
 "Usage: @ci-dokumentor/cli generate|gen [options]
 
-Generate documentation from CI/CD configuration files
+Generate documentation from CI/CD manifest files
 
 Options:
   -s, --source <file>                Source manifest file path to handle
-  -d, --destination <dir>            Destination path for generated
+  -d, --destination <file>           Destination file path for generated
                                      documentation (auto-detected if not
                                      specified)
   -r, --repository <platform>        Repository platform (auto-detected if not
