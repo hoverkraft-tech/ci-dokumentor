@@ -4,6 +4,7 @@ import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifi
 import { GitHubAction } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
+import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
 
 describe('GeneratedSectionGenerator', () => {
   let formatterAdapter: FormatterAdapter;
@@ -57,11 +58,7 @@ describe('GeneratedSectionGenerator', () => {
     it('should generate the same section regardless of manifest type', () => {
       // Arrange
       const actionManifest: GitHubAction = GitHubActionMockFactory.create();
-      const workflowManifest = {
-        name: 'Test Workflow',
-        on: 'push',
-        jobs: {},
-      };
+      const workflowManifest = GitHubWorkflowMockFactory.create();
 
       // Act
       const actionResult = generator.generateSection(

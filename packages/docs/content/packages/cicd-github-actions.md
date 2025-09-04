@@ -39,11 +39,13 @@ class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
   // OutputAdapter and does not return the destination path. The higher-level
   // GeneratorService determines the destination (using the adapter's
   // `getDocumentationPath`) and returns it to callers.
-  generateDocumentation(
-    source: string,
-    formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter,
-  ): Promise<void>;
+  generateDocumentation(args: {
+    source: string;
+    sections: GenerateSectionsOptions;
+    formatterAdapter: FormatterAdapter;
+    outputAdapter: OutputAdapter;
+    repositoryProvider: RepositoryProvider;
+  }): Promise<void>;
 }
 ```
 

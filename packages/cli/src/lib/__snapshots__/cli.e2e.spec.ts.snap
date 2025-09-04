@@ -34,7 +34,7 @@ Options:
   -i, --include-sections <sections>  Comma-separated list of sections to include
   -e, --exclude-sections <sections>  Comma-separated list of sections to exclude
   --dry-run                          Preview what would be generated without
-                                     writing files
+                                     writing files (default: false)
   -h, --help                         display help for command
 
 Commands:

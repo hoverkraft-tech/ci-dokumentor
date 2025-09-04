@@ -1,9 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { existsSync, statSync } from 'fs';
 import {
-  DryRunOutputAdapter,
-  FormatterAdapter,
-  FormatterService,
+  GenerateSectionsOptions,
   GeneratorAdapter,
   GeneratorService,
   OptionDescriptor,
@@ -12,7 +10,6 @@ import {
   RepositoryService
 } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
-import { createMockRepository } from '../utils/mock-repository.js';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -32,6 +29,11 @@ export interface GenerateDocumentationUseCaseInput {
    * If not provided, the generator adapter will auto-detect the destination path
    */
   destination?: string;
+
+  /**
+   * Dry-run mode - when true, validate inputs and show what would be generated without writing files
+   */
+  dryRun: boolean;
 
   /**
    * Repository platform options
@@ -63,28 +65,7 @@ export interface GenerateDocumentationUseCaseInput {
   /**
    * Section generator options
    */
-  sections?: {
-    /**
-     * List of section identifiers to include in generation
-     * If not specified, all available sections are included
-     */
-    includeSections?: string[];
-
-    /**
-     * List of section identifiers to exclude from generation
-     */
-    excludeSections?: string[];
-
-    /**
-     * Section-specific configuration options
-     */
-    sectionConfig?: Record<string, Record<string, unknown>>;
-  };
-
-  /**
-   * Dry-run mode - when true, validate inputs and show what would be generated without writing files
-   */
-  dryRun?: boolean;
+  sections: GenerateSectionsOptions;
 }
 
 export interface GenerateDocumentationUseCaseOutput {
@@ -104,9 +85,7 @@ export class GenerateDocumentationUseCase {
     @inject(GeneratorService)
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
-    private readonly repositoryService: RepositoryService,
-    @inject(FormatterService)
-    private readonly formatterService: FormatterService
+    private readonly repositoryService: RepositoryService
   ) { }
 
 
@@ -187,26 +166,12 @@ export class GenerateDocumentationUseCase {
   ): Promise<GenerateDocumentationUseCaseOutput> {
     this.validateInput(input);
 
-    if (input.dryRun) {
-      this.loggerService.info('DRY-RUN MODE: Previewing documentation generation...', input.outputFormat);
-    } else {
-      this.loggerService.info('Starting documentation generation...', input.outputFormat);
-    }
-
+    this.loggerService.info(
+      `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation generation...`, input.outputFormat);
     this.loggerService.info(`Source manifest: ${input.source}`, input.outputFormat);
     if (input.destination) {
       this.loggerService.info(`Destination path: ${input.destination}`, input.outputFormat);
     }
-
-    const repositoryProviderAdapter = await this.resolveRepositoryProvider(input);
-
-    // If repository provider options were provided, apply them to the provider
-    const repositoryOptions = input.repository?.options;
-    if (repositoryOptions) {
-      repositoryProviderAdapter.setOptions(repositoryOptions);
-    }
-
-    const generatorAdapter = this.resolveGeneratorAdapter(input);
 
     // Log section options if provided
     if (input.sections?.includeSections?.length) {
@@ -222,77 +187,27 @@ export class GenerateDocumentationUseCase {
       );
     }
 
-    if (input.dryRun) {
-      this.loggerService.info('DRY-RUN MODE: Previewing documentation generation...', input.outputFormat);
-      this.loggerService.info(`- Repository platform: ${repositoryProviderAdapter.getPlatformName()}`, input.outputFormat);
-      this.loggerService.info(`- CI/CD platform: ${generatorAdapter.getPlatformName()}`, input.outputFormat);
-
-      const supportedSections = generatorAdapter.getSupportedSections();
-      if (supportedSections) {
-        this.loggerService.info(`- Available sections: ${supportedSections.join(', ')}`, input.outputFormat);
-      }
-
-      // Generate the actual documentation content for preview
-      const destinationPath = input.destination ?? generatorAdapter.getDocumentationPath(input.source);
-      const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
-
-      // Use dry-run output adapter to capture content instead of writing files
-      const dryRunOutputAdapter = new DryRunOutputAdapter(formatterAdapter);
-
-      try {
-        // For GitHub Actions, we can generate content using a mock repository
-        if (generatorAdapter.getPlatformName() === 'github-actions') {
-          await this.generateGitHubActionsDryRun(
-            input.source,
-            generatorAdapter,
-            formatterAdapter,
-            dryRunOutputAdapter
-          );
-        } else {
-          // For other platforms, fall back to the regular generation
-          // (which might fail with network errors)
-          await generatorAdapter.generateDocumentation(
-            input.source,
-            formatterAdapter,
-            dryRunOutputAdapter
-          );
-        }
-
-        const result = dryRunOutputAdapter.getResult();
-        const fullContent = result.getFullContent();
-
-        this.loggerService.info('DRY-RUN MODE: Generated documentation preview:', input.outputFormat);
-        this.loggerService.info('----------------------------------------', input.outputFormat);
-        this.loggerService.info(fullContent.toString(), input.outputFormat);
-        this.loggerService.info('----------------------------------------', input.outputFormat);
-      } catch (error) {
-        // If generation fails due to network issues (common in dry-run), show what we can
-        this.loggerService.warn('DRY-RUN MODE: Unable to generate full preview due to network restrictions.', input.outputFormat);
-        this.loggerService.warn('In a real environment, documentation would be generated with:', input.outputFormat);
-        this.loggerService.info(`- Output file: ${destinationPath}`, input.outputFormat);
-        if (supportedSections) {
-          this.loggerService.info(`- Sections: ${supportedSections.join(', ')}`, input.outputFormat);
-        }
-      }
-
-      this.loggerService.info('DRY-RUN MODE: Documentation generation preview completed successfully!', input.outputFormat);
-
-      return {
-        success: true,
-        message: 'Documentation generation preview completed successfully (dry-run mode)',
-      };
-    }
+    const generatorAdapter = await this.resolveGeneratorAdapter(input);
+    const repositoryProvider = await this.resolveRepositoryProvider(input);
 
     // Generate documentation using the specific CI/CD platform adapter
     // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
-    const destination = await this.generatorService.generateDocumentationForPlatform(
+    const destination = await this.generatorService.generateDocumentationForPlatform({
+      source: input.source,
+      destination: input.destination,
+      dryRun: input.dryRun,
+      sections: input.sections,
       generatorAdapter,
-      input.source,
-      input.destination
-    );
+      repositoryProvider,
+    });
 
     this.loggerService.info('Documentation generated successfully!', input.outputFormat);
-    this.loggerService.info(`Documentation saved to: ${destination}`, input.outputFormat);
+
+    if (input.dryRun) {
+
+    } else {
+      this.loggerService.info(`Documentation saved to: ${destination}`, input.outputFormat);
+    }
 
     // Output the result using the logger
     const result: GenerateDocumentationUseCaseOutput = {
@@ -306,66 +221,6 @@ export class GenerateDocumentationUseCase {
 
     return result;
   }
-
-  /**
-   * Auto-detect repository platform if not provided    
-   */
-  private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput) {
-    let repositoryProviderAdapter: RepositoryProvider | undefined;
-    if (input.repository?.platform) {
-      this.loggerService.info(`Repository platform: ${input.repository.platform}`, input.outputFormat);
-      repositoryProviderAdapter = this.repositoryService.getRepositoryProviderByPlatform(input.repository.platform);
-      if (!repositoryProviderAdapter) {
-        throw new Error(
-          `No repository platform found for '${input.repository.platform}'. Please specify a valid one.`
-        );
-      }
-
-    } else {
-      repositoryProviderAdapter = await this.repositoryService.autoDetectRepositoryProvider();
-      if (!repositoryProviderAdapter) {
-        throw new Error(
-          `No repository platform could be auto-detected. Please specify one using --repository option.`
-        );
-      }
-      this.loggerService.info(
-        `Auto-detected repository platform: ${repositoryProviderAdapter.getPlatformName()}`,
-        input.outputFormat
-      );
-    }
-    return repositoryProviderAdapter;
-  }
-
-  /**
-   * Get CI/CD adapter (either from platform input or auto-detect)
-   */
-  private resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput) {
-    let generatorAdapter: GeneratorAdapter | undefined;
-    if (input.cicd?.platform) {
-      this.loggerService.info(`CI/CD platform: ${input.cicd.platform}`, input.outputFormat);
-      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(
-        input.cicd.platform
-      );
-      if (!generatorAdapter) {
-        throw new Error(
-          `No generator adapter found for CI/CD platform '${input.cicd.platform}'`
-        );
-      }
-    } else {
-      generatorAdapter = this.generatorService.autoDetectCicdAdapter(input.source);
-      if (!generatorAdapter) {
-        throw new Error(
-          `No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`
-        );
-      }
-      this.loggerService.info(
-        `Auto-detected CI/CD platform: ${generatorAdapter.getPlatformName()}`,
-        input.outputFormat
-      );
-    }
-    return generatorAdapter;
-  }
-
 
   private validateInput(input: GenerateDocumentationUseCaseInput): void {
     if (!input.source) {
@@ -401,47 +256,68 @@ export class GenerateDocumentationUseCase {
   }
 
   /**
-   * Generate GitHub Actions documentation in dry-run mode using mock repository
+   * Auto-detect repository platform if not provided    
    */
-  private async generateGitHubActionsDryRun(
-    source: string,
-    generatorAdapter: GeneratorAdapter,
-    formatterAdapter: FormatterAdapter,
-    outputAdapter: DryRunOutputAdapter
-  ): Promise<void> {
-    // Create a mock repository to avoid network calls
-    const mockRepository = createMockRepository(source);
-
-    // We need to access the GitHub Actions adapter's internals
-    // This is a type assertion since we know it's a GitHub Actions adapter
-    const githubActionsAdapter = generatorAdapter as any;
-
-    if (githubActionsAdapter.gitHubActionsParser && githubActionsAdapter.sectionGeneratorAdapters) {
-      // Parse the source file using the mock repository
-      const gitHubActionOrWorkflow = githubActionsAdapter.gitHubActionsParser.parseFile(
-        source,
-        mockRepository
-      );
-
-      // Generate sections using the mock repository
-      for (const sectionGeneratorAdapter of githubActionsAdapter.sectionGeneratorAdapters) {
-        const sectionContent = sectionGeneratorAdapter.generateSection(
-          formatterAdapter,
-          gitHubActionOrWorkflow,
-          mockRepository
-        );
-
-        await outputAdapter.writeSection(
-          sectionGeneratorAdapter.getSectionIdentifier(),
-          sectionContent.length ? Buffer.concat([
-            sectionContent,
-          ]) : Buffer.alloc(0)
+  private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput): Promise<RepositoryProvider> {
+    let repositoryProviderAdapter: RepositoryProvider | undefined;
+    if (input.repository?.platform) {
+      this.loggerService.info(`Repository platform: ${input.repository.platform}`, input.outputFormat);
+      repositoryProviderAdapter = this.repositoryService.getRepositoryProviderByPlatform(input.repository.platform);
+      if (!repositoryProviderAdapter) {
+        throw new Error(
+          `No repository platform found for '${input.repository.platform}'. Please specify a valid one.`
         );
       }
     } else {
-      // Fallback to regular generation if we can't access internals
-      throw new Error('Unable to access GitHub Actions adapter internals for dry-run');
+      repositoryProviderAdapter = await this.repositoryService.autoDetectRepositoryProvider();
+      if (!repositoryProviderAdapter) {
+        throw new Error(
+          `No repository platform could be auto-detected. Please specify one using --repository option.`
+        );
+      }
+      this.loggerService.info(
+        `Auto-detected repository platform: ${repositoryProviderAdapter.getPlatformName()}`,
+        input.outputFormat
+      );
     }
+
+    // If repository provider options were provided, apply them to the provider
+    const repositoryOptions = input.repository?.options;
+    if (repositoryOptions) {
+      repositoryProviderAdapter.setOptions(repositoryOptions);
+    }
+
+    return repositoryProviderAdapter;
+  }
+
+  /**
+ * Get CI/CD adapter (either from platform input or auto-detect)
+ */
+  private async resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput): Promise<GeneratorAdapter> {
+    let generatorAdapter: GeneratorAdapter | undefined;
+    if (input.cicd?.platform) {
+      this.loggerService.info(`CI/CD platform: ${input.cicd.platform}`, input.outputFormat);
+      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(
+        input.cicd.platform
+      );
+      if (!generatorAdapter) {
+        throw new Error(
+          `No generator adapter found for CI/CD platform '${input.cicd.platform}'`
+        );
+      }
+    } else {
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(input.source);
+      if (!generatorAdapter) {
+        throw new Error(
+          `No CI/CD platform could be auto-detected for source '${input.source}'. Please specify one using --cicd option.`
+        );
+      }
+      this.loggerService.info(
+        `Auto-detected CI/CD platform: ${generatorAdapter.getPlatformName()}`,
+        input.outputFormat
+      );
+    }
+    return generatorAdapter;
   }
 
 }

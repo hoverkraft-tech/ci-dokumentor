@@ -4,39 +4,27 @@ import {
   FormatterAdapter,
   FileOutputAdapter,
   MarkdownFormatterAdapter,
-  RepositoryService,
-  Repository,
+  RepositoryProvider,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
+import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let formatterAdapter: FormatterAdapter;
+  let repositoryProvider: RepositoryProvider;
   let gitHubActionsGeneratorAdapter: GitHubActionsGeneratorAdapter;
-  let repositoryService: RepositoryService;
 
   beforeEach(async () => {
     // Use real dependencies from the container
     const container = initTestContainer();
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
-    repositoryService = container.get(RepositoryService);
+    repositoryProvider = container.get(GitRepositoryProvider);
+
     gitHubActionsGeneratorAdapter = container.get(
       GitHubActionsGeneratorAdapter
-    );
-
-    // Mock the repository service to return consistent test data
-    const mockRepository: Repository = {
-      url: 'https://github.com/test-owner/test-action',
-      name: 'test-action',
-      owner: 'test-owner',
-      fullName: 'test-owner/test-action',
-      logo: 'https://example.com/logo.png',
-    };
-
-    vi.spyOn(repositoryService, 'getRepository').mockResolvedValue(
-      mockRepository
     );
   });
 
@@ -109,11 +97,13 @@ runs:
       );
 
       // Act
-      await gitHubActionsGeneratorAdapter.generateDocumentation(
-        '/test/action.yml',
+      await gitHubActionsGeneratorAdapter.generateDocumentation({
+        source: '/test/action.yml',
+        sections: {},
         formatterAdapter,
-        outputAdapter
-      );
+        outputAdapter,
+        repositoryProvider,
+      });
 
       // Assert
       const expectedDocumentationPath = '/test/README.md';
@@ -249,11 +239,13 @@ jobs:
       );
 
       // Act
-      await gitHubActionsGeneratorAdapter.generateDocumentation(
-        '/test/.github/workflows/ci-cd.yml',
+      await gitHubActionsGeneratorAdapter.generateDocumentation({
+        source: '/test/.github/workflows/ci-cd.yml',
+        sections: {},
         formatterAdapter,
-        outputAdapter
-      );
+        outputAdapter,
+        repositoryProvider,
+      });
 
       // Assert
       const expectedDocumentationPath = '/test/.github/workflows/ci-cd.md';
@@ -372,11 +364,13 @@ runs:
 
       // Act & Assert
       await expect(
-        gitHubActionsGeneratorAdapter.generateDocumentation(
-          '/test/action.yml',
+        gitHubActionsGeneratorAdapter.generateDocumentation({
+          source: '/test/action.yml',
+          sections: {},
           formatterAdapter,
-          outputAdapter
-        )
+          outputAdapter,
+          repositoryProvider,
+        })
       ).rejects.toThrow();
     });
 
@@ -393,11 +387,13 @@ runs:
 
       // Act & Assert
       await expect(
-        gitHubActionsGeneratorAdapter.generateDocumentation(
-          '/test/action.yml',
+        gitHubActionsGeneratorAdapter.generateDocumentation({
+          source: '/test/action.yml',
+          sections: {},
           formatterAdapter,
-          outputAdapter
-        )
+          outputAdapter,
+          repositoryProvider,
+        })
       ).rejects.toThrow();
     });
 
@@ -417,11 +413,13 @@ runs:
       // Act & Assert
       // This should either work with empty content or throw a meaningful error
       try {
-        await gitHubActionsGeneratorAdapter.generateDocumentation(
-          '/test/action.yml',
+        await gitHubActionsGeneratorAdapter.generateDocumentation({
+          source: '/test/action.yml',
+          sections: {},
           formatterAdapter,
-          outputAdapter
-        );
+          outputAdapter,
+          repositoryProvider,
+        });
         // If it succeeds, that's fine
       } catch (error) {
         // If it fails, the error should be meaningful

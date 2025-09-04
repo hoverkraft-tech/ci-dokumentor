@@ -83,6 +83,9 @@ describe('GenerateCommand', () => {
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         destination: './test-destination',
+        dryRun: false,
+        outputFormat: undefined,
+        sections: {},
       });
     });
 
@@ -107,6 +110,9 @@ describe('GenerateCommand', () => {
         repository: {
           platform: 'github',
         },
+        dryRun: false,
+        outputFormat: undefined,
+        sections: {},
       });
     });
 
@@ -131,6 +137,9 @@ describe('GenerateCommand', () => {
         cicd: {
           platform: 'github-actions',
         },
+        dryRun: false,
+        outputFormat: undefined,
+        sections: {},
       });
     });
 
@@ -155,7 +164,8 @@ describe('GenerateCommand', () => {
         sections: {
           includeSections: ['header', 'overview', 'badges'],
         },
-
+        dryRun: false,
+        outputFormat: undefined,
       });
     });
 
@@ -180,7 +190,8 @@ describe('GenerateCommand', () => {
         sections: {
           excludeSections: ['license', 'security'],
         },
-
+        dryRun: false,
+        outputFormat: undefined,
       });
     });
 
@@ -208,7 +219,8 @@ describe('GenerateCommand', () => {
           includeSections: ['header', 'overview'],
           excludeSections: ['license'],
         },
-
+        dryRun: false,
+        outputFormat: undefined,
       });
     });
 
@@ -233,7 +245,8 @@ describe('GenerateCommand', () => {
         sections: {
           includeSections: ['header', 'overview', 'badges'],
         },
-
+        dryRun: false,
+        outputFormat: undefined,
       });
     });
 
@@ -258,7 +271,8 @@ describe('GenerateCommand', () => {
         sections: {
           includeSections: ['header', 'overview'],
         },
-
+        dryRun: false,
+        outputFormat: undefined,
       });
     });
 
@@ -288,7 +302,9 @@ describe('GenerateCommand', () => {
         cicd: {
           platform: 'github-actions',
         },
-
+        dryRun: false,
+        outputFormat: undefined,
+        sections: {},
       });
     });
 
@@ -329,6 +345,9 @@ describe('GenerateCommand', () => {
           platform: 'github',
           options: { foo: 'bar' }
         },
+        dryRun: false,
+        outputFormat: undefined,
+        sections: {},
       });
     });
 
@@ -366,6 +385,9 @@ describe('GenerateCommand', () => {
             foo: 'bar-from-env'
           },
         },
+        dryRun: false,
+        outputFormat: undefined,
+        sections: {},
       });
 
     });
@@ -397,6 +419,8 @@ describe('GenerateCommand', () => {
         sections: {
           includeSections: ['header'],
         },
+        dryRun: false,
+        outputFormat: undefined,
       });
 
     });
@@ -427,7 +451,7 @@ describe('GenerateCommand', () => {
       const args = [
         '--source',
         './test-source',
-        '--output',
+        '--destination',
         './test-output',
         '--dry-run',
       ];
@@ -438,8 +462,10 @@ describe('GenerateCommand', () => {
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
-        output: './test-output',
+        destination: './test-output',
         dryRun: true,
+        outputFormat: undefined,
+        sections: {},
       });
     });
   });
