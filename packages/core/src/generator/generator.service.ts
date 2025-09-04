@@ -3,7 +3,8 @@ import {
   GENERATOR_ADAPTER_IDENTIFIER,
   GeneratorAdapter,
 } from './generator.adapter.js';
-import { FileOutputAdapter } from '../output/file-output.adapter.js';
+import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
+import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
 import { inject, injectable, multiInject } from 'inversify';
 import { FormatterService } from '../formatter/formatter.service.js';
 import { RepositoryProvider } from 'src/index.js';
@@ -13,6 +14,10 @@ export class GeneratorService {
   constructor(
     @inject(FormatterService)
     private readonly formatterService: FormatterService,
+    @inject(FileRendererAdapter)
+    private readonly fileRendererAdapter: FileRendererAdapter,
+    @inject(DiffRendererAdapter)
+    private readonly diffRendererAdapter: DiffRendererAdapter,
     @multiInject(GENERATOR_ADAPTER_IDENTIFIER)
     private readonly generatorAdapters: GeneratorAdapter[]
   ) { }
@@ -87,17 +92,15 @@ export class GeneratorService {
     const destinationPath = destination ?? generatorAdapter.getDocumentationPath(source);
     const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
 
-    // Use FileOutputAdapter for writing to files
-    const outputAdapter = new FileOutputAdapter(
-      destinationPath,
-      formatterAdapter
-    );
+    // Use provided renderer adapter or default to FileRenderer
+    const rendererAdapter = dryRun ? this.diffRendererAdapter : this.fileRendererAdapter;
 
     await generatorAdapter.generateDocumentation({
       source,
       sections,
       formatterAdapter,
-      outputAdapter,
+      rendererAdapter,
+      destination: destinationPath,
       repositoryProvider
     });
 

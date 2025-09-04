@@ -1,5 +1,3 @@
-
-
 import type { GitHubAction } from '../src/github-actions-parser.js';
 
 export class GitHubActionMockFactory {

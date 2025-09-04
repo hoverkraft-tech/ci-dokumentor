@@ -191,7 +191,6 @@ export class GenerateDocumentationUseCase {
     const repositoryProvider = await this.resolveRepositoryProvider(input);
 
     // Generate documentation using the specific CI/CD platform adapter
-    // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
     const destination = await this.generatorService.generateDocumentationForPlatform({
       source: input.source,
       destination: input.destination,
@@ -204,7 +203,7 @@ export class GenerateDocumentationUseCase {
     this.loggerService.info('Documentation generated successfully!', input.outputFormat);
 
     if (input.dryRun) {
-
+      this.loggerService.info(`(Dry-run) Documentation would be saved to: ${destination}`, input.outputFormat);
     } else {
       this.loggerService.info(`Documentation saved to: ${destination}`, input.outputFormat);
     }

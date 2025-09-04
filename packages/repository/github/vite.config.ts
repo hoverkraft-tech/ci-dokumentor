@@ -7,7 +7,6 @@ export default defineConfig(() => {
   const sharedConfig = createSharedConfig(__dirname);
   return ({
     ...sharedConfig,
-
     // Configuration for building your library.
     // See: https://vitejs.dev/guide/build.html#library-mode
     build: {
@@ -19,5 +18,5 @@ export default defineConfig(() => {
         formats: ['es' as const],
       },
     },
-  })
+  });
 });

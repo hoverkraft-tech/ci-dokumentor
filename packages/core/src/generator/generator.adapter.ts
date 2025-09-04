@@ -1,5 +1,5 @@
-import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
-import { OutputAdapter } from '../output/output.adapter.js';
+import { RendererAdapter } from '../renderer/renderer.adapter.js';
+import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
 
 export const GENERATOR_ADAPTER_IDENTIFIER = Symbol('GeneratorAdapter');
@@ -49,15 +49,17 @@ export interface GeneratorAdapter {
    */
   generateDocumentation({
     source,
+    destination,
     sections,
     formatterAdapter,
-    outputAdapter,
+    rendererAdapter,
     repositoryProvider
   }: {
     source: string;
+    destination: string;
     sections: GenerateSectionsOptions;
     formatterAdapter: FormatterAdapter;
-    outputAdapter: OutputAdapter;
+    rendererAdapter: RendererAdapter;
     repositoryProvider: RepositoryProvider;
   }): Promise<void>;
 }

@@ -2,9 +2,10 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 import {
   FormatterAdapter,
-  FileOutputAdapter,
+  FileRendererAdapter,
   MarkdownFormatterAdapter,
   RepositoryProvider,
+  RendererAdapter,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from './container.js';
 import mockFs from 'mock-fs';
@@ -14,6 +15,7 @@ import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let formatterAdapter: FormatterAdapter;
   let repositoryProvider: RepositoryProvider;
+  let rendererAdapter: RendererAdapter;
   let gitHubActionsGeneratorAdapter: GitHubActionsGeneratorAdapter;
 
   beforeEach(async () => {
@@ -22,6 +24,7 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     repositoryProvider = container.get(GitRepositoryProvider);
+    rendererAdapter = container.get(FileRendererAdapter);
 
     gitHubActionsGeneratorAdapter = container.get(
       GitHubActionsGeneratorAdapter
@@ -90,18 +93,15 @@ runs:
         '/test/action.yml': actionYaml,
       });
 
-      // Use real FileOutputAdapter for integration testing
-      const outputAdapter = new FileOutputAdapter(
-        '/test/README.md',
-        formatterAdapter
-      );
+
 
       // Act
       await gitHubActionsGeneratorAdapter.generateDocumentation({
         source: '/test/action.yml',
+        destination: '/test/README.md',
         sections: {},
         formatterAdapter,
-        outputAdapter,
+        rendererAdapter,
         repositoryProvider,
       });
 
@@ -232,18 +232,13 @@ jobs:
         '/test/.github/workflows/ci-cd.yml': workflowYaml,
       });
 
-      // Use real FileOutputAdapter for integration testing
-      const outputAdapter = new FileOutputAdapter(
-        '/test/.github/workflows/ci-cd.md',
-        formatterAdapter
-      );
-
       // Act
       await gitHubActionsGeneratorAdapter.generateDocumentation({
         source: '/test/.github/workflows/ci-cd.yml',
+        destination: '/test/.github/workflows/ci-cd.md',
         sections: {},
         formatterAdapter,
-        outputAdapter,
+        rendererAdapter,
         repositoryProvider,
       });
 
@@ -356,19 +351,14 @@ runs:
         '/test/action.yml': malformedYaml,
       });
 
-      // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter(
-        '/test/README.md',
-        formatterAdapter
-      );
-
       // Act & Assert
       await expect(
         gitHubActionsGeneratorAdapter.generateDocumentation({
           source: '/test/action.yml',
+          destination: '/test/README.md',
           sections: {},
           formatterAdapter,
-          outputAdapter,
+          rendererAdapter,
           repositoryProvider,
         })
       ).rejects.toThrow();
@@ -379,19 +369,13 @@ runs:
       // Setup empty mock file system
       mockFs({});
 
-      // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter(
-        '/test/README.md',
-        formatterAdapter
-      );
-
-      // Act & Assert
       await expect(
         gitHubActionsGeneratorAdapter.generateDocumentation({
           source: '/test/action.yml',
+          destination: '/test/README.md',
           sections: {},
           formatterAdapter,
-          outputAdapter,
+          rendererAdapter,
           repositoryProvider,
         })
       ).rejects.toThrow();
@@ -404,20 +388,13 @@ runs:
         '/test/action.yml': '',
       });
 
-      // Use real FileOutputAdapter for this test
-      const outputAdapter = new FileOutputAdapter(
-        '/test/README.md',
-        formatterAdapter
-      );
-
-      // Act & Assert
-      // This should either work with empty content or throw a meaningful error
       try {
         await gitHubActionsGeneratorAdapter.generateDocumentation({
           source: '/test/action.yml',
+          destination: '/test/README.md',
           sections: {},
           formatterAdapter,
-          outputAdapter,
+          rendererAdapter,
           repositoryProvider,
         });
         // If it succeeds, that's fine

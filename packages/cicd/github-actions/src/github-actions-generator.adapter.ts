@@ -1,11 +1,11 @@
 import {
   GeneratorAdapter,
-  OutputAdapter,
   SECTION_GENERATOR_ADAPTER_IDENTIFIER,
   SectionGeneratorAdapter,
   FormatterAdapter,
   RepositoryProvider,
   GenerateSectionsOptions,
+  RendererAdapter,
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
@@ -80,15 +80,17 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
 
   async generateDocumentation({
     source,
+    destination,
     sections,
     formatterAdapter,
-    outputAdapter,
+    rendererAdapter,
     repositoryProvider,
   }: {
     source: string;
+    destination: string;
     sections: GenerateSectionsOptions;
     formatterAdapter: FormatterAdapter;
-    outputAdapter: OutputAdapter;
+    rendererAdapter: RendererAdapter;
     repositoryProvider: RepositoryProvider;
   }): Promise<void> {
     const repository = await repositoryProvider.getRepository();
@@ -109,12 +111,12 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
         repository
       );
 
-      await outputAdapter.writeSection(
-        sectionGeneratorAdapter.getSectionIdentifier(),
-        sectionContent.length ? Buffer.concat([
-          sectionContent,
-        ]) : Buffer.alloc(0)
-      );
+      await rendererAdapter.writeSection({
+        formatterAdapter,
+        destination,
+        sectionIdentifier: sectionGeneratorAdapter.getSectionIdentifier(),
+        data: sectionContent.length ? Buffer.concat([sectionContent]) : Buffer.alloc(0),
+      });
     }
   }
 
