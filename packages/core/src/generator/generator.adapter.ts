@@ -1,7 +1,21 @@
-import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
-import { OutputAdapter } from '../output/output.adapter.js';
+import { RendererAdapter } from '../renderer/renderer.adapter.js';
+import { FormatterAdapter } from '../formatter/formatter.adapter.js';
+import { RepositoryProvider } from '../repository/repository.provider.js';
 
 export const GENERATOR_ADAPTER_IDENTIFIER = Symbol('GeneratorAdapter');
+
+export type GenerateSectionsOptions = {
+  /**
+   * List of section identifiers to include in generation
+   * If not specified, all available sections are included
+   */
+  includeSections?: string[];
+
+  /**
+   * List of section identifiers to exclude from generation
+   */
+  excludeSections?: string[];
+};
 
 export interface GeneratorAdapter {
   /**
@@ -30,9 +44,22 @@ export interface GeneratorAdapter {
    */
   getDocumentationPath(source: string): string;
 
-  generateDocumentation(
-    source: string,
-    formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter
-  ): Promise<void>;
+  /**
+   * Generates documentation for the given path using this CI/CD platform adapter.
+   */
+  generateDocumentation({
+    source,
+    destination,
+    sections,
+    formatterAdapter,
+    rendererAdapter,
+    repositoryProvider
+  }: {
+    source: string;
+    destination: string;
+    sections: GenerateSectionsOptions;
+    formatterAdapter: FormatterAdapter;
+    rendererAdapter: RendererAdapter;
+    repositoryProvider: RepositoryProvider;
+  }): Promise<void>;
 }

@@ -86,11 +86,13 @@ interface GeneratorAdapter {
   getSupportedSections(): string[];
   supportsSource(source: string): boolean;
   getDocumentationPath(source: string): string;
-  generateDocumentation(
-    source: string,
-    formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter,
-  ): Promise<void>;
+  generateDocumentation(args: {
+    source: string;
+    sections: GenerateSectionsOptions;
+    formatterAdapter: FormatterAdapter;
+    outputAdapter: OutputAdapter;
+    repositoryProvider: RepositoryProvider;
+  }): Promise<void>;
 }
 ```
 

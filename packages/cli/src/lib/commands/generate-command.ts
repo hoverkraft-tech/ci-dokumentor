@@ -5,7 +5,7 @@ import {
   GenerateDocumentationUseCase,
   GenerateDocumentationUseCaseInput,
 } from '../usecases/generate-documentation.usecase.js';
-import { RepositoryOptions } from '@ci-dokumentor/core';
+import { GenerateSectionsOptions, RepositoryOptions } from '@ci-dokumentor/core';
 
 export type GenerateCommandOptions = {
   outputFormat: string;
@@ -15,6 +15,7 @@ export type GenerateCommandOptions = {
   cicd?: string;
   includeSections?: string;
   excludeSections?: string;
+  dryRun: boolean;
   [key: string]: unknown; // Allow dynamic keys for provider-specific options
 };
 
@@ -74,6 +75,11 @@ export class GenerateCommand extends BaseCommand {
         '-e, --exclude-sections <sections>',
         'Comma-separated list of sections to exclude'
       )
+      .option(
+        '--dry-run',
+        'Preview what would be generated without writing files',
+        false
+      )
       .hook('preAction', async (thisCommand) => {
         await this.populateSupportedOptions(thisCommand);
 
@@ -92,9 +98,6 @@ export class GenerateCommand extends BaseCommand {
         const input: GenerateDocumentationUseCaseInput = this.mapGenerateCommandOptions(options);
 
         await this.mapSupportedOptions(input, options);
-
-        // Handle section options
-        this.mapSectionOptions(input, options);
 
         await this.generateDocumentationUseCase.execute(input);
       })
@@ -135,7 +138,9 @@ export class GenerateCommand extends BaseCommand {
     const generateOptions: GenerateDocumentationUseCaseInput = {
       source: options.source,
       destination: options.destination,
-      outputFormat: this.getOutputFormatOption(this)
+      outputFormat: this.getOutputFormatOption(this),
+      dryRun: options.dryRun,
+      sections: this.mapSectionOptions(options),
     };
 
     // Handle repository platform options
@@ -153,6 +158,24 @@ export class GenerateCommand extends BaseCommand {
     }
 
     return generateOptions;
+  }
+
+  private mapSectionOptions(options: GenerateCommandOptions): GenerateSectionsOptions {
+    const sectionsOptions: GenerateSectionsOptions = {};
+    if (options.includeSections) {
+      sectionsOptions.includeSections = options.includeSections
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0)
+    }
+
+    if (options.excludeSections) {
+      sectionsOptions.excludeSections = options.excludeSections
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+    }
+    return sectionsOptions;
   }
 
   private getOutputFormatOption(command: Command): string | undefined {
@@ -209,25 +232,5 @@ export class GenerateCommand extends BaseCommand {
       flag = flag.replace(/<.*?>|\[.*?\]/g, '');
     } while (flag !== prev);
     return flag;
-  }
-
-  private mapSectionOptions(input: GenerateDocumentationUseCaseInput, options: GenerateCommandOptions) {
-    if (options.includeSections || options.excludeSections) {
-      input.sections = input.sections || {};
-
-      if (options.includeSections) {
-        input.sections.includeSections = options.includeSections
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter((s: string) => s.length > 0);
-      }
-
-      if (options.excludeSections) {
-        input.sections.excludeSections = options.excludeSections
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter((s: string) => s.length > 0);
-      }
-    }
   }
 }
