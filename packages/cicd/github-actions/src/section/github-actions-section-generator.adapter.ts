@@ -1,20 +1,36 @@
-import { Repository } from '@ci-dokumentor/core';
 import {
-  FormatterAdapter,
   SectionGeneratorAdapter,
   SectionIdentifier,
+  SectionOptions,
+  SectionGenerationPayload,
+  SectionOptionsDescriptors,
 } from '@ci-dokumentor/core';
 import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from 'src/github-actions-parser.js';
 
 export abstract class GitHubActionsSectionGeneratorAdapter
   implements SectionGeneratorAdapter<GitHubActionsManifest> {
+
   abstract getSectionIdentifier(): SectionIdentifier;
 
-  abstract generateSection(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubActionsManifest,
-    repository: Repository
-  ): Buffer;
+  /**
+   * Generate section content using a structured payload object
+   */
+  abstract generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer>;
+
+  /**
+   * Provide CLI option descriptors specific to this section generator
+   * Must return an object (can be empty if no options needed)
+   */
+  getSectionOptions(): SectionOptionsDescriptors<SectionOptions> {
+    return {};
+  }
+
+  /**
+   * Apply runtime option values to the section generator
+   */
+  setSectionOptions(options: Partial<SectionOptions>): void {
+    // Default implementation - subclasses can override
+  }
 
   protected isGitHubAction(parsed: unknown): parsed is GitHubAction {
     // Validate all required fields for a GitHub Action

@@ -11,6 +11,7 @@ import { initTestContainer } from './container.js';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
+import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let repositoryProvider: RepositoryProvider;
@@ -119,8 +120,9 @@ runs:
       expect(generatedContent).toBeDefined();
       expect(generatedContent.length).toBeGreaterThan(0);
 
-      // Snapshot test the generated content
-      expect(generatedContent).toMatchSnapshot('github-action-documentation');
+      // Snapshot test the generated content      
+      const sanitizedContent = sanitizeSnapshotContent(generatedContent);
+      expect(sanitizedContent).toMatchSnapshot('github-action-documentation');
     });
 
     it('should generate documentation for a CI/CD workflow', async () => {
@@ -262,7 +264,8 @@ jobs:
       expect(generatedContent.length).toBeGreaterThan(0);
 
       // Snapshot test the generated content
-      expect(generatedContent).toMatchSnapshot('workflow-documentation');
+      const sanitizedContent = sanitizeSnapshotContent(generatedContent);
+      expect(sanitizedContent).toMatchSnapshot('workflow-documentation');
     });
   });
 

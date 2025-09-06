@@ -1,8 +1,11 @@
 import {
-  Repository,
-  RepositoryProvider,
+  RepositoryInfo,
+  LicenseInfo,
+  ContributingInfo,
+  AbstractRepositoryProvider,
   LicenseService,
   RepositoryOptionsDescriptors,
+  ManifestVersion,
 } from '@ci-dokumentor/core';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { graphql } from "@octokit/graphql";
@@ -18,17 +21,18 @@ type GitHubRepositoryProviderOptions = {
 };
 
 @injectable()
-export class GitHubRepositoryProvider implements RepositoryProvider<GitHubRepositoryProviderOptions> {
-
+export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubRepositoryProviderOptions> {
   private githubToken?: string;
 
   private graphqlClient?: GraphQLClient;
 
   constructor(
     @inject(GitRepositoryProvider)
-    private gitRepositoryService: GitRepositoryProvider,
+    private gitRepositoryProvider: GitRepositoryProvider,
     @inject(LicenseService) private licenseService: LicenseService,
-  ) { }
+  ) {
+    super();
+  }
 
   /**
    * Get the platform name identifier for this provider
@@ -84,27 +88,44 @@ export class GitHubRepositoryProvider implements RepositoryProvider<GitHubReposi
   async supports(): Promise<boolean> {
     try {
       // First check if the git repository provider supports the context
-      if (!(await this.gitRepositoryService.supports())) {
+      if (!(await this.gitRepositoryProvider.supports())) {
         return false;
       }
 
-      const parsedUrl = await this.gitRepositoryService.getRemoteParsedUrl();
+      const parsedUrl = await this.gitRepositoryProvider.getRemoteParsedUrl();
       return parsedUrl.source === 'github.com';
     } catch {
       return false;
     }
   }
 
-  async getRepository(): Promise<Repository> {
-    const repositoryInfo = await this.gitRepositoryService.getRepository();
-    const logo = await this.getLogoUri(repositoryInfo);
-    const license = await this.getLicenseInfo(repositoryInfo);
-
+  protected async fetchRepositoryInfo(): Promise<RepositoryInfo> {
+    const repository = await this.gitRepositoryProvider.getRepositoryInfo();
     return {
-      ...repositoryInfo,
-      logo, // Optional logo URI
-      license, // Optional license information
+      owner: repository.owner,
+      name: repository.name,
+      url: repository.url,
+      fullName: repository.fullName,
     };
+  }
+
+  protected async fetchLogo(): Promise<string | undefined> {
+    const repositoryInfo = await this.fetchRepositoryInfo();
+    return this.getLogoUri(repositoryInfo);
+  }
+
+  protected async fetchLicense(): Promise<LicenseInfo | undefined> {
+    const repositoryInfo = await this.fetchRepositoryInfo();
+    return this.getLicenseInfo(repositoryInfo);
+  }
+
+  protected async fetchContributing(): Promise<ContributingInfo | undefined> {
+    const repositoryInfo = await this.fetchRepositoryInfo();
+    return this.getContributingInfo(repositoryInfo);
+  }
+
+  protected override async fetchLatestVersion(): Promise<ManifestVersion | undefined> {
+    return this.gitRepositoryProvider.getLatestVersion();
   }
 
   /**
@@ -129,7 +150,7 @@ export class GitHubRepositoryProvider implements RepositoryProvider<GitHubReposi
   }
 
   private async getLogoUri(
-    repositoryInfo: Repository
+    repositoryInfo: RepositoryInfo
   ): Promise<string | undefined> {
     const possibleLogoPaths = [
       '.github/logo.png',
@@ -149,7 +170,7 @@ export class GitHubRepositoryProvider implements RepositoryProvider<GitHubReposi
   }
 
   private async getOpenGraphImageUrl(
-    repositoryInfo: Repository
+    repositoryInfo: RepositoryInfo
   ): Promise<string | undefined> {
     const graphqlClient = this.getGraphQLClient();
 
@@ -173,10 +194,8 @@ export class GitHubRepositoryProvider implements RepositoryProvider<GitHubReposi
   }
 
   private async getLicenseInfo(
-    repositoryInfo: Repository
-  ): Promise<
-    { name: string; spdxId: string | null; url: string | null } | undefined
-  > {
+    repositoryInfo: RepositoryInfo
+  ): Promise<LicenseInfo | undefined> {
     const graphqlClient = this.getGraphQLClient();
 
     const response = await graphqlClient<{
@@ -213,5 +232,38 @@ export class GitHubRepositoryProvider implements RepositoryProvider<GitHubReposi
 
     // Fallback to reading license file directly if no license info from GitHub
     return this.licenseService.detectLicenseFromFile();
+  }
+
+  private async getContributingInfo(
+    repositoryInfo: RepositoryInfo
+  ): Promise<ContributingInfo | undefined> {
+    const graphqlClient = this.getGraphQLClient();
+
+    const response = await graphqlClient<{
+      repository?: {
+        contributingGuidelines?: {
+          url: string;
+        }
+      }
+    }>(
+      `query getLicense($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          contributingGuidelines {
+            url
+          }
+        }
+      }`,
+      {
+        owner: repositoryInfo.owner,
+        repo: repositoryInfo.name,
+      });
+
+    const contributingGuidelines = response?.repository?.contributingGuidelines;
+    if (contributingGuidelines) {
+      return {
+        url: contributingGuidelines.url,
+      };
+    }
+    return undefined;
   }
 }

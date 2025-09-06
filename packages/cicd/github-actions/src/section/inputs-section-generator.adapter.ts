@@ -1,4 +1,4 @@
-import { Repository } from '@ci-dokumentor/core';
+import { SectionGenerationPayload } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
@@ -9,17 +9,15 @@ import {
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 
+@injectable()
 export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Inputs;
   }
 
-  generateSection(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubActionsManifest,
-    _repository: Repository
-  ): Buffer {
+  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
     let manifestInputsContent: Buffer;
     if (this.isGitHubAction(manifest)) {
       manifestInputsContent = this.generateActionInputsTable(formatterAdapter, manifest);

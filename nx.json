@@ -55,6 +55,7 @@
   ],
   "targetDefaults": {
     "typecheck": {
+      "dependsOn": ["^build"],
       "inputs": ["default", "^default"],
       "outputs": [],
       "cache": true
@@ -63,7 +64,7 @@
       "dependsOn": ["typecheck", "^typecheck"]
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["build", "^build"],
       "inputs": ["default", "tests", "^default"]
     }
   }

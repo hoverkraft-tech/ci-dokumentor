@@ -1,34 +1,39 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, Mocked } from 'vitest';
 import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
-  Repository,
   MarkdownFormatterAdapter,
+  SectionGenerationPayload,
+  RepositoryProvider,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
+import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('BadgesSectionGenerator', () => {
+  let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
+
   let generator: BadgesSectionGenerator;
-  let mockRepository: Repository;
+
 
   beforeEach(() => {
+    mockRepositoryProvider = RepositoryProviderMockFactory.create({
+      getRepositoryInfo: {
+        url: 'https://github.com/owner/repo',
+        owner: 'owner',
+        name: 'repo',
+        fullName: 'owner/repo',
+      },
+    });
+
     const container = initTestContainer();
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new BadgesSectionGenerator();
-
-    // Create mock repository
-    mockRepository = {
-      url: 'https://github.com/owner/repo',
-      owner: 'owner',
-      name: 'repo',
-      fullName: 'owner/repo',
-    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -43,16 +48,17 @@ describe('BadgesSectionGenerator', () => {
 
   describe('generateSection', () => {
     describe('with GitHub Action manifest', () => {
-      it('should generate badges section for GitHub Action', () => {
+      it('should generate badges section for GitHub Action', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
-
-        // Act
-        const result = generator.generateSection(
+        const payload: SectionGenerationPayload<GitHubAction> = {
           formatterAdapter,
           manifest,
-          mockRepository
-        );
+          repositoryProvider: mockRepositoryProvider,
+        };
+
+        // Act
+        const result = await generator.generateSection(payload);
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -67,16 +73,17 @@ describe('BadgesSectionGenerator', () => {
     });
 
     describe('with GitHub Workflow manifest', () => {
-      it('should generate badges section for GitHub Workflow', () => {
+      it('should generate badges section for GitHub Workflow', async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create();
-
-        // Act
-        const result = generator.generateSection(
+        const payload: SectionGenerationPayload<GitHubWorkflow> = {
           formatterAdapter,
           manifest,
-          mockRepository
-        );
+          repositoryProvider: mockRepositoryProvider,
+        };
+
+        // Act
+        const result = await generator.generateSection(payload);
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);

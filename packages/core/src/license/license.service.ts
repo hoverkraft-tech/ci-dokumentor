@@ -3,8 +3,8 @@ import { injectable } from 'inversify';
 
 export type LicenseInfo = {
   name: string;
-  spdxId: string | null;
-  url: string | null;
+  spdxId?: string;
+  url?: string;
 };
 
 @injectable()
@@ -35,7 +35,7 @@ export class LicenseService {
           return {
             name: licenseName,
             spdxId: this.getSpdxIdFromName(licenseName),
-            url: null,
+            url: undefined,
           };
         } catch (error) {
           console.warn(`Failed to read license file ${licensePath}:`, error);
@@ -92,7 +92,7 @@ export class LicenseService {
     return 'Custom License';
   }
 
-  private getSpdxIdFromName(licenseName: string): string | null {
+  private getSpdxIdFromName(licenseName: string): string | undefined {
     const spdxMap: { [key: string]: string } = {
       'MIT License': 'MIT',
       'Apache License 2.0': 'Apache-2.0',
@@ -103,6 +103,6 @@ export class LicenseService {
       'ISC License': 'ISC',
     };
 
-    return spdxMap[licenseName] || null;
+    return spdxMap[licenseName] || undefined;
   }
 }

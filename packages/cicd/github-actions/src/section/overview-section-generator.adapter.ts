@@ -1,18 +1,16 @@
-import { Repository } from '@ci-dokumentor/core';
+import { SectionGenerationPayload } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 
+@injectable()
 export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Overview;
   }
 
-  generateSection(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubActionsManifest,
-    _repository: Repository
-  ): Buffer {
+  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
     const description =
       'description' in manifest ? manifest.description : undefined;
     if (!description) {

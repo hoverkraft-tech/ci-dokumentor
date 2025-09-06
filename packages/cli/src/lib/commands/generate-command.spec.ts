@@ -26,6 +26,7 @@ describe('GenerateCommand', () => {
         .fn()
         .mockReturnValue(['header', 'overview', 'usage', 'inputs', 'outputs']) as Mocked<GenerateDocumentationUseCase['getSupportedSections']>,
       getRepositorySupportedOptions: vi.fn().mockResolvedValue([]) as Mocked<GenerateDocumentationUseCase['getRepositorySupportedOptions']>,
+      getSectionSupportedOptions: vi.fn().mockReturnValue({}) as Mocked<GenerateDocumentationUseCase['getSectionSupportedOptions']>,
     } as Mocked<GenerateDocumentationUseCase>;
 
     const processExitMock = ((code?: number | string | null | undefined) => {

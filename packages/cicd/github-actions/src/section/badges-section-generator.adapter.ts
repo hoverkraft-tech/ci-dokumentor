@@ -1,49 +1,47 @@
-import { Repository } from '@ci-dokumentor/core';
+import { RepositoryInfo, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 
 type Badge = { label: string; url: string };
 type LinkedBadge = { url: string; badge: Badge };
 
+@injectable()
 export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Badges;
   }
 
-  generateSection(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubActionsManifest,
-    repository: Repository
-  ): Buffer {
-    const linkedBadges = this.getAllBadges(manifest, repository);
+  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
+
+    const linkedBadges = this.getAllBadges(manifest, repositoryInfo);
     return this.formatBadgeCollection(linkedBadges, formatterAdapter);
   }
 
   private getAllBadges(
     manifest: GitHubActionsManifest,
-    repository: Repository
+    repositoryInfo: RepositoryInfo
   ): LinkedBadge[] {
     return [
-      ...this.getDistributionBadges(manifest, repository),
-      ...this.getBuildQualityBadges(manifest, repository),
-      ...this.getSecurityBadges(manifest, repository),
-      ...this.getComplianceBadges(manifest, repository),
-      ...this.getCommunityBadges(manifest, repository),
+      ...this.getDistributionBadges(manifest, repositoryInfo),
+      ...this.getComplianceBadges(repositoryInfo),
+      ...this.getCommunityBadges(repositoryInfo),
     ];
   }
 
   private getDistributionBadges(
     manifest: GitHubActionsManifest,
-    repository: Repository
+    repositoryInfo: RepositoryInfo
   ): LinkedBadge[] {
     const actionName = manifest.name.toLowerCase().replace(/\s+/g, '-');
     const badges = [
       {
-        url: `${repository.url}/releases`,
+        url: `${repositoryInfo.url}/releases`,
         badge: {
           label: 'Release',
-          url: `https://img.shields.io/github/v/release/${repository.fullName}`,
+          url: `https://img.shields.io/github/v/release/${repositoryInfo.fullName}`,
         },
       },
     ];
@@ -61,46 +59,29 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     return badges;
   }
-
-  private getBuildQualityBadges(
-    _manifest: GitHubActionsManifest,
-    _repository: Repository
-  ): LinkedBadge[] {
-    return [];
-  }
-
-  private getSecurityBadges(
-    _manifest: GitHubActionsManifest,
-    _repository: Repository
-  ): LinkedBadge[] {
-    return [];
-  }
-
   private getComplianceBadges(
-    manifest: GitHubActionsManifest,
-    repository: Repository
+    repositoryInfo: RepositoryInfo
   ): LinkedBadge[] {
     return [
       {
-        url: `https://img.shields.io/github/license/${repository.fullName}`,
+        url: `https://img.shields.io/github/license/${repositoryInfo.fullName}`,
         badge: {
           label: 'License',
-          url: `https://img.shields.io/github/license/${repository.fullName}`,
+          url: `https://img.shields.io/github/license/${repositoryInfo.fullName}`,
         },
       },
     ];
   }
 
   private getCommunityBadges(
-    manifest: GitHubActionsManifest,
-    repository: Repository
+    repositoryInfo: RepositoryInfo
   ): LinkedBadge[] {
     return [
       {
-        url: `https://img.shields.io/github/stars/${repository.fullName}?style=social`,
+        url: `https://img.shields.io/github/stars/${repositoryInfo.fullName}?style=social`,
         badge: {
           label: 'Stars',
-          url: `https://img.shields.io/github/stars/${repository.fullName}?style=social`,
+          url: `https://img.shields.io/github/stars/${repositoryInfo.fullName}?style=social`,
         },
       },
     ];

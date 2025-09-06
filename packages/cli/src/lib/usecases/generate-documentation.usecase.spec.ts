@@ -23,15 +23,7 @@ describe('GenerateDocumentationUseCase', () => {
 
     mockLoggerService = LoggerServiceMockFactory.create();
     mockGeneratorService = GeneratorServiceMockFactory.create();
-
-    mockRepositoryService = RepositoryServiceMockFactory.create({
-      getRepository: {
-        owner: 'test',
-        name: 'repo',
-        url: 'https://github.com/test/repo',
-        fullName: 'test/repo',
-      }
-    });
+    mockRepositoryService = RepositoryServiceMockFactory.create();
 
     generateDocumentationUseCase = new GenerateDocumentationUseCase(
       mockLoggerService,

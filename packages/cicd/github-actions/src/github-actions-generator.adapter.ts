@@ -5,6 +5,8 @@ import {
   RepositoryProvider,
   GenerateSectionsOptions,
   RendererAdapter,
+  SectionOptionsDescriptors,
+  SectionGenerationPayload,
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
@@ -23,9 +25,7 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     @inject(GitHubActionsParser)
     public readonly gitHubActionsParser: GitHubActionsParser,
     @multiInject(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
-    private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<
-      GitHubActionsManifest
-    >[]
+    private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubActionsManifest>[]
   ) { }
 
   /**
@@ -42,6 +42,21 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     return this.sectionGeneratorAdapters.map((adapter) =>
       adapter.getSectionIdentifier()
     );
+  }
+
+  /**
+   * Get section-specific options from all section generators
+   */
+  getSectionsOptions(): Record<string, SectionOptionsDescriptors> {
+    const sectionOptions: Record<string, SectionOptionsDescriptors> = {};
+
+    for (const sectionGenerator of this.sectionGeneratorAdapters) {
+      const sectionId = sectionGenerator.getSectionIdentifier();
+      // getSectionOptions is now mandatory, so we can call it directly
+      sectionOptions[sectionId] = sectionGenerator.getSectionOptions();
+    }
+
+    return sectionOptions;
   }
 
   /**
@@ -88,10 +103,9 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     rendererAdapter: RendererAdapter;
     repositoryProvider: RepositoryProvider;
   }): Promise<void> {
-    const repository = await repositoryProvider.getRepository();
     const gitHubActionOrWorkflow = this.gitHubActionsParser.parseFile(
       source,
-      repository
+      await repositoryProvider.getRepositoryInfo()
     );
 
     for (const sectionGeneratorAdapter of this.sectionGeneratorAdapters) {
@@ -100,11 +114,14 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
         continue;
       }
 
-      const sectionContent = sectionGeneratorAdapter.generateSection(
-        rendererAdapter.getFormatterAdapter(),
-        gitHubActionOrWorkflow,
-        repository
-      );
+      // Section generators now use repository provider for on-demand data fetching
+      const payload: SectionGenerationPayload<GitHubActionsManifest> = {
+        formatterAdapter: rendererAdapter.getFormatterAdapter(),
+        manifest: gitHubActionOrWorkflow,
+        repositoryProvider,
+      };
+
+      const sectionContent = await sectionGeneratorAdapter.generateSection(payload);
 
       await rendererAdapter.writeSection(
         sectionGeneratorAdapter.getSectionIdentifier(),

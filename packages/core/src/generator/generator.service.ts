@@ -102,7 +102,7 @@ export class GeneratorService {
       source,
       sections,
       rendererAdapter,
-      repositoryProvider
+      repositoryProvider,
     });
 
     const data = await rendererAdapter.finalize();

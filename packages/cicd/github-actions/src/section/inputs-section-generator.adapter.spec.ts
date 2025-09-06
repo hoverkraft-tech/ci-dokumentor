@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, Mocked } from 'vitest';
 import { InputsSectionGenerator } from './inputs-section-generator.adapter.js';
 import {
   GitHubAction,
@@ -12,29 +12,32 @@ import {
   FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  Repository,
+  RepositoryProvider,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
+import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('InputsSectionGenerator', () => {
+  let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
+
   let generator: InputsSectionGenerator;
-  let mockRepository: Repository;
 
   beforeEach(() => {
+    mockRepositoryProvider = RepositoryProviderMockFactory.create({
+      getRepositoryInfo: {
+        url: 'https://github.com/owner/repo',
+        owner: 'owner',
+        name: 'repo',
+        fullName: 'owner/repo',
+      },
+    });
+
     const container = initTestContainer();
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new InputsSectionGenerator();
-
-    // Create mock repository
-    mockRepository = {
-      url: 'https://github.com/owner/repo',
-      owner: 'owner',
-      name: 'repo',
-      fullName: 'owner/repo',
-    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -49,7 +52,7 @@ describe('InputsSectionGenerator', () => {
 
   describe('generateSection', () => {
     describe('with GitHub Action manifest', () => {
-      it('should generate inputs section for GitHub Action with inputs', () => {
+      it('should generate inputs section for GitHub Action with inputs', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
           inputs: {
@@ -66,11 +69,7 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -85,16 +84,12 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
-      it('should generate inputs section for GitHub Action without inputs', () => {
+      it('should generate inputs section for GitHub Action without inputs', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -107,16 +102,12 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
-      it('should generate inputs section for GitHub Action with empty inputs object', () => {
+      it('should generate inputs section for GitHub Action with empty inputs object', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs: {} });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -129,18 +120,14 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
-      it('should handle inputs with missing optional properties', () => {
+      it('should handle inputs with missing optional properties', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
           inputs: { 'minimal-input': {} as GitHubActionInput },
         });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -156,7 +143,7 @@ describe('InputsSectionGenerator', () => {
     });
 
     describe('with GitHub Workflow manifest', () => {
-      it('should generate inputs section for GitHub Workflow with workflow_call inputs', () => {
+      it('should generate inputs section for GitHub Workflow with workflow_call inputs', async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: {
@@ -179,11 +166,7 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -200,18 +183,14 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
-      it('should generate inputs section for GitHub Workflow without workflow_dispatch', () => {
+      it('should generate inputs section for GitHub Workflow without workflow_dispatch', async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: { push: {} },
         });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -220,18 +199,18 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
-      it('should generate inputs section for GitHub Workflow with workflow_dispatch but no inputs', () => {
+      it('should generate inputs section for GitHub Workflow with workflow_dispatch but no inputs', async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: { workflow_dispatch: {} },
         });
 
         // Act
-        const result = generator.generateSection(
+        const result = await generator.generateSection({
           formatterAdapter,
           manifest,
-          mockRepository
-        );
+          repositoryProvider: mockRepositoryProvider
+        });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -240,7 +219,7 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
-      it('should handle workflow inputs with missing optional properties', () => {
+      it('should handle workflow inputs with missing optional properties', async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: {
@@ -256,11 +235,7 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -276,7 +251,7 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
-      it('should handle workflow inputs with options but no description', () => {
+      it('should handle workflow inputs with options but no description', async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: {
@@ -292,11 +267,7 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -321,13 +292,7 @@ describe('InputsSectionGenerator', () => {
         } as unknown as GitHubActionsManifest;
 
         // Act & Assert
-        expect(() => {
-          generator.generateSection(
-            formatterAdapter,
-            invalidManifest,
-            mockRepository
-          );
-        }).toThrow('Unsupported manifest type for InputsSectionGenerator');
+        expect(generator.generateSection({ formatterAdapter, manifest: invalidManifest, repositoryProvider: mockRepositoryProvider })).rejects.toThrow('Unsupported manifest type for InputsSectionGenerator');
       });
     });
   });

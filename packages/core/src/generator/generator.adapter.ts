@@ -1,5 +1,7 @@
 import { RendererAdapter } from '../renderer/renderer.adapter.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
+import { ManifestVersion } from '../version/version.service.js';
+import { SectionOptions, SectionOptionsDescriptors } from './section-generator.adapter.js';
 
 export const GENERATOR_ADAPTER_IDENTIFIER = Symbol('GeneratorAdapter');
 
@@ -14,6 +16,11 @@ export type GenerateSectionsOptions = {
    * List of section identifiers to exclude from generation
    */
   excludeSections?: string[];
+
+  /**
+   * Section-specific configuration options
+   */
+  sectionConfig?: Record<string, SectionOptions>;
 };
 
 export interface GeneratorAdapter {
@@ -56,5 +63,12 @@ export interface GeneratorAdapter {
     sections: GenerateSectionsOptions;
     rendererAdapter: RendererAdapter;
     repositoryProvider: RepositoryProvider;
+    version?: ManifestVersion
   }): Promise<void>;
+
+  /**
+   * Get section-specific options from all section generators
+   * @returns Record mapping section identifiers to their option descriptors
+   */
+  getSectionsOptions(): Record<string, SectionOptionsDescriptors>;
 }
