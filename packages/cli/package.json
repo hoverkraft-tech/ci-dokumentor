@@ -1,8 +1,7 @@
 {
   "name": "@ci-dokumentor/cli",
-  "description": "Command Line Interface for CI Dokumentor",
+  "description": "Command Line Interface for CI Dokumentor - Automated documentation generator for CI/CD components",
   "version": "0.0.1",
-  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -10,6 +9,29 @@
   "bin": {
     "ci-dokumentor": "./dist/bin/ci-dokumentor.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoverkraft-tech/ci-dokumentor.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/hoverkraft-tech/ci-dokumentor",
+  "bugs": {
+    "url": "https://github.com/hoverkraft-tech/ci-dokumentor/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "cli",
+    "documentation",
+    "ci-cd",
+    "github-actions",
+    "markdown",
+    "automation"
+  ],
+  "author": "hoverkraft-tech",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -20,12 +42,14 @@
     }
   },
   "dependencies": {
-    "@ci-dokumentor/cicd-github-actions": "workspace:*",
-    "@ci-dokumentor/core": "workspace:*",
-    "@ci-dokumentor/repository-git": "workspace:*",
-    "@ci-dokumentor/repository-github": "workspace:*",
     "commander": "^14.0.0",
     "reflect-metadata": "^0.2.2",
     "inversify": "^7.9.1"
+  },
+  "devDependencies": {
+    "@ci-dokumentor/core": "workspace:*",
+    "@ci-dokumentor/repository-git": "workspace:*",
+    "@ci-dokumentor/repository-github": "workspace:*",
+    "@ci-dokumentor/cicd-github-actions": "workspace:*"
   }
 }
