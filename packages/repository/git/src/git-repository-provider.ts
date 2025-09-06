@@ -130,44 +130,40 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
       const git = simpleGit();
       
       // Use user-provided values if available
-      const ref = this.userRef;
-      const sha = this.userSha;
+      const userRef = this.userRef;
+      const userSha = this.userSha;
 
-      // If both are provided by user, return them
-      if (ref && sha) {
-        return { ref, sha };
+      // If user provided any values, use only those (no auto-detection)
+      if (userRef || userSha) {
+        return { ref: userRef, sha: userSha };
       }
 
-      // Auto-detect missing values
-      let detectedRef = ref;
-      let detectedSha = sha;
+      // Auto-detect missing values when no user values are provided
+      let detectedRef: string | undefined;
+      let detectedSha: string | undefined;
 
-      // Get current commit SHA if not provided
-      if (!detectedSha) {
-        try {
-          detectedSha = await git.revparse('HEAD');
-        } catch {
-          // If we can't get SHA, that's ok
-        }
+      // Get current commit SHA
+      try {
+        detectedSha = await git.revparse('HEAD');
+      } catch {
+        // If we can't get SHA, that's ok
       }
 
-      // Get latest tag if ref not provided
-      if (!detectedRef) {
-        try {
-          // Try to get the latest tag pointing to current commit
-          const tags = await git.tags(['--points-at', 'HEAD']);
-          if (tags.latest) {
-            detectedRef = tags.latest;
-          } else {
-            // Fallback to current branch name
-            const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
-            if (currentBranch && currentBranch !== 'HEAD') {
-              detectedRef = currentBranch;
-            }
+      // Get latest tag
+      try {
+        // Try to get the latest tag pointing to current commit
+        const tags = await git.tags(['--points-at', 'HEAD']);
+        if (tags.latest) {
+          detectedRef = tags.latest;
+        } else {
+          // Fallback to current branch name
+          const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
+          if (currentBranch && currentBranch !== 'HEAD') {
+            detectedRef = currentBranch;
           }
-        } catch {
-          // If we can't detect ref, that's ok
         }
+      } catch {
+        // If we can't detect ref, that's ok
       }
 
       // Return version info if we have at least one piece of information
