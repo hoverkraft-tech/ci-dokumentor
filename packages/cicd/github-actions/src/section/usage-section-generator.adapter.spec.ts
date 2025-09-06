@@ -165,6 +165,67 @@ describe('UsageSectionGenerator', () => {
 `
         );
       });
+
+      it('should generate usage section with version information when available', () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
+        const repositoryWithVersion = {
+          ...mockRepository,
+          version: {
+            ref: 'v1.0.0',
+            sha: '08c6903cd8c0fde910a37f88322edcfb5dd907a8',
+          }
+        };
+
+        // Act
+        const result = generator.generateSection(
+          formatterAdapter,
+          manifest,
+          repositoryWithVersion
+        );
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toBe(
+          `## Usage
+
+\`\`\`yaml
+- uses: owner/repo@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+\`\`\`
+`
+        );
+      });
+
+      it('should generate usage section with ref when sha not available', () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
+        const repositoryWithRef = {
+          ...mockRepository,
+          version: {
+            ref: 'v1.0.0',
+          }
+        };
+
+        // Act
+        const result = generator.generateSection(
+          formatterAdapter,
+          manifest,
+          repositoryWithRef
+        );
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toBe(
+          `## Usage
+
+\`\`\`yaml
+- uses: owner/repo@v1.0.0
+
+\`\`\`
+`
+        );
+      });
     });
 
     describe('with GitHub Workflow manifest', () => {
@@ -398,6 +459,49 @@ on:
 jobs:
   test.yml:
     uses: owner/repo/.github/workflows/test.yml
+
+\`\`\`
+`
+        );
+      });
+
+      it('should generate usage section for workflow with version information', () => {
+        // Arrange
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          usesName: 'owner/repo/.github/workflows/workflow.yml',
+          name: 'Test Workflow',
+          on: { push: { branches: ['main'] }, workflow_dispatch: {} },
+        });
+
+        const repositoryWithVersion = {
+          ...mockRepository,
+          version: {
+            ref: 'v2.1.0',
+            sha: 'abc123def456',
+          }
+        };
+
+        // Act
+        const result = generator.generateSection(
+          formatterAdapter,
+          manifest,
+          repositoryWithVersion
+        );
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toBe(
+          `## Usage
+
+\`\`\`yaml
+name: Test Workflow
+on:
+  push:
+    branches:
+      - main
+jobs:
+  workflow.yml:
+    uses: owner/repo/.github/workflows/workflow.yml@abc123def456
 
 \`\`\`
 `

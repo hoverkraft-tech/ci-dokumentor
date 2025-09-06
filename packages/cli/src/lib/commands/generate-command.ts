@@ -15,6 +15,8 @@ export type GenerateCommandOptions = {
   cicd?: string;
   includeSections?: string;
   excludeSections?: string;
+  ref?: string;
+  sha?: string;
   [key: string]: unknown; // Allow dynamic keys for provider-specific options
 };
 
@@ -73,6 +75,14 @@ export class GenerateCommand extends BaseCommand {
       .option(
         '-e, --exclude-sections <sections>',
         'Comma-separated list of sections to exclude'
+      )
+      .option(
+        '--ref <ref>',
+        'Git reference (branch, tag, or ref) to include in usage examples (auto-detected if not specified)'
+      )
+      .option(
+        '--sha <sha>',
+        'Git commit SHA to include in usage examples (auto-detected if not specified)'
       )
       .hook('preAction', async (thisCommand) => {
         await this.populateSupportedOptions(thisCommand);
@@ -139,10 +149,21 @@ export class GenerateCommand extends BaseCommand {
     };
 
     // Handle repository platform options
-    if (options.repository) {
+    if (options.repository || options.ref || options.sha) {
       generateOptions.repository = {
         platform: options.repository,
       };
+
+      // Add version information if provided
+      if (options.ref || options.sha) {
+        generateOptions.repository.options = generateOptions.repository.options || {};
+        if (options.ref) {
+          generateOptions.repository.options.ref = options.ref;
+        }
+        if (options.sha) {
+          generateOptions.repository.options.sha = options.sha;
+        }
+      }
     }
 
     // Handle CI/CD platform options

@@ -11,10 +11,16 @@ export type ParsedRemoteUrl = {
   toString: (format?: string) => string;
 };
 
-type GitRepositoryProviderOptions = Record<string, never>;
+type GitRepositoryProviderOptions = {
+  ref?: string;
+  sha?: string;
+};
 
 @injectable()
 export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryProviderOptions> {
+
+  private userRef?: string;
+  private userSha?: string;
 
   /**
    * Get the platform name identifier for this provider
@@ -24,16 +30,26 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
   }
 
   getOptions(): RepositoryOptionsDescriptors<GitRepositoryProviderOptions> {
-    return {};
+    return {
+      ref: {
+        flags: '--ref <ref>',
+        description: 'Git reference (branch, tag, or ref) to include in usage examples',
+      },
+      sha: {
+        flags: '--sha <sha>',
+        description: 'Git commit SHA to include in usage examples',
+      },
+    };
   }
 
   /**
-   * No provider-specific options for the plain git provider. Keep method for
-   * interface compatibility.
+   * Apply runtime options to the provider instance.
    */
   setOptions(options: GitRepositoryProviderOptions): void {
-    // no-op for git provider
-    return;
+    if (options) {
+      this.userRef = options.ref;
+      this.userSha = options.sha;
+    }
   }
 
   /**
@@ -69,11 +85,14 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
     const fullName =
       parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
 
+    const version = await this.getVersionInfo();
+
     return {
       owner: parsedUrl.owner,
       name: parsedUrl.name,
       url,
       fullName,
+      version,
     };
   }
 
@@ -101,5 +120,65 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
   private async getRemoteUrl(): Promise<string> {
     const originRemote = await this.getOriginRemote();
     return originRemote.refs.fetch;
+  }
+
+  /**
+   * Get version information (ref and SHA) for the repository
+   */
+  private async getVersionInfo(): Promise<{ ref?: string; sha?: string } | undefined> {
+    try {
+      const git = simpleGit();
+      
+      // Use user-provided values if available
+      const ref = this.userRef;
+      const sha = this.userSha;
+
+      // If both are provided by user, return them
+      if (ref && sha) {
+        return { ref, sha };
+      }
+
+      // Auto-detect missing values
+      let detectedRef = ref;
+      let detectedSha = sha;
+
+      // Get current commit SHA if not provided
+      if (!detectedSha) {
+        try {
+          detectedSha = await git.revparse('HEAD');
+        } catch {
+          // If we can't get SHA, that's ok
+        }
+      }
+
+      // Get latest tag if ref not provided
+      if (!detectedRef) {
+        try {
+          // Try to get the latest tag pointing to current commit
+          const tags = await git.tags(['--points-at', 'HEAD']);
+          if (tags.latest) {
+            detectedRef = tags.latest;
+          } else {
+            // Fallback to current branch name
+            const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
+            if (currentBranch && currentBranch !== 'HEAD') {
+              detectedRef = currentBranch;
+            }
+          }
+        } catch {
+          // If we can't detect ref, that's ok
+        }
+      }
+
+      // Return version info if we have at least one piece of information
+      if (detectedRef || detectedSha) {
+        return { ref: detectedRef, sha: detectedSha };
+      }
+
+      return undefined;
+    } catch {
+      // If anything goes wrong, return undefined (no version info)
+      return undefined;
+    }
   }
 }

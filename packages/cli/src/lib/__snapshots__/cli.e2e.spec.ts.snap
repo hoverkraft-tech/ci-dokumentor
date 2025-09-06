@@ -33,6 +33,11 @@ Options:
                                      specified) (choices: "github-actions")
   -i, --include-sections <sections>  Comma-separated list of sections to include
   -e, --exclude-sections <sections>  Comma-separated list of sections to exclude
+  --ref <ref>                        Git reference (branch, tag, or ref) to
+                                     include in usage examples (auto-detected if
+                                     not specified)
+  --sha <sha>                        Git commit SHA to include in usage examples
+                                     (auto-detected if not specified)
   -h, --help                         display help for command
 
 Commands:
