@@ -12,13 +12,11 @@ export type ParsedRemoteUrl = {
 };
 
 type GitRepositoryProviderOptions = {
-  version?: string;
+  // No version option anymore
 };
 
 @injectable()
 export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryProviderOptions> {
-
-  private userVersion?: string;
 
   /**
    * Get the platform name identifier for this provider
@@ -29,10 +27,7 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
 
   getOptions(): RepositoryOptionsDescriptors<GitRepositoryProviderOptions> {
     return {
-      version: {
-        flags: '--version <version>',
-        description: 'Version identifier (tag, branch, commit SHA, etc.) to include in usage examples',
-      },
+      // No version option anymore
     };
   }
 
@@ -40,9 +35,7 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
    * Apply runtime options to the provider instance.
    */
   setOptions(options: GitRepositoryProviderOptions): void {
-    if (options) {
-      this.userVersion = options.version;
-    }
+    // No options to set anymore
   }
 
   /**
@@ -78,14 +71,11 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
     const fullName =
       parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
 
-    const version = await this.getVersionInfo();
-
     return {
       owner: parsedUrl.owner,
       name: parsedUrl.name,
       url,
       fullName,
-      version,
     };
   }
 
@@ -113,63 +103,5 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
   private async getRemoteUrl(): Promise<string> {
     const originRemote = await this.getOriginRemote();
     return originRemote.refs.fetch;
-  }
-
-  /**
-   * Get version information (ref and SHA) for the repository
-   */
-  private async getVersionInfo(): Promise<{ ref?: string; sha?: string } | undefined> {
-    try {
-      const git = simpleGit();
-      
-      // If user provided a version, use it
-      if (this.userVersion) {
-        // Check if the provided version looks like a commit SHA (40 hex characters)
-        const isSha = /^[a-f0-9]{40}$/i.test(this.userVersion);
-        if (isSha) {
-          return { sha: this.userVersion };
-        } else {
-          return { ref: this.userVersion };
-        }
-      }
-
-      // Auto-detect version information when no user version is provided
-      let detectedRef: string | undefined;
-      let detectedSha: string | undefined;
-
-      // Get current commit SHA
-      try {
-        detectedSha = await git.revparse('HEAD');
-      } catch {
-        // If we can't get SHA, that's ok
-      }
-
-      // Get latest tag
-      try {
-        // Try to get the latest tag pointing to current commit
-        const tags = await git.tags(['--points-at', 'HEAD']);
-        if (tags.latest) {
-          detectedRef = tags.latest;
-        } else {
-          // Fallback to current branch name
-          const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
-          if (currentBranch && currentBranch !== 'HEAD') {
-            detectedRef = currentBranch;
-          }
-        }
-      } catch {
-        // If we can't detect ref, that's ok
-      }
-
-      // Return version info if we have at least one piece of information
-      if (detectedRef || detectedSha) {
-        return { ref: detectedRef, sha: detectedSha };
-      }
-
-      return undefined;
-    } catch {
-      // If anything goes wrong, return undefined (no version info)
-      return undefined;
-    }
   }
 }

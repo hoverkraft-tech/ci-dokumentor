@@ -77,7 +77,7 @@ export class GenerateCommand extends BaseCommand {
       )
       .option(
         '--version <version>',
-        'Version identifier (tag, branch, commit SHA, etc.) to include in usage examples (auto-detected if not specified)'
+        'Version identifier of the manifest (tag, branch, commit SHA, etc.)'
       )
       .hook('preAction', async (thisCommand) => {
         await this.populateSupportedOptions(thisCommand);
@@ -140,20 +140,15 @@ export class GenerateCommand extends BaseCommand {
     const generateOptions: GenerateDocumentationUseCaseInput = {
       source: options.source,
       destination: options.destination,
-      outputFormat: this.getOutputFormatOption(this)
+      outputFormat: this.getOutputFormatOption(this),
+      version: options.version, // Map version as a top-level parameter
     };
 
     // Handle repository platform options
-    if (options.repository || options.version) {
+    if (options.repository) {
       generateOptions.repository = {
         platform: options.repository,
       };
-
-      // Add version information if provided
-      if (options.version) {
-        generateOptions.repository.options = generateOptions.repository.options || {};
-        generateOptions.repository.options.version = options.version;
-      }
     }
 
     // Handle CI/CD platform options

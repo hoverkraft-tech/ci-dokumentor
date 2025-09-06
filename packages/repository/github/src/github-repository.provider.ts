@@ -15,7 +15,6 @@ type GraphQLClient = typeof graphql;
 
 type GitHubRepositoryProviderOptions = {
   githubToken?: string;
-  version?: string;
 };
 
 @injectable()
@@ -56,10 +55,6 @@ export class GitHubRepositoryProvider implements RepositoryProvider<GitHubReposi
         description: 'Optional GitHub token to authenticate GraphQL requests',
         env: 'GITHUB_TOKEN',
       },
-      version: {
-        flags: '--version <version>',
-        description: 'Version identifier (tag, branch, commit SHA, etc.) to include in usage examples',
-      },
     };
   }
 
@@ -75,11 +70,6 @@ export class GitHubRepositoryProvider implements RepositoryProvider<GitHubReposi
 
     const shouldResetGraphqlClient = options.githubToken !== this.githubToken;
     this.githubToken = options.githubToken;
-
-    // Pass version option to the git repository service
-    this.gitRepositoryService.setOptions({
-      version: options.version,
-    });
 
     // Reset client to pick up new token
     if (shouldResetGraphqlClient) {

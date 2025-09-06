@@ -169,19 +169,17 @@ describe('UsageSectionGenerator', () => {
       it('should generate usage section with version information when available', () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
-        const repositoryWithVersion = {
-          ...mockRepository,
-          version: {
-            ref: 'v1.0.0',
-            sha: '08c6903cd8c0fde910a37f88322edcfb5dd907a8',
-          }
+        const version = {
+          ref: 'v1.0.0',
+          sha: '08c6903cd8c0fde910a37f88322edcfb5dd907a8',
         };
 
         // Act
-        const result = generator.generateSection(
+        const result = generator.generateSectionWithVersion(
           formatterAdapter,
           manifest,
-          repositoryWithVersion
+          mockRepository,
+          version
         );
 
         // Assert
@@ -200,18 +198,16 @@ describe('UsageSectionGenerator', () => {
       it('should generate usage section with ref when sha not available', () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
-        const repositoryWithRef = {
-          ...mockRepository,
-          version: {
-            ref: 'v1.0.0',
-          }
+        const version = {
+          ref: 'v1.0.0',
         };
 
         // Act
-        const result = generator.generateSection(
+        const result = generator.generateSectionWithVersion(
           formatterAdapter,
           manifest,
-          repositoryWithRef
+          mockRepository,
+          version
         );
 
         // Assert
@@ -473,19 +469,17 @@ jobs:
           on: { push: { branches: ['main'] }, workflow_dispatch: {} },
         });
 
-        const repositoryWithVersion = {
-          ...mockRepository,
-          version: {
-            ref: 'v2.1.0',
-            sha: 'abc123def456',
-          }
+        const version = {
+          ref: 'v2.1.0',
+          sha: 'abc123def456',
         };
 
         // Act
-        const result = generator.generateSection(
+        const result = generator.generateSectionWithVersion(
           formatterAdapter,
           manifest,
-          repositoryWithVersion
+          mockRepository,
+          version
         );
 
         // Assert

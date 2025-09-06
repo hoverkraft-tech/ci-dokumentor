@@ -1,5 +1,6 @@
 import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
 import { Repository } from '../repository/repository.service.js';
+import { ManifestVersion } from '../version/version.service.js';
 
 export const SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
   'SectionGeneratorAdapter'
@@ -28,5 +29,17 @@ export interface SectionGeneratorAdapter<TManifest> {
     formatterAdapter: FormatterAdapter,
     manifest: TManifest,
     repository: Repository
+  ): Buffer;
+}
+
+/**
+ * Enhanced interface for section generators that need version information
+ */
+export interface VersionAwareSectionGeneratorAdapter<TManifest> extends SectionGeneratorAdapter<TManifest> {
+  generateSectionWithVersion(
+    formatterAdapter: FormatterAdapter,
+    manifest: TManifest,
+    repository: Repository,
+    version?: ManifestVersion
   ): Buffer;
 }
