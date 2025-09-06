@@ -120,6 +120,16 @@ importers:
 
   packages/cli:
     dependencies:
+      commander:
+        specifier: ^14.0.0
+        version: 14.0.0
+      inversify:
+        specifier: ^7.9.1
+        version: 7.9.1(reflect-metadata@0.2.2)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+    devDependencies:
       '@ci-dokumentor/cicd-github-actions':
         specifier: workspace:*
         version: link:../cicd/github-actions
@@ -132,15 +142,6 @@ importers:
       '@ci-dokumentor/repository-github':
         specifier: workspace:*
         version: link:../repository/github
-      commander:
-        specifier: ^14.0.0
-        version: 14.0.0
-      inversify:
-        specifier: ^7.9.1
-        version: 7.9.1(reflect-metadata@0.2.2)
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
 
   packages/core:
     dependencies:
@@ -8171,7 +8172,7 @@ snapshots:
       '@babel/preset-env': 7.27.2(@babel/core@7.27.4)
       '@babel/preset-react': 7.27.1(@babel/core@7.27.4)
       '@babel/preset-typescript': 7.27.1(@babel/core@7.27.4)
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.3
       '@babel/runtime-corejs3': 7.28.3
       '@babel/traverse': 7.27.4
       '@docusaurus/logger': 3.8.1
@@ -10664,7 +10665,7 @@ snapshots:
 
   babel-plugin-macros@3.1.0:
     dependencies:
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.3
       cosmiconfig: 7.1.0
       resolve: 1.22.10
 
@@ -14192,19 +14193,19 @@ snapshots:
 
   react-loadable-ssr-addon-v5-slorber@1.0.1(@docusaurus/react-loadable@6.0.0(react@19.1.1))(webpack@5.101.3(@swc/core@1.13.5(@swc/helpers@0.5.17))):
     dependencies:
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.3
       react-loadable: '@docusaurus/react-loadable@6.0.0(react@19.1.1)'
       webpack: 5.101.3(@swc/core@1.13.5(@swc/helpers@0.5.17))
 
   react-router-config@5.1.1(react-router@5.3.4(react@19.1.1))(react@19.1.1):
     dependencies:
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.3
       react: 19.1.1
       react-router: 5.3.4(react@19.1.1)
 
   react-router-dom@5.3.4(react@19.1.1):
     dependencies:
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.3
       history: 4.10.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
@@ -14215,7 +14216,7 @@ snapshots:
 
   react-router@5.3.4(react@19.1.1):
     dependencies:
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.3
       history: 4.10.1
       hoist-non-react-statics: 3.3.2
       loose-envify: 1.4.0
