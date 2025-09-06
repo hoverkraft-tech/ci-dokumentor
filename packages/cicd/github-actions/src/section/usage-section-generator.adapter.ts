@@ -1,4 +1,4 @@
-import { Repository } from '@ci-dokumentor/core';
+import { Repository, ManifestVersion } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
@@ -9,14 +9,15 @@ import {
   GitHubWorkflowSecret,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { FormatterAdapter, SectionIdentifier, VersionAwareSectionGeneratorAdapter } from '@ci-dokumentor/core';
 import { Document } from 'yaml';
 import { basename } from 'node:path';
 
 export type UsageInput = {
   name: string;
 } & (GitHubActionInput | GitHubWorkflowCallInput | GitHubWorkflowSecret);
-export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
+
+export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter implements VersionAwareSectionGeneratorAdapter<GitHubActionsManifest> {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Usage;
   }
@@ -26,10 +27,21 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     manifest: GitHubActionsManifest,
     repository: Repository
   ): Buffer {
+    // Legacy method - call the new version-aware method without version
+    return this.generateSectionWithVersion(formatterAdapter, manifest, repository);
+  }
+
+  generateSectionWithVersion(
+    formatterAdapter: FormatterAdapter,
+    manifest: GitHubActionsManifest,
+    repository: Repository,
+    version?: ManifestVersion
+  ): Buffer {
     const usageExample = this.generateUsageExample(
       formatterAdapter,
       manifest,
-      repository
+      repository,
+      version
     );
     return Buffer.concat([
       formatterAdapter.heading(Buffer.from('Usage'), 2),
@@ -41,11 +53,12 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
   private generateUsageExample(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
-    repository: Repository
+    repository: Repository,
+    version?: ManifestVersion
   ): Buffer {
     const usageContent = this.isGitHubAction(manifest)
-      ? this.generateActionUsage(manifest, repository)
-      : this.generateWorkflowUsage(manifest, repository);
+      ? this.generateActionUsage(manifest, repository, version)
+      : this.generateWorkflowUsage(manifest, repository, version);
     return formatterAdapter.code(
       Buffer.from(
         usageContent.toString({
@@ -62,14 +75,17 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
   private generateActionUsage(
     manifest: GitHubAction,
-    _repository: Repository
+    repository: Repository,
+    version?: ManifestVersion
   ): Document {
     const inputs = manifest.inputs || {};
     const withUsage = this.generateInputsUsage(inputs);
 
+    const usesName = this.buildUsesNameWithVersion(manifest.usesName, repository, version);
+
     return new Document([
       {
-        uses: manifest.usesName,
+        uses: usesName,
         with: withUsage,
       },
     ]);
@@ -77,7 +93,8 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
   private generateWorkflowUsage(
     workflow: GitHubWorkflow,
-    _repository: Repository
+    repository: Repository,
+    version?: ManifestVersion
   ): Document {
     const filteredOnAllowList = ['workflow_call', 'workflow_dispatch'];
 
@@ -102,6 +119,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     const withUsage = this.generateInputsUsage(inputs) || undefined;
 
     const jobName = basename(workflow.usesName);
+    const usesName = this.buildUsesNameWithVersion(workflow.usesName, repository, version);
 
     return new Document({
       name: `${workflow.name}`,
@@ -109,7 +127,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       permissions,
       jobs: {
         [jobName]: {
-          uses: `${workflow.usesName}`,
+          uses: usesName,
           secrets: secretsUsage,
           with: withUsage,
         },
@@ -243,5 +261,22 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       value: defaultValue,
       comment: commentBefore || undefined,
     };
+  }
+
+  /**
+   * Build the uses name with version information
+   */
+  private buildUsesNameWithVersion(usesName: string, repository: Repository, version?: ManifestVersion): string {
+    if (!version) {
+      return usesName;
+    }
+
+    // Prefer SHA over ref for precision, but use ref if that's all we have
+    const versionSuffix = version.sha || version.ref;
+    if (!versionSuffix) {
+      return usesName;
+    }
+
+    return `${usesName}@${versionSuffix}`;
   }
 }

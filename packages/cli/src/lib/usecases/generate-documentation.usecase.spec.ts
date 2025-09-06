@@ -169,7 +169,8 @@ describe('GenerateDocumentationUseCase', () => {
       expect(mockGeneratorService.generateDocumentationForPlatform).toHaveBeenCalledWith(
         generatorAdapterMock,
         './action.yml',
-        undefined
+        undefined,
+        expect.anything() // Version parameter is auto-detected from git context
       );
       expect(mockLoggerService.info).toHaveBeenCalled();
     });

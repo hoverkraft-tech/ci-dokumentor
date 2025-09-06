@@ -9,5 +9,6 @@ export * from './output/file-output.adapter.js';
 export * from './repository/repository.provider.js';
 export * from './repository/repository.service.js';
 export * from './repository/license.service.js';
+export * from './version/version.service.js';
 export * from './container.js';
 export * from './options/options.js';

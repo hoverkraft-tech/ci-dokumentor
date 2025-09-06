@@ -5,6 +5,7 @@ import {
 import { FileOutputAdapter } from '../output/file-output.adapter.js';
 import { inject, injectable, multiInject } from 'inversify';
 import { FormatterService } from '../formatter/formatter.service.js';
+import { ManifestVersion } from '../version/version.service.js';
 
 @injectable()
 export class GeneratorService {
@@ -63,7 +64,8 @@ export class GeneratorService {
   async generateDocumentationForPlatform(
     adapter: GeneratorAdapter,
     source: string,
-    output?: string
+    output?: string,
+    version?: ManifestVersion
   ): Promise<string> {
     // Check if the adapter supports the source path
     if (!adapter.supportsSource(source)) {
@@ -85,7 +87,8 @@ export class GeneratorService {
     await adapter.generateDocumentation(
       source,
       formatterAdapter,
-      outputAdapter
+      outputAdapter,
+      version
     );
 
     return destinationPath;

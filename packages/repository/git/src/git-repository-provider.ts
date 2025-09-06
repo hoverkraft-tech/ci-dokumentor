@@ -11,7 +11,9 @@ export type ParsedRemoteUrl = {
   toString: (format?: string) => string;
 };
 
-type GitRepositoryProviderOptions = Record<string, never>;
+type GitRepositoryProviderOptions = {
+  // No version option anymore
+};
 
 @injectable()
 export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryProviderOptions> {
@@ -24,16 +26,16 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
   }
 
   getOptions(): RepositoryOptionsDescriptors<GitRepositoryProviderOptions> {
-    return {};
+    return {
+      // No version option anymore
+    };
   }
 
   /**
-   * No provider-specific options for the plain git provider. Keep method for
-   * interface compatibility.
+   * Apply runtime options to the provider instance.
    */
   setOptions(options: GitRepositoryProviderOptions): void {
-    // no-op for git provider
-    return;
+    // No options to set anymore
   }
 
   /**

@@ -33,6 +33,8 @@ Options:
                                      specified) (choices: "github-actions")
   -i, --include-sections <sections>  Comma-separated list of sections to include
   -e, --exclude-sections <sections>  Comma-separated list of sections to exclude
+  --version <version>                Version identifier of the manifest (tag,
+                                     branch, commit SHA, etc.)
   -h, --help                         display help for command
 
 Commands:

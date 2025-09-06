@@ -15,6 +15,7 @@ export type GenerateCommandOptions = {
   cicd?: string;
   includeSections?: string;
   excludeSections?: string;
+  version?: string;
   [key: string]: unknown; // Allow dynamic keys for provider-specific options
 };
 
@@ -73,6 +74,10 @@ export class GenerateCommand extends BaseCommand {
       .option(
         '-e, --exclude-sections <sections>',
         'Comma-separated list of sections to exclude'
+      )
+      .option(
+        '--version <version>',
+        'Version identifier of the manifest (tag, branch, commit SHA, etc.)'
       )
       .hook('preAction', async (thisCommand) => {
         await this.populateSupportedOptions(thisCommand);
@@ -135,7 +140,8 @@ export class GenerateCommand extends BaseCommand {
     const generateOptions: GenerateDocumentationUseCaseInput = {
       source: options.source,
       destination: options.destination,
-      outputFormat: this.getOutputFormatOption(this)
+      outputFormat: this.getOutputFormatOption(this),
+      version: options.version, // Map version as a top-level parameter
     };
 
     // Handle repository platform options

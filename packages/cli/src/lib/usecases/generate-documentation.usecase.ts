@@ -6,9 +6,12 @@ import {
   OptionDescriptor,
   RepositoryOptions,
   RepositoryProvider,
-  RepositoryService
+  RepositoryService,
+  ManifestVersion,
+  VersionService
 } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
+import { GitVersionDetector } from '@ci-dokumentor/repository-git';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -28,6 +31,12 @@ export interface GenerateDocumentationUseCaseInput {
    * If not provided, the generator adapter will auto-detect the destination path
    */
   destination?: string;
+
+  /**
+   * Version identifier for the manifest (optional)
+   * Can be a tag, branch, commit SHA, etc. If not provided, will be auto-detected
+   */
+  version?: string;
 
   /**
    * Repository platform options
@@ -90,13 +99,18 @@ export interface GenerateDocumentationUseCaseOutput {
  */
 @injectable()
 export class GenerateDocumentationUseCase {
+  private versionService: VersionService;
+
   constructor(
     @inject(LoggerService) private readonly loggerService: LoggerService,
     @inject(GeneratorService)
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
     private readonly repositoryService: RepositoryService
-  ) { }
+  ) { 
+    // Initialize version service with git version detector
+    this.versionService = new VersionService(new GitVersionDetector());
+  }
 
 
   /**
@@ -192,6 +206,15 @@ export class GenerateDocumentationUseCase {
 
     const generatorAdapter = this.resolveGeneratorAdapter(input);
 
+    // Handle version detection
+    const version = await this.resolveVersion(input);
+    if (version) {
+      const versionSuffix = this.versionService.buildVersionSuffix(version);
+      if (versionSuffix) {
+        this.loggerService.info(`Using version: ${versionSuffix}`, input.outputFormat);
+      }
+    }
+
     // Log section options if provided
     if (input.sections?.includeSections?.length) {
       this.loggerService.info(
@@ -207,11 +230,12 @@ export class GenerateDocumentationUseCase {
     }
 
     // Generate documentation using the specific CI/CD platform adapter
-    // Note: generateDocumentationForPlatform(adapter, source, output?) returns the destination path
+    // Note: generateDocumentationForPlatform(adapter, source, output?, version?) returns the destination path
     const destination = await this.generatorService.generateDocumentationForPlatform(
       generatorAdapter,
       input.source,
-      input.destination
+      input.destination,
+      version
     );
 
     this.loggerService.info('Documentation generated successfully!', input.outputFormat);
@@ -290,6 +314,12 @@ export class GenerateDocumentationUseCase {
     return generatorAdapter;
   }
 
+  /**
+   * Resolve version information from input or auto-detection
+   */
+  private async resolveVersion(input: GenerateDocumentationUseCaseInput): Promise<ManifestVersion | undefined> {
+    return await this.versionService.getVersion(input.version);
+  }
 
   private validateInput(input: GenerateDocumentationUseCaseInput): void {
     if (!input.source) {

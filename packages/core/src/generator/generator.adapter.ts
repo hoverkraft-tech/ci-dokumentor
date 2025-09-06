@@ -1,5 +1,6 @@
 import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
 import { OutputAdapter } from '../output/output.adapter.js';
+import { ManifestVersion } from '../version/version.service.js';
 
 export const GENERATOR_ADAPTER_IDENTIFIER = Symbol('GeneratorAdapter');
 
@@ -33,6 +34,7 @@ export interface GeneratorAdapter {
   generateDocumentation(
     source: string,
     formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter
+    outputAdapter: OutputAdapter,
+    version?: ManifestVersion
   ): Promise<void>;
 }

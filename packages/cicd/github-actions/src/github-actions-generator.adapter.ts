@@ -5,6 +5,8 @@ import {
   SectionGeneratorAdapter,
   FormatterAdapter,
   RepositoryService,
+  ManifestVersion,
+  VersionAwareSectionGeneratorAdapter,
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
@@ -82,7 +84,8 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
   async generateDocumentation(
     source: string,
     formatterAdapter: FormatterAdapter,
-    outputAdapter: OutputAdapter
+    outputAdapter: OutputAdapter,
+    version?: ManifestVersion
   ): Promise<void> {
     const repository = await this.repositoryService.getRepository();
     const gitHubActionOrWorkflow = this.gitHubActionsParser.parseFile(
@@ -91,11 +94,19 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     );
 
     for (const sectionGeneratorAdapter of this.sectionGeneratorAdapters) {
-      const sectionContent = sectionGeneratorAdapter.generateSection(
-        formatterAdapter,
-        gitHubActionOrWorkflow,
-        repository
-      );
+      let sectionContent: Buffer;
+      
+      // Check if this is a version-aware section generator (like usage section)
+      if ('generateSectionWithVersion' in sectionGeneratorAdapter) {
+        sectionContent = (sectionGeneratorAdapter as VersionAwareSectionGeneratorAdapter<GitHubActionsManifest>)
+          .generateSectionWithVersion(formatterAdapter, gitHubActionOrWorkflow, repository, version);
+      } else {
+        sectionContent = sectionGeneratorAdapter.generateSection(
+          formatterAdapter,
+          gitHubActionOrWorkflow,
+          repository
+        );
+      }
 
       await outputAdapter.writeSection(
         sectionGeneratorAdapter.getSectionIdentifier(),
