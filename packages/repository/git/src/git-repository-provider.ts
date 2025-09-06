@@ -12,15 +12,13 @@ export type ParsedRemoteUrl = {
 };
 
 type GitRepositoryProviderOptions = {
-  ref?: string;
-  sha?: string;
+  version?: string;
 };
 
 @injectable()
 export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryProviderOptions> {
 
-  private userRef?: string;
-  private userSha?: string;
+  private userVersion?: string;
 
   /**
    * Get the platform name identifier for this provider
@@ -31,13 +29,9 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
 
   getOptions(): RepositoryOptionsDescriptors<GitRepositoryProviderOptions> {
     return {
-      ref: {
-        flags: '--ref <ref>',
-        description: 'Git reference (branch, tag, or ref) to include in usage examples',
-      },
-      sha: {
-        flags: '--sha <sha>',
-        description: 'Git commit SHA to include in usage examples',
+      version: {
+        flags: '--version <version>',
+        description: 'Version identifier (tag, branch, commit SHA, etc.) to include in usage examples',
       },
     };
   }
@@ -47,8 +41,7 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
    */
   setOptions(options: GitRepositoryProviderOptions): void {
     if (options) {
-      this.userRef = options.ref;
-      this.userSha = options.sha;
+      this.userVersion = options.version;
     }
   }
 
@@ -129,16 +122,18 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
     try {
       const git = simpleGit();
       
-      // Use user-provided values if available
-      const userRef = this.userRef;
-      const userSha = this.userSha;
-
-      // If user provided any values, use only those (no auto-detection)
-      if (userRef || userSha) {
-        return { ref: userRef, sha: userSha };
+      // If user provided a version, use it
+      if (this.userVersion) {
+        // Check if the provided version looks like a commit SHA (40 hex characters)
+        const isSha = /^[a-f0-9]{40}$/i.test(this.userVersion);
+        if (isSha) {
+          return { sha: this.userVersion };
+        } else {
+          return { ref: this.userVersion };
+        }
       }
 
-      // Auto-detect missing values when no user values are provided
+      // Auto-detect version information when no user version is provided
       let detectedRef: string | undefined;
       let detectedSha: string | undefined;
 
