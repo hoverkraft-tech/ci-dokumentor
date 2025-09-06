@@ -81,7 +81,7 @@ Documentation generated successfully!
 +## Usage
 +
 +\`\`\`yaml
-+- uses: hoverkraft-tech/ci-dokumentor/test
++- uses: hoverkraft-tech/ci-dokumentor/test@sha-version
 +  with:
 +    # Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).
 +    # This input is required.

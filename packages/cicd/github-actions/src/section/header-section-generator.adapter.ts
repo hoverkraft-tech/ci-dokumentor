@@ -1,28 +1,31 @@
-import { Repository } from '@ci-dokumentor/core';
+import { SectionGenerationPayload } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 import { icons } from 'feather-icons';
+import { injectable } from 'inversify';
 
+@injectable()
 export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Header;
   }
 
-  generateSection(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubActionsManifest,
-    repository: Repository
-  ): Buffer {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+    const [repositoryInfo, logo] = await Promise.all([
+      repositoryProvider.getRepositoryInfo(),
+      repositoryProvider.getLogo(),
+    ]);
+
     const logoContent = this.generateLogo(
       formatterAdapter,
       manifest,
-      repository
+      logo
     );
     const titleContent = this.generateTitle(
       formatterAdapter,
       manifest,
-      repository
+      repositoryInfo
     );
 
     let sectionContent = titleContent;
@@ -41,14 +44,13 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private generateLogo(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
-    repository: Repository
+    logoPath: string | undefined
   ): Buffer | null {
-    const logoPath = repository.logo;
     if (!logoPath) {
       return null;
     }
 
-    const logoAltText = this.getDisplayName(manifest, repository);
+    const logoAltText = this.getDisplayName(manifest);
     const logoImage = formatterAdapter.image(Buffer.from(logoPath), logoAltText, {
       width: '60px',
       align: 'center',
@@ -59,9 +61,9 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   private getDisplayName(
     manifest: GitHubActionsManifest,
-    repository: Repository
+    repositoryInfo?: import('@ci-dokumentor/core').RepositoryInfo
   ): Buffer {
-    const name = manifest.name || repository.name;
+    const name = manifest.name || repositoryInfo?.name || 'Unknown';
     // Convert to pascal case
     return Buffer.from(name.replace(/(?:^|_)(\w)/g, (_, c) => c.toUpperCase()));
   }
@@ -69,10 +71,10 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private generateTitle(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
-    repository: Repository
+    repositoryInfo: import('@ci-dokumentor/core').RepositoryInfo
   ): Buffer {
     const title = Buffer.from(
-      this.getTitlePrefix(manifest) + this.getDisplayName(manifest, repository)
+      this.getTitlePrefix(manifest) + this.getDisplayName(manifest, repositoryInfo)
     );
     const branchingIcon = this.generateBrandingIcon(formatterAdapter, manifest);
 

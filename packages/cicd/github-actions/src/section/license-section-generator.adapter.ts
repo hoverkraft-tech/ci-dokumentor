@@ -1,26 +1,27 @@
-import { Repository } from '@ci-dokumentor/core';
+import { SectionGenerationPayload } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 
+@injectable()
 export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.License;
   }
 
-  generateSection(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubActionsManifest,
-    repository: Repository
-  ): Buffer {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
     const currentYear = new Date().getFullYear();
+
+    const [repositoryInfo, licenseInfo] = await Promise.all([
+      repositoryProvider.getRepositoryInfo(),
+      repositoryProvider.getLicense(),
+    ]);
+
     const authorName =
       'author' in manifest && manifest.author
         ? manifest.author
-        : repository.owner;
-
-    // Use license information from repository (fetched by GitHubRepositoryProvider with fallbacks)
-    const licenseInfo = repository.license;
+        : repositoryInfo.owner;
 
     // Only generate license section if license information is available
     if (!licenseInfo) {

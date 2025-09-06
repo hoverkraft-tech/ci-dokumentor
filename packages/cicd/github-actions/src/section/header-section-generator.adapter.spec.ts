@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, Mocked } from 'vitest';
 import { HeaderSectionGenerator } from './header-section-generator.adapter.js';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
@@ -7,27 +7,31 @@ import {
   SectionIdentifier,
   MarkdownFormatterAdapter,
   Repository,
+  RepositoryProvider,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
+import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('HeaderSectionGenerator', () => {
+  let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
+
   let generator: HeaderSectionGenerator;
-  let mockRepository: Repository;
 
   beforeEach(() => {
+    mockRepositoryProvider = RepositoryProviderMockFactory.create({
+      getRepositoryInfo: {
+        url: 'https://github.com/owner/repo',
+        owner: 'owner',
+        name: 'repo',
+        fullName: 'owner/repo',
+      },
+    });
+
     const container = initTestContainer();
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new HeaderSectionGenerator();
-
-    // Create mock repository
-    mockRepository = {
-      url: 'https://github.com/owner/repo',
-      owner: 'owner',
-      name: 'repo',
-      fullName: 'owner/repo',
-    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -42,16 +46,12 @@ describe('HeaderSectionGenerator', () => {
 
   describe('generateSection', () => {
     describe('with GitHub Action manifest', () => {
-      it('should generate header section for GitHub Action without logo', () => {
+      it('should generate header section for GitHub Action without logo', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -63,20 +63,14 @@ describe('HeaderSectionGenerator', () => {
         );
       });
 
-      it('should generate header section for GitHub Action with logo', () => {
+      it('should generate header section for GitHub Action with logo', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
-        const repositoryWithLogo: Repository = {
-          ...mockRepository,
-          logo: 'https://example.com/logo.png',
-        };
+
+        mockRepositoryProvider.getLogo.mockResolvedValue('https://example.com/logo.png');
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          repositoryWithLogo
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -89,18 +83,14 @@ describe('HeaderSectionGenerator', () => {
         );
       });
 
-      it('should generate header section for GitHub Action with branding icon', () => {
+      it('should generate header section for GitHub Action with branding icon', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
           branding: { icon: 'activity', color: 'blue' },
         });
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -112,7 +102,7 @@ describe('HeaderSectionGenerator', () => {
         );
       });
 
-      it('should generate header section for GitHub Action with branding icon and default color', () => {
+      it('should generate header section for GitHub Action with branding icon and default color', async () => {
         // Arrange
         const manifest: GitHubAction = {
           usesName: 'owner/repo',
@@ -125,11 +115,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -141,7 +127,7 @@ describe('HeaderSectionGenerator', () => {
         );
       });
 
-      it('should generate header section for GitHub Action with invalid branding icon', () => {
+      it('should generate header section for GitHub Action with invalid branding icon', async () => {
         // Arrange
         const manifest: GitHubAction = {
           usesName: 'owner/repo',
@@ -155,11 +141,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -171,7 +153,7 @@ describe('HeaderSectionGenerator', () => {
         );
       });
 
-      it('should generate header section for GitHub Action with logo and branding icon', () => {
+      it('should generate header section for GitHub Action with logo and branding icon', async () => {
         // Arrange
         const manifest: GitHubAction = {
           usesName: 'owner/repo',
@@ -183,17 +165,11 @@ describe('HeaderSectionGenerator', () => {
             color: 'blue',
           },
         };
-        const repositoryWithLogo: Repository = {
-          ...mockRepository,
-          logo: 'https://example.com/logo.png',
-        };
 
-        // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          repositoryWithLogo
-        );
+        mockRepositoryProvider.getLogo.mockResolvedValue('https://example.com/logo.png');
+
+        // Act        
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -208,7 +184,7 @@ describe('HeaderSectionGenerator', () => {
     });
 
     describe('with GitHub Workflow manifest', () => {
-      it('should generate header section for GitHub Workflow without logo', () => {
+      it('should generate header section for GitHub Workflow without logo', async () => {
         // Arrange
         const manifest: GitHubWorkflow = {
           usesName: 'owner/repo/.github/workflows/test-workflow.yml',
@@ -218,11 +194,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -233,7 +205,7 @@ describe('HeaderSectionGenerator', () => {
 `);
       });
 
-      it('should generate header section for GitHub Workflow with logo', () => {
+      it('should generate header section for GitHub Workflow with logo', async () => {
         // Arrange
         const manifest: GitHubWorkflow = {
           usesName: 'owner/repo/.github/workflows/test-workflow.yml',
@@ -241,17 +213,11 @@ describe('HeaderSectionGenerator', () => {
           on: { push: {} },
           jobs: {},
         };
-        const repositoryWithLogo: Repository = {
-          ...mockRepository,
-          logo: 'https://example.com/logo.png',
-        };
 
-        // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          repositoryWithLogo
-        );
+        mockRepositoryProvider.getLogo.mockResolvedValue('https://example.com/logo.png');
+
+        // Act        
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -263,7 +229,7 @@ describe('HeaderSectionGenerator', () => {
 `);
       });
 
-      it('should not generate branding icon for GitHub Workflow', () => {
+      it('should not generate branding icon for GitHub Workflow', async () => {
         // Arrange
         const manifest: GitHubWorkflow = {
           usesName: 'owner/repo/.github/workflows/test-workflow.yml',
@@ -273,11 +239,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = generator.generateSection(
-          formatterAdapter,
-          manifest,
-          mockRepository
-        );
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -289,7 +251,7 @@ describe('HeaderSectionGenerator', () => {
       });
     });
 
-    it('should handle empty manifest name', () => {
+    it('should handle empty manifest name', async () => {
       // Arrange
       const manifest: GitHubAction = {
         usesName: 'owner/repo',
@@ -299,11 +261,7 @@ describe('HeaderSectionGenerator', () => {
       };
 
       // Act
-      const result = generator.generateSection(
-        formatterAdapter,
-        manifest,
-        mockRepository
-      );
+      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);
@@ -315,7 +273,7 @@ describe('HeaderSectionGenerator', () => {
       );
     });
 
-    it('should handle manifest with special characters in name', () => {
+    it('should handle manifest with special characters in name', async () => {
       // Arrange
       const manifest: GitHubAction = {
         usesName: 'owner/repo',
@@ -325,11 +283,7 @@ describe('HeaderSectionGenerator', () => {
       };
 
       // Act
-      const result = generator.generateSection(
-        formatterAdapter,
-        manifest,
-        mockRepository
-      );
+      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);
@@ -341,7 +295,7 @@ describe('HeaderSectionGenerator', () => {
       );
     });
 
-    it('should handle repository without logo property', () => {
+    it('should handle repository without logo property', async () => {
       // Arrange
       const manifest: GitHubAction = {
         usesName: 'owner/repo',
@@ -359,11 +313,7 @@ describe('HeaderSectionGenerator', () => {
       } as Repository;
 
       // Act
-      const result = generator.generateSection(
-        formatterAdapter,
-        manifest,
-        repositoryWithoutLogo
-      );
+      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: { ...mockRepositoryProvider, getRepositoryInfo: async () => repositoryWithoutLogo } });
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);

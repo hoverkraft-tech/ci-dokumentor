@@ -4,10 +4,11 @@ import {
   GenerateSectionsOptions,
   GeneratorAdapter,
   GeneratorService,
-  OptionDescriptor,
   RepositoryOptions,
+  RepositoryOptionsDescriptors,
   RepositoryProvider,
-  RepositoryService
+  RepositoryService,
+  SectionOptionsDescriptors,
 } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
 
@@ -107,9 +108,9 @@ export class GenerateDocumentationUseCase {
    * Detect some extra options for current context and return any CLI options it exposes
    */
   async getRepositorySupportedOptions(repositoryPlatform?: string): Promise<
-    Record<string, OptionDescriptor>
+    RepositoryOptionsDescriptors
   > {
-    const options: Record<string, OptionDescriptor> = {};
+    const options: RepositoryOptionsDescriptors = {};
 
     let repositoryProvider: RepositoryProvider | undefined;
     if (repositoryPlatform) {
@@ -135,6 +136,30 @@ export class GenerateDocumentationUseCase {
     }
 
     return options;
+  }
+
+  /**
+   * Get section-specific options for current context
+   */
+  getSectionSupportedOptions({
+    cicdPlatform,
+    source
+  }: {
+    cicdPlatform?: string;
+    source?: string;
+  }): Record<string, SectionOptionsDescriptors> {
+    let generatorAdapter: GeneratorAdapter | undefined;
+    if (cicdPlatform) {
+      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
+    } else if (source) {
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(source);
+    }
+
+    if (generatorAdapter) {
+      return generatorAdapter.getSectionsOptions();
+    }
+
+    return {};
   }
 
   /**
@@ -174,17 +199,19 @@ export class GenerateDocumentationUseCase {
     }
 
     // Log section options if provided
-    if (input.sections?.includeSections?.length) {
-      this.loggerService.info(
-        `Including sections: ${input.sections.includeSections.join(', ')}`,
-        input.outputFormat
-      );
-    }
-    if (input.sections?.excludeSections?.length) {
-      this.loggerService.info(
-        `Excluding sections: ${input.sections.excludeSections.join(', ')}`,
-        input.outputFormat
-      );
+    if (input.sections) {
+      if (input.sections.includeSections?.length) {
+        this.loggerService.info(
+          `Including sections: ${input.sections.includeSections.join(', ')}`,
+          input.outputFormat
+        );
+      }
+      if (input.sections.excludeSections?.length) {
+        this.loggerService.info(
+          `Excluding sections: ${input.sections.excludeSections.join(', ')}`,
+          input.outputFormat
+        );
+      }
     }
 
     const generatorAdapter = await this.resolveGeneratorAdapter(input);

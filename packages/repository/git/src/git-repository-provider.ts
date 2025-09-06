@@ -1,4 +1,4 @@
-import { Repository, RepositoryOptionsDescriptors, RepositoryProvider } from '@ci-dokumentor/core';
+import { RepositoryOptionsDescriptors, AbstractRepositoryProvider, RepositoryInfo, LicenseInfo, ContributingInfo, ManifestVersion } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import gitUrlParse from 'git-url-parse';
 import { simpleGit } from 'simple-git';
@@ -14,7 +14,7 @@ export type ParsedRemoteUrl = {
 type GitRepositoryProviderOptions = Record<string, never>;
 
 @injectable()
-export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryProviderOptions> {
+export class GitRepositoryProvider extends AbstractRepositoryProvider<GitRepositoryProviderOptions> {
 
   /**
    * Get the platform name identifier for this provider
@@ -24,16 +24,16 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
   }
 
   getOptions(): RepositoryOptionsDescriptors<GitRepositoryProviderOptions> {
-    return {};
+    return {
+      // No version option anymore
+    };
   }
 
   /**
-   * No provider-specific options for the plain git provider. Keep method for
-   * interface compatibility.
+   * Apply runtime options to the provider instance.
    */
-  setOptions(options: GitRepositoryProviderOptions): void {
-    // no-op for git provider
-    return;
+  setOptions(_options: GitRepositoryProviderOptions): void {
+    // No options to set anymore
   }
 
   /**
@@ -57,7 +57,7 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
     }
   }
 
-  async getRepository(): Promise<Repository> {
+  protected async fetchRepositoryInfo(): Promise<RepositoryInfo> {
     const parsedUrl = await this.getRemoteParsedUrl();
 
     let url = parsedUrl.toString('https');
@@ -75,6 +75,65 @@ export class GitRepositoryProvider implements RepositoryProvider<GitRepositoryPr
       url,
       fullName,
     };
+  }
+
+  protected async fetchLogo(): Promise<string | undefined> {
+    // Basic git provider doesn't provide logo functionality
+    return undefined;
+  }
+
+  protected async fetchLicense(): Promise<LicenseInfo | undefined> {
+    // Basic git provider doesn't provide license functionality
+    return undefined;
+  }
+
+  protected async fetchContributing(): Promise<ContributingInfo | undefined> {
+    // Basic git provider doesn't provide contributing functionality
+    return undefined;
+  }
+
+  protected async fetchLatestVersion(): Promise<ManifestVersion | undefined> {
+    try {
+      const git = simpleGit();
+
+      // Auto-detect version information
+      let detectedRef: string | undefined;
+      let detectedSha: string | undefined;
+
+      // Get current commit SHA
+      try {
+        detectedSha = await git.revparse('HEAD');
+      } catch {
+        // If we can't get SHA, that's ok
+      }
+
+      // Get latest tag
+      try {
+        // Try to get the latest tag pointing to current commit
+        const tags = await git.tags(['--points-at', 'HEAD']);
+        if (tags.latest) {
+          detectedRef = tags.latest;
+        } else {
+          // Fallback to current branch name
+          const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
+          if (currentBranch && currentBranch !== 'HEAD') {
+            detectedRef = currentBranch;
+          }
+        }
+      } catch {
+        // If we can't detect ref, that's ok
+      }
+
+      // Return version info if we have at least one piece of information
+      if (detectedRef || detectedSha) {
+        return { ref: detectedRef, sha: detectedSha };
+      }
+
+      return undefined;
+    } catch {
+      // If anything goes wrong, return undefined (no version info)
+      return undefined;
+    }
   }
 
   /**

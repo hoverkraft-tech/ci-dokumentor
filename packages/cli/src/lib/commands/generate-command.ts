@@ -5,7 +5,7 @@ import {
   GenerateDocumentationUseCase,
   GenerateDocumentationUseCaseInput,
 } from '../usecases/generate-documentation.usecase.js';
-import { GenerateSectionsOptions, RepositoryOptions } from '@ci-dokumentor/core';
+import { GenerateSectionsOptions, RepositoryOptions, SectionOptions } from '@ci-dokumentor/core';
 
 export type GenerateCommandOptions = {
   outputFormat: string;
@@ -16,7 +16,7 @@ export type GenerateCommandOptions = {
   includeSections?: string;
   excludeSections?: string;
   dryRun: boolean;
-  [key: string]: unknown; // Allow dynamic keys for provider-specific options
+  [key: string]: unknown; // Allow dynamic keys for provider-specific options and section options
 };
 
 /**
@@ -107,6 +107,7 @@ export class GenerateCommand extends BaseCommand {
   }
 
   private async populateSupportedOptions(thisCommand: Command) {
+    // Add repository-specific options
     const repositorySupportedOptions = await this.generateDocumentationUseCase.getRepositorySupportedOptions(
       thisCommand.getOptionValue('repository')
     );
@@ -120,6 +121,24 @@ export class GenerateCommand extends BaseCommand {
           option.env(optionDescription.env)
         }
         thisCommand.addOption(option);
+      }
+    }
+
+    // Add section-specific options
+    const sectionSupportedOptions = await this.generateDocumentationUseCase.getSectionSupportedOptions({
+      cicdPlatform: thisCommand.getOptionValue('cicd'),
+      source: thisCommand.getOptionValue('source'),
+    });
+
+    for (const [_sectionId, sectionOptions] of Object.entries(sectionSupportedOptions)) {
+      for (const [_optionKey, optionDescription] of Object.entries(sectionOptions)) {
+        if (!thisCommand.options.find((o) => o.flags === optionDescription.flags)) {
+          const option = new Option(optionDescription.flags, optionDescription.description || '');
+          if (optionDescription.env) {
+            option.env(optionDescription.env);
+          }
+          thisCommand.addOption(option);
+        }
       }
     }
 
@@ -140,7 +159,7 @@ export class GenerateCommand extends BaseCommand {
       destination: options.destination,
       outputFormat: this.getOutputFormatOption(this),
       dryRun: options.dryRun,
-      sections: this.mapSectionOptions(options),
+      sections: this.getSectionsOptions(options),
     };
 
     // Handle repository platform options
@@ -160,21 +179,61 @@ export class GenerateCommand extends BaseCommand {
     return generateOptions;
   }
 
-  private mapSectionOptions(options: GenerateCommandOptions): GenerateSectionsOptions {
+  private getSectionsOptions(options: GenerateCommandOptions): GenerateSectionsOptions {
     const sectionsOptions: GenerateSectionsOptions = {};
-    if (options.includeSections) {
-      sectionsOptions.includeSections = options.includeSections
-        .split(',')
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0)
+
+    // Handle standard section options (include/exclude sections)
+    if (options.includeSections || options.excludeSections) {
+
+      if (options.includeSections) {
+        sectionsOptions.includeSections = options.includeSections
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
+      }
+
+      if (options.excludeSections) {
+        sectionsOptions.excludeSections = options.excludeSections
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
+      }
     }
 
-    if (options.excludeSections) {
-      sectionsOptions.excludeSections = options.excludeSections
-        .split(',')
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+    // Handle section-specific options
+    const sectionSupportedOptions = this.generateDocumentationUseCase.getSectionSupportedOptions({
+      cicdPlatform: options.cicd,
+      source: options.source,
+    });
+
+    const sectionConfig: Record<string, SectionOptions> = {};
+
+    for (const [sectionId, sectionOptions] of Object.entries(sectionSupportedOptions)) {
+      const sectionSpecificOptions: SectionOptions = {};
+
+      for (const [optionKey, optionDescriptor] of Object.entries(sectionOptions)) {
+        const longFlag = optionDescriptor.flags.split(/[ ,|]+/).find((f) => f.startsWith('--')) || optionDescriptor.flags;
+        const key = this.sanitizeFlagName(longFlag);
+        const targetKey = key.split('-').map((part, idx) => idx === 0 ? part : part[0].toUpperCase() + part.slice(1)).join('');
+
+        const value = options[targetKey as keyof GenerateCommandOptions] ?? undefined;
+        if (value !== undefined) {
+          sectionSpecificOptions[optionKey] = value;
+        }
+      }
+
+      if (Object.keys(sectionSpecificOptions).length > 0) {
+        sectionConfig[sectionId] = sectionSpecificOptions;
+      }
     }
+
+    if (Object.keys(sectionConfig).length > 0) {
+      sectionsOptions.sectionConfig = {
+        ...sectionsOptions.sectionConfig,
+        ...sectionConfig
+      };
+    }
+
     return sectionsOptions;
   }
 
@@ -233,4 +292,5 @@ export class GenerateCommand extends BaseCommand {
     } while (flag !== prev);
     return flag;
   }
+
 }

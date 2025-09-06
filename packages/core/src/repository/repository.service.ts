@@ -38,19 +38,6 @@ export class RepositoryService {
     return this.providers.map((provider) => provider.getPlatformName());
   }
 
-  async getRepository(): Promise<Repository> {
-    // Try to auto-detect using providers first
-    const detectedProvider = await this.autoDetectRepositoryProvider();
-    if (detectedProvider) {
-      return await detectedProvider.getRepository();
-    }
-
-    // If no provider supports the current context, throw an error
-    throw new Error(
-      'No repository provider found that supports the current context'
-    );
-  }
-
   /**
    * Auto-detect the appropriate repository provider for the current context
    */

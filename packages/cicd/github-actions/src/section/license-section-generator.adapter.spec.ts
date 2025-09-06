@@ -1,28 +1,31 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, Mocked } from 'vitest';
 import { LicenseSectionGenerator } from './license-section-generator.adapter.js';
-import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifier } from '@ci-dokumentor/core';
+import { FormatterAdapter, MarkdownFormatterAdapter, SectionIdentifier, SectionGenerationPayload, RepositoryProvider } from '@ci-dokumentor/core';
 import { GitHubAction } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
+import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('LicenseSectionGenerator - Enhanced License Support', () => {
+  let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
+
   let generator: LicenseSectionGenerator;
-  let mockRepository: Repository;
 
   beforeEach(() => {
+    mockRepositoryProvider = RepositoryProviderMockFactory.create({
+      getRepositoryInfo: {
+        url: 'https://github.com/owner/repo',
+        owner: 'owner',
+        name: 'repo',
+        fullName: 'owner/repo',
+      },
+    });
+
     const container = initTestContainer();
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new LicenseSectionGenerator();
-
-    // Create mock repository
-    mockRepository = {
-      url: 'https://github.com/owner/repo',
-      owner: 'owner',
-      name: 'repo',
-      fullName: 'owner/repo',
-    } as Repository;
   });
 
   describe('getSectionIdentifier', () => {
@@ -36,23 +39,25 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
   });
 
   describe('generateSection', () => {
-    it('should generate license section with GitHub API license information', () => {
+    it('should generate license section with GitHub API license information', async () => {
       // Arrange
       const manifest: GitHubAction = GitHubActionMockFactory.create();
 
-      // Act
-      const result = generator.generateSection(
+      mockRepositoryProvider.getLicense.mockResolvedValue({
+        name: 'Apache License 2.0',
+        spdxId: 'Apache-2.0',
+        url: 'https://api.github.com/licenses/apache-2.0',
+      });
+
+
+      const payload: SectionGenerationPayload<GitHubAction> = {
         formatterAdapter,
         manifest,
-        {
-          ...mockRepository,
-          license: {
-            name: 'Apache License 2.0',
-            spdxId: 'Apache-2.0',
-            url: 'https://api.github.com/licenses/apache-2.0',
-          },
-        }
-      );
+        repositoryProvider: mockRepositoryProvider,
+      };
+
+      // Act
+      const result = await generator.generateSection(payload);
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);
@@ -70,23 +75,24 @@ For more details, see the [license](https://api.github.com/licenses/apache-2.0).
       );
     });
 
-    it('should return empty buffer when no license information is available', () => {
+    it('should return empty buffer when no license information is available', async () => {
       // Arrange
       const manifest: GitHubAction = GitHubActionMockFactory.create();
-
-      // Act
-      const result = generator.generateSection(
+      const payload: SectionGenerationPayload<GitHubAction> = {
         formatterAdapter,
         manifest,
-        mockRepository
-      );
+        repositoryProvider: mockRepositoryProvider,
+      };
+
+      // Act
+      const result = await generator.generateSection(payload);
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);
       expect(result.toString()).toEqual('');
     });
 
-    it('should return empty buffer when no license information is available', () => {
+    it('should return empty buffer when no license information is available', async () => {
       // Arrange
       const manifest: GitHubAction = {
         usesName: 'owner/repo',
@@ -95,12 +101,14 @@ For more details, see the [license](https://api.github.com/licenses/apache-2.0).
         runs: { using: 'node20' },
       };
 
-      // Act
-      const result = generator.generateSection(
+      const payload: SectionGenerationPayload<GitHubAction> = {
         formatterAdapter,
         manifest,
-        mockRepository
-      );
+        repositoryProvider: mockRepositoryProvider,
+      };
+
+      // Act
+      const result = await generator.generateSection(payload);
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);

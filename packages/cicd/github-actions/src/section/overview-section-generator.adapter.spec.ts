@@ -1,29 +1,32 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, Mocked } from 'vitest';
 import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
-import { FormatterAdapter, MarkdownFormatterAdapter, Repository, SectionIdentifier } from '@ci-dokumentor/core';
+import { FormatterAdapter, MarkdownFormatterAdapter, RepositoryProvider, SectionIdentifier } from '@ci-dokumentor/core';
 import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
+import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('OverviewSectionGenerator', () => {
+    let mockRepositoryProvider: Mocked<RepositoryProvider>;
     let formatterAdapter: FormatterAdapter;
+
     let generator: OverviewSectionGenerator;
-    let mockRepository: Repository;
 
     beforeEach(() => {
+        mockRepositoryProvider = RepositoryProviderMockFactory.create({
+            getRepositoryInfo: {
+                url: 'https://github.com/owner/repo',
+                owner: 'owner',
+                name: 'repo',
+                fullName: 'owner/repo',
+            },
+        });
+
         const container = initTestContainer();
         formatterAdapter = container.get(MarkdownFormatterAdapter);
 
         generator = new OverviewSectionGenerator();
-
-        // Create base mock repository
-        mockRepository = {
-            url: 'https://github.com/owner/repo',
-            owner: 'owner',
-            name: 'repo',
-            fullName: 'owner/repo',
-        } as Repository;
     });
 
     describe('getSectionIdentifier', () => {
@@ -38,18 +41,14 @@ describe('OverviewSectionGenerator', () => {
 
     describe('generateSection', () => {
         describe('with GitHub Action manifest', () => {
-            it('should generate overview section for GitHub Action with description', () => {
+            it('should generate overview section for GitHub Action with description', async () => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: 'A comprehensive test action for CI/CD workflows',
                 });
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -61,54 +60,42 @@ A comprehensive test action for CI/CD workflows
                 );
             });
 
-            it('should return empty buffer for GitHub Action without description', () => {
+            it('should return empty buffer for GitHub Action without description', async () => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: undefined,
                 });
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
                 expect(result.toString()).toEqual('');
             });
 
-            it('should return empty buffer for GitHub Action with empty description', () => {
+            it('should return empty buffer for GitHub Action with empty description', async () => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: '',
                 });
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
                 expect(result.toString()).toEqual('');
             });
 
-            it('should handle multiline descriptions correctly', () => {
+            it('should handle multiline descriptions correctly', async () => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: 'A test action with\nmultiple lines\nof description',
                 });
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -122,18 +109,14 @@ of description
                 );
             });
 
-            it('should handle descriptions with special characters', () => {
+            it('should handle descriptions with special characters', async () => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({
                     description: 'A test action with **bold**, *italic*, and `code` formatting',
                 });
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -147,7 +130,7 @@ A test action with **bold**, *italic*, and \`code\` formatting
         });
 
         describe('with GitHub Workflow manifest', () => {
-            it('should generate overview section for GitHub Workflow with description only', () => {
+            it('should generate overview section for GitHub Workflow with description only', async () => {
                 // Arrange
                 const manifest = {
                     ...GitHubWorkflowMockFactory.create({
@@ -163,11 +146,7 @@ A test action with **bold**, *italic*, and \`code\` formatting
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -182,7 +161,7 @@ Continuous integration workflow for the project
                 );
             });
 
-            it('should generate overview section for GitHub Workflow with description and permissions', () => {
+            it('should generate overview section for GitHub Workflow with description and permissions', async () => {
                 // Arrange
                 const manifest = {
                     ...GitHubWorkflowMockFactory.create({
@@ -203,11 +182,7 @@ Continuous integration workflow for the project
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -225,7 +200,7 @@ Continuous integration workflow with permissions
                 );
             });
 
-            it('should handle GitHub Workflow with empty permissions object', () => {
+            it('should handle GitHub Workflow with empty permissions object', async () => {
                 // Arrange
                 const manifest = {
                     ...GitHubWorkflowMockFactory.create({
@@ -242,11 +217,7 @@ Continuous integration workflow with permissions
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -261,7 +232,7 @@ Workflow with empty permissions
                 );
             });
 
-            it('should handle GitHub Workflow without permissions', () => {
+            it('should handle GitHub Workflow without permissions', async () => {
                 // Arrange
                 const manifest = {
                     ...GitHubWorkflowMockFactory.create({
@@ -277,11 +248,7 @@ Workflow with empty permissions
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -296,7 +263,7 @@ Workflow without permissions
                 );
             });
 
-            it('should return empty buffer for GitHub Workflow without description', () => {
+            it('should return empty buffer for GitHub Workflow without description', async () => {
                 // Arrange
                 const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
                     on: { push: { branches: ['main'] } },
@@ -304,18 +271,14 @@ Workflow without permissions
                 });
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
                 expect(result.toString()).toEqual('');
             });
 
-            it('should handle GitHub Workflow with complex permissions structure', () => {
+            it('should handle GitHub Workflow with complex permissions structure', async () => {
                 // Arrange
                 const manifest = {
                     ...GitHubWorkflowMockFactory.create({
@@ -346,11 +309,7 @@ Workflow without permissions
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -375,18 +334,17 @@ Automated release workflow
         });
 
         describe('edge cases', () => {
-            it('should handle undefined manifest gracefully', () => {
+            it('should handle undefined manifest gracefully', async () => {
                 // Act & Assert
-                expect(() => {
-                    generator.generateSection(
-                        formatterAdapter,
-                        undefined as unknown as GitHubActionsManifest,
-                        mockRepository
-                    );
-                }).toThrow("Cannot use 'in' operator to search for 'description' in undefined");
+                await expect(generator.generateSection({
+                    formatterAdapter,
+                    manifest: undefined as unknown as GitHubActionsManifest,
+                    repositoryProvider: mockRepositoryProvider
+                })).rejects.toThrow("Cannot use 'in' operator to search for 'description' in undefined");
+
             });
 
-            it('should handle manifest without description property', () => {
+            it('should handle manifest without description property', async () => {
                 // Arrange
                 const manifest = {
                     usesName: 'owner/repo',
@@ -395,18 +353,39 @@ Automated release workflow
                 } as GitHubAction;
 
                 // Act
-                const result = generator.generateSection(
-                    formatterAdapter,
-                    manifest,
-                    mockRepository
-                );
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
                 expect(result.toString()).toEqual('');
             });
 
-            it('should generate section independent of repository content', () => {
+            it.each([
+                {
+                    repositoryInfo: {
+                        url: 'https://github.com/owner/repo',
+                        owner: 'owner',
+                        name: 'repo',
+                        fullName: 'owner/repo',
+                    }
+                },
+                {
+                    repositoryInfo: {
+                        url: 'https://github.com/owner/repo',
+                        owner: 'owner',
+                        name: 'different-repo',
+                        fullName: 'owner/repo',
+                    }
+                },
+                {
+                    repositoryInfo: {
+                        url: 'https://github.com/owner/repo',
+                        owner: 'owner',
+                        name: 'repo',
+                        fullName: 'different-owner',
+                    }
+                },
+            ])('should generate section independent of repository content', async ({ repositoryInfo }) => {
                 // Arrange
                 const manifest: GitHubAction = {
                     usesName: 'owner/repo',
@@ -415,31 +394,19 @@ Automated release workflow
                     runs: { using: 'node20' },
                 };
 
-                const differentRepositories = [
-                    mockRepository,
-                    { ...mockRepository, name: 'different-repo' },
-                    { ...mockRepository, owner: 'different-owner' },
-                    null,
-                    undefined,
-                ];
+                mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(repositoryInfo);
 
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+
+                // Assert
                 const expectedOutput = `## Overview
 
 Test description
 `;
-
-                differentRepositories.forEach((repository) => {
-                    // Act
-                    const result = generator.generateSection(
-                        formatterAdapter,
-                        manifest,
-                        repository as Repository
-                    );
-
-                    // Assert
-                    expect(result).toBeInstanceOf(Buffer);
-                    expect(result.toString()).toEqual(expectedOutput);
-                });
+                expect(result).toBeInstanceOf(Buffer);
+                expect(result.toString()).toEqual(expectedOutput);
             });
         });
     });

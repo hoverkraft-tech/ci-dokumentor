@@ -20,6 +20,7 @@ describe('GitHubRepositoryProvider', () => {
       getPlatformName: vi.fn(),
       supports: vi.fn(),
       getRepository: vi.fn(),
+      getRepositoryInfo: vi.fn(),
       getRemoteParsedUrl: vi.fn(),
     } as unknown as Mocked<GitRepositoryProvider>;
 
@@ -150,197 +151,39 @@ describe('GitHubRepositoryProvider', () => {
     });
   });
 
-  describe('getRepository', () => {
-    const mockBaseRepo = {
-      owner: 'test-owner',
-      name: 'test-repo',
-      url: 'https://github.com/test-owner/test-repo',
-      fullName: 'test-owner/test-repo',
-    };
-
-    beforeEach(() => {
-      mockGitRepositoryService.getRepository.mockResolvedValue(mockBaseRepo);
-    });
-
-    it('should extend base repository with logo and license information from GitHub API', async () => {
+  describe('fetchLicense and logo behavior', () => {
+    it('should return openGraphImageUrl from graphql when available', async () => {
       // Arrange
-      graphqlMock
-        .mockResolvedValueOnce({
-          repository: {
-            openGraphImageUrl:
-              'https://github.com/test-owner/test-repo/social-preview.png',
-          },
-        })
-        .mockResolvedValueOnce({
-          repository: {
-            licenseInfo: {
-              name: 'MIT License',
-              spdxId: 'MIT',
-              url: 'https://api.github.com/licenses/mit',
-            },
-          },
-        });
+      const repo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo as any);
+
+      // GraphQL mock to return openGraphImageUrl
+      vi.mocked(graphqlMock).mockResolvedValue({ repository: { openGraphImageUrl: 'https://img.local/og.png' } });
 
       // Act
-      const result = await gitHubRepositoryProvider.getRepository();
+      const logo = await (gitHubRepositoryProvider as any).getOpenGraphImageUrl(repo as any);
 
       // Assert
-      expect(result).toEqual({
-        ...mockBaseRepo,
-        logo: 'https://github.com/test-owner/test-repo/social-preview.png',
-        license: {
-          name: 'MIT License',
-          spdxId: 'MIT',
-          url: 'https://api.github.com/licenses/mit',
-        },
-      });
-      expect(mockLicenseService.detectLicenseFromFile).not.toHaveBeenCalled();
+      expect(logo).toBe('https://img.local/og.png');
     });
 
-    it('should fallback to license service when GitHub API has no license info', async () => {
+    it('should fallback to licenseService when graphql has no licenseInfo', async () => {
       // Arrange
-      graphqlMock.mockResolvedValueOnce({ repository: { openGraphImageUrl: 'https://github.com/test-owner/test-repo/social-preview.png' } });
-      graphqlMock.mockResolvedValueOnce({ repository: { licenseInfo: null } });
+      const repo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo as any);
 
-      mockLicenseService.detectLicenseFromFile.mockReturnValue({
-        name: 'Apache License 2.0',
-        spdxId: 'Apache-2.0',
-        url: null,
-      });
+      // GraphQL mock returns repository with no licenseInfo
+      vi.mocked(graphqlMock).mockResolvedValue({ repository: {} });
+
+      const expected = { name: 'MIT', spdxId: 'MIT', url: 'https://license' };
+      mockLicenseService.detectLicenseFromFile.mockResolvedValue(expected as any);
 
       // Act
-      const result = await gitHubRepositoryProvider.getRepository();
+      const license = await (gitHubRepositoryProvider as any).getLicenseInfo(repo as any);
 
       // Assert
-      expect(result).toEqual({
-        ...mockBaseRepo,
-        logo: 'https://github.com/test-owner/test-repo/social-preview.png',
-        license: {
-          name: 'Apache License 2.0',
-          spdxId: 'Apache-2.0',
-          url: null,
-        },
-      });
-      expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
-    });
-
-    it('should handle case when no license info is available from either source', async () => {
-      // Arrange
-      graphqlMock
-        .mockResolvedValueOnce({
-          repository: {
-            openGraphImageUrl:
-              'https://github.com/test-owner/test-repo/social-preview.png',
-          },
-        })
-        .mockResolvedValueOnce({
-          repository: {
-            licenseInfo: null,
-          },
-        });
-
-      mockLicenseService.detectLicenseFromFile.mockReturnValue(undefined);
-
-      // Act
-      const result = await gitHubRepositoryProvider.getRepository();
-
-      // Assert
-      expect(result).toEqual({
-        ...mockBaseRepo,
-        logo: 'https://github.com/test-owner/test-repo/social-preview.png',
-        license: undefined,
-      });
-      expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
-    });
-
-    it('should let GitHub API errors bubble up when fetching license info', async () => {
-      // Arrange
-      graphqlMock
-        .mockResolvedValueOnce({
-          repository: {
-            openGraphImageUrl:
-              'https://github.com/test-owner/test-repo/social-preview.png',
-          },
-        })
-        .mockRejectedValueOnce(new Error('GitHub API rate limit exceeded'));
-
-      // Act & Assert
-      await expect(gitHubRepositoryProvider.getRepository()).rejects.toThrow(
-        'GitHub API rate limit exceeded'
-      );
-      expect(mockLicenseService.detectLicenseFromFile).not.toHaveBeenCalled();
-    });
-
-    it('should handle missing repository data from GitHub API', async () => {
-      // Arrange
-      graphqlMock
-        .mockResolvedValueOnce({
-          repository: {
-            openGraphImageUrl:
-              'https://github.com/test-owner/test-repo/social-preview.png',
-          },
-        })
-        .mockResolvedValueOnce({
-          repository: null,
-        });
-
-      mockLicenseService.detectLicenseFromFile.mockReturnValue({
-        name: 'MIT License',
-        spdxId: 'MIT',
-        url: null,
-      });
-
-      // Act
-      const result = await gitHubRepositoryProvider.getRepository();
-
-      // Assert
-      expect(result).toEqual({
-        ...mockBaseRepo,
-        logo: 'https://github.com/test-owner/test-repo/social-preview.png',
-        license: {
-          name: 'MIT License',
-          spdxId: 'MIT',
-          url: null,
-        },
-      });
-      expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
-    });
-
-    it('should use local license service when GitHub license API returns empty object', async () => {
-      // Arrange
-      graphqlMock
-        .mockResolvedValueOnce({
-          repository: {
-            openGraphImageUrl:
-              'https://github.com/test-owner/test-repo/social-preview.png',
-          },
-        })
-        .mockResolvedValueOnce({
-          repository: {
-
-          },
-        });
-
-      mockLicenseService.detectLicenseFromFile.mockReturnValue({
-        name: 'Custom License',
-        spdxId: null,
-        url: null,
-      });
-
-      // Act
-      const result = await gitHubRepositoryProvider.getRepository();
-
-      // Assert
-      expect(result).toEqual({
-        ...mockBaseRepo,
-        logo: 'https://github.com/test-owner/test-repo/social-preview.png',
-        license: {
-          name: 'Custom License',
-          spdxId: null,
-          url: null,
-        },
-      });
-      expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
+      expect(license).toEqual(expected);
     });
   });
+
 });

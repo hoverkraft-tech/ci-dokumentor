@@ -24,7 +24,7 @@ Builds the application and deploys it to the specified environment
 ## Usage
 
 \`\`\`yaml
-- uses: hoverkraft-tech/ci-dokumentor/test
+- uses: hoverkraft-tech/ci-dokumentor/test@sha-version
   with:
     # Target environment (staging, production)
     # This input is required.
@@ -111,7 +111,7 @@ on:
     - cron: 0 2 * * 1
 jobs:
   ci-cd.yml:
-    uses: hoverkraft-tech/ci-dokumentor/test/.github/workflows/ci-cd.yml
+    uses: hoverkraft-tech/ci-dokumentor/test/.github/workflows/ci-cd.yml@sha-version
     secrets:
       # GitHub token for authentication
       github-token: ""

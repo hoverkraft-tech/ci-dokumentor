@@ -57,7 +57,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'MIT License',
         spdxId: 'MIT',
-        url: null,
+        url: undefined,
       });
       expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE', 'utf-8');
     });
@@ -78,7 +78,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'Apache License 2.0',
         spdxId: 'Apache-2.0',
-        url: null,
+        url: undefined,
       });
       expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE.txt', 'utf-8');
     });
@@ -99,7 +99,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'GNU General Public License v3.0',
         spdxId: 'GPL-3.0',
-        url: null,
+        url: undefined,
       });
       expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE.md', 'utf-8');
     });
@@ -118,7 +118,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'GNU General Public License v2.0',
         spdxId: 'GPL-2.0',
-        url: null,
+        url: undefined,
       });
     });
 
@@ -136,7 +136,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'BSD 3-Clause "New" or "Revised" License',
         spdxId: 'BSD-3-Clause',
-        url: null,
+        url: undefined,
       });
     });
 
@@ -154,7 +154,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'BSD 2-Clause "Simplified" License',
         spdxId: 'BSD-2-Clause',
-        url: null,
+        url: undefined,
       });
     });
 
@@ -170,7 +170,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'ISC License',
         spdxId: 'ISC',
-        url: null,
+        url: undefined,
       });
     });
 
@@ -187,8 +187,8 @@ describe('LicenseService', () => {
       // Assert
       expect(result).toEqual({
         name: 'Custom License',
-        spdxId: null,
-        url: null,
+        spdxId: undefined,
+        url: undefined,
       });
     });
 
@@ -232,7 +232,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'MIT License',
         spdxId: 'MIT',
-        url: null,
+        url: undefined,
       });
       // Verify it checked files in correct order
       expect(mockExistsSync).toHaveBeenNthCalledWith(1, 'LICENSE');
@@ -257,7 +257,7 @@ describe('LicenseService', () => {
       expect(result).toEqual({
         name: 'MIT License',
         spdxId: 'MIT',
-        url: null,
+        url: undefined,
       });
       expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE', 'utf-8');
       expect(mockReadFileSync).not.toHaveBeenCalledWith('LICENSE.txt', 'utf-8');
@@ -334,7 +334,7 @@ describe('LicenseService', () => {
       const result = licenseService.detectLicenseFromFile();
 
       // Assert
-      expect(result?.spdxId).toBeNull();
+      expect(result?.spdxId).toBeUndefined();
     });
   });
 });
