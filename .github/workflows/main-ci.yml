@@ -80,15 +80,14 @@ jobs:
         uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@1d00c9eb280acbee5df4b4a2087f786e66b13d87 # 0.14.1
         with:
           registry-url: 'https://registry.npmjs.org'
-      - name: Download build artifacts
+      - name: Download package tarball
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: build
+          name: package-tarball
           path: .
       - name: Publish CLI to npm
         run: |
-          cd packages/cli
-          npm publish --provenance --access public
+          npm publish ci-dokumentor-cli-*.tgz --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

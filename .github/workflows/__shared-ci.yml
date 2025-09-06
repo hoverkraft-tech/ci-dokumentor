@@ -45,7 +45,7 @@ jobs:
         }
 
   package-test:
-    needs: nodejs
+    needs: [linter, nodejs]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -59,11 +59,11 @@ jobs:
       - name: Create package tarball
         run: |
           cd packages/cli
-          npm pack --pack-destination ../../tmp/
+          npm pack --pack-destination ${{ runner.temp }}/
       - name: Test package installation
         run: |
-          mkdir -p tmp/test-install
-          cd tmp/test-install
+          mkdir -p ${{ runner.temp }}/test-install
+          cd ${{ runner.temp }}/test-install
           npm init -y
           npm install ../ci-dokumentor-cli-*.tgz
           npx ci-dokumentor --version
@@ -72,10 +72,10 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: package-tarball
-          path: tmp/ci-dokumentor-cli-*.tgz
+          path: ${{ runner.temp }}/ci-dokumentor-cli-*.tgz
 
   docker:
-    needs: [linter, nodejs, package-test]
+    needs: [linter, nodejs]
     uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@f9e149b6cdfa8443994994f10085691a57b8cf0e # 0.27.1
     permissions:
       contents: read
