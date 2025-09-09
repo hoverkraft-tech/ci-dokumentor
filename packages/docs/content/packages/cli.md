@@ -141,6 +141,16 @@ ci-dokumentor --output-format json generate --source ./my-project/action.yml
 | `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude                                         | -          |
 | `--dry-run`                     | -     | Preview what would be generated without writing files                               | `false`    |
 
+#### Platform-Specific Options
+
+Depending on the detected or specified platform, additional options may be available:
+
+**GitHub Actions Platform:**
+
+- `--extra-badges <badges>` - Additional badges to include as JSON array of badge objects
+- `--version <version>` - Version identifier for usage examples (tag, branch, commit SHA)
+- `--github-token <token>` - GitHub token for API access (env: `GITHUB_TOKEN`)
+
 #### Supported Platforms
 
 Some extra options may be available depending on the specific repository or CI/CD manifest.
@@ -149,12 +159,12 @@ Depending on the context, the following platforms are supported:
 
 **Repository Platforms:**
 
-- [`git`](./repository-git) - Git repository support
-- [`github`](./repository-github) - GitHub-specific features
+- [`git`](./repository-git.md) - Git repository support
+- [`github`](./repository-github.md) - GitHub-specific features
 
 **CI/CD Platforms:**
 
-- [`github-actions`](./repository-github) - GitHub Actions workflows and action files
+- [`github-actions`](./cicd-github-actions.md) - GitHub Actions workflows and action files
 
 #### Examples
 
@@ -174,7 +184,54 @@ ci-dokumentor --output-format github-action generate --source ./actions/action.y
 
 # Preview changes without writing files (dry run)
 ci-dokumentor generate --source ./actions/action.yml --dry-run
+
+# Add custom badges to the badges section
+ci-dokumentor generate --source ./actions/action.yml --extra-badges '[
+  {
+    "label": "Coverage",
+    "url": "https://img.shields.io/badge/coverage-90%25-green",
+  },
+  {
+    "label": "Build Status",
+    "url": "https://img.shields.io/github/actions/workflow/status/owner/repo/ci.yml",
+    "linkUrl": "https://github.com/owner/repo/actions"
+  }
+]'
 ```
+
+#### Extra Badges Configuration
+
+The `--extra-badges` option allows you to add custom badges to the badges section alongside the automatically generated ones. This is useful for adding coverage badges, build status from external CI systems, or other custom indicators.
+
+**Badge Object Format:**
+
+Each badge object must include:
+
+- `label` (string) - The display text for the badge
+- `url` (string) - The badge image URL (typically from shields.io or CI/CD platform)
+- `linkUrl` (string) - (optional) The URL to navigate to when the badge is clicked
+
+**JSON Format:**
+
+The badges must be provided as a JSON array. You can format it across multiple lines for readability:
+
+```bash
+ci-dokumentor generate --source action.yml --extra-badges '[
+  {
+    "label": "My Badge",
+    "url": "https://img.shields.io/badge/my-badge-blue",
+    "linkUrl": "https://example.com"
+  }
+]'
+```
+
+**Common Use Cases:**
+
+- Code coverage badges from external services
+- Build status from non-GitHub CI systems
+- Quality metrics (code quality, security scores)
+- Version badges from package registries
+- Custom project status indicators
 
 #### Multiple files
 
@@ -192,13 +249,21 @@ The CLI supports including/excluding specific documentation sections:
 
 **Common Sections (varies by platform):**
 
+- `badges` - Shields.io badges, marketplace links, and custom badges
 - `overview` - General information
 - `inputs` - Input parameters
 - `outputs` - Output values
 - `usage` - Usage examples
 - `examples` - Code examples
 
-Use `ci-dokumentor generate --help` to see platform-specific sections.
+Use `ci-dokumentor generate --help` with a source file to see all available sections and platform-specific options.
+
+**Section-Specific Options:**
+
+Some sections support additional configuration options:
+
+- **`badges`** - Use `--extra-badges` to add custom badges alongside auto-generated ones
+- **`usage`** - Use `--version` to specify which version to use in usage examples
 
 ## CLI Architecture
 

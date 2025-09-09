@@ -24,18 +24,22 @@ inputs:
   exclude-sections:
     description: Comma-separated list of sections to exclude.
     required: false
-  version:
-    description: Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
-    required: false
-    default: latest
-  github-token:
-    description: The GitHub token used to fetch repository information.
-    default: ${{ github.token }}
-    required: false
   dry-run:
     description: Whether to perform a dry run (no files are written).
     required: false
     default: 'false'
+  extra-badges:
+    description: JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties.
+    required: false
+    default: ''
+  github-token:
+    description: The GitHub token used to fetch repository information.
+    default: ${{ github.token }}
+    required: false
+  version:
+    description: Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
+    required: false
+    default: latest
 
 outputs:
   destination:
@@ -89,6 +93,12 @@ runs:
         if [ "$dry_run" = "true" ]; then
           args="$args --dry-run"
           echo "::debug::Dry run enabled"
+        fi
+
+        extra_badges="${{ inputs.extra-badges }}"
+        if [ -n "$extra_badges" ]; then
+          args="$args --extra-badges '$extra_badges'"
+          echo "::debug::Extra badges set to: $extra_badges"
         fi
 
         echo "::debug::Args set to: $args"

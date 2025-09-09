@@ -168,7 +168,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |
-          # Assert generate-docs action ouputs
+          # Assert generate-docs action outputs
           output_destination="${{ steps.generate-docs.outputs.destination }}"
           expected_output_destination="packages/docs/content/integrations/github-action.md"
           if [ "$output_destination" != "$expected_output_destination" ]; then

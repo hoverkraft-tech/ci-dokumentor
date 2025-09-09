@@ -68,7 +68,7 @@ The package includes the following section generators:
 
 - **HeaderSectionGenerator** - Action/workflow title and description
 - **OverviewSectionGenerator** - General information and summary
-- **BadgesSectionGenerator** - Status badges and shields
+- **BadgesSectionGenerator** - Status badges and shields (supports custom badges via `--extra-badges`)
 - **ContentsTable** - Table of contents for navigation
 
 ### Action-Specific Sections
@@ -111,6 +111,19 @@ Generates:
 - Input/output parameter tables
 - Security considerations
 - Contributing guidelines
+- Configurable badge sections with support for custom badges
+
+### Badge Generation
+
+The `BadgesSectionGenerator` automatically creates badges for:
+
+- **GitHub Actions Marketplace** - Links to the marketplace page
+- **Release badges** - Latest release version from GitHub
+- **License badges** - Repository license information
+- **Social badges** - GitHub stars count
+- **Custom badges** - User-defined badges via CLI options
+
+Custom badges can be added using the `--extra-badges` CLI option, supporting various badge services and custom URLs.
 
 ## Container Setup
 

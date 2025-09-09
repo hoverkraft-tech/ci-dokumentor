@@ -14,7 +14,8 @@
     "sharedGlobals": ["{workspaceRoot}/vite.shared.ts"],
     "tests": [
       "{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "{projectRoot}/__tests__/**/*"
+      "{projectRoot}/__tests__/**/*",
+      "{projectRoot}/action.yml"
     ]
   },
   "plugins": [
