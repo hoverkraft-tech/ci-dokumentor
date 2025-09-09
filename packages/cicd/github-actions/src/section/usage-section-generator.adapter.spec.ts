@@ -130,6 +130,9 @@ describe('UsageSectionGenerator', () => {
           'optional-input': {
             description: 'An optional input',
           },
+          'optional-input-with-multiline-description': {
+            description: 'An optional input\nwith multiline\ndescription',
+          }
         };
 
         const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs });
@@ -155,6 +158,11 @@ describe('UsageSectionGenerator', () => {
 
     # An optional input
     optional-input: ""
+
+    # An optional input
+    # with multiline
+    # description
+    optional-input-with-multiline-description: ""
 
 \`\`\`
 `

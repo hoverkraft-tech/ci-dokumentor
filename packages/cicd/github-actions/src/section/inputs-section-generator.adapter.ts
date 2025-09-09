@@ -138,7 +138,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private getInputDescription(
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput
   ): Buffer {
-    let description = input.description || '';
+    let description = (input.description || '').trim();
 
     const deprecationMessage = this.getInputDeprecationMessage(input);
     if (deprecationMessage) {

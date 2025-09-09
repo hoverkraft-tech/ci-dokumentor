@@ -557,12 +557,12 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe(
-        '| Name | Age | City |\n' +
-        '| --- | --- | --- |\n' +
-        '| John | 25 | New York |\n' +
-        '| Jane | 30 | Paris |\n'
-      );
+      expect(result.toString()).toEqual(
+        `| Name | Age | City     |
+| ---- | --- | -------- |
+| John | 25  | New York |
+| Jane | 30  | Paris    |
+`);
     });
 
     it('should handle empty table', () => {
@@ -574,7 +574,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe('|  |\n|  |\n');
+      expect(result.toString()).toEqual('');
     });
 
     it('should handle table with only headers', () => {
@@ -586,8 +586,10 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe(
-        '| Column 1 | Column 2 |\n' + '| --- | --- |\n'
+      expect(result.toString()).toEqual(
+        `| Column 1 | Column 2 |
+| -------- | -------- |
+`
       );
     });
 
@@ -602,10 +604,11 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe(
-        '| Name | Description |\n' +
-        '| --- | --- |\n' +
-        '| Item "A" | Description with & symbols! |\n'
+      expect(result.toString()).toEqual(
+        `| Name     | Description                 |
+| -------- | --------------------------- |
+| Item "A" | Description with & symbols! |
+`
       );
     });
 
@@ -623,12 +626,13 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe(
-        '| Name | Description |\n' +
-        '| --- | --- |\n' +
-        '| John | A person with |\n' +
-        '| Doe | multiple lines |\n' +
-        '|  | of description |\n'
+      expect(result.toString()).toEqual(
+        `| Name | Description    |
+| ---- | -------------- |
+| John | A person with  |
+| Doe  | multiple lines |
+|      | of description |
+`
       );
     });
 
@@ -643,10 +647,11 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe(
-        '| Code | Output |\n' +
-        '| --- | --- |\n' +
-        '| if (a \\| b) | result: true \\| false |\n'
+      expect(result.toString()).toEqual(
+        `| Code        | Output                |
+| ----------- | --------------------- |
+| if (a \\| b) | result: true \\| false |
+`
       );
     });
 
@@ -663,11 +668,12 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toBe(
-        '| Multi | Description |\n' +
-        '| --- | --- |\n' +
-        '| Line |  |\n' +
-        '| Header |  |\n' +
-        '| Value | Single line content |\n'
+        `| Multi  | Description         |
+| ------ | ------------------- |
+| Line   |                     |
+| Header |                     |
+| Value  | Single line content |
+`
       );
     });
 
@@ -695,13 +701,14 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.table(headers, rows);
 
       // Assert
-      expect(result.toString()).toBe(
-        '| Name | Status | Notes |\n' +
-        '| --- | --- | --- |\n' +
-        '| John | Active | Single line note |\n' +
-        '| Jane | Pending | This is a |\n' +
-        '| Smith | Review | multiline note |\n' +
-        '|  |  | with details |\n'
+      expect(result.toString()).toEqual(
+        `| Name  | Status  | Notes            |
+| ----- | ------- | ---------------- |
+| John  | Active  | Single line note |
+| Jane  | Pending | This is a        |
+| Smith | Review  | multiline note   |
+|       |         | with details     |
+`
       );
     });
   });

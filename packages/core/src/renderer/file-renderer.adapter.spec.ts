@@ -10,7 +10,7 @@ describe('FileRendererAdapter', () => {
   let fileRendererAdapter: FileRendererAdapter;
   const testFilePath = '/test/document.md';
   const testSectionIdentifier = 'test-section';
-  const testData = Buffer.from('New section content');
+  const testData = Buffer.from('New section content\n');
 
   beforeEach(() => {
     // Set up mock filesystem
@@ -28,7 +28,9 @@ describe('FileRendererAdapter', () => {
         'multiple-sections.md': [
           'Header content',
           '<!-- first-section:start -->',
+          '',
           'First section content',
+          '',
           '<!-- first-section:end -->',
           'Middle content',
           '<!-- second-section:start -->',
@@ -99,7 +101,9 @@ describe('FileRendererAdapter', () => {
       // Assert
       const fileContent = readFileSync('/test/empty.md', 'utf-8');
       const expectedContent = `<!-- ${testSectionIdentifier}:start -->
+
 New section content
+
 <!-- ${testSectionIdentifier}:end -->
 `;
       expect(fileContent).toBe(expectedContent);
@@ -108,7 +112,7 @@ New section content
     it('should handle multiple sections without affecting other sections', async () => {
       // Arrange
       const multipleSectionsAdapter = new FileRendererAdapter();
-      const newData = Buffer.from('Updated second section');
+      const newData = Buffer.from('Updated second section\n');
 
       // Act
       await multipleSectionsAdapter.initialize('/test/multiple-sections.md', formatterAdapter);
@@ -117,21 +121,21 @@ New section content
       // Assert
       const fileContent = readFileSync('/test/multiple-sections.md', 'utf-8');
 
-      // Should preserve first section
-      expect(fileContent).toContain('<!-- first-section:start -->');
-      expect(fileContent).toContain('First section content');
-      expect(fileContent).toContain('<!-- first-section:end -->');
+      // Should preserve first section with blank lines around content
+      expect(fileContent).toEqual(`Header content
+<!-- first-section:start -->
 
-      // Should update second section
-      expect(fileContent).toContain('<!-- second-section:start -->');
-      expect(fileContent).toContain('Updated second section');
-      expect(fileContent).toContain('<!-- second-section:end -->');
-      expect(fileContent).not.toContain('Second section content');
+First section content
 
-      // Should preserve other content
-      expect(fileContent).toContain('Header content');
-      expect(fileContent).toContain('Middle content');
-      expect(fileContent).toContain('Footer content');
+<!-- first-section:end -->
+Middle content
+<!-- second-section:start -->
+
+Updated second section
+
+<!-- second-section:end -->
+Footer content
+`);
     });
 
     it('should handle sections with complex content including line breaks', async () => {
@@ -178,6 +182,7 @@ New section content
         sectionStart + `<!-- ${testSectionIdentifier}:start -->`.length,
         sectionEnd
       );
+      // We expect three line breaks: the start marker's trailing newline plus two blank lines (before and after content)
       expect(sectionContent).toEqual('\n');
     });
 

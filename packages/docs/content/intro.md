@@ -92,6 +92,30 @@ npx ci-dokumentor generate --source action.yml
 ci-dokumentor generate --source action.yml
 ```
 
+### Generated document template
+
+When CI Dokumentor writes or updates documentation it targets specific, clearly-marked sections inside the destination file. Use HTML comment anchors to indicate editable regions that the generator can replace. The simplest pattern is a pair of comments marking the start and end of a section:
+
+<!-- inputs:start -->
+<!-- inputs:end -->
+
+You can create multiple named sections (for example `inputs`) to let the tool update only those parts while preserving the rest of the file. A minimal example template looks like:
+
+```markdown
+# My Action
+
+Description of the action and any manual notes.
+
+<!-- inputs:start -->
+<!-- inputs:end -->
+```
+
+Place any hand-written documentation outside the anchored regions so it remains unchanged when the generator runs. The CLI will detect the `--destination` file and replace content inside matching anchors; if no anchors are found the generator can either append a generated section or write a new file depending on flags.
+
+:::tip
+For a full, copyable templates including all anchored sections for supported CI/CD platforms: [see the templates directory](./templates).
+:::
+
 ### Using a CI/CD platform
 
 Integrate CI Dokumentor into your CI/CD pipeline:

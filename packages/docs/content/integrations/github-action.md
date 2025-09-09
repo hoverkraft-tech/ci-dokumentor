@@ -173,10 +173,10 @@ jobs:
 
 ## Related Documentation
 
-- [Docker Integration](./docker) - Using CI Dokumentor with Docker
-- [CLI Package](../packages/cli) - Command-line interface reference
-- [Introduction](../intro) - Quick start and basic usage examples
-- [Developers Guide](../developers/ci-cd) - Advanced CI/CD integration patterns
+- [CLI Package](../packages/cli.md) - Command-line interface reference
+- [CI/CD - GitHub Package](../packages/cicd-github-actions.md) - CI/CD GitHub package reference
+- [Introduction](../intro.md) - Quick start and basic usage examples
+- [Developers Guide](../developers/ci-cd.md) - Advanced CI/CD integration patterns
 
 <!-- secrets:start -->
 <!-- secrets:end -->

@@ -53,6 +53,13 @@ inputs:
     options:
       - option1
       - option2
+  optional-input-with-multiline-description:
+    description: |
+      An optional input
+      with multiline
+      description
+    type: string
+    required: false
 outputs:
     output-name:
         description: Output description 
@@ -93,6 +100,12 @@ runs:
           type: 'choice',
           options: ['option1', 'option2'],
         });
+        expect((result.inputs as Record<string, GitHubActionInput>)['optional-input-with-multiline-description']).toEqual({
+          description: 'An optional input\nwith multiline\ndescription\n',
+          required: false,
+          type: 'string',
+        });
+
 
         expect(result.outputs).toBeDefined();
         expect((result.outputs as Record<string, GitHubActionOutput>)['output-name']).toEqual({

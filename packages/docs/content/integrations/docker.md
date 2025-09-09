@@ -13,7 +13,7 @@ CI Dokumentor provides a production-ready Docker image for easy integration with
 
 ```bash
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml
 ```
 
@@ -23,7 +23,7 @@ Note: the Docker image uses `/workspace` as the default working directory. The `
 
 The official Docker image is available on GitHub Container Registry:
 
-- **Image**: `ghcr.io/hoverkraft-tech/ci-dokumentor:latest`
+- **Image**: `ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest`
 - **Base**: Alpine Linux (minimal footprint)
 - **Tags**: `latest`, version-specific tags (e.g., `1.0.0`)
 
@@ -35,7 +35,7 @@ Mount your project directory to `/workspace` for both input (and output if diffe
 
 ```bash
 docker run --rm -v $(pwd):/workspace \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml
 ```
 
@@ -45,8 +45,18 @@ For correct file ownership on Linux/macOS:
 
 ```bash
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml
+```
+
+### Provides GitHub Token
+
+```bash
+# Using gh cli
+docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
+  generate --source /workspace/action.yml \
+  --github-token $(gh auth token)
 ```
 
 ## Platform-Specific Examples
@@ -55,7 +65,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 
 ```bash
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml
 ```
 
@@ -64,7 +74,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 ```powershell
 docker run --rm -v ${PWD}:/workspace `
   -u $(id -u):$(id -g) `
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest `
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest `
   generate --source /workspace/action.yml
 ```
 
@@ -73,7 +83,7 @@ docker run --rm -v ${PWD}:/workspace `
 ```cmd
 docker run --rm -v %cd%:/workspace ^
   -u %USERPROFILE%:$(id -g) ^
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest ^
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest ^
   generate --source /workspace/action.yml
 ```
 
@@ -91,7 +101,7 @@ Note: `/workspace` is the image's default working directory. When you mount your
 
 ```bash
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml
 ```
 
@@ -102,7 +112,16 @@ docker run --rm \
   -v $(pwd):/workspace:ro \
   -v $(pwd)/destination:/destination \
   -u $(id -u):$(id -g) \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
+  generate --source /workspace/action.yml --destination /destination/README.md
+```
+
+```bash
+docker run --rm \
+  -v $(pwd):/workspace:ro \
+  -v $(pwd)/destination:/destination \
+  -u $(id -u):$(id -g) \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml --destination /destination/README.md
 ```
 
@@ -116,7 +135,7 @@ docker run --rm \
 
 ```bash
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml
 ```
 
@@ -126,7 +145,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 
 ```bash
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
-  ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
+  ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
   generate --source /workspace/action.yml \
   --cicd github-actions
 ```
@@ -146,7 +165,7 @@ For consistent development environments:
 version: '3.8'
 services:
   ci-dokumentor:
-    image: ghcr.io/hoverkraft-tech/ci-dokumentor:latest
+    image: ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest
     volumes:
       - .:/workspace
   command: generate --source /workspace/action.yml

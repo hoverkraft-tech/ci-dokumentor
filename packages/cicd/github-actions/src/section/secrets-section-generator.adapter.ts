@@ -73,7 +73,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   }
 
   private getSecretDescription(secret: GitHubWorkflowSecret): Buffer {
-    return Buffer.from(secret.description || '');
+    return Buffer.from((secret.description || '').trim());
   }
 
   private getSecretRequired(
