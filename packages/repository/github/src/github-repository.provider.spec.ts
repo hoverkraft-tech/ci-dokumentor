@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitRepositoryProvider, ParsedRemoteUrl } from '@ci-dokumentor/repository-git';
-import { LicenseService } from '@ci-dokumentor/core';
+import { LicenseService, RepositoryInfo, LicenseInfo, ManifestVersion } from '@ci-dokumentor/core';
 import { OcktokitMockFactory } from '../__tests__/octokit-mock.factory.js';
+import mockFs from 'mock-fs';
 import { GitHubRepositoryProvider } from './github-repository.provider.js'
+import { LicenseServiceMockFactory } from '@ci-dokumentor/core/tests';
 
 const { graphqlMock } = OcktokitMockFactory.create();
 
@@ -17,22 +19,23 @@ describe('GitHubRepositoryProvider', () => {
 
     // Create a mock git repository service
     mockGitRepositoryService = {
-      getPlatformName: vi.fn(),
-      supports: vi.fn(),
-      getRepository: vi.fn(),
-      getRepositoryInfo: vi.fn(),
-      getRemoteParsedUrl: vi.fn(),
-    } as unknown as Mocked<GitRepositoryProvider>;
+      getPlatformName: vi.fn() as Mocked<GitRepositoryProvider['getPlatformName']>,
+      supports: vi.fn() as Mocked<GitRepositoryProvider['supports']>,
+      getRepositoryInfo: vi.fn() as Mocked<GitRepositoryProvider['getRepositoryInfo']>,
+      getRemoteParsedUrl: vi.fn() as Mocked<GitRepositoryProvider['getRemoteParsedUrl']>,
+    } as Mocked<GitRepositoryProvider>;
 
     // Create a mock license service
-    mockLicenseService = {
-      detectLicenseFromFile: vi.fn(),
-    } as unknown as Mocked<LicenseService>;
+    mockLicenseService = LicenseServiceMockFactory.create();
 
     gitHubRepositoryProvider = new GitHubRepositoryProvider(
       mockGitRepositoryService,
       mockLicenseService
     );
+  });
+
+  afterEach(() => {
+    mockFs.restore();
   });
 
   describe('getPlatformName', () => {
@@ -151,39 +154,112 @@ describe('GitHubRepositoryProvider', () => {
     });
   });
 
-  describe('fetchLicense and logo behavior', () => {
-    it('should return openGraphImageUrl from graphql when available', async () => {
+  describe('getRepositoryInfo', () => {
+    it('should return repository info from git provider', async () => {
       // Arrange
-      const repo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo as any);
-
-      // GraphQL mock to return openGraphImageUrl
-      vi.mocked(graphqlMock).mockResolvedValue({ repository: { openGraphImageUrl: 'https://img.local/og.png' } });
+      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
 
       // Act
-      const logo = await (gitHubRepositoryProvider as any).getOpenGraphImageUrl(repo as any);
+      const result = await gitHubRepositoryProvider.getRepositoryInfo();
 
       // Assert
-      expect(logo).toBe('https://img.local/og.png');
+      expect(result).toEqual(repo);
+    });
+  });
+
+  describe('getLogo', () => {
+    it('should return file uri when logo exists in .github', async () => {
+      // Arrange
+      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      mockFs({ '.github': { 'logo.png': 'png' } });
+
+      // Act
+      const uri = await gitHubRepositoryProvider.getLogo();
+
+      // Assert
+      expect(uri).toBe('file://.github/logo.png');
+    });
+
+    it('should fallback to openGraph image when no local logo', async () => {
+      // Arrange
+      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      // Ensure no local files
+      mockFs({});
+
+      // Mock graphql to return openGraphImageUrl
+      graphqlMock.mockResolvedValue({ repository: { openGraphImageUrl: 'https://img.local/og.png' } });
+
+      // Act
+      const uri = await gitHubRepositoryProvider.getLogo();
+
+      // Assert
+      expect(uri).toBe('https://img.local/og.png');
+    });
+  });
+
+  describe('getLicense', () => {
+    it('should return license info from graphql when present', async () => {
+      // Arrange
+      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+
+      graphqlMock.mockResolvedValue({ repository: { licenseInfo: { name: 'MIT', spdxId: 'MIT', url: 'https://license' } } });
+
+      // Act
+      const license = await gitHubRepositoryProvider.getLicense();
+
+      // Assert
+      expect(license).toEqual({ name: 'MIT', spdxId: 'MIT', url: 'https://license' });
     });
 
     it('should fallback to licenseService when graphql has no licenseInfo', async () => {
       // Arrange
-      const repo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo as any);
+      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
 
-      // GraphQL mock returns repository with no licenseInfo
-      vi.mocked(graphqlMock).mockResolvedValue({ repository: {} });
+      graphqlMock.mockResolvedValue({ repository: {} });
 
-      const expected = { name: 'MIT', spdxId: 'MIT', url: 'https://license' };
-      mockLicenseService.detectLicenseFromFile.mockResolvedValue(expected as any);
+      const expected: LicenseInfo = { name: 'MIT', spdxId: 'MIT', url: 'https://license' };
+      mockLicenseService.detectLicenseFromFile.mockResolvedValue(expected);
 
       // Act
-      const license = await (gitHubRepositoryProvider as any).getLicenseInfo(repo as any);
+      const license = await gitHubRepositoryProvider.getLicense();
 
       // Assert
       expect(license).toEqual(expected);
     });
   });
 
+  describe('getContributing', () => {
+    it('should return contributing url when available via graphql', async () => {
+      // Arrange
+      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+
+      graphqlMock.mockResolvedValue({ repository: { contributingGuidelines: { url: 'https://github.com/owner/repo/CONTRIBUTING' } } });
+
+      // Act
+      const contributing = await gitHubRepositoryProvider.getContributing();
+
+      // Assert
+      expect(contributing).toEqual({ url: 'https://github.com/owner/repo/CONTRIBUTING' });
+    });
+  });
+
+  describe('getLatestVersion', () => {
+    it('should delegate to gitRepositoryProvider.getLatestVersion', async () => {
+      // Arrange
+      const expected: ManifestVersion = { version: '1.2.3' } as ManifestVersion;
+      (mockGitRepositoryService as unknown as { getLatestVersion?: () => Promise<ManifestVersion> }).getLatestVersion = vi.fn().mockResolvedValue(expected);
+
+      // Act
+      const result = await gitHubRepositoryProvider.getLatestVersion();
+
+      // Assert
+      expect(result).toBe(expected);
+    });
+  });
 });

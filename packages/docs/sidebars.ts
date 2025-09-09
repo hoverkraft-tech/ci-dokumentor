@@ -1,4 +1,4 @@
-import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
+import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -18,21 +18,11 @@ const sidebars: SidebarsConfig = {
     'intro',
     {
       type: 'category',
-      label: 'Packages',
-      items: [
-        'packages/core',
-        'packages/cli',
-        'packages/repository-git',
-        'packages/repository-github',
-        'packages/cicd-github-actions',
-      ],
-    },
-    {
-      type: 'category',
       label: 'Integrations',
       items: [
         'integrations/docker',
         'integrations/github-action',
+        'integrations/nodejs-package',
       ],
     },
     {
@@ -44,6 +34,17 @@ const sidebars: SidebarsConfig = {
         'developers/setup',
         'developers/testing',
         'developers/ci-cd',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Packages',
+      items: [
+        'packages/core',
+        'packages/cli',
+        'packages/repository-git',
+        'packages/repository-github',
+        'packages/cicd-github-actions',
       ],
     },
   ],

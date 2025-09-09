@@ -100,28 +100,97 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
   }
 
   protected async fetchRepositoryInfo(): Promise<RepositoryInfo> {
-    const repository = await this.gitRepositoryProvider.getRepositoryInfo();
-    return {
-      owner: repository.owner,
-      name: repository.name,
-      url: repository.url,
-      fullName: repository.fullName,
-    };
+    return this.gitRepositoryProvider.getRepositoryInfo();
   }
 
   protected async fetchLogo(): Promise<string | undefined> {
-    const repositoryInfo = await this.fetchRepositoryInfo();
-    return this.getLogoUri(repositoryInfo);
+    const possibleLogoPaths = [
+      '.github/logo.png',
+      '.github/logo.jpg',
+      '.github/logo.jpeg',
+      '.github/logo.svg',
+    ];
+
+    for (const path of possibleLogoPaths) {
+      if (existsSync(path)) {
+        return `file://${path}`;
+      }
+    }
+
+    // Fallback to Open Graph image if no logo is found
+    const response = await this.graphqlQuery<{
+      repository: {
+        openGraphImageUrl?: string;
+      }
+    }>(
+      `query getOpenGraphImageUrl($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          openGraphImageUrl
+        }
+      }`,
+    );
+
+    return response?.repository?.openGraphImageUrl ?? undefined;
   }
 
   protected async fetchLicense(): Promise<LicenseInfo | undefined> {
-    const repositoryInfo = await this.fetchRepositoryInfo();
-    return this.getLicenseInfo(repositoryInfo);
+    const response = await this.graphqlQuery<{
+      repository?: {
+        licenseInfo?: {
+          name: string;
+          spdxId: string;
+          url: string;
+        }
+      }
+    }>(
+      `query getLicense($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          licenseInfo {
+            name
+            spdxId
+            url
+          }
+        }
+      }`
+    );
+
+    const licenseInfo = response?.repository?.licenseInfo;
+    if (licenseInfo) {
+      return {
+        name: licenseInfo.name,
+        spdxId: licenseInfo.spdxId,
+        url: licenseInfo.url,
+      };
+    }
+
+    // Fallback to reading license file directly if no license info from GitHub
+    return this.licenseService.detectLicenseFromFile();
   }
 
   protected async fetchContributing(): Promise<ContributingInfo | undefined> {
-    const repositoryInfo = await this.fetchRepositoryInfo();
-    return this.getContributingInfo(repositoryInfo);
+    const response = await this.graphqlQuery<{
+      repository?: {
+        contributingGuidelines?: {
+          url: string;
+        }
+      }
+    }>(
+      `query getLicense($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          contributingGuidelines {
+            url
+          }
+        }
+      }`
+    );
+
+    const contributingGuidelines = response?.repository?.contributingGuidelines;
+    if (contributingGuidelines) {
+      return {
+        url: contributingGuidelines.url,
+      };
+    }
+    return undefined;
   }
 
   protected override async fetchLatestVersion(): Promise<ManifestVersion | undefined> {
@@ -149,121 +218,17 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
     return this.graphqlClient;
   }
 
-  private async getLogoUri(
-    repositoryInfo: RepositoryInfo
-  ): Promise<string | undefined> {
-    const possibleLogoPaths = [
-      '.github/logo.png',
-      '.github/logo.jpg',
-      '.github/logo.jpeg',
-      '.github/logo.svg',
-    ];
+  private async graphqlQuery<Data>(query: string): Promise<Data> {
 
-    for (const path of possibleLogoPaths) {
-      if (existsSync(path)) {
-        return `file://${path}`;
-      }
-    }
+    const repositoryInfo = await this.getRepositoryInfo();
 
-    // Fallback to Open Graph image if no logo is found
-    return this.getOpenGraphImageUrl(repositoryInfo);
-  }
-
-  private async getOpenGraphImageUrl(
-    repositoryInfo: RepositoryInfo
-  ): Promise<string | undefined> {
     const graphqlClient = this.getGraphQLClient();
-
-    const response = await graphqlClient<{
-      repository: {
-        openGraphImageUrl?: string;
-      }
-    }>(
-      `query getOpenGraphImageUrl($owner: String!, $repo: String!) {
-        repository(owner: $owner, name: $repo) {
-          openGraphImageUrl
-        }
-      }`,
+    return graphqlClient<Data>(
+      query,
       {
         owner: repositoryInfo.owner,
         repo: repositoryInfo.name,
       }
     );
-
-    return response?.repository?.openGraphImageUrl ?? undefined;
-  }
-
-  private async getLicenseInfo(
-    repositoryInfo: RepositoryInfo
-  ): Promise<LicenseInfo | undefined> {
-    const graphqlClient = this.getGraphQLClient();
-
-    const response = await graphqlClient<{
-      repository?: {
-        licenseInfo?: {
-          name: string;
-          spdxId: string;
-          url: string;
-        }
-      }
-    }>(
-      `query getLicense($owner: String!, $repo: String!) {
-        repository(owner: $owner, name: $repo) {
-          licenseInfo {
-            name
-            spdxId
-            url
-          }
-        }
-      }`,
-      {
-        owner: repositoryInfo.owner,
-        repo: repositoryInfo.name,
-      });
-
-    const licenseInfo = response?.repository?.licenseInfo;
-    if (licenseInfo) {
-      return {
-        name: licenseInfo.name,
-        spdxId: licenseInfo.spdxId,
-        url: licenseInfo.url,
-      };
-    }
-
-    // Fallback to reading license file directly if no license info from GitHub
-    return this.licenseService.detectLicenseFromFile();
-  }
-
-  private async getContributingInfo(
-    repositoryInfo: RepositoryInfo
-  ): Promise<ContributingInfo | undefined> {
-    const graphqlClient = this.getGraphQLClient();
-
-    const response = await graphqlClient<{
-      repository?: {
-        contributingGuidelines?: {
-          url: string;
-        }
-      }
-    }>(
-      `query getLicense($owner: String!, $repo: String!) {
-        repository(owner: $owner, name: $repo) {
-          contributingGuidelines {
-            url
-          }
-        }
-      }`,
-      {
-        owner: repositoryInfo.owner,
-        repo: repositoryInfo.name,
-      });
-
-    const contributingGuidelines = response?.repository?.contributingGuidelines;
-    if (contributingGuidelines) {
-      return {
-        url: contributingGuidelines.url,
-      };
-    }
-    return undefined;
   }
 }

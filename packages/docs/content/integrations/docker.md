@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # Docker Integration
@@ -8,9 +8,10 @@ CI Dokumentor provides a production-ready Docker image for easy integration with
 
 ## Quick Start
 
+> Generate documentation for a CI/CD manifest file (required)
+> Pass a manifest file path inside the container, for example `/workspace/action.yml`
+
 ```bash
-# Generate documentation for a CI/CD manifest file (required)
-# Pass a manifest file path inside the container, for example `/workspace/action.yml`
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml
@@ -111,8 +112,9 @@ docker run --rm \
 
 #### Permission Denied
 
+> Solution: Run with user mapping
+
 ```bash
-# Solution: Run with user mapping
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml
@@ -120,8 +122,9 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
 
 #### Platform Detection Failed
 
+> Solution: Specify platform explicitly
+
 ```bash
-# Solution: Specify platform explicitly
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
   ghcr.io/hoverkraft-tech/ci-dokumentor:latest \
   generate --source /workspace/action.yml \
@@ -149,8 +152,9 @@ services:
   command: generate --source /workspace/action.yml
 ```
 
+> Run documentation generation
+
 ```bash
-# Run documentation generation
 docker-compose run --rm ci-dokumentor
 ```
 

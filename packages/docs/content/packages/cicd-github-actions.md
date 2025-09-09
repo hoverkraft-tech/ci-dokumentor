@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# CI/CD GitHub Actions Package
+# CI/CD - GitHub Actions Package
 
 The `@ci-dokumentor/cicd-github-actions` package provides GitHub Actions-specific CI/CD manifest parsing and documentation generation capabilities.
 

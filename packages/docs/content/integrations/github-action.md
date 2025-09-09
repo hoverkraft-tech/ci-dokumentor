@@ -71,6 +71,18 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
     exclude-sections: 'examples'
 ```
 
+### Dry-run Example
+
+To preview changes without modifying files, set the `dry-run` input to `true`. The action will pass `--dry-run` to the CLI and the core generator will produce a diff instead of writing files.
+
+```yaml
+- name: Generate Documentation (dry-run)
+  uses: hoverkraft-tech/ci-dokumentor@main
+  with:
+    source: 'action.yml'
+    dry-run: 'true'
+```
+
 ## Complete Workflow Examples
 
 ### Auto-Commit Documentation
@@ -133,30 +145,17 @@ None - all parameters have sensible defaults.
 
 ### Optional Parameters
 
-| Parameter          | Description                                  | Default       | Example                                 |
-| ------------------ | -------------------------------------------- | ------------- | --------------------------------------- |
-| `source`           | Source directory containing CI/CD files      | `.`           | `action.yml`, `.github/workflows/`, `.` |
-| `output`           | Output directory for generated documentation | `./docs`      | `docs`, `documentation`, `./output`     |
-| `repository`       | Repository platform                          | Auto-detected | `github`, `gitlab`                      |
-| `cicd`             | CI/CD platform                               | Auto-detected | `github-actions`, `gitlab-ci`           |
-| `include-sections` | Comma-separated list of sections to include  | All sections  | `inputs,outputs,runs`                   |
-| `exclude-sections` | Comma-separated list of sections to exclude  | None          | `examples,troubleshooting`              |
-
-| `dry-run` | Run in preview mode; generate a diff instead of writing files (maps to CLI `--dry-run`) | `false` | `true` |
+| Parameter          | Description                                                                             | Default       | Example                                 |
+| ------------------ | --------------------------------------------------------------------------------------- | ------------- | --------------------------------------- |
+| `source`           | Source directory containing CI/CD files                                                 | `.`           | `action.yml`, `.github/workflows/`, `.` |
+| `output`           | Output directory for generated documentation                                            | `./docs`      | `docs`, `documentation`, `./output`     |
+| `repository`       | Repository platform                                                                     | Auto-detected | `github`, `gitlab`                      |
+| `cicd`             | CI/CD platform                                                                          | Auto-detected | `github-actions`, `gitlab-ci`           |
+| `include-sections` | Comma-separated list of sections to include                                             | All sections  | `inputs,outputs,runs`                   |
+| `exclude-sections` | Comma-separated list of sections to exclude                                             | None          | `examples,troubleshooting`              |
+| `dry-run`          | Run in preview mode; generate a diff instead of writing files (maps to CLI `--dry-run`) | `false`       | `true`                                  |
 
 ## Related Documentation
-
-### Dry-run Example
-
-To preview changes without modifying files, set the `dry-run` input to `true`. The action will pass `--dry-run` to the CLI and the core generator will produce a diff instead of writing files.
-
-```yaml
-- name: Generate Documentation (dry-run)
-  uses: hoverkraft-tech/ci-dokumentor@main
-  with:
-    source: 'action.yml'
-    dry-run: 'true'
-```
 
 - [Docker Integration](./docker) - Using CI Dokumentor with Docker
 - [CLI Package](../packages/cli) - Command-line interface reference
