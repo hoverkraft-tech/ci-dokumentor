@@ -5,7 +5,7 @@ import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 
 type Badge = { label: string; url: string };
-type LinkedBadge = { url: string; badge: Badge };
+type LinkedBadge = { url?: string; badge: Badge };
 
 export interface BadgesSectionOptions extends SectionOptions {
   extraBadges?: string;
@@ -13,7 +13,9 @@ export interface BadgesSectionOptions extends SectionOptions {
 
 @injectable()
 export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter implements SectionGeneratorAdapter<GitHubActionsManifest, BadgesSectionOptions> {
+
   private extraBadges?: LinkedBadge[];
+
   getSectionIdentifier(): SectionIdentifier {
     return SectionIdentifier.Badges;
   }
@@ -28,30 +30,42 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   override setSectionOptions({ extraBadges }: Partial<BadgesSectionOptions>): void {
-    if (extraBadges) {
-      try {
-        const parsed = JSON.parse(extraBadges);
-        if (Array.isArray(parsed)) {
-          this.extraBadges = parsed.map(badge => {
-            // Determine the badge image URL (shields.io URL)
-            const badgeImageUrl = badge.badgeUrl || badge.url;
-            // Determine the link URL (where clicking the badge should go)
-            const linkUrl = badge.linkUrl || badge.url;
-            
-            return {
-              url: linkUrl,
-              badge: {
-                label: badge.label,
-                url: badgeImageUrl,
-              },
-            };
-          });
-        }
-      } catch (error) {
-        // If JSON parsing fails, ignore the extra badges and continue
-        this.extraBadges = undefined;
-      }
+    if (!extraBadges) {
+      return;
     }
+
+    const parsed = JSON.parse(extraBadges);
+    if (!Array.isArray(parsed)) {
+      throw new Error('The extra badges option must be a JSON array of badge objects.');
+    }
+
+    this.extraBadges = parsed.map(badge => {
+      // Determine the badge label
+      const badgeLabel = badge.label;
+      if (!badgeLabel || typeof badgeLabel !== 'string') {
+        throw new Error('Badge must have a label property for the badge label.');
+      }
+
+      // Determine the badge image URL (shields.io URL)
+      const badgeImageUrl = badge.url;
+      if (!badgeImageUrl || typeof badgeImageUrl !== 'string') {
+        throw new Error('Badge must have a url property for the badge image URL.');
+      }
+
+      // Determine the link URL (where clicking the badge should go)
+      const linkUrl = badge.linkUrl;
+      if (linkUrl !== undefined && typeof linkUrl !== 'string') {
+        throw new Error('Badge linkUrl property must be a string if provided.');
+      }
+
+      return {
+        url: linkUrl,
+        badge: {
+          label: badgeLabel,
+          url: badgeImageUrl,
+        },
+      };
+    });
   }
 
   async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
@@ -70,12 +84,12 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       ...this.getComplianceBadges(repositoryInfo),
       ...this.getCommunityBadges(repositoryInfo),
     ];
-    
+
     // Add extra badges if provided
     if (this.extraBadges && this.extraBadges.length > 0) {
       badges.push(...this.extraBadges);
     }
-    
+
     return badges;
   }
 
@@ -144,10 +158,13 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     }
 
     const badgeCollectionContent = linkedBadges.map((linkedBadge) => {
-      const badgeBuffer = formatterAdapter.link(
-        formatterAdapter.badge(Buffer.from(linkedBadge.badge.label), Buffer.from(linkedBadge.badge.url)),
-        Buffer.from(linkedBadge.url)
-      );
+      let badgeBuffer = formatterAdapter.badge(Buffer.from(linkedBadge.badge.label), Buffer.from(linkedBadge.badge.url));
+      if (linkedBadge.url) {
+        badgeBuffer = formatterAdapter.link(
+          badgeBuffer,
+          Buffer.from(linkedBadge.url)
+        );
+      }
       return [badgeBuffer, formatterAdapter.lineBreak()];
     }).flat();
 

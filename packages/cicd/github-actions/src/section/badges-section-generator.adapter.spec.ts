@@ -75,20 +75,20 @@ describe('BadgesSectionGenerator', () => {
       // Assert - we'll verify this works by testing generateSection output
     });
 
-    it('should handle invalid JSON gracefully', () => {
+    it('should handle invalid JSON', () => {
       // Arrange
       const invalidJson = 'invalid json';
 
       // Act & Assert - should not throw
-      expect(() => generator.setSectionOptions({ extraBadges: invalidJson })).not.toThrow();
+      expect(() => generator.setSectionOptions({ extraBadges: invalidJson })).toThrow(`Unexpected token 'i', "invalid json" is not valid JSON`);
     });
 
-    it('should handle non-array JSON gracefully', () => {
+    it('should handle non-array JSON', () => {
       // Arrange
       const nonArrayJson = JSON.stringify({ notAnArray: true });
 
       // Act & Assert - should not throw
-      expect(() => generator.setSectionOptions({ extraBadges: nonArrayJson })).not.toThrow();
+      expect(() => generator.setSectionOptions({ extraBadges: nonArrayJson })).toThrow('The extra badges option must be a JSON array of badge objects.');
     });
 
     it('should handle undefined extraBadges', () => {
@@ -152,7 +152,7 @@ describe('BadgesSectionGenerator', () => {
         );
       });
 
-      it('should handle badges with alternative property names', async () => {
+      it('should handle badges without linkUrl', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const payload: SectionGenerationPayload<GitHubAction> = {
@@ -162,7 +162,7 @@ describe('BadgesSectionGenerator', () => {
         };
 
         const extraBadgesJson = JSON.stringify([
-          { label: 'Badge with badgeUrl', badgeUrl: 'https://img.shields.io/badge/badge-url-orange', url: 'https://badgeurl.com' }
+          { label: 'Badge without linkUrl', url: 'https://img.shields.io/badge/badge-url-orange' }
         ]);
 
         generator.setSectionOptions({ extraBadges: extraBadgesJson });
@@ -172,7 +172,13 @@ describe('BadgesSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toContain('[![Badge with badgeUrl](https://img.shields.io/badge/badge-url-orange)](https://badgeurl.com)');
+        expect(result.toString()).toEqual(
+          `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
+[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
+[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+![Badge without linkUrl](https://img.shields.io/badge/badge-url-orange)
+`);
       });
     });
 

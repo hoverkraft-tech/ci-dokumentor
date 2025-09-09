@@ -57,7 +57,7 @@ Documentation generated successfully!
 ===================================================================
 --- test.md
 +++ test.md
-@@ -0,0 +1,93 @@
+@@ -0,0 +1,97 @@
 +<!-- header:start -->
 +<div align="center">
 +  # ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYm9vay1vcGVuIiBjb2xvcj0iYmx1ZSI+PHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhMyAzIDAgMCAwLTMtM0gyeiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMiAzaC02YTQgNCAwIDAgMC00IDR2MTRhMyAzIDAgMCAxIDMtM2g3eiI+PC9wYXRoPjwvc3ZnPg==) GitHub Action: CI Dokumentor
@@ -102,17 +102,20 @@ Documentation generated successfully!
 +    # Comma-separated list of sections to exclude.
 +    exclude-sections: ""
 +
-+    # Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
-+    # Default: \`latest\`
-+    version: latest
++    # Whether to perform a dry run (no files are written).
++    # Default: \`false\`
++    dry-run: "false"
++
++    # JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties.
++    extra-badges: ""
 +
 +    # The GitHub token used to fetch repository information.
 +    # Default: \`\${{ github.token }}\`
 +    github-token: \${{ github.token }}
 +
-+    # Whether to perform a dry run (no files are written).
-+    # Default: \`false\`
-+    dry-run: "false"
++    # Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
++    # Default: \`latest\`
++    version: latest
 +
 +\`\`\`
 +
@@ -128,9 +131,10 @@ Documentation generated successfully!
 +| **\`cicd\`** | CI/CD platform (github-actions, gitlab-ci, etc.). | **false** | \`\` |
 +| **\`include-sections\`** | Comma-separated list of sections to include. | **false** | \`\` |
 +| **\`exclude-sections\`** | Comma-separated list of sections to exclude. | **false** | \`\` |
-+| **\`version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>. | **false** | \`latest\` |
-+| **\`github-token\`** | The GitHub token used to fetch repository information. | **false** | \`\${{ github.token }}\` |
 +| **\`dry-run\`** | Whether to perform a dry run (no files are written). | **false** | \`false\` |
++| **\`extra-badges\`** | JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties. | **false** | \`\` |
++| **\`github-token\`** | The GitHub token used to fetch repository information. | **false** | \`\${{ github.token }}\` |
++| **\`version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>. | **false** | \`latest\` |
 +
 +<!-- inputs:end -->
 +<!-- outputs:start -->
