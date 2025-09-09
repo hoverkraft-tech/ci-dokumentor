@@ -28,6 +28,9 @@ inputs:
     description: Whether to perform a dry run (no files are written).
     required: false
     default: 'false'
+  version:
+    description: Version to document (auto-detected if not specified).
+    required: false
   extra-badges:
     description: JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties.
     required: false
@@ -36,7 +39,7 @@ inputs:
     description: The GitHub token used to fetch repository information.
     default: ${{ github.token }}
     required: false
-  version:
+  ci-dokumentor-version:
     description: Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
     required: false
     default: latest
@@ -110,8 +113,8 @@ runs:
 
         echo "::debug::Env args set to: $envs"
 
-        version="${{ inputs.version }}"
-        echo "::debug::Version set to: $version"
+        ci_dokumentor_version="${{ inputs.ci-dokumentor-version }}"
+        echo "::debug::CI Dokumentor version set to: $ci_dokumentor_version"
 
         docker run --rm \
           -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
@@ -119,5 +122,5 @@ runs:
           -u "$(id -u):$(id -g)" \
           -w "$GITHUB_WORKSPACE" \
           $envs \
-          ghcr.io/hoverkraft-tech/ci-dokumentor/cli:$version \
+          ghcr.io/hoverkraft-tech/ci-dokumentor/cli:$ci_dokumentor_version \
           $args

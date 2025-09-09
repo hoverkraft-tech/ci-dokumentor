@@ -1,4 +1,4 @@
-import { RepositoryInfo, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions } from '@ci-dokumentor/core';
+import { RepositoryProvider, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
@@ -69,20 +69,18 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
-    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
-
-    const linkedBadges = this.getAllBadges(manifest, repositoryInfo);
+    const linkedBadges = await this.getAllBadges(manifest, repositoryProvider);
     return this.formatBadgeCollection(linkedBadges, formatterAdapter);
   }
 
-  private getAllBadges(
+  private async getAllBadges(
     manifest: GitHubActionsManifest,
-    repositoryInfo: RepositoryInfo
-  ): LinkedBadge[] {
+    repositoryProvider: RepositoryProvider
+  ): Promise<LinkedBadge[]> {
     const badges = [
-      ...this.getDistributionBadges(manifest, repositoryInfo),
-      ...this.getComplianceBadges(repositoryInfo),
-      ...this.getCommunityBadges(repositoryInfo),
+      ...await this.getDistributionBadges(manifest, repositoryProvider),
+      ...await this.getComplianceBadges(repositoryProvider),
+      ...await this.getCommunityBadges(repositoryProvider),
     ];
 
     // Add extra badges if provided
@@ -93,10 +91,12 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     return badges;
   }
 
-  private getDistributionBadges(
+  private async getDistributionBadges(
     manifest: GitHubActionsManifest,
-    repositoryInfo: RepositoryInfo
-  ): LinkedBadge[] {
+    repositoryProvider: RepositoryProvider
+  ): Promise<LinkedBadge[]> {
+    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
+
     const actionName = manifest.name.toLowerCase().replace(/\s+/g, '-');
     const badges = [
       {
@@ -121,24 +121,35 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     return badges;
   }
-  private getComplianceBadges(
-    repositoryInfo: RepositoryInfo
-  ): LinkedBadge[] {
+
+  private async getComplianceBadges(
+    repositoryProvider: RepositoryProvider
+  ): Promise<LinkedBadge[]> {
+    const license = await repositoryProvider.getLicense();
+    if (!license) {
+      return [];
+    }
+
+    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
+    const badgeUrl = `https://img.shields.io/github/license/${repositoryInfo.fullName}`;
+
     return [
       {
-        url: `https://img.shields.io/github/license/${repositoryInfo.fullName}`,
+        url: license.url ?? badgeUrl,
         badge: {
           label: 'License',
-          url: `https://img.shields.io/github/license/${repositoryInfo.fullName}`,
+          url: badgeUrl,
         },
       },
     ];
   }
 
-  private getCommunityBadges(
-    repositoryInfo: RepositoryInfo
-  ): LinkedBadge[] {
-    return [
+  private async getCommunityBadges(
+    repositoryProvider: RepositoryProvider
+  ): Promise<LinkedBadge[]> {
+    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
+
+    const badges: LinkedBadge[] = [
       {
         url: `https://img.shields.io/github/stars/${repositoryInfo.fullName}?style=social`,
         badge: {
@@ -147,6 +158,19 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
         },
       },
     ];
+
+    const contributing = await repositoryProvider.getContributing();
+    if (contributing) {
+      badges.push({
+        url: contributing.url,
+        badge: {
+          label: 'PRs Welcome',
+          url: 'https://img.shields.io/badge/PRs-welcome-brightgreen.svg',
+        },
+      });
+    }
+
+    return badges;
   }
 
   private formatBadgeCollection(

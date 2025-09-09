@@ -54,6 +54,15 @@ docker-shell: docker-build ## Open a shell in the Docker image
 docker-run: ## Run a command in the Docker container
 	@docker run --rm -v "$(CURDIR):/workspace" --user $(shell id -u):$(shell id -g) ci-dokumentor:latest $(1)
 
+docs-generate: ## Generate documentation
+	@GITHUB_TOKEN=$(shell gh auth token) node packages/cli/dist/bin/ci-dokumentor.js gen --source action.yml \
+		--include-sections badges,contributing,license,generated \
+		--extra-badges '[{ "label": "Total Downloads", "url": "https://img.shields.io/npm/dm/@ci-dokumentor/cli", "linkUrl": "https://www.npmjs.com/package/@ci-dokumentor/cli" },{ "label": "Coverage Status", "url": "https://codecov.io/gh/hoverkraft-tech/ci-dokumentor/branch/main/graph/badge.svg", "linkUrl": "https://codecov.io/gh/hoverkraft-tech/ci-dokumentor" },{ "label": "Continuous Integration", "url": "https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml/badge.svg", "linkUrl": "https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml" }]'
+
+	@GITHUB_TOKEN=$(shell gh auth token) node packages/cli/dist/bin/ci-dokumentor.js gen --source action.yml \
+		--destination packages/docs/content/integrations/github-action.md \
+		--include-sections usage,inputs,outputs,secrets
+
 define run_linter
 	DEFAULT_WORKSPACE="$(CURDIR)"; \
 	LINTER_IMAGE="linter:latest"; \

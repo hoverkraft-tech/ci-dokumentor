@@ -28,6 +28,14 @@ describe('BadgesSectionGenerator', () => {
         name: 'repo',
         fullName: 'owner/repo',
       },
+      getLicense: {
+        name: 'MIT',
+        spdxId: 'MIT',
+        url: 'https://opensource.org/licenses/MIT',
+      },
+      getContributing: {
+        url: 'https://github.com/owner/repo/blob/main/CONTRIBUTING.md',
+      }
     });
 
     const container = initTestContainer();
@@ -116,7 +124,58 @@ describe('BadgesSectionGenerator', () => {
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
-[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
+[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
+`
+        );
+      });
+
+      it('should not generate license badge if not present', async () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
+
+        mockRepositoryProvider.getLicense.mockResolvedValue(undefined);
+        const payload: SectionGenerationPayload<GitHubAction> = {
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+        };
+
+        // Act
+        const result = await generator.generateSection(payload);
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toEqual(
+          `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
+[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
+[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
+`
+        );
+      });
+
+      it('should not generate contributing badge if not present', async () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
+
+        mockRepositoryProvider.getContributing.mockResolvedValue(undefined);
+        const payload: SectionGenerationPayload<GitHubAction> = {
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+        };
+
+        // Act
+        const result = await generator.generateSection(payload);
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toEqual(
+          `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
+[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 `
         );
@@ -145,8 +204,9 @@ describe('BadgesSectionGenerator', () => {
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
-[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 [![Custom Badge](https://img.shields.io/badge/custom-badge-green)](https://example.com)
 `
         );
@@ -175,8 +235,9 @@ describe('BadgesSectionGenerator', () => {
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
-[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 ![Badge without linkUrl](https://img.shields.io/badge/badge-url-orange)
 `);
       });
@@ -199,8 +260,9 @@ describe('BadgesSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
-[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 `
         );
       });
@@ -227,8 +289,9 @@ describe('BadgesSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
-[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 [![Workflow Badge](https://img.shields.io/badge/workflow-badge-red)](https://workflow.com)
 `
         );
@@ -255,8 +318,9 @@ describe('BadgesSectionGenerator', () => {
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
-[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 `
         );
       });
@@ -280,8 +344,9 @@ describe('BadgesSectionGenerator', () => {
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
-[![License](https://img.shields.io/github/license/owner/repo)](https://img.shields.io/github/license/owner/repo)
+[![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 `
         );
       });

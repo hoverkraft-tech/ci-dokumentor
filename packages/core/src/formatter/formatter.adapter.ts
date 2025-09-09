@@ -33,5 +33,9 @@ export interface FormatterAdapter {
 
   badge(label: Buffer, message: Buffer, color?: Buffer): Buffer;
 
+  horizontalRule(): Buffer;
+
   lineBreak(): Buffer;
+
+
 }
