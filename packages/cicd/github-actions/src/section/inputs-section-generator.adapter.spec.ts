@@ -73,13 +73,13 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Inputs
 
-| **Input** | **Description** | **Required** | **Default** |
-| --- | --- | --- | --- |
-| **\`input-name\`** | Test input description | **true** | \`default-value\` |
-| **\`optional-input\`** | Optional input description | **false** | \`\` |
+| **Input**            | **Description**            | **Required** | **Default**     |
+| -------------------- | -------------------------- | ------------ | --------------- |
+| **\`input-name\`**     | Test input description     | **true**     | \`default-value\` |
+| **\`optional-input\`** | Optional input description | **false**    | \`\`              |
 `
         );
       });
@@ -93,11 +93,11 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Inputs
 
 | **Input** | **Description** | **Required** | **Default** |
-| --- | --- | --- | --- |
+| --------- | --------------- | ------------ | ----------- |
 `
         );
       });
@@ -111,11 +111,11 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Inputs
 
 | **Input** | **Description** | **Required** | **Default** |
-| --- | --- | --- | --- |
+| --------- | --------------- | ------------ | ----------- |
 `
         );
       });
@@ -131,12 +131,12 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Inputs
 
-| **Input** | **Description** | **Required** | **Default** |
-| --- | --- | --- | --- |
-| **\`minimal-input\`** |  | **false** | \`\` |
+| **Input**           | **Description** | **Required** | **Default** |
+| ------------------- | --------------- | ------------ | ----------- |
+| **\`minimal-input\`** |                 | **false**    | \`\`          |
 `
         );
       });
@@ -170,15 +170,15 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Inputs
 
 ### Workflow Call Inputs
 
-| **Input** | **Description** | **Required** | **Type** | **Default** |
-| --- | --- | --- | --- | --- |
-| **\`environment\`** | Environment to deploy to | **true** | **string** | \`staging\` |
-| **\`version\`** | Version to deploy | **false** | **string** | \`\` |
+| **Input**         | **Description**          | **Required** | **Type**   | **Default** |
+| ----------------- | ------------------------ | ------------ | ---------- | ----------- |
+| **\`environment\`** | Environment to deploy to | **true**     | **string** | \`staging\`   |
+| **\`version\`**     | Version to deploy        | **false**    | **string** | \`\`          |
 `
         );
       });
@@ -194,7 +194,7 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           ``
         );
       });
@@ -214,7 +214,7 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           ``
         );
       });
@@ -239,14 +239,14 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Inputs
 
 ### Workflow Dispatch Inputs
 
-| **Input** | **Description** | **Required** | **Type** | **Default** |
-| --- | --- | --- | --- | --- |
-| **\`minimal-input\`** | Minimal input | **false** | **string** | \`\` |
+| **Input**           | **Description** | **Required** | **Type**   | **Default** |
+| ------------------- | --------------- | ------------ | ---------- | ----------- |
+| **\`minimal-input\`** | Minimal input   | **false**    | **string** | \`\`          |
 `
         );
       });
@@ -271,14 +271,14 @@ describe('InputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Inputs
 
 ### Workflow Dispatch Inputs
 
-| **Input** | **Description** | **Required** | **Type** | **Default** |
-| --- | --- | --- | --- | --- |
-| **\`no-description-input\`** |  | **false** | **string** | \`\` |
+| **Input**                  | **Description** | **Required** | **Type**   | **Default** |
+| -------------------------- | --------------- | ------------ | ---------- | ----------- |
+| **\`no-description-input\`** |                 | **false**    | **string** | \`\`          |
 `
         );
       });

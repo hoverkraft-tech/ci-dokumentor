@@ -127,47 +127,72 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     const splitMultilineCell = (cell: Buffer): string[] => {
       return cell.toString().split('\n');
     };
-
     let result = '';
 
-    // Handle multiline content with additional rows
-    const headerLines = headers.map(splitMultilineCell);
-    const maxHeaderLines = Math.max(
-      ...headerLines.map((lines) => lines.length)
-    );
+    // If no headers, tests expect an empty string
+    if (!headers || headers.length === 0) return Buffer.from('');
 
-    // First header row (main headers)
+    // Handle multiline content with additional rows and compute column widths
+    const headerLines = headers.map(splitMultilineCell);
+    const numCols = headers.length;
+    const maxHeaderLines = Math.max(...headerLines.map((lines) => lines.length));
+
+    const colWidths: number[] = Array.from({ length: numCols }, () => 0);
+
+    // consider header lines
+    for (let c = 0; c < numCols; c++) {
+      (headerLines[c] || ['']).forEach((ln) => {
+        const s = normalizeCell(Buffer.from(ln || ''));
+        colWidths[c] = Math.max(colWidths[c], s.length);
+      });
+    }
+
+    // consider data rows
+    rows.forEach((row) => {
+      for (let c = 0; c < numCols; c++) {
+        const cell = row[c] || Buffer.from('');
+        splitMultilineCell(cell).forEach((ln) => {
+          const s = normalizeCell(Buffer.from(ln || ''));
+          colWidths[c] = Math.max(colWidths[c], s.length);
+        });
+      }
+    });
+
+    const pad = (s: string, width: number) => s + ' '.repeat(Math.max(0, width - s.length));
+
+    // First header row (main headers) — pad to column widths
     const mainHeaderRow = `| ${headers
-      .map((h) => normalizeCell(Buffer.from(splitMultilineCell(h)[0] || '')))
+      .map((h, c) => pad(normalizeCell(Buffer.from(splitMultilineCell(h)[0] || '')), colWidths[c]))
       .join(' | ')} |`;
-    const separatorRow = `| ${headers.map(() => '---').join(' | ')} |`;
+
+    // separator uses dashes matching column width (min 3)
+    const separatorRow = `| ${colWidths.map((w) => '-'.repeat(Math.max(3, w))).join(' | ')} |`;
     result += `${mainHeaderRow}\n${separatorRow}\n`;
 
     // Additional header rows if multiline headers exist
     for (let lineIndex = 1; lineIndex < maxHeaderLines; lineIndex++) {
-      const additionalHeaderCells = headerLines.map((lines) =>
-        normalizeCell(Buffer.from(lines[lineIndex] || ''))
+      const additionalHeaderCells = headerLines.map((lines, c) =>
+        pad(normalizeCell(Buffer.from(lines[lineIndex] || '')), colWidths[c])
       );
       result += `| ${additionalHeaderCells.join(' | ')} |\n`;
     }
 
-    // Process data rows
+    // Process data rows — normalize to numCols and pad each cell line
     rows.forEach((row) => {
-      const cellLines = row.map(splitMultilineCell);
+      const normalizedRow: Buffer[] = [];
+      for (let c = 0; c < numCols; c++) normalizedRow.push(row[c] || Buffer.from(''));
+
+      const cellLines = normalizedRow.map(splitMultilineCell);
       const maxLines = Math.max(...cellLines.map((lines) => lines.length));
 
-      // First line of the row (main content)
-      const mainRowCells = cellLines.map((lines) =>
-        normalizeCell(Buffer.from(lines[0] || ''))
-      );
-      result += `| ${mainRowCells.join(' | ')} |\n`;
-
-      // Additional lines for multiline content
-      for (let lineIndex = 1; lineIndex < maxLines; lineIndex++) {
-        const additionalCells = cellLines.map((lines) =>
-          normalizeCell(Buffer.from(lines[lineIndex] || ''))
-        );
-        result += `| ${additionalCells.join(' | ')} |\n`;
+      for (let lineIndex = 0; lineIndex < maxLines; lineIndex++) {
+        const outCells: string[] = [];
+        for (let c = 0; c < numCols; c++) {
+          const lines = cellLines[c] || [''];
+          const raw = lines[lineIndex] || '';
+          outCells.push(pad(normalizeCell(Buffer.from(raw)), colWidths[c]));
+        }
+        result += `| ${outCells.join(' | ')} |\n`;
       }
     });
 

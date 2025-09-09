@@ -65,7 +65,13 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
 
             const sectionContent = Buffer.concat([
                 sectionStart,
-                ...(data.length ? [data, formatterAdapter.lineBreak()] : []),
+                ...(data.length ? [
+                    // Ensure an empty line before the section content
+                    formatterAdapter.lineBreak(),
+                    data,
+                    // Ensure an empty line before the end marker
+                    formatterAdapter.lineBreak(),
+                ] : []),
                 sectionEnd,
             ]);
 

@@ -96,6 +96,6 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   }
 
   private getOutputDescription(output: GitHubActionOutput | GitHubWorkflowOutput): Buffer {
-    return Buffer.from(output.description || '');
+    return Buffer.from((output.description || '').trim());
   }
 }

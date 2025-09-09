@@ -60,10 +60,10 @@ describe('SecretsSectionGenerator', () => {
         expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(`## Secrets
 
-| **Secret** | **Description** | **Required** |
-| --- | --- | --- |
-| **\`SECRET_A\`** | First secret | **true** |
-| **\`SECRET_B\`** | Second secret | **false** |
+| **Secret**     | **Description** | **Required** |
+| -------------- | --------------- | ------------ |
+| **\`SECRET_A\`** | First secret    | **true**     |
+| **\`SECRET_B\`** | Second secret   | **false**    |
 `);
     });
 });

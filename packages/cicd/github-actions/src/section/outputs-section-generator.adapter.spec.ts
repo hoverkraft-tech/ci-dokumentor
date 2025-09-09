@@ -71,12 +71,12 @@ describe('OutputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Outputs
 
-| **Output** | **Description** |
-| --- | --- |
-| **\`output-name\`** | Test output description |
+| **Output**           | **Description**            |
+| -------------------- | -------------------------- |
+| **\`output-name\`**    | Test output description    |
 | **\`another-output\`** | Another output description |
 `
         );
@@ -122,9 +122,9 @@ describe('OutputsSectionGenerator', () => {
         expect(result.toString()).toBe(
           `## Outputs
 
-| **Output** | **Description** |
-| --- | --- |
-| **\`minimal-output\`** |  |
+| **Output**           | **Description** |
+| -------------------- | --------------- |
+| **\`minimal-output\`** |                 |
 `
         );
       });
@@ -140,11 +140,11 @@ describe('OutputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Outputs
 
-| **Output** | **Description** |
-| --- | --- |
+| **Output**             | **Description**              |
+| ---------------------- | ---------------------------- |
 | **\`description-only\`** | Output with description only |
 `
         );
@@ -161,12 +161,12 @@ describe('OutputsSectionGenerator', () => {
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
-        expect(result.toString()).toBe(
+        expect(result.toString()).toEqual(
           `## Outputs
 
-| **Output** | **Description** |
-| --- | --- |
-| **\`no-description\`** |  |
+| **Output**           | **Description** |
+| -------------------- | --------------- |
+| **\`no-description\`** |                 |
 `
         );
       });
@@ -187,8 +187,8 @@ describe('OutputsSectionGenerator', () => {
         expect(result.toString()).toBe(
           `## Outputs
 
-| **Output** | **Description** |
-| --- | --- |
+| **Output**            | **Description**   |
+| --------------------- | ----------------- |
 | **\`workflow-output\`** | A workflow output |
 `
         );
