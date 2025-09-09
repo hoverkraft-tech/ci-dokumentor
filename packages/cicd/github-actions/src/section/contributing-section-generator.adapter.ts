@@ -19,6 +19,10 @@ export class ContributingSectionGenerator extends GitHubActionsSectionGeneratorA
 
     const contributingText = `Contributions are welcome! Please see the [contributing guidelines](${contributingInfo.url}) for more details.`;
 
-    return formatterAdapter.paragraph(Buffer.from(contributingText));
+    return Buffer.concat([
+      formatterAdapter.heading(Buffer.from('Contributing'), 2),
+      formatterAdapter.lineBreak(),
+      formatterAdapter.paragraph(Buffer.from(contributingText)),
+    ]);
   }
 }

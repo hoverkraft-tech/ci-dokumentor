@@ -66,6 +66,9 @@ export class TextLoggerAdapter implements LoggerAdapter {
   private resultObject(data: object): void {
     console.info(`✅ Result:`);
     for (const [key, value] of Object.entries(data)) {
+      if (value === undefined) {
+        continue;
+      }
       const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
       console.info(`   - ${key}: ${stringValue}`);
     }

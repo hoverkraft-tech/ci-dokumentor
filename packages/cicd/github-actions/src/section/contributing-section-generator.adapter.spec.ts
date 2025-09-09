@@ -55,9 +55,10 @@ describe('ContributingSectionGenerator', () => {
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
-            expect(result.toString()).toEqual(
-                'Contributions are welcome! Please see the [contributing guidelines](https://github.com/owner/repo/blob/main/CONTRIBUTING.md) for more details.\n'
-            );
+            expect(result.toString()).toEqual(`## Contributing
+
+Contributions are welcome! Please see the [contributing guidelines](https://github.com/owner/repo/blob/main/CONTRIBUTING.md) for more details.
+`);
         });
 
         it('should return empty buffer when repository has no contributing information', async () => {
@@ -123,9 +124,10 @@ describe('ContributingSectionGenerator', () => {
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
-            expect(result.toString()).toEqual(
-                `Contributions are welcome! Please see the [contributing guidelines](${url}) for more details.\n`
-            );
+            expect(result.toString()).toEqual(`## Contributing
+
+Contributions are welcome! Please see the [contributing guidelines](${url}) for more details.
+`);
         });
 
         it('should properly escape special characters in contributing URL', async () => {
@@ -139,9 +141,10 @@ describe('ContributingSectionGenerator', () => {
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
-            expect(result.toString()).toEqual(
-                'Contributions are welcome! Please see the [contributing guidelines](https://github.com/owner/repo-with-special-chars/blob/main/CONTRIBUTING.md?tab=readme-ov-file#contributing) for more details.\n'
-            );
+            expect(result.toString()).toEqual(`## Contributing
+
+Contributions are welcome! Please see the [contributing guidelines](https://github.com/owner/repo-with-special-chars/blob/main/CONTRIBUTING.md?tab=readme-ov-file#contributing) for more details.
+`);
         });
 
         it.each([
@@ -171,7 +174,10 @@ describe('ContributingSectionGenerator', () => {
             });
 
 
-            const expectedOutput = 'Contributions are welcome! Please see the [contributing guidelines](https://github.com/owner/repo/blob/main/CONTRIBUTING.md) for more details.\n';
+            const expectedOutput = `## Contributing
+
+Contributions are welcome! Please see the [contributing guidelines](https://github.com/owner/repo/blob/main/CONTRIBUTING.md) for more details.
+`;
 
             // Act
             const result = await generator.generateSection({ formatterAdapter, manifest: manifest as GitHubAction, repositoryProvider: mockRepositoryProvider });

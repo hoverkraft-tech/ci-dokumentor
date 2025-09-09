@@ -84,7 +84,14 @@ describe('CLI', () => {
       const manifestFilePath = join(rootPath, 'action.yml');
 
       // Mock process.argv to simulate generate command
-      process.argv = ['node', 'ci-dokumentor', 'generate', '--dry-run', '--source', manifestFilePath, '--repository', 'git', '--destination', 'test.md'];
+      process.argv = [
+        'node', 'ci-dokumentor', 'generate',
+        '--dry-run',
+        '--source', manifestFilePath,
+        '--repository', 'git',
+        '--destination', 'test.md',
+        '--extra-badges', '[{"label":"Coverage Status","url":"https://img.shields.io/badge/Coverage_Status-75%25-brightgreen","linkUrl":"https://example.com/coverage"}]',
+      ];
 
       // Act
       await cli();

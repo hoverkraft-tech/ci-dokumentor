@@ -748,6 +748,16 @@ describe('MarkdownFormatterAdapter', () => {
     });
   });
 
+  describe('horizontalRule', () => {
+    it('should return horizontal rule markdown', () => {
+      // Act
+      const result = adapter.horizontalRule();
+
+      // Assert
+      expect(result.toString()).toBe('\n---\n');
+    });
+  });
+
   describe('lineBreak', () => {
     it('should return newline character', () => {
       // Act

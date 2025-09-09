@@ -178,6 +178,10 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return Buffer.from(`![${label.toString()}](${url.toString()})`);
   }
 
+  horizontalRule(): Buffer {
+    return Buffer.concat([this.lineBreak(), Buffer.from('---'), this.lineBreak()]);
+  }
+
   lineBreak(): Buffer {
     return Buffer.from('\n');
   }
