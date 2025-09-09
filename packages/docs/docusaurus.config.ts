@@ -90,13 +90,17 @@ const config: Config = {
               to: '/intro',
             },
             {
-              label: 'Packages',
-              to: '/packages/core',
+              label: 'Integrations',
+              to: '/integrations/',
             },
             {
-              label: 'Integrations',
-              to: '/integrations/docker',
+              label: 'Packages',
+              to: '/packages/',
             },
+            {
+              label: 'Developers',
+              to: '/developers/',
+            }
           ],
         },
         {

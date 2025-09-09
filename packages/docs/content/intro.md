@@ -13,10 +13,11 @@ CI Dokumentor is a powerful TypeScript-based tool that automatically generates c
 ### Key Features
 
 - 📖 **Automated Generation** - Convert CI/CD manifest files into professional documentation
+- ⚙️ **Command-line tool** — Lightweight, fast, scriptable, and easy to integrate into local workflows or CI pipelines.
 - 🔧 **Extensible Design** - Easy to add support for new CI/CD platforms
 - 🐳 **Docker Ready** - Available as a Docker image for easy integration
 - 🚀 **GitHub Action** - Can be used directly in GitHub workflows
-- 📋 **Command-line tool** - Command-line interface for local usage
+- 📦 **Node.js Package** - Installable via npm for local or CI/CD usage
 
 ## Quick Start
 
@@ -48,7 +49,13 @@ npm install -g @ci-dokumentor/cli
 pnpm add -g @ci-dokumentor/cli
 ```
 
-Note: For end users we recommend Docker or NPX for quick, reproducible runs. For contributors working in this repository prefer pnpm workspace commands and building the CLI locally.
+:::note
+For end users we recommend Docker or NPX for quick, reproducible runs. For contributors working in this repository prefer pnpm workspace commands and building the CLI locally.
+:::
+
+:::tip
+**📖 Full Documentation**: For more details on integrations, see our [**Integrations documentation**](./integrations/index.md).
+:::
 
 #### Generate Your First Documentation
 
@@ -102,23 +109,26 @@ The main command is `generate` with these key options:
 - `--repository <platform>` - Repository platform (auto-detected)
 - `--cicd <platform>` - CI/CD platform (auto-detected)
 - `--output-format <format>` - Output format: `text`, `json`, `github-action` (Optional; default: `text`)
+- `--dry-run` - Simulate generation without writing files (Optional)
 
-> **📖 Full Documentation**: For more details on CLI usage, see our [CLI documentation](./packages/cli).
+:::tip
+**📖 Full Documentation**: For more details on CLI usage, see our [**CLI documentation**](./packages/cli.md).
+:::
 
 ## Supported Repository Platforms
 
-- ✅ **Git** - Basic repository information
-- ✅ **GitHub** - GitHub Repository information and metadata
-- 🚧 **GitLab** - GitLab Repository information and metadata
+- ✅ [**Git**](./packages/repository-git.md) - Basic repository information
+- ✅ [**GitHub**](./packages/repository-github.md) - GitHub Repository information and metadata
+- 🚧 [**GitLab**](./packages/repository-gitlab.md) - GitLab Repository information and metadata
 
 ## Next Steps
 
 For detailed information, explore these guides:
 
-- 🐳 [Docker Integration](./integrations/docker) - Advanced Docker usage patterns
-- 🐙 [GitHub Actions](./integrations/github-action) - GitHub Actions integration guide
-- 🦊 [GitLab CI](./integrations/gitlab-ci) - GitLab CI integration guide
-- 🗡️ [Dagger.io](./integrations/dagger) - Dagger.io integration guide
-- 💻 [CLI Package](./packages/cli) - Complete command-line reference
-- 📦 [Core Architecture](./packages/core) - Learn about the internal architecture
-- 👨‍💻 [Developer Guide](./developers/contributing) - Contribute to the project
+- 🐳 [**Docker Integration**](./integrations/docker.md) - Advanced Docker usage patterns
+- 🐙 [**GitHub Actions**](./integrations/github-action.md) - GitHub Actions integration guide
+- 🦊 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI integration guide
+- 🗡️ [**Dagger.io**](./integrations/dagger.md) - Dagger.io integration guide
+- 💻 [**CLI Package**](./packages/cli.md) - Complete command-line reference
+- 📦 [**Core Architecture**](./packages/core.md) - Learn about the internal architecture
+- 👨‍💻 [**Developer Guide**](./developers/index.md) - Contribute to the project

@@ -57,6 +57,15 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
     }
   }
 
+  /**
+   * Get the parsed remote URL for the repository
+   * This is a public method that can be used by other providers
+   */
+  async getRemoteParsedUrl(): Promise<ParsedRemoteUrl> {
+    const remoteUrl = await this.getRemoteUrl();
+    return gitUrlParse(remoteUrl);
+  }
+
   protected async fetchRepositoryInfo(): Promise<RepositoryInfo> {
     const parsedUrl = await this.getRemoteParsedUrl();
 
@@ -134,15 +143,6 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
       // If anything goes wrong, return undefined (no version info)
       return undefined;
     }
-  }
-
-  /**
-   * Get the parsed remote URL for the repository
-   * This is a public method that can be used by other providers
-   */
-  async getRemoteParsedUrl(): Promise<ParsedRemoteUrl> {
-    const remoteUrl = await this.getRemoteUrl();
-    return gitUrlParse(remoteUrl);
   }
 
   private async getOriginRemote() {

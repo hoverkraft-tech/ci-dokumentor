@@ -4,4 +4,6 @@ sidebar_position: 2
 
 # GitLab CI Integration
 
-🚧 Work in Progress - Not Yet Implemented.
+:::warning
+**Status**: 🚧 This package is not available yet. It is planned for future development.
+:::
