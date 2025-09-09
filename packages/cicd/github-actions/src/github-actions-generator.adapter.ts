@@ -114,6 +114,12 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
         continue;
       }
 
+      // Apply section-specific options if provided
+      const sectionId = sectionGeneratorAdapter.getSectionIdentifier();
+      if (sections.sectionConfig && sections.sectionConfig[sectionId]) {
+        sectionGeneratorAdapter.setSectionOptions(sections.sectionConfig[sectionId]);
+      }
+
       // Section generators now use repository provider for on-demand data fetching
       const payload: SectionGenerationPayload<GitHubActionsManifest> = {
         formatterAdapter: rendererAdapter.getFormatterAdapter(),
