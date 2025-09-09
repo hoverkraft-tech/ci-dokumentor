@@ -8,9 +8,9 @@
 
 [![Continuous Integration](https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml/badge.svg)](https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml)
 [![Coverage Status](https://codecov.io/gh/hoverkraft-tech/ci-dokumentor/branch/main/graph/badge.svg)](https://codecov.io/gh/hoverkraft-tech/ci-dokumentor)
-[![Latest Stable Version](https://poser.pugx.org/hoverkraft-tech/ci-dokumentor/v/stable)](https://packagist.org/packages/hoverkraft-tech/ci-dokumentor)
-[![Total Downloads](https://poser.pugx.org/hoverkraft-tech/ci-dokumentor/downloads)](https://npm.org/packages/hoverkraft-tech/ci-dokumentor)
-[![License](https://poser.pugx.org/hoverkraft-tech/ci-dokumentor/license)](https://packagist.org/packages/hoverkraft-tech/ci-dokumentor)
+[![Latest Stable Version](https://img.shields.io/npm/v/@ci-dokumentor/cli)](https://www.npmjs.com/package/@ci-dokumentor/cli)
+[![Total Downloads](https://img.shields.io/npm/dm/@ci-dokumentor/cli)](https://www.npmjs.com/package/@ci-dokumentor/cli)
+[![License](https://img.shields.io/npm/l/@ci-dokumentor/cli)](https://github.com/hoverkraft-tech/ci-dokumentor/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 📢 **CI Dokumentor** is an automated documentation generator for CI/CD components
@@ -31,7 +31,14 @@
 ### Npm package
 
 ```bash
-npx ci-dokumentor /path/to/ci-cd/component.yml
+# Install globally
+npm install -g @ci-dokumentor/cli
+
+# Use the CLI
+ci-dokumentor generate --source action.yml
+
+# Or use directly with npx
+npx @ci-dokumentor/cli generate --source action.yml
 ```
 
 ### Docker

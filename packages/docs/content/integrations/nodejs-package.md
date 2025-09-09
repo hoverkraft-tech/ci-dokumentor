@@ -2,36 +2,44 @@
 sidebar_position: 2
 ---
 
-# Node.js package
+# Node.js Package
 
-## Using the published package: `ci-dokumentor`
+## Using the published package: `@ci-dokumentor/cli`
 
-The project is published as `ci-dokumentor`. Below are common ways to run it.
+The CLI is published as a scoped npm package `@ci-dokumentor/cli`. The package includes all necessary dependencies bundled together, making it a standalone tool that works independently of the monorepo structure.
 
-### One-off with npx
+### Package Information
+
+- **Package Name**: `@ci-dokumentor/cli`
+- **Binary Name**: `ci-dokumentor`
+- **Registry**: [npm registry](https://www.npmjs.com/package/@ci-dokumentor/cli)
+- **Standalone**: Includes all workspace dependencies bundled
+
+### One-off usage with npx
 
 ```bash
-npx ci-dokumentor --help
+npx @ci-dokumentor/cli --help
+npx @ci-dokumentor/cli generate --source action.yml
 ```
 
 ### Install & run with npm (global)
 
 ```bash
-npm install -g ci-dokumentor
+npm install -g @ci-dokumentor/cli
 ci-dokumentor generate --source action.yml
 ```
 
 ### Install & run with pnpm (global)
 
 ```bash
-pnpm add -g ci-dokumentor
+pnpm add -g @ci-dokumentor/cli
 ci-dokumentor generate --source action.yml
 ```
 
 ### Using Yarn (global)
 
 ```bash
-yarn global add ci-dokumentor
+yarn global add @ci-dokumentor/cli
 ci-dokumentor generate --source action.yml
 ```
 
@@ -42,7 +50,10 @@ Add a script to your repository's `package.json`:
 ```json
 {
   "scripts": {
-    "doc:generate": "ci-dokumentor generate --source action.yml"
+    "doc:generate": "@ci-dokumentor/cli generate --source action.yml"
+  },
+  "devDependencies": {
+    "@ci-dokumentor/cli": "^0.0.1"
   }
 }
 ```
@@ -53,6 +64,22 @@ Then run:
 npm run doc:generate
 # or
 pnpm run doc:generate
+```
+
+### Local installation (project-specific)
+
+You can also install the CLI locally in your project:
+
+```bash
+npm install --save-dev @ci-dokumentor/cli
+# or
+pnpm add -D @ci-dokumentor/cli
+```
+
+Then use it via npx or package scripts:
+
+```bash
+npx @ci-dokumentor/cli generate --source action.yml
 ```
 
 ## Related Documentation

@@ -39,12 +39,17 @@ graph TD
     C --> D[Docker Build]
     C --> E[Release]
     C --> F[Documentation Update]
+    C --> G[NPM Publish]
 
-    B --> G[Linting]
-    B --> H[Node.js CI]
-    H --> I[Build]
-    H --> J[Test]
-    H --> K[Coverage]
+    B --> H[Linting]
+    B --> I[Node.js CI]
+    B --> J[Package Testing]
+    I --> K[Build]
+    I --> L[Test]
+    I --> M[Coverage]
+    J --> N[NPM Tarball Creation]
+    J --> O[CLI Functionality Testing]
+    J --> P[Package Validation]
 ```
 
 ## Shared CI Workflow
@@ -66,6 +71,15 @@ graph TD
 - **Test** - Comprehensive test suite with coverage
 - **Security** - Dependency vulnerability scanning
 - **Coverage Report** - Codecov integration
+
+#### Package Testing Stage
+
+- **CLI Build Verification** - Ensure CLI binary is properly built
+- **Package Creation** - Create npm tarball using `npm pack`
+- **Global Installation** - Install package globally from tarball
+- **Command Testing** - Test version, help, and generate commands
+- **Output Validation** - Verify documentation generation works
+- **Artifact Upload** - Upload tested package for later publishing
 
 ## Pull Request Workflow
 
@@ -117,7 +131,15 @@ To pass CI, your PR must:
 - **Tag management** - Latest, version tags, and SHA tags
 - **Security scanning** - Container vulnerability assessment
 
-#### 3. Release Job
+#### 4. Npm Publish Job
+
+- **Tag-triggered** - Only runs on Git tag pushes
+- **Artifact reuse** - Publishes tested package tarball
+- **Provenance** - Includes npm provenance for security
+- **Scoped package** - Published as `@ci-dokumentor/cli`
+- **Public access** - Available for global installation
+
+#### 5. Release Job
 
 - **Readme generation** - Auto-update repository readme
 - **Documentation updates** - Generate action/workflow docs
@@ -152,7 +174,7 @@ CI Dokumentor follows semantic versioning:
 The release process is triggered by:
 
 1. **Manual workflow dispatch**
-2. **Tag creation** (v\*)
+2. **Tag creation**
 3. **Scheduled releases** (weekly)
 
 ### Release Steps
@@ -165,6 +187,15 @@ The release process is triggered by:
 6. **GitHub Release** - Create release with notes and assets
 7. **NPM Publish** - Publish CLI package to npm registry (triggered on tags)
 
+### NPM Publishing Pipeline
+
+- **Tag Trigger** - Automatically triggered on Git tag pushes
+- **Artifact Reuse** - Publishes the exact tarball that was tested
+- **Provenance** - Includes npm provenance for supply chain security
+- **Public Access** - Published as public scoped package `@ci-dokumentor/cli`
+
+The two-stage approach ensures that the published package works correctly in real-world scenarios before it reaches the npm registry.
+
 ### Release Artifacts
 
 Each release includes:
@@ -172,7 +203,7 @@ Each release includes:
 - **Source code** - Tarball and ZIP
 - **Docker images** - Multi-architecture containers
 - **Documentation** - Generated docs archive
-- **CLI binaries** - Pre-built executables (future)
+- **NPM Package** - Standalone CLI package with bundled dependencies
 
 ## Documentation Deployment
 
