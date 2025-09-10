@@ -85,39 +85,6 @@ For testing Docker integration and running containerized workflows:
 
 # Verify installation
 docker --version
-docker-compose --version
-```
-
-### Optional Tools
-
-#### IDE/Editor
-
-**Visual Studio Code** (recommended):
-
-- Download: [code.visualstudio.com](https://code.visualstudio.com/)
-- Extensions (install after cloning):
-  ```bash
-  # Install recommended extensions
-  code --install-extension ms-vscode.vscode-typescript-next
-  code --install-extension esbenp.prettier-vscode
-  code --install-extension ms-vscode.vscode-eslint
-  code --install-extension eamodio.gitlens
-  ```
-
-**Alternative editors**:
-
-- **WebStorm** - Full TypeScript/Node.js support
-- **Vim/Neovim** - With TypeScript language server
-- **Emacs** - With tide-mode or lsp-mode
-
-#### Terminal Enhancements
-
-```bash
-# Oh My Zsh (macOS/Linux)
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-# Windows Terminal (Windows)
-# Available in Microsoft Store
 ```
 
 ## Repository Setup

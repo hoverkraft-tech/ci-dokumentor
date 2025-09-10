@@ -17,7 +17,7 @@ import {
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { RepositoryProviderMockFactory, VersionServiceMockFactory } from '@ci-dokumentor/core/tests';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory, VersionServiceMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('UsageSectionGenerator', () => {
   let mockVersionService: Mocked<VersionService>;
@@ -28,12 +28,7 @@ describe('UsageSectionGenerator', () => {
 
   beforeEach(() => {
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
-      getRepositoryInfo: {
-        url: 'https://github.com/owner/repo',
-        owner: 'owner',
-        name: 'repo',
-        fullName: 'owner/repo',
-      },
+      getRepositoryInfo: RepositoryInfoMockFactory.create()
     });
 
     mockVersionService = VersionServiceMockFactory.create();
@@ -129,7 +124,7 @@ describe('UsageSectionGenerator', () => {
             description: 'An optional input',
           },
           'optional-input-with-multiline-description': {
-            description: 'An optional input\nwith multiline\ndescription',
+            description: 'An optional input\nwith multiline\n  \ndescription',
           }
         };
 
@@ -159,6 +154,7 @@ describe('UsageSectionGenerator', () => {
 
     # An optional input
     # with multiline
+    #
     # description
     optional-input-with-multiline-description: ""
 \`\`\`

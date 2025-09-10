@@ -4,7 +4,7 @@ import { FormatterAdapter, MarkdownFormatterAdapter, SectionIdentifier, SectionG
 import { GitHubAction } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('LicenseSectionGenerator - Enhanced License Support', () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
@@ -14,12 +14,7 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
 
   beforeEach(() => {
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
-      getRepositoryInfo: {
-        url: 'https://github.com/owner/repo',
-        owner: 'owner',
-        name: 'repo',
-        fullName: 'owner/repo',
-      },
+      getRepositoryInfo: RepositoryInfoMockFactory.create(),
     });
 
     const container = initTestContainer();

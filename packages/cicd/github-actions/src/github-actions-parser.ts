@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { basename, dirname, extname, join } from 'node:path';
+import { basename, dirname, extname, join, relative } from 'node:path';
 import { parse } from 'yaml';
 import { RepositoryInfo } from '@ci-dokumentor/core';
 
@@ -152,13 +152,15 @@ export class GitHubActionsParser {
 
   private getUsesName(source: string, repositoryInfo: RepositoryInfo): string {
     // For GitHub Actions, the usesName is typically the repository name
+    const sourceRelativePath = relative(repositoryInfo.rootDir, source);
     if (this.isGitHubActionFile(source)) {
-      return join(repositoryInfo.owner, repositoryInfo.name, dirname(source));
+
+      return join(repositoryInfo.owner, repositoryInfo.name, dirname(sourceRelativePath));
     }
 
     // For GitHub Workflows, the usesName is the workflow file path
     if (this.isGitHubWorkflowFile(source)) {
-      return join(repositoryInfo.owner, repositoryInfo.name, source);
+      return join(repositoryInfo.owner, repositoryInfo.name, sourceRelativePath);
     }
 
     throw new Error(`Unsupported source file: ${source}`);

@@ -12,8 +12,9 @@ export type RepositoryOptionsDescriptors<Options extends RepositoryOptions = Rep
  * Basic repository information without optional metadata
  */
 export interface RepositoryInfo {
-  owner: string;
-  name: string;
+  rootDir: string; // Root directory of the repository
+  owner: string; // Owner of the repository (user or organization)
+  name: string; // Name of the repository
   url: string; // The URL of the repository, without the .git suffix
   fullName: string; // owner/name format
 }

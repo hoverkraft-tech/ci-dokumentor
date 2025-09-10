@@ -838,7 +838,7 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.horizontalRule();
 
       // Assert
-      expect(result.toString()).toEqual('\n---\n');
+      expect(result.toString()).toEqual('---\n');
     });
   });
 

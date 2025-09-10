@@ -6,11 +6,10 @@ import {
   FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  Repository,
   RepositoryProvider,
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('HeaderSectionGenerator', () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
@@ -20,12 +19,7 @@ describe('HeaderSectionGenerator', () => {
 
   beforeEach(() => {
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
-      getRepositoryInfo: {
-        url: 'https://github.com/owner/repo',
-        owner: 'owner',
-        name: 'repo',
-        fullName: 'owner/repo',
-      },
+      getRepositoryInfo: RepositoryInfoMockFactory.create()
     });
 
     const container = initTestContainer();
@@ -304,16 +298,9 @@ describe('HeaderSectionGenerator', () => {
         runs: { using: 'node20' },
       };
 
-      const repositoryWithoutLogo = {
-        url: 'https://github.com/owner/repo',
-        owner: 'owner',
-        name: 'repo',
-        fullName: 'owner/repo',
-        // No logo property
-      } as Repository;
 
       // Act
-      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: { ...mockRepositoryProvider, getRepositoryInfo: async () => repositoryWithoutLogo } });
+      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);

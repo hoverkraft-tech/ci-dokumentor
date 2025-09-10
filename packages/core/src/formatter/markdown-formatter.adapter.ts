@@ -282,7 +282,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   horizontalRule(): Buffer {
-    return this.appendContent(this.lineBreak(), Buffer.from('---'), this.lineBreak());
+    return this.appendContent(Buffer.from('---'), this.lineBreak());
   }
 
   lineBreak(): Buffer {

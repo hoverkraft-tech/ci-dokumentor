@@ -12,6 +12,9 @@ import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'fs';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
+import { join } from 'path';
+
+const rootPath = join(__dirname, '../../../..');
 
 describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
   let repositoryProvider: RepositoryProvider;
@@ -89,21 +92,22 @@ runs:
   post: 'scripts/post-deploy.js'
 `;
 
+      const sourcePath = join(rootPath, 'action.yml');
+      const destinationPath = join(rootPath, 'README.md');
+
       // Setup mock file with the action YAML content
       mockFs({
-        '/test/action.yml': actionYaml,
+        [sourcePath]: actionYaml,
       });
-
-
 
       // Act
       await rendererAdapter.initialize(
-        '/test/README.md',
+        destinationPath,
         formatterAdapter,
       );
 
       await gitHubActionsGeneratorAdapter.generateDocumentation({
-        source: '/test/action.yml',
+        source: sourcePath,
         sections: {},
         rendererAdapter,
         repositoryProvider,
@@ -112,11 +116,10 @@ runs:
       await rendererAdapter.finalize();
 
       // Assert
-      const expectedDocumentationPath = '/test/README.md';
       // Verify that the README.md file was created and has content
-      expect(existsSync(expectedDocumentationPath)).toBe(true);
+      expect(existsSync(destinationPath)).toBe(true);
 
-      const generatedContent = readFileSync(expectedDocumentationPath, 'utf-8');
+      const generatedContent = readFileSync(destinationPath, 'utf-8');
       expect(generatedContent).toBeDefined();
       expect(generatedContent.length).toBeGreaterThan(0);
 
@@ -233,20 +236,23 @@ jobs:
           echo "Deploying \${{ needs.build.outputs.image-tag }}"
           echo "Image digest: \${{ needs.build.outputs.image-digest }}"
 `;
+      const sourcePath = join(rootPath, '.github/workflows/ci-cd.yml')
+      const destinationPath = join(rootPath, '.github/workflows/ci-cd.md');
+
 
       // Setup mock file with the workflow YAML content
       mockFs({
-        '/test/.github/workflows/ci-cd.yml': workflowYaml,
+        [sourcePath]: workflowYaml,
       });
 
       // Act
       await rendererAdapter.initialize(
-        '/test/.github/workflows/ci-cd.md',
+        destinationPath,
         formatterAdapter,
       );
 
       await gitHubActionsGeneratorAdapter.generateDocumentation({
-        source: '/test/.github/workflows/ci-cd.yml',
+        source: sourcePath,
         sections: {},
         rendererAdapter,
         repositoryProvider,
@@ -255,11 +261,10 @@ jobs:
       await rendererAdapter.finalize();
 
       // Assert
-      const expectedDocumentationPath = '/test/.github/workflows/ci-cd.md';
       // Verify that the README.md file was created and has content
-      expect(existsSync(expectedDocumentationPath)).toBe(true);
+      expect(existsSync(destinationPath)).toBe(true);
 
-      const generatedContent = readFileSync(expectedDocumentationPath, 'utf-8');
+      const generatedContent = readFileSync(destinationPath, 'utf-8');
       expect(generatedContent).toBeDefined();
       expect(generatedContent.length).toBeGreaterThan(0);
 

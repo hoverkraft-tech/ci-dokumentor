@@ -86,8 +86,15 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
         usageContent.toString({
           commentString: (comment: string) =>
             comment
+              .trim()
               .split('\n')
-              .map((line) => `# ${line}`)
+              .map((line) => {
+                line = line.trim();
+                if (line === '') {
+                  return '#';
+                }
+                return `# ${line}`;
+              })
               .join('\n'),
         })
       ),

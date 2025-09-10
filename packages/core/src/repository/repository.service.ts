@@ -4,22 +4,6 @@ import {
   REPOSITORY_PROVIDER_IDENTIFIER,
 } from './repository.provider.js';
 
-export type Repository = {
-  owner: string;
-  name: string;
-  url: string; // The URL of the repository, without the .git suffix
-  fullName: string; // owner/name format
-  logo?: string; // Optional logo URI
-  license?: {
-    name: string;
-    spdxId: string | null;
-    url: string | null;
-  }; // Optional license information
-  contributing?: {
-    url: string;
-  }; // Optional contributing information
-};
-
 @injectable()
 export class RepositoryService {
   constructor(

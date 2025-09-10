@@ -7,19 +7,15 @@ import {
   GitHubActionInput,
   GitHubActionOutput,
 } from './github-actions-parser.js';
-import { Repository } from '@ci-dokumentor/core';
+import { RepositoryInfo } from '@ci-dokumentor/core';
+import { RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('GitHubActionsParser', () => {
-  let repository: Repository;
+  let repositoryInfo: RepositoryInfo;
   let parser: GitHubActionsParser;
 
   beforeEach(() => {
-    repository = {
-      owner: 'test-owner',
-      name: 'test-repo',
-      url: 'https://github.com/test-owner/test-repo',
-      fullName: 'test-owner/test-repo',
-    };
+    repositoryInfo = RepositoryInfoMockFactory.create();
 
     parser = new GitHubActionsParser();
   });
@@ -73,12 +69,12 @@ runs:
         // Act
         const result = parser.parseFile(
           '/test/action.yml',
-          repository
+          repositoryInfo
         ) as GitHubAction;
 
         // Assert
         expect(result).toBeDefined();
-        expect(result.usesName).toBe('test-owner/test-repo/test');
+        expect(result.usesName).toBe('owner/repo');
         expect(result.name).toBe('Test Action');
         expect(result.description).toBe('A test GitHub Action');
         expect(result.author).toBe('Test Author');
@@ -142,13 +138,13 @@ jobs:
         // Act
         const result = parser.parseFile(
           '/test/.github/workflows/workflow.yml',
-          repository
+          repositoryInfo
         ) as GitHubWorkflow;
 
         // Assert
         expect(result).toBeDefined();
         expect(result.usesName).toBe(
-          'test-owner/test-repo/test/.github/workflows/workflow.yml'
+          'owner/repo/.github/workflows/workflow.yml'
         );
         expect(result.name).toBe('Test Workflow');
       });
@@ -175,7 +171,7 @@ jobs:
         // Act
         const result = parser.parseFile(
           '/test/.github/workflows/workflow-test.yml',
-          repository
+          repositoryInfo
         ) as GitHubWorkflow;
 
         // Assert
@@ -199,7 +195,7 @@ jobs:
 
         // Act & Assert
         expect(() =>
-          parser.parseFile('/test/.github/workflows/invalid.yml', repository)
+          parser.parseFile('/test/.github/workflows/invalid.yml', repositoryInfo)
         ).toThrow('Nested mappings are not allowed in compact mappings at line 1, column 10');
       });
 
@@ -217,7 +213,7 @@ jobs:
 
         // Act & Assert
         expect(() =>
-          parser.parseFile('/test/.github/workflows/empty.yml', repository)
+          parser.parseFile('/test/.github/workflows/empty.yml', repositoryInfo)
         ).toThrow('Unsupported source file');
       });
 
@@ -235,7 +231,7 @@ jobs:
 
         // Act & Assert
         expect(() =>
-          parser.parseFile('/test/.github/workflows/plain-text.yml', repository)
+          parser.parseFile('/test/.github/workflows/plain-text.yml', repositoryInfo)
         ).toThrow(
           'Unsupported GitHub Actions file format: /test/.github/workflows/plain-text.yml'
         );
@@ -259,7 +255,7 @@ anotherField: 123
         expect(() =>
           parser.parseFile(
             '/test/.github/workflows/object-without-required-fields.yml',
-            repository
+            repositoryInfo
           )
         ).toThrow(
           'Unsupported GitHub Actions file format: /test/.github/workflows/object-without-required-fields.yml'
@@ -281,7 +277,7 @@ runs:
         });
 
         // Act
-        const result = parser.parseFile('/test/action.yml', repository);
+        const result = parser.parseFile('/test/action.yml', repositoryInfo);
 
         // Assert
         expect(result).toBeDefined();
@@ -313,7 +309,7 @@ jobs:
         // Act
         const result = parser.parseFile(
           '/test/.github/workflows/workflow.yml',
-          repository
+          repositoryInfo
         );
 
         // Assert

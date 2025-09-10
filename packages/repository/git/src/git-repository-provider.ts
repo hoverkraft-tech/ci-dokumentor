@@ -79,6 +79,7 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
       parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
 
     return {
+      rootDir: await this.getRootDir(),
       owner: parsedUrl.owner,
       name: parsedUrl.name,
       url,
@@ -160,5 +161,10 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
   private async getRemoteUrl(): Promise<string> {
     const originRemote = await this.getOriginRemote();
     return originRemote.refs.fetch;
+  }
+
+  private async getRootDir(): Promise<string> {
+    const git = simpleGit();
+    return await git.revparse(['--show-toplevel']);
   }
 }
