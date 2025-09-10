@@ -11,7 +11,7 @@ import {
 } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('BadgesSectionGenerator', () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
@@ -22,12 +22,7 @@ describe('BadgesSectionGenerator', () => {
 
   beforeEach(() => {
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
-      getRepositoryInfo: {
-        url: 'https://github.com/owner/repo',
-        owner: 'owner',
-        name: 'repo',
-        fullName: 'owner/repo',
-      },
+      getRepositoryInfo: RepositoryInfoMockFactory.create(),
       getLicense: {
         name: 'MIT',
         spdxId: 'MIT',

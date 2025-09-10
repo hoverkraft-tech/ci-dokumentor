@@ -5,7 +5,7 @@ import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-a
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('OverviewSectionGenerator', () => {
     let mockRepositoryProvider: Mocked<RepositoryProvider>;
@@ -15,12 +15,7 @@ describe('OverviewSectionGenerator', () => {
 
     beforeEach(() => {
         mockRepositoryProvider = RepositoryProviderMockFactory.create({
-            getRepositoryInfo: {
-                url: 'https://github.com/owner/repo',
-                owner: 'owner',
-                name: 'repo',
-                fullName: 'owner/repo',
-            },
+            getRepositoryInfo: RepositoryInfoMockFactory.create(),
         });
 
         const container = initTestContainer();
@@ -362,30 +357,22 @@ Automated release workflow
 
             it.each([
                 {
-                    repositoryInfo: {
-                        url: 'https://github.com/owner/repo',
-                        owner: 'owner',
-                        name: 'repo',
-                        fullName: 'owner/repo',
-                    }
+                    name: 'standard full info',
+                    repositoryInfo: RepositoryInfoMockFactory.create(),
                 },
                 {
-                    repositoryInfo: {
-                        url: 'https://github.com/owner/repo',
-                        owner: 'owner',
+                    name: 'different repository name',
+                    repositoryInfo: RepositoryInfoMockFactory.create({
                         name: 'different-repo',
-                        fullName: 'owner/repo',
-                    }
+                    }),
                 },
                 {
-                    repositoryInfo: {
-                        url: 'https://github.com/owner/repo',
-                        owner: 'owner',
-                        name: 'repo',
-                        fullName: 'different-owner',
-                    }
+                    name: 'different repository owner',
+                    repositoryInfo: RepositoryInfoMockFactory.create({
+                        owner: 'different-owner',
+                    }),
                 },
-            ])('should generate section independent of repository content', async ({ repositoryInfo }) => {
+            ])('should generate section independent of repository with $name', async ({ repositoryInfo }) => {
                 // Arrange
                 const manifest: GitHubAction = {
                     usesName: 'owner/repo',

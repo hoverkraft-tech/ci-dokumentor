@@ -3,7 +3,7 @@ import { ContributingSectionGenerator } from './contributing-section-generator.a
 import { FormatterAdapter, MarkdownFormatterAdapter, RepositoryProvider, SectionIdentifier } from '@ci-dokumentor/core';
 import { GitHubAction } from '../github-actions-parser.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('ContributingSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;
@@ -12,12 +12,7 @@ describe('ContributingSectionGenerator', () => {
 
     beforeEach(() => {
         mockRepositoryProvider = RepositoryProviderMockFactory.create({
-            getRepositoryInfo: {
-                url: 'https://github.com/owner/repo',
-                owner: 'owner',
-                name: 'repo',
-                fullName: 'owner/repo',
-            },
+            getRepositoryInfo: RepositoryInfoMockFactory.create(),
         });
 
         const container = initTestContainer();

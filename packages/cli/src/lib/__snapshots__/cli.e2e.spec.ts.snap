@@ -58,7 +58,7 @@ Documentation generated successfully!
 ===================================================================
 --- test.md
 +++ test.md
-@@ -0,0 +1,110 @@
+@@ -0,0 +1,109 @@
 +<!-- header:start -->
 +
 +<div align="center">
@@ -86,7 +86,7 @@ Documentation generated successfully!
 +## Usage
 +
 +\`\`\`yaml
-+- uses: hoverkraft-tech/ci-dokumentor/test@sha-version
++- uses: hoverkraft-tech/ci-dokumentor@sha-version
 +  with:
 +    # Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).
 +    # This input is required.
@@ -162,7 +162,6 @@ Documentation generated successfully!
 +<!-- license:start -->
 +<!-- license:end -->
 +<!-- generated:start -->
-+
 +
 +---
 +

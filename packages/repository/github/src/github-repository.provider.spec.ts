@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitRepositoryProvider, ParsedRemoteUrl } from '@ci-dokumentor/repository-git';
-import { LicenseService, RepositoryInfo, LicenseInfo, ManifestVersion } from '@ci-dokumentor/core';
+import { LicenseService, LicenseInfo, ManifestVersion } from '@ci-dokumentor/core';
 import { OcktokitMockFactory } from '../__tests__/octokit-mock.factory.js';
 import mockFs from 'mock-fs';
 import { GitHubRepositoryProvider } from './github-repository.provider.js'
-import { LicenseServiceMockFactory } from '@ci-dokumentor/core/tests';
+import { LicenseServiceMockFactory, RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
 
 const { graphqlMock } = OcktokitMockFactory.create();
 
@@ -157,22 +157,22 @@ describe('GitHubRepositoryProvider', () => {
   describe('getRepositoryInfo', () => {
     it('should return repository info from git provider', async () => {
       // Arrange
-      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
 
       // Act
       const result = await gitHubRepositoryProvider.getRepositoryInfo();
 
       // Assert
-      expect(result).toEqual(repo);
+      expect(result).toEqual(repositoryInfo);
     });
   });
 
   describe('getLogo', () => {
     it('should return file uri when logo exists in .github', async () => {
       // Arrange
-      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
       mockFs({ '.github': { 'logo.png': 'png' } });
 
       // Act
@@ -184,8 +184,8 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should fallback to openGraph image when no local logo', async () => {
       // Arrange
-      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
       // Ensure no local files
       mockFs({});
 
@@ -203,8 +203,8 @@ describe('GitHubRepositoryProvider', () => {
   describe('getLicense', () => {
     it('should return license info from graphql when present', async () => {
       // Arrange
-      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
 
       graphqlMock.mockResolvedValue({ repository: { licenseInfo: { name: 'MIT', spdxId: 'MIT', url: 'https://license' } } });
 
@@ -217,8 +217,8 @@ describe('GitHubRepositoryProvider', () => {
 
     it('should fallback to licenseService when graphql has no licenseInfo', async () => {
       // Arrange
-      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
 
       graphqlMock.mockResolvedValue({ repository: {} });
 
@@ -236,8 +236,8 @@ describe('GitHubRepositoryProvider', () => {
   describe('getContributing', () => {
     it('should return contributing url when available via graphql', async () => {
       // Arrange
-      const repo: RepositoryInfo = { owner: 'owner', name: 'repo', url: 'https://github.com/owner/repo', fullName: 'owner/repo' };
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repo);
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
 
       graphqlMock.mockResolvedValue({ repository: { contributingGuidelines: { url: 'https://github.com/owner/repo/CONTRIBUTING' } } });
 
