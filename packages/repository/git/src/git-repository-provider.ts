@@ -15,7 +15,7 @@ type GitRepositoryProviderOptions = Record<string, never>;
 
 @injectable()
 export class GitRepositoryProvider extends AbstractRepositoryProvider<GitRepositoryProviderOptions> {
-
+  private static STABLE_SEMVER_RE = /^(?:v)?\d+\.\d+\.\d+$/; // no pre-release/build
   /**
    * Get the platform name identifier for this provider
    */
@@ -103,42 +103,60 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
   }
 
   protected async fetchLatestVersion(): Promise<ManifestVersion | undefined> {
+    const lastTag = await this.getLastStableTagVersion();
+    if (lastTag) {
+      return lastTag;
+    }
+    return await this.getCurrentBranchVersion();
+  }
+
+  private async getLastStableTagVersion(): Promise<ManifestVersion | undefined> {
     try {
       const git = simpleGit();
 
-      // Auto-detect version information
-      let detectedRef: string | undefined;
-      let detectedSha: string | undefined;
+      // First try to get the latest stable semver tag
+      await git.fetch(['--tags']);
 
-      // Get current commit SHA
-      try {
-        detectedSha = await git.revparse('HEAD');
-      } catch {
-        // If we can't get SHA, that's ok
-      }
+      // Ask Git for tags, version-sorted descending, and only return names.
+      // List only tags that look like semantic versions (have at least two dots),
+      // sorted by semantic version descending.
+      const out = await git.raw([
+        'tag',
+        '--list',
+        '*.*.*', // match tags like 1.2.3 or v1.2.3
+        '--sort=-v:refname',
+        '--format=%(refname:short)',
+      ]);
 
-      // Get latest tag
-      try {
-        // Try to get the latest tag pointing to current commit
-        const tags = await git.tags(['--points-at', 'HEAD']);
-        if (tags.latest) {
-          detectedRef = tags.latest;
-        } else {
-          // Fallback to current branch name
-          const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
-          if (currentBranch && currentBranch !== 'HEAD') {
-            detectedRef = currentBranch;
-          }
+      for (const line of out.split('\n')) {
+        const tag = line.trim();
+        if (GitRepositoryProvider.STABLE_SEMVER_RE.test(tag)) {
+          const detectedSha = await git.revparse([tag]);
+          const detectedRef = tag;
+          return { ref: detectedRef, sha: detectedSha };
         }
-      } catch {
-        // If we can't detect ref, that's ok
       }
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  }
 
+  private async getCurrentBranchVersion(): Promise<ManifestVersion | undefined> {
+    try {
+      const git = simpleGit();
+      const detectedSha = await git.revparse('HEAD');
+      let detectedRef: string | undefined;
+
+      // Fallback to current branch name
+      const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
+      if (currentBranch && currentBranch !== 'HEAD') {
+        detectedRef = currentBranch;
+      }
       // Return version info if we have at least one piece of information
       if (detectedRef || detectedSha) {
         return { ref: detectedRef, sha: detectedSha };
       }
-
       return undefined;
     } catch {
       // If anything goes wrong, return undefined (no version info)

@@ -74,7 +74,7 @@ describe('InputsSectionGenerator', () => {
 | **Input**            | **Description**            | **Required** | **Default**     |
 | -------------------- | -------------------------- | ------------ | --------------- |
 | **\`input-name\`**     | Test input description     | **true**     | \`default-value\` |
-| **\`optional-input\`** | Optional input description | **false**    | \`\`              |
+| **\`optional-input\`** | Optional input description | **false**    | -               |
 `
         );
       });
@@ -131,7 +131,7 @@ describe('InputsSectionGenerator', () => {
 
 | **Input**           | **Description** | **Required** | **Default** |
 | ------------------- | --------------- | ------------ | ----------- |
-| **\`minimal-input\`** |                 | **false**    | \`\`          |
+| **\`minimal-input\`** |                 | **false**    | -           |
 `
         );
       });
@@ -173,7 +173,7 @@ describe('InputsSectionGenerator', () => {
 | **Input**         | **Description**          | **Required** | **Type**   | **Default** |
 | ----------------- | ------------------------ | ------------ | ---------- | ----------- |
 | **\`environment\`** | Environment to deploy to | **true**     | **string** | \`staging\`   |
-| **\`version\`**     | Version to deploy        | **false**    | **string** | \`\`          |
+| **\`version\`**     | Version to deploy        | **false**    | **string** | -           |
 `
         );
       });
@@ -241,7 +241,7 @@ describe('InputsSectionGenerator', () => {
 
 | **Input**           | **Description** | **Required** | **Type**   | **Default** |
 | ------------------- | --------------- | ------------ | ---------- | ----------- |
-| **\`minimal-input\`** | Minimal input   | **false**    | **string** | \`\`          |
+| **\`minimal-input\`** | Minimal input   | **false**    | **string** | -           |
 `
         );
       });
@@ -273,7 +273,7 @@ describe('InputsSectionGenerator', () => {
 
 | **Input**                  | **Description** | **Required** | **Type**   | **Default** |
 | -------------------------- | --------------- | ------------ | ---------- | ----------- |
-| **\`no-description-input\`** |                 | **false**    | **string** | \`\`          |
+| **\`no-description-input\`** |                 | **false**    | **string** | -           |
 `
         );
       });

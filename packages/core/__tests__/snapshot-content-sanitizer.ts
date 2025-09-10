@@ -14,7 +14,8 @@ export function sanitizeSnapshotContent(content: string | unknown[][]): string {
     return content
         // Replace absolute paths with a placeholder
         .replaceAll(rootPath, '/test')
+        // Replace sha version and tag with a placeholder
+        .replaceAll(/@[a-f0-9]{40} # [\w-/]+/g, '@sha-version # tag')
         // Replace sha version with a placeholder
-        // @f122e8ee783be6677c271ce67776ec607546a669
-        .replaceAll(/@[a-f0-9]{40}/g, '@sha-version');
+        .replaceAll(/@[a-f0-9]{40}/g, '@sha-version # tag');
 }

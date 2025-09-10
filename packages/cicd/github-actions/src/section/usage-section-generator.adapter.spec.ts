@@ -28,7 +28,7 @@ describe('UsageSectionGenerator', () => {
 
   beforeEach(() => {
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
-      getRepositoryInfo: RepositoryInfoMockFactory.create()
+      getRepositoryInfo: RepositoryInfoMockFactory.create(),
     });
 
     mockVersionService = VersionServiceMockFactory.create();
@@ -166,7 +166,7 @@ describe('UsageSectionGenerator', () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const version = {
-          ref: 'v1.0.0',
+          ref: '1.0.0',
           sha: '08c6903cd8c0fde910a37f88322edcfb5dd907a8',
         };
 
@@ -182,7 +182,7 @@ describe('UsageSectionGenerator', () => {
           `## Usage
 
 \`\`\`yaml
-- uses: owner/repo@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+- uses: owner/repo@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # 1.0.0
 \`\`\`
 `
         );
@@ -192,7 +192,7 @@ describe('UsageSectionGenerator', () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const version = {
-          ref: 'v1.0.0',
+          ref: '1.0.0',
         };
 
         // Arrange: mock version resolution
@@ -207,7 +207,7 @@ describe('UsageSectionGenerator', () => {
           `## Usage
 
 \`\`\`yaml
-- uses: owner/repo@v1.0.0
+- uses: owner/repo@1.0.0
 \`\`\`
 `
         );
@@ -435,7 +435,7 @@ jobs:
         });
 
         const version = {
-          ref: 'v2.1.0',
+          ref: '1.0.0',
           sha: 'abc123def456',
         };
 
@@ -458,7 +458,7 @@ on:
       - main
 jobs:
   workflow.yml:
-    uses: owner/repo/.github/workflows/workflow.yml@abc123def456
+    uses: owner/repo/.github/workflows/workflow.yml@abc123def456 # 1.0.0
 \`\`\`
 `
         );

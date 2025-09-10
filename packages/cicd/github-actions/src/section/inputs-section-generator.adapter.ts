@@ -171,7 +171,9 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
   ): Buffer {
-    return formatterAdapter.inlineCode(Buffer.from(input.default || ''));
+    return input.default
+      ? formatterAdapter.inlineCode(Buffer.from(input.default))
+      : Buffer.from('-');
   }
 
   private getInputRequired(

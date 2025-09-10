@@ -1,4 +1,4 @@
-import { RepositoryInfo, VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, RepositoryProvider } from '@ci-dokumentor/core';
+import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
@@ -10,7 +10,7 @@ import {
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier, SectionGeneratorAdapter } from '@ci-dokumentor/core';
-import { Document } from 'yaml';
+import { Document, isScalar } from 'yaml';
 import { basename } from 'node:path';
 import { inject, injectable } from 'inversify';
 
@@ -59,7 +59,6 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     const usageExample = await this.generateUsageExample(
       formatterAdapter,
       manifest,
-      repositoryProvider,
       version
     );
     return formatterAdapter.appendContent(
@@ -72,15 +71,12 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
   private async generateUsageExample(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
-    repositoryProvider: RepositoryProvider,
     version?: ManifestVersion
   ): Promise<Buffer> {
-    // Get repository info on-demand for usage example generation
-    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
-
     const usageContent = this.isGitHubAction(manifest)
-      ? this.generateActionUsage(manifest, repositoryInfo, version)
-      : this.generateWorkflowUsage(manifest, repositoryInfo, version);
+      ? this.generateActionUsage(manifest, version)
+      : this.generateWorkflowUsage(manifest, version);
+
     return formatterAdapter.code(
       Buffer.from(
         usageContent.toString({
@@ -104,13 +100,10 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
   private generateActionUsage(
     manifest: GitHubAction,
-    repositoryInfo: RepositoryInfo,
     version?: ManifestVersion
   ): Document {
-    const inputs = manifest.inputs || {};
-    const withUsage = this.generateInputsUsage(inputs);
-
-    const usesName = this.buildUsesNameWithVersion(manifest.usesName, repositoryInfo, version);
+    const usesName = this.generateUsesSection(manifest.usesName, version);
+    const withUsage = this.generateWithSection(manifest.inputs || {});
 
     return new Document([
       {
@@ -122,7 +115,6 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
 
   private generateWorkflowUsage(
     workflow: GitHubWorkflow,
-    repositoryInfo: RepositoryInfo,
     version?: ManifestVersion
   ): Document {
     const filteredOnAllowList = ['workflow_call', 'workflow_dispatch'];
@@ -142,13 +134,13 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     const permissions = workflow.permissions || undefined;
 
     const secrets = workflow.on?.workflow_call?.secrets || {};
-    const secretsUsage = this.generateInputsUsage(secrets);
+    const secretsUsage = this.generateWithSection(secrets);
 
     const inputs = workflow.on?.workflow_call?.inputs || workflow.on?.workflow_dispatch?.inputs || {};
-    const withUsage = this.generateInputsUsage(inputs) || undefined;
+    const withUsage = this.generateWithSection(inputs) || undefined;
 
     const jobName = basename(workflow.usesName);
-    const usesName = this.buildUsesNameWithVersion(workflow.usesName, repositoryInfo, version);
+    const usesName = this.generateUsesSection(workflow.usesName, version);
 
     return new Document({
       name: `${workflow.name}`,
@@ -164,7 +156,42 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     });
   }
 
-  private generateInputsUsage(
+  /**
+   * Build the uses name with version information
+   */
+  private generateUsesSection(usesName: string, version?: ManifestVersion): Document {
+    const usesSectionDocument = new Document({});
+
+    const { value, comment } = this.getUsesSectionData(usesName, version);
+
+    usesSectionDocument.contents = usesSectionDocument.createNode(value);
+    // createNode returns a YAML node (a scalar for strings). To add an end-of-line
+    // comment we must set the node's `comment` property. Previously the code
+    // checked the contents' typeof against 'string' which never matches a node.
+    if (comment && isScalar(usesSectionDocument.contents)) {
+      (usesSectionDocument.contents as { comment?: string }).comment = comment;
+    }
+
+    return usesSectionDocument;
+  }
+
+  private getUsesSectionData(usesName: string, version?: ManifestVersion): { value: string; comment?: string } {
+    if (!version) {
+      return { value: usesName };
+    }
+
+    // Prefer SHA over ref for precision, but use ref if that's all we have
+    if (!version.sha) {
+      if (!version.ref) {
+        return { value: usesName };
+      }
+      return { value: `${usesName}@${version.ref}` };
+    }
+
+    return { value: `${usesName}@${version.sha}`, comment: version.ref };
+  }
+
+  private generateWithSection(
     inputs: Record<
       string,
       GitHubActionInput | GitHubWorkflowCallInput | GitHubWorkflowDispatchInput | GitHubWorkflowSecret
@@ -174,7 +201,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       return undefined;
     }
 
-    const inputsUsageDocument = new Document({});
+    const withSectionDocument = new Document({});
 
     // Process inputs using the dedicated method
     const processedInputs: Record<string, unknown> = {};
@@ -190,16 +217,16 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     }
 
     // Set the document contents
-    inputsUsageDocument.contents =
-      inputsUsageDocument.createNode(processedInputs);
+    withSectionDocument.contents =
+      withSectionDocument.createNode(processedInputs);
 
     // Add comments to each key using the internal YAML API
     if (
-      inputsUsageDocument.contents &&
-      typeof inputsUsageDocument.contents === 'object' &&
-      'items' in inputsUsageDocument.contents
+      withSectionDocument.contents &&
+      typeof withSectionDocument.contents === 'object' &&
+      'items' in withSectionDocument.contents
     ) {
-      const items = (inputsUsageDocument.contents as { items: { key?: { value?: string, spaceBefore?: boolean, commentBefore?: string }; }[] })
+      const items = (withSectionDocument.contents as { items: { key?: { value?: string, spaceBefore?: boolean, commentBefore?: string }; }[] })
         .items;
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
@@ -220,7 +247,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       }
     }
 
-    return inputsUsageDocument;
+    return withSectionDocument;
   }
 
   private generateInputUsage(input: UsageInput): {
@@ -290,22 +317,5 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       value: defaultValue,
       comment: commentBefore || undefined,
     };
-  }
-
-  /**
-   * Build the uses name with version information
-   */
-  private buildUsesNameWithVersion(usesName: string, repositoryInfo: RepositoryInfo, version?: ManifestVersion): string {
-    if (!version) {
-      return usesName;
-    }
-
-    // Prefer SHA over ref for precision, but use ref if that's all we have
-    const versionSuffix = version.sha || version.ref;
-    if (!versionSuffix) {
-      return usesName;
-    }
-
-    return `${usesName}@${versionSuffix}`;
   }
 }
