@@ -1,4 +1,4 @@
-import { RepositoryInfo, VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions } from '@ci-dokumentor/core';
+import { RepositoryInfo, VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, RepositoryProvider } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
@@ -62,17 +62,17 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       repositoryProvider,
       version
     );
-    return Buffer.concat([
+    return formatterAdapter.appendContent(
       formatterAdapter.heading(Buffer.from('Usage'), 2),
       formatterAdapter.lineBreak(),
       usageExample,
-    ]);
+    );
   }
 
   private async generateUsageExample(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
-    repositoryProvider: import('@ci-dokumentor/core').RepositoryProvider,
+    repositoryProvider: RepositoryProvider,
     version?: ManifestVersion
   ): Promise<Buffer> {
     // Get repository info on-demand for usage example generation

@@ -66,6 +66,6 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       );
     }
 
-    return Buffer.concat(elements);
+    return formatterAdapter.appendContent(...elements);
   }
 }

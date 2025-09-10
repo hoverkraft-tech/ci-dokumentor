@@ -63,7 +63,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
             const sectionStart = this.getSectionStart(sectionIdentifier);
             const sectionEnd = this.getSectionEnd(sectionIdentifier);
 
-            const sectionContent = Buffer.concat([
+            const sectionContent = formatterAdapter.appendContent(
                 sectionStart,
                 ...(data.length ? [
                     // Ensure an empty line before the section content
@@ -73,7 +73,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                     formatterAdapter.lineBreak(),
                 ] : []),
                 sectionEnd,
-            ]);
+            );
 
             const sectionStartString = sectionStart.toString();
             const sectionEndString = sectionEnd.toString();
@@ -83,7 +83,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                 if (isSectionStart) {
                     sectionFound = true;
                     inSection = true;
-                    output = Buffer.concat([output, sectionContent]);
+                    output = formatterAdapter.appendContent(output, sectionContent);
                     return;
                 }
 
@@ -95,14 +95,14 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                 }
 
                 if (!inSection) {
-                    output = Buffer.concat([output, Buffer.from(line), formatterAdapter.lineBreak()]);
+                    output = formatterAdapter.appendContent(output, Buffer.from(line), formatterAdapter.lineBreak());
                 }
                 // Skip lines inside the section (they get replaced)
             });
 
             readLine.on('close', () => {
                 if (!sectionFound) {
-                    output = Buffer.concat([output, sectionContent]);
+                    output = formatterAdapter.appendContent(output, sectionContent);
                 }
                 writeFile(destination, output, (err) => {
                     if (err) {

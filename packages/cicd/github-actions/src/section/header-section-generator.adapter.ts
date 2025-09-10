@@ -1,4 +1,4 @@
-import { SectionGenerationPayload } from '@ci-dokumentor/core';
+import { RepositoryInfo, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
@@ -31,11 +31,11 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     let sectionContent = titleContent;
 
     if (logoContent) {
-      sectionContent = Buffer.concat([
+      sectionContent = formatterAdapter.appendContent(
         logoContent,
         formatterAdapter.lineBreak(),
         titleContent,
-      ]);
+      );
     }
 
     return formatterAdapter.center(sectionContent);
@@ -61,7 +61,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   private getDisplayName(
     manifest: GitHubActionsManifest,
-    repositoryInfo?: import('@ci-dokumentor/core').RepositoryInfo
+    repositoryInfo?: RepositoryInfo
   ): Buffer {
     const name = manifest.name || repositoryInfo?.name || 'Unknown';
     // Convert to pascal case
@@ -71,7 +71,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private generateTitle(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
-    repositoryInfo: import('@ci-dokumentor/core').RepositoryInfo
+    repositoryInfo: RepositoryInfo
   ): Buffer {
     const title = Buffer.from(
       this.getTitlePrefix(manifest) + this.getDisplayName(manifest, repositoryInfo)
@@ -79,7 +79,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     const branchingIcon = this.generateBrandingIcon(formatterAdapter, manifest);
 
     const headingContent = branchingIcon
-      ? Buffer.concat([branchingIcon, Buffer.from(' '), title])
+      ? formatterAdapter.appendContent(branchingIcon, Buffer.from(' '), title)
       : title;
 
     return formatterAdapter.heading(headingContent, 1);

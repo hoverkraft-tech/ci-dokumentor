@@ -14,15 +14,15 @@ export class ContributingSectionGenerator extends GitHubActionsSectionGeneratorA
     const contributingInfo = await repositoryProvider.getContributing();
 
     if (!contributingInfo?.url) {
-      return Buffer.from('');
+      return Buffer.alloc(0);
     }
 
     const contributingText = `Contributions are welcome! Please see the [contributing guidelines](${contributingInfo.url}) for more details.`;
 
-    return Buffer.concat([
+    return formatterAdapter.appendContent(
       formatterAdapter.heading(Buffer.from('Contributing'), 2),
       formatterAdapter.lineBreak(),
       formatterAdapter.paragraph(Buffer.from(contributingText)),
-    ]);
+    );
   }
 }

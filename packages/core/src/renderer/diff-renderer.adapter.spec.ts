@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, MockInstance, } from 'vitest';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -9,7 +9,7 @@ import { DiffRendererAdapter } from './diff-renderer.adapter.js';
 
 describe('DiffRendererAdapter', () => {
     const fixedNow = 1234567890;
-    let dateSpy: any;
+    let dateSpy: MockInstance<typeof Date.now>;
 
     beforeEach(() => {
         // Provide a deterministic tmpdir and test file structure

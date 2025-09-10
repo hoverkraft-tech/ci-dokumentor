@@ -157,7 +157,7 @@ Footer content
 
     it('should handle empty section content', async () => {
       // Arrange
-      const emptyData = Buffer.from('');
+      const emptyData = Buffer.alloc(0);
 
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);

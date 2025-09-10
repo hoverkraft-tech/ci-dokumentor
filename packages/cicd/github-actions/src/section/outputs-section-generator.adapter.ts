@@ -30,11 +30,11 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       return Buffer.alloc(0);
     }
 
-    return Buffer.concat([
+    return formatterAdapter.appendContent(
       formatterAdapter.heading(Buffer.from('Outputs'), 2),
       formatterAdapter.lineBreak(),
       manifestOutputsContent,
-    ]);
+    );
   }
 
   private generateActionOutputsTable(
