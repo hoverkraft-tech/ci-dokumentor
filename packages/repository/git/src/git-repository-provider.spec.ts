@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, Mocked, MockInstance } from 'vitest';
 import { GitRepositoryProvider } from './git-repository-provider.js';
-import { simpleGit, TagResult, Response } from 'simple-git';
+import { simpleGit, TagResult, Response, FetchResult } from 'simple-git';
 import gitUrlParse from 'git-url-parse';
 
 // Mock the dependencies
@@ -20,6 +20,8 @@ describe('GitRepositoryProvider', () => {
       getRemotes: vi.fn(),
       revparse: vi.fn(),
       tags: vi.fn(),
+      fetch: vi.fn(),
+      raw: vi.fn(),
     } as unknown as Mocked<ReturnType<typeof simpleGit>>;
 
     // Mock simpleGit to return our mock instance
@@ -196,17 +198,25 @@ describe('GitRepositoryProvider', () => {
     it('should return ref and sha when tag and sha are detected', async () => {
       // Arrange
       const mockSha = 'abcdef1234567890abcdef1234567890abcdef12';
-      vi.mocked(simpleGit).mockReturnValue(mockGit);
+      const mockTag = 'v1.2.3';
+
+      // Mock fetch (no-op), raw (returns the tag list), and revparse (returns sha for the tag)
+      const emptyFetchResult = {} as unknown as FetchResult;
+      mockGit.fetch.mockResolvedValue(emptyFetchResult);
+      mockGit.raw = vi.fn().mockResolvedValue(`${mockTag}\n`);
       mockGit.revparse.mockImplementation((arg: unknown) => {
-        return Promise.resolve(arg === 'HEAD' ? mockSha : 'main') as Response<string>;
+        // When revparse is called with the tag array, return the mock SHA
+        if (Array.isArray(arg) && arg[0] === mockTag) {
+          return Promise.resolve(mockSha) as Response<string>;
+        }
+        return Promise.resolve(mockSha) as Response<string>;
       });
-      mockGit.tags!.mockResolvedValue({ latest: 'v1.2.3' } as TagResult);
 
       // Act
       const result = await provider.getLatestVersion();
 
       // Assert
-      expect(result).toEqual({ ref: 'v1.2.3', sha: mockSha });
+      expect(result).toEqual({ ref: mockTag, sha: mockSha });
     });
 
     it('should return branch name when no tag but branch detected', async () => {

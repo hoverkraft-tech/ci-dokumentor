@@ -58,12 +58,10 @@ Documentation generated successfully!
 ===================================================================
 --- test.md
 +++ test.md
-@@ -0,0 +1,109 @@
+@@ -0,0 +1,107 @@
 +<!-- header:start -->
 +
-+<div align="center">
-+  # ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYm9vay1vcGVuIiBjb2xvcj0iYmx1ZSI+PHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhMyAzIDAgMCAwLTMtM0gyeiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMiAzaC02YTQgNCAwIDAgMC00IDR2MTRhMyAzIDAgMCAxIDMtM2g3eiI+PC9wYXRoPjwvc3ZnPg==) GitHub Action: CI Dokumentor
-+</div>
++# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYm9vay1vcGVuIiBjb2xvcj0iYmx1ZSI+PHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhMyAzIDAgMCAwLTMtM0gyeiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMiAzaC02YTQgNCAwIDAgMC00IDR2MTRhMyAzIDAgMCAxIDMtM2g3eiI+PC9wYXRoPjwvc3ZnPg==) GitHub Action: CI Dokumentor
 +
 +<!-- header:end -->
 +<!-- badges:start -->
@@ -86,7 +84,7 @@ Documentation generated successfully!
 +## Usage
 +
 +\`\`\`yaml
-+- uses: hoverkraft-tech/ci-dokumentor@sha-version
++- uses: hoverkraft-tech/ci-dokumentor@sha-version # tag
 +  with:
 +    # Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).
 +    # This input is required.
@@ -133,15 +131,15 @@ Documentation generated successfully!
 +
 +| **Input**                   | **Description**                                                                                                                       | **Required** | **Default**           |
 +| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------------- |
-+| **\`source\`**                | Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).                                                  | **true**     | \`\`                    |
-+| **\`destination\`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).                | **false**    | \`\`                    |
-+| **\`repository\`**            | Repository platform (auto-detected if not specified).                                                                                 | **false**    | \`\`                    |
-+| **\`cicd\`**                  | CI/CD platform (github-actions, gitlab-ci, etc.).                                                                                     | **false**    | \`\`                    |
-+| **\`include-sections\`**      | Comma-separated list of sections to include.                                                                                          | **false**    | \`\`                    |
-+| **\`exclude-sections\`**      | Comma-separated list of sections to exclude.                                                                                          | **false**    | \`\`                    |
++| **\`source\`**                | Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).                                                  | **true**     | -                     |
++| **\`destination\`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).                | **false**    | -                     |
++| **\`repository\`**            | Repository platform (auto-detected if not specified).                                                                                 | **false**    | -                     |
++| **\`cicd\`**                  | CI/CD platform (github-actions, gitlab-ci, etc.).                                                                                     | **false**    | -                     |
++| **\`include-sections\`**      | Comma-separated list of sections to include.                                                                                          | **false**    | -                     |
++| **\`exclude-sections\`**      | Comma-separated list of sections to exclude.                                                                                          | **false**    | -                     |
 +| **\`dry-run\`**               | Whether to perform a dry run (no files are written).                                                                                  | **false**    | \`false\`               |
-+| **\`version\`**               | Version to document (auto-detected if not specified).                                                                                 | **false**    | \`\`                    |
-+| **\`extra-badges\`**          | JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties. | **false**    | \`\`                    |
++| **\`version\`**               | Version to document (auto-detected if not specified).                                                                                 | **false**    | -                     |
++| **\`extra-badges\`**          | JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties. | **false**    | -                     |
 +| **\`github-token\`**          | The GitHub token used to fetch repository information.                                                                                | **false**    | \`\${{ github.token }}\` |
 +| **\`ci-dokumentor-version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.                                     | **false**    | \`latest\`              |
 +

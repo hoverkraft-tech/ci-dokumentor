@@ -17,37 +17,37 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       repositoryProvider.getLogo(),
     ]);
 
-    const logoContent = this.generateLogo(
-      formatterAdapter,
-      manifest,
-      logo
-    );
-    const titleContent = this.generateTitle(
+
+    let sectionContent = this.generateTitle(
       formatterAdapter,
       manifest,
       repositoryInfo
     );
 
-    let sectionContent = titleContent;
+    const logoContent = this.generateLogo(
+      formatterAdapter,
+      manifest,
+      logo
+    );
 
-    if (logoContent) {
+    if (logoContent.length > 0) {
       sectionContent = formatterAdapter.appendContent(
         logoContent,
         formatterAdapter.lineBreak(),
-        titleContent,
+        sectionContent,
       );
     }
 
-    return formatterAdapter.center(sectionContent);
+    return sectionContent;
   }
 
   private generateLogo(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
     logoPath: string | undefined
-  ): Buffer | null {
+  ): Buffer {
     if (!logoPath) {
-      return null;
+      return Buffer.alloc(0);
     }
 
     const logoAltText = this.getDisplayName(manifest);
@@ -56,7 +56,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       align: 'center',
     });
 
-    return logoImage;
+    return formatterAdapter.center(logoImage);
   }
 
   private getDisplayName(
