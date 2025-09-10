@@ -16,7 +16,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
   async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
     if (this.isGitHubAction(manifest)) {
-      return Buffer.from('');
+      return Buffer.alloc(0);
     }
 
     if (!this.isGitHubWorkflow(manifest)) {
@@ -28,11 +28,11 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       return Buffer.alloc(0);
     }
 
-    return Buffer.concat([
+    return formatterAdapter.appendContent(
       formatterAdapter.heading(Buffer.from('Secrets'), 2),
       formatterAdapter.lineBreak(),
       manifestSecretsContent,
-    ]);
+    );
   }
 
   private generateWorkflowSecretsTable(

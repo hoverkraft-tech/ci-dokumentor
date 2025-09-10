@@ -5,6 +5,8 @@ export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');
 export interface FormatterAdapter {
   supportsLanguage(language: FormatterLanguage): boolean;
 
+  appendContent(...content: Buffer[]): Buffer;
+
   heading(input: Buffer, level?: number): Buffer;
 
   center(input: Buffer): Buffer;
@@ -36,6 +38,4 @@ export interface FormatterAdapter {
   horizontalRule(): Buffer;
 
   lineBreak(): Buffer;
-
-
 }

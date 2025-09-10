@@ -14,7 +14,7 @@ export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     const description =
       'description' in manifest ? manifest.description : undefined;
     if (!description) {
-      return Buffer.from('');
+      return Buffer.alloc(0);
     }
 
     const overviewContent = [
@@ -39,6 +39,6 @@ export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapt
       );
     }
 
-    return Buffer.concat(overviewContent);
+    return formatterAdapter.appendContent(...overviewContent);
   }
 }

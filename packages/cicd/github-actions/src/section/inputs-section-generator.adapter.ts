@@ -31,11 +31,11 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       return Buffer.alloc(0);
     }
 
-    return Buffer.concat([
+    return formatterAdapter.appendContent(
       formatterAdapter.heading(Buffer.from('Inputs'), 2),
       formatterAdapter.lineBreak(),
       manifestInputsContent,
-    ]);
+    );
   }
 
   private generateActionInputsTable(
@@ -65,39 +65,39 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     formatterAdapter: FormatterAdapter,
     manifest: GitHubWorkflow
   ): Buffer {
-    let content = Buffer.alloc(0);
+    let content: Buffer = Buffer.alloc(0);
 
     const workflowDispatchInputs = Object.entries(manifest.on?.workflow_dispatch?.inputs || {});
     if (workflowDispatchInputs.length) {
       if (content.length > 0) {
-        content = Buffer.concat([
+        content = formatterAdapter.appendContent(
           content,
           formatterAdapter.lineBreak(),
-        ]);
+        );
       }
-      content = Buffer.concat([
+      content = formatterAdapter.appendContent(
         content,
         formatterAdapter.heading(Buffer.from('Workflow Dispatch Inputs'), 3),
         formatterAdapter.lineBreak(),
         this.getWorkflowInputsTable(formatterAdapter, workflowDispatchInputs),
-      ]);
+      );
     }
 
     const workflowCallInputs = Object.entries(manifest.on?.workflow_call?.inputs || {});
     if (workflowCallInputs.length) {
       if (content.length > 0) {
-        content = Buffer.concat([
+        content = formatterAdapter.appendContent(
           content,
           formatterAdapter.lineBreak(),
-        ]);
+        );
       }
 
-      content = Buffer.concat([
+      content = formatterAdapter.appendContent(
         content,
         formatterAdapter.heading(Buffer.from('Workflow Call Inputs'), 3),
         formatterAdapter.lineBreak(),
         this.getWorkflowInputsTable(formatterAdapter, workflowCallInputs),
-      ]);
+      );
     }
 
     return content;

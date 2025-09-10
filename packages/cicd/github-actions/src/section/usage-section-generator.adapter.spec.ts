@@ -70,7 +70,6 @@ describe('UsageSectionGenerator', () => {
 
 \`\`\`yaml
 - uses: owner/repo
-
 \`\`\`
 `
         );
@@ -109,7 +108,6 @@ describe('UsageSectionGenerator', () => {
     # Request timeout in seconds
     # Default: \`30\`
     timeout: "30"
-
 \`\`\`
 `
         );
@@ -163,7 +161,6 @@ describe('UsageSectionGenerator', () => {
     # with multiline
     # description
     optional-input-with-multiline-description: ""
-
 \`\`\`
 `
         );
@@ -190,7 +187,6 @@ describe('UsageSectionGenerator', () => {
 
 \`\`\`yaml
 - uses: owner/repo@08c6903cd8c0fde910a37f88322edcfb5dd907a8
-
 \`\`\`
 `
         );
@@ -216,7 +212,6 @@ describe('UsageSectionGenerator', () => {
 
 \`\`\`yaml
 - uses: owner/repo@v1.0.0
-
 \`\`\`
 `
         );
@@ -249,7 +244,6 @@ on:
 jobs:
   workflow.yml:
     uses: owner/repo/.github/workflows/workflow.yml
-
 \`\`\`
 `
         );
@@ -331,7 +325,6 @@ jobs:
       # Enable debug mode
       # Default: \`false\`
       debug: false
-
 \`\`\`
 `
         );
@@ -370,7 +363,6 @@ on:
 jobs:
   ci.yml:
     uses: owner/repo/.github/workflows/ci.yml
-
 \`\`\`
 `
         );
@@ -403,7 +395,6 @@ on:
 jobs:
   release.yml:
     uses: owner/repo/.github/workflows/release.yml
-
 \`\`\`
 `
         );
@@ -434,7 +425,6 @@ on:
 jobs:
   test.yml:
     uses: owner/repo/.github/workflows/test.yml
-
 \`\`\`
 `
         );
@@ -473,7 +463,6 @@ on:
 jobs:
   workflow.yml:
     uses: owner/repo/.github/workflows/workflow.yml@abc123def456
-
 \`\`\`
 `
         );

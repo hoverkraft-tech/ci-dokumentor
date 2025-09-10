@@ -178,7 +178,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     formatterAdapter: FormatterAdapter
   ): Buffer {
     if (linkedBadges.length === 0) {
-      return Buffer.from('');
+      return Buffer.alloc(0);
     }
 
     const badgeCollectionContent = linkedBadges.map((linkedBadge) => {
@@ -192,6 +192,6 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       return [badgeBuffer, formatterAdapter.lineBreak()];
     }).flat();
 
-    return Buffer.concat(badgeCollectionContent);
+    return formatterAdapter.appendContent(...badgeCollectionContent);
   }
 }

@@ -43,6 +43,8 @@ docker-test: docker-build ## Test Docker image functionality
 	$(MAKE) docker-run -- --help
 	@echo "Testing generate --help command:"
 	$(MAKE) docker-run -- generate --help
+	@echo "Testing generate --dry-run command:"
+	$(MAKE) docker-run -- "generate --dry-run --source action.yml --repository git"
 	@echo "✅ All tests passed!"
 	@echo "📊 Image information:"
 	@docker images ci-dokumentor:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
@@ -52,7 +54,7 @@ docker-shell: docker-build ## Open a shell in the Docker image
 	@docker run --rm -it -v "$(CURDIR):/workspace" --user $(shell id -u):$(shell id -g) --entrypoint /bin/sh ci-dokumentor:latest
 
 docker-run: ## Run a command in the Docker container
-	@docker run --rm -v "$(CURDIR):/workspace" --user $(shell id -u):$(shell id -g) ci-dokumentor:latest $(1)
+	@docker run --rm -v "$(CURDIR):/workspace" --user $(shell id -u):$(shell id -g) ci-dokumentor:latest $(filter-out $@,$(MAKECMDGOALS))
 
 docs-generate: ## Generate documentation
 	@GITHUB_TOKEN=$(shell gh auth token) node packages/cli/dist/bin/ci-dokumentor.js gen --source action.yml \
