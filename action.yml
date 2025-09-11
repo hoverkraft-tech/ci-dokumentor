@@ -98,7 +98,7 @@ runs:
           echo "::debug::Dry run enabled"
         fi
 
-        extra_badges=${{ toJson(inputs.extra-badges || '') }}
+        extra_badges=${{ toJson(inputs.extra-badges && fromJson(inputs.extra-badges) || '') }}
         if [ -n "$extra_badges" ]; then
           args="$args --extra-badges $extra_badges"
           echo "::debug::Extra badges set to: $extra_badges"
