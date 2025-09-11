@@ -69,7 +69,6 @@ The package includes the following section generators:
 - **HeaderSectionGenerator** - Action/workflow title and description
 - **OverviewSectionGenerator** - General information and summary
 - **BadgesSectionGenerator** - Status badges and shields (supports custom badges via `--extra-badges`)
-- **ContentsTable** - Table of contents for navigation
 
 ### Action-Specific Sections
 

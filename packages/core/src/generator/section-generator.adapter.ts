@@ -10,7 +10,6 @@ export enum SectionIdentifier {
   Header = 'header', // Title and logo
   Badges = 'badges', // Shields.io, marketplace, pipeline badges
   Overview = 'overview', // One-sentence value proposition
-  Contents = 'contents', // Table of contents
   Usage = 'usage', // Quickstart / usage examples
   Inputs = 'inputs', // Inputs / parameters
   Outputs = 'outputs', // Outputs / artefacts

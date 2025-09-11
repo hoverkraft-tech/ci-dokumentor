@@ -8,6 +8,7 @@ import { LicenseService } from './license/license.service.js';
 import { FileRendererAdapter } from './renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from './renderer/diff-renderer.adapter.js';
 import { VersionService } from './version/version.service.js';
+import { MigrationService } from './migration/migration.service.js';
 
 export type Container = InversifyContainer;
 
@@ -43,6 +44,7 @@ export function initContainer(
   container.bind(RepositoryService).toSelf().inSingletonScope();
   container.bind(LicenseService).toSelf().inSingletonScope();
   container.bind(VersionService).toSelf().inSingletonScope();
+  container.bind(MigrationService).toSelf().inSingletonScope();
 
   // Formatter adapters
   container.bind(MarkdownFormatterAdapter).toSelf().inSingletonScope();

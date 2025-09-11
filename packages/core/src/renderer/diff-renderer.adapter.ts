@@ -25,9 +25,15 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
     }
 
     async writeSection(sectionIdentifier: string, data: Buffer): Promise<void> {
-        if (!this.tempFilePath) { throw new Error('Temp file path not initialized'); }
-        // Delegate to the inner file renderer which targets the temp file
         await this.fileRenderer.writeSection(sectionIdentifier, data);
+    }
+
+    async readExistingContent(): Promise<Buffer> {
+        return this.fileRenderer.readExistingContent();
+    }
+
+    async replaceContent(data: Buffer): Promise<void> {
+        return this.fileRenderer.replaceContent(data);
     }
 
     override async finalize(): Promise<string | undefined> {
@@ -35,10 +41,13 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
         const temp = this.getTempFilePath();
 
         // Produce patch between destination and temp
+        const destinationContent = existsSync(destination) ? readFileSync(destination, 'utf-8') : '';
+        const tempContent = await this.readExistingContent();
+
         const diff = createPatch(
             destination,
-            existsSync(destination) ? readFileSync(destination, 'utf-8') : '',
-            readFileSync(temp, 'utf-8'),
+            destinationContent,
+            tempContent.toString('utf-8'),
         );
 
         // Reset initialized parameters
