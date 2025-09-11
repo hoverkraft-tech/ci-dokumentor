@@ -100,7 +100,7 @@ runs:
 
         extra_badges=${{ toJson(inputs.extra-badges || '') }}
         if [ -n "$extra_badges" ]; then
-          args="$args --extra-badges '$extra_badges'"
+          args="$args --extra-badges $extra_badges"
           echo "::debug::Extra badges set to: $extra_badges"
         fi
 
