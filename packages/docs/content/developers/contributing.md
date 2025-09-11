@@ -75,6 +75,7 @@ These coding standards are the canonical rules contributors and automated agents
 
 - Naming conventions: use camelCase for variables and functions, and PascalCase for classes and interfaces.
 - TypeScript: enable and use strict TypeScript settings; prefer explicit return types for public APIs.
+- Apply strict typing and avoid `any` unless absolutely necessary even in tests.
 - Types: prefer `interface` for public object shapes, use union types and discriminated unions for variants, and prefer `unknown` over `any` for dynamic inputs.
 - Exports: use barrel exports (`index.ts`) to define a package's public API surface.
 - Dependencies: prefer `peerDependencies` for shared libraries where appropriate and keep critical runtime versions pinned.

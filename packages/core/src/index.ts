@@ -12,5 +12,7 @@ export * from './repository/repository.service.js';
 export * from './license/license.service.js';
 export * from './repository/abstract-repository.provider.js';
 export * from './version/version.service.js';
+export * from './migration/migration.adapter.js';
+export * from './migration/migration.service.js';
 export * from './container.js';
 export * from './options/options.js';

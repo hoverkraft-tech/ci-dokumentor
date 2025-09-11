@@ -2,6 +2,7 @@ import {
   Container,
   SECTION_GENERATOR_ADAPTER_IDENTIFIER,
   GENERATOR_ADAPTER_IDENTIFIER,
+  MIGRATION_ADAPTER_IDENTIFIER,
 } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
 import { initContainer as coreInitContainer } from '@ci-dokumentor/core';
@@ -21,6 +22,12 @@ import { SecretsSectionGenerator } from './section/secrets-section-generator.ada
 import { ContributingSectionGenerator } from './section/contributing-section-generator.adapter.js';
 import { LicenseSectionGenerator } from './section/license-section-generator.adapter.js';
 import { GeneratedSectionGenerator } from './section/generated-section-generator.adapter.js';
+
+// Migration adapters
+import { ActionDocsMigrationAdapter } from './migration/action-docs-migration.adapter.js';
+import { AutoDocMigrationAdapter } from './migration/auto-doc-migration.adapter.js';
+import { ActdocsMigrationAdapter } from './migration/actdocs-migration.adapter.js';
+import { GitHubActionReadmeGeneratorMigrationAdapter } from './migration/github-action-readme-generator-migration.adapter.js';
 
 let container: Container | null = null;
 
@@ -87,6 +94,27 @@ export function initContainer(
   container
     .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(GeneratedSectionGenerator);
+
+  // Bind migration adapters to the container
+  container.bind(ActionDocsMigrationAdapter).toSelf().inSingletonScope();
+  container
+    .bind(MIGRATION_ADAPTER_IDENTIFIER)
+    .to(ActionDocsMigrationAdapter);
+
+  container.bind(AutoDocMigrationAdapter).toSelf().inSingletonScope();
+  container
+    .bind(MIGRATION_ADAPTER_IDENTIFIER)
+    .to(AutoDocMigrationAdapter);
+
+  container.bind(ActdocsMigrationAdapter).toSelf().inSingletonScope();
+  container
+    .bind(MIGRATION_ADAPTER_IDENTIFIER)
+    .to(ActdocsMigrationAdapter);
+
+  container.bind(GitHubActionReadmeGeneratorMigrationAdapter).toSelf().inSingletonScope();
+  container
+    .bind(MIGRATION_ADAPTER_IDENTIFIER)
+    .to(GitHubActionReadmeGeneratorMigrationAdapter);
 
   return container;
 }

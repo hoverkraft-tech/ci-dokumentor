@@ -28,7 +28,7 @@ export abstract class GitHubActionsSectionGeneratorAdapter
   /**
    * Apply runtime option values to the section generator
    */
-  setSectionOptions(options: Partial<SectionOptions>): void {
+  setSectionOptions(_options: Partial<SectionOptions>): void {
     // Default implementation - subclasses can override
   }
 
