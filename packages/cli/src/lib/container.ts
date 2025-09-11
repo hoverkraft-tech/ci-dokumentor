@@ -18,7 +18,9 @@ import {
 } from './application/program.js';
 import { CliApplication } from './application/cli-application.js';
 import { GenerateCommand } from './commands/generate-command.js';
+import { MigrateCommand } from './commands/migrate-command.js';
 import { GenerateDocumentationUseCase } from './usecases/generate-documentation.usecase.js';
+import { MigrateDocumentationUseCase } from './usecases/migrate-documentation.usecase.js';
 import { LoggerService } from './logger/logger.service.js';
 import { FilePackageService } from './package/file-package.service.js';
 import { Command as CommanderCommand } from 'commander';
@@ -83,11 +85,17 @@ export function initContainer(
 
   // Bind use cases
   container.bind(GenerateDocumentationUseCase).toSelf().inSingletonScope();
+  container.bind(MigrateDocumentationUseCase).toSelf().inSingletonScope();
 
   // Bind commands (using multiInject pattern)
   container
     .bind<Command>(COMMAND_IDENTIFIER)
     .to(GenerateCommand)
+    .inSingletonScope();
+
+  container
+    .bind<Command>(COMMAND_IDENTIFIER)
+    .to(MigrateCommand)
     .inSingletonScope();
 
   // Bind the main application

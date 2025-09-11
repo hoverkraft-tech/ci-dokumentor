@@ -130,8 +130,8 @@ export class GenerateCommand extends BaseCommand {
       source: thisCommand.getOptionValue('source'),
     });
 
-    for (const [_sectionId, sectionOptions] of Object.entries(sectionSupportedOptions)) {
-      for (const [_optionKey, optionDescription] of Object.entries(sectionOptions)) {
+    for (const [, sectionOptions] of Object.entries(sectionSupportedOptions)) {
+      for (const [, optionDescription] of Object.entries(sectionOptions)) {
         if (!thisCommand.options.find((o) => o.flags === optionDescription.flags)) {
           const option = new Option(optionDescription.flags, optionDescription.description || '');
           if (optionDescription.env) {

@@ -14,6 +14,8 @@ Options:
 
 Commands:
   generate|gen [options]        Generate documentation from CI/CD manifest files
+  migrate [options]             Migrate existing documentation markers from
+                                various tools to ci-dokumentor format
   help [command]                display help for command
 "
 `;
