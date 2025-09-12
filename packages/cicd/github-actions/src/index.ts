@@ -12,3 +12,8 @@ export * from './section/outputs-section-generator.adapter.js';
 export * from './section/overview-section-generator.adapter.js';
 export * from './section/secrets-section-generator.adapter.js';
 export * from './section/usage-section-generator.adapter.js';
+
+export * from './migration/action-docs-migration.adapter.js';
+export * from './migration/auto-doc-migration.adapter.js';
+export * from './migration/actdocs-migration.adapter.js';
+export * from './migration/github-action-readme-generator-migration.adapter.js';

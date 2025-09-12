@@ -1,10 +1,11 @@
-import { multiInject } from 'inversify';
+import { injectable, multiInject } from 'inversify';
 import {
   FORMATTER_ADAPTER_IDENTIFIER,
   FormatterAdapter,
 } from './formatter.adapter.js';
 import { FormatterLanguage } from './formatter-language.js';
 
+@injectable()
 export class FormatterService {
   constructor(
     @multiInject(FORMATTER_ADAPTER_IDENTIFIER)
