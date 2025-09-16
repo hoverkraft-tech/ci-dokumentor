@@ -27,6 +27,13 @@ export interface ContributingInfo {
 }
 
 /**
+ * Security policy information
+ */
+export interface SecurityInfo {
+  url: string;
+}
+
+/**
  * Interface for repository service providers
  */
 export interface RepositoryProvider<Options extends RepositoryOptions = RepositoryOptions> {
@@ -73,6 +80,12 @@ export interface RepositoryProvider<Options extends RepositoryOptions = Reposito
    * @returns Promise<ContributingInfo | undefined> contributing information or undefined if not available
    */
   getContributing(): Promise<ContributingInfo | undefined>;
+
+  /**
+   * Get security policy information
+   * @returns Promise<SecurityInfo | undefined> security information or undefined if not available
+   */
+  getSecurity(): Promise<SecurityInfo | undefined>;
 
   /**
    * Get the latest version information (e.g., latest tag or commit SHA)

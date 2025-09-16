@@ -11,6 +11,7 @@ export * from './section/license-section-generator.adapter.js';
 export * from './section/outputs-section-generator.adapter.js';
 export * from './section/overview-section-generator.adapter.js';
 export * from './section/secrets-section-generator.adapter.js';
+export * from './section/security-section-generator.adapter.js';
 export * from './section/usage-section-generator.adapter.js';
 
 export * from './migration/action-docs-migration.adapter.js';
