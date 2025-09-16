@@ -249,6 +249,36 @@ describe('GitHubRepositoryProvider', () => {
     });
   });
 
+  describe('getSecurity', () => {
+    it('should return security policy url when available via graphql', async () => {
+      // Arrange
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+
+      graphqlMock.mockResolvedValue({ repository: { securityPolicyUrl: 'https://github.com/owner/repo/security/policy' } });
+
+      // Act
+      const security = await gitHubRepositoryProvider.getSecurity();
+
+      // Assert
+      expect(security).toEqual({ url: 'https://github.com/owner/repo/security/policy' });
+    });
+
+    it('should return undefined when no security policy is available', async () => {
+      // Arrange
+      const repositoryInfo = RepositoryInfoMockFactory.create();
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+
+      graphqlMock.mockResolvedValue({ repository: {} });
+
+      // Act
+      const security = await gitHubRepositoryProvider.getSecurity();
+
+      // Assert
+      expect(security).toBeUndefined();
+    });
+  });
+
   describe('getLatestVersion', () => {
     it('should delegate to gitRepositoryProvider.getLatestVersion', async () => {
       // Arrange
