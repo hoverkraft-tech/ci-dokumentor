@@ -16,6 +16,8 @@ export interface RendererAdapter {
 
     getFormatterAdapter(): FormatterAdapter;
 
+    getDestination(): string;
+
     writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
 
     /**

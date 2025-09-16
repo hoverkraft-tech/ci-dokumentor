@@ -125,6 +125,7 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
         formatterAdapter: rendererAdapter.getFormatterAdapter(),
         manifest: gitHubActionOrWorkflow,
         repositoryProvider,
+        destination: rendererAdapter.getDestination(),
       };
 
       const sectionContent = await sectionGeneratorAdapter.generateSection(payload);

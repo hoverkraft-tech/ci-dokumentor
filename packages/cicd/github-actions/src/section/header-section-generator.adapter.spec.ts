@@ -76,6 +76,58 @@ describe('HeaderSectionGenerator', () => {
         );
       });
 
+      it('should generate header section with relative path for local logo file', async () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
+
+        mockRepositoryProvider.getLogo.mockResolvedValue('file://.github/logo.png');
+
+        // Act
+        const result = await generator.generateSection({ 
+          formatterAdapter, 
+          manifest, 
+          repositoryProvider: mockRepositoryProvider,
+          destination: 'README.md'
+        });
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toEqual(
+          `<div align="center">
+  <img src=".github/logo.png" width="60px" align="center" alt="Test Action" />
+</div>
+
+# GitHub Action: Test Action
+`
+        );
+      });
+
+      it('should generate header section with correct relative path for nested destination', async () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create();
+
+        mockRepositoryProvider.getLogo.mockResolvedValue('file://.github/logo.png');
+
+        // Act
+        const result = await generator.generateSection({ 
+          formatterAdapter, 
+          manifest, 
+          repositoryProvider: mockRepositoryProvider,
+          destination: 'docs/actions/README.md'
+        });
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString()).toEqual(
+          `<div align="center">
+  <img src="../../.github/logo.png" width="60px" align="center" alt="Test Action" />
+</div>
+
+# GitHub Action: Test Action
+`
+        );
+      });
+
       it('should generate header section for GitHub Action with branding icon', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
@@ -210,6 +262,36 @@ describe('HeaderSectionGenerator', () => {
         expect(result.toString())
           .toEqual(`<div align="center">
   <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Workflow" />
+</div>
+
+# GitHub Workflow: Test Workflow
+`);
+      });
+
+      it('should generate header section with relative path for workflow with local logo', async () => {
+        // Arrange
+        const manifest: GitHubWorkflow = {
+          usesName: 'owner/repo/.github/workflows/test-workflow.yml',
+          name: 'Test Workflow',
+          on: { push: {} },
+          jobs: {},
+        };
+
+        mockRepositoryProvider.getLogo.mockResolvedValue('file://.github/logo.png');
+
+        // Act        
+        const result = await generator.generateSection({ 
+          formatterAdapter, 
+          manifest, 
+          repositoryProvider: mockRepositoryProvider,
+          destination: '.github/workflows/test-workflow.md'
+        });
+
+        // Assert
+        expect(result).toBeInstanceOf(Buffer);
+        expect(result.toString())
+          .toEqual(`<div align="center">
+  <img src="../logo.png" width="60px" align="center" alt="Test Workflow" />
 </div>
 
 # GitHub Workflow: Test Workflow

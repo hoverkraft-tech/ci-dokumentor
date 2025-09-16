@@ -32,6 +32,7 @@ export interface SectionGenerationPayload<TManifest> {
   formatterAdapter: FormatterAdapter;
   manifest: TManifest;
   repositoryProvider: RepositoryProvider;
+  destination?: string; // Optional destination path for relative path calculations
 }
 
 /**
