@@ -11,6 +11,7 @@ The `@ci-dokumentor/cli` package provides a command-line interface for generatin
 The CLI package provides:
 
 - **Generate Command** - Main command for documentation generation
+- **Migrate Command** - Bridge tool for transitioning from other documentation tools
 - **Platform Auto-detection** - Automatically detects supported CI/CD platforms
 - **Repository Integration** - Works with Git and GitHub repositories
 - **Configurable Output** - Flexible output options and sections
@@ -110,13 +111,160 @@ ci-dokumentor --version
 ci-dokumentor -v
 ```
 
+### Migrate Command
+
+The migrate command helps you transition existing documentation from other popular tools to ci-dokumentor's standardized format. This command is designed as a **bridge solution** to help you move from tools that may not perfectly fit your needs or are no longer actively maintained.
+
+:::note Migration Philosophy
+The migrate command is **not intended to compete** with other excellent documentation tools. Instead, it serves as a helpful bridge when:
+
+- Your current tool doesn't perfectly match your specific requirements
+- A tool you're using is no longer actively maintained
+- You want to standardize on ci-dokumentor's flexible, extensible architecture
+- You need better integration with your existing CI/CD workflows
+  :::
+
+**Command:** `migrate`
+
+#### Basic Usage - `migrate`
+
+```bash
+# Migrate from action-docs tool
+ci-dokumentor migrate --tool action-docs --destination README.md
+
+# Preview changes without writing (dry-run)
+ci-dokumentor migrate --tool auto-doc --destination docs/README.md --dry-run
+
+# Migrate with specific output format
+ci-dokumentor --output-format json migrate --tool actdocs --destination README.md
+```
+
+#### Command Options - `migrate`
+
+| Option                 | Alias | Description                                                  | Default    |
+| ---------------------- | ----- | ------------------------------------------------------------ | ---------- |
+| `--tool <tool>`        | `-t`  | Migration tool to convert from (see supported tools below)   | (required) |
+| `--destination <file>` | `-d`  | Destination file containing documentation markers to migrate | (required) |
+| `--dry-run`            | -     | Preview what would be migrated without writing files         | `false`    |
+
+#### Supported Migration Tools
+
+The migrate command supports migrating from these popular GitHub Actions documentation tools:
+
+##### action-docs
+
+Converts action-docs markers to ci-dokumentor format:
+
+- `<!-- action-docs-header source="action.yml" -->` → `<!-- header:start -->`
+- `<!-- action-docs-description source="action.yml" -->` → `<!-- overview:start -->`
+- `<!-- action-docs-inputs source="action.yml" -->` → `<!-- inputs:start -->`
+- `<!-- action-docs-outputs source="action.yml" -->` → `<!-- outputs:start -->`
+- `<!-- action-docs-runs source="action.yml" -->` → `<!-- usage:start -->`
+
+```bash
+ci-dokumentor migrate --tool action-docs --destination README.md
+```
+
+##### auto-doc
+
+Converts auto-doc headers to ci-dokumentor format:
+
+- `## Inputs` → `<!-- inputs:start -->\n## Inputs\n<!-- inputs:end -->`
+- `## Outputs` → `<!-- outputs:start -->\n## Outputs\n<!-- outputs:end -->`
+- `## Secrets` → `<!-- secrets:start -->\n## Secrets\n<!-- secrets:end -->`
+- `## Description` → `<!-- overview:start -->\n## Description\n<!-- overview:end -->`
+
+```bash
+ci-dokumentor migrate --tool auto-doc --destination README.md
+```
+
+##### actdocs
+
+Converts actdocs paired markers to ci-dokumentor format:
+
+- `<!-- actdocs description start -->` / `<!-- actdocs description end -->` → `<!-- overview:start -->` / `<!-- overview:end -->`
+- `<!-- actdocs inputs start -->` / `<!-- actdocs inputs end -->` → `<!-- inputs:start -->` / `<!-- inputs:end -->`
+- `<!-- actdocs secrets start -->` / `<!-- actdocs secrets end -->` → `<!-- secrets:start -->` / `<!-- secrets:end -->`
+- `<!-- actdocs outputs start -->` / `<!-- actdocs outputs end -->` → `<!-- outputs:start -->` / `<!-- outputs:end -->`
+- `<!-- actdocs permissions start -->` / `<!-- actdocs permissions end -->` → `<!-- security:start -->` / `<!-- security:end -->`
+
+```bash
+ci-dokumentor migrate --tool actdocs --destination README.md
+```
+
+##### github-action-readme-generator
+
+Converts GitHub Action readme Generator markers to ci-dokumentor format:
+
+- `<!-- start branding -->` / `<!-- end branding -->` → `<!-- badges:start -->` / `<!-- badges:end -->`
+- `<!-- start title -->` / `<!-- end title -->` → `<!-- header:start -->` / `<!-- header:end -->`
+- `<!-- start description -->` / `<!-- end description -->` → `<!-- overview:start -->` / `<!-- overview:end -->`
+- `<!-- start usage -->` / `<!-- end usage -->` → `<!-- usage:start -->` / `<!-- usage:end -->`
+- `<!-- start inputs -->` / `<!-- end inputs -->` → `<!-- inputs:start -->` / `<!-- inputs:end -->`
+- `<!-- start outputs -->` / `<!-- end outputs -->` → `<!-- outputs:start -->` / `<!-- outputs:end -->`
+- `<!-- start [.github/ghadocs/examples/] -->` / `<!-- end [...] -->` → `<!-- examples:start -->` / `<!-- examples:end -->`
+
+```bash
+ci-dokumentor migrate --tool github-action-readme-generator --destination README.md
+```
+
+#### Migration Workflow
+
+The typical migration workflow follows these steps:
+
+1. **Backup your documentation**: Always backup your existing documentation files before migration
+2. **Preview changes**: Use `--dry-run` to see what would be changed
+3. **Migrate markers**: Run the migration command to convert existing markers
+4. **Generate fresh content**: Use `ci-dokumentor generate` to populate the new markers with current content
+5. **Review and customize**: Review the generated content and make any manual adjustments
+
+Example complete workflow:
+
+```bash
+# 1. Backup your README
+cp README.md README.md.backup
+
+# 2. Preview migration changes
+ci-dokumentor migrate --tool action-docs --destination README.md --dry-run
+
+# 3. Perform migration
+ci-dokumentor migrate --tool action-docs --destination README.md
+
+# 4. Generate fresh documentation content
+ci-dokumentor generate --source action.yml --destination README.md
+
+# 5. Review the results
+git diff README.md.backup README.md
+```
+
+#### When to Use Migration
+
+Consider using the migrate command when:
+
+- **Transitioning from another tool**: You're already using a documentation tool but want to switch to ci-dokumentor
+- **Tool maintenance concerns**: Your current tool is no longer actively maintained or has limited support
+- **Need more flexibility**: You need features or customization options not available in your current tool
+- **Standardization**: You want to standardize documentation across multiple projects using ci-dokumentor
+- **Better CI/CD integration**: You need tighter integration with your existing CI/CD pipelines
+
+#### Migration Benefits
+
+After migration, you'll gain access to ci-dokumentor's features:
+
+- **Extensible architecture** - Easy to add new platforms and generators
+- **Multiple output formats** - Support for text, JSON, and GitHub Actions output
+- **Active maintenance** - Regular updates and community support
+- **Repository integration** - Deep integration with Git and GitHub features
+- **Flexible templates** - Customizable section templates and formatting
+- **Comprehensive platform support** - Growing support for multiple CI/CD platforms
+
 ### Generate Command
 
 The main command for generating documentation from CI/CD files.
 
 **Aliases:** `generate`, `gen`
 
-#### Basic Usage
+#### Basic Usage - `generate`
 
 ```bash
 # Generate documentation for a single manifest file (required)
@@ -129,7 +277,7 @@ ci-dokumentor generate --source ./my-project/action.yml --destination ./my-docs/
 ci-dokumentor --output-format json generate --source ./my-project/action.yml
 ```
 
-#### Command Options
+#### Command Options - `generate`
 
 | Option                          | Alias | Description                                                                         | Default    |
 | ------------------------------- | ----- | ----------------------------------------------------------------------------------- | ---------- |

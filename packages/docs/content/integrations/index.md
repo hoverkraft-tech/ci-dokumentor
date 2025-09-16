@@ -11,4 +11,5 @@ Guides and documentation for integrations supported by the project.
 - [🐳 Docker](./docker.md) — Docker recipes and images.
 - [🐙 GitHub Action](./github-action.md) — GitHub Actions examples and configuration.
 - [🦊 GitLab CI](./gitlab-ci.md) — GitLab CI pipelines and examples.
+- [🔄 Migration Guide](./migration.md) — Migrate from other documentation tools to ci-dokumentor.
 - [📦 Node.js package](./nodejs-package.md) — Node.js package integration guide.

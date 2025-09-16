@@ -23,6 +23,7 @@ const sidebars: SidebarsConfig = {
         'integrations/docker',
         'integrations/github-action',
         'integrations/nodejs-package',
+        'integrations/migration',
       ],
     },
     {

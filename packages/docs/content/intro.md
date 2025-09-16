@@ -126,6 +126,10 @@ Integrate CI Dokumentor into your CI/CD pipeline:
 
 ## CLI Usage
 
+The CLI provides two main commands:
+
+### Generate Command
+
 The main command is `generate` with these key options:
 
 - `--source <file>` - Source manifest file path to handle (required)
@@ -134,6 +138,26 @@ The main command is `generate` with these key options:
 - `--cicd <platform>` - CI/CD platform (auto-detected)
 - `--output-format <format>` - Output format: `text`, `json`, `github-action` (Optional; default: `text`)
 - `--dry-run` - Simulate generation without writing files (Optional)
+
+### Migrate Command
+
+The `migrate` command helps transition from other documentation tools to ci-dokumentor format:
+
+- `--tool <tool>` - Source tool to migrate from (`action-docs`, `auto-doc`, `actdocs`, `github-action-readme-generator`)
+- `--destination <file>` - File containing markers to migrate (required)
+- `--dry-run` - Preview changes without writing files
+
+```bash
+# Migrate from action-docs
+ci-dokumentor migrate --tool action-docs --destination README.md
+
+# Preview migration
+ci-dokumentor migrate --tool auto-doc --destination README.md --dry-run
+```
+
+:::note
+The migrate command serves as a **bridge solution** to help transition from other tools when they don't perfectly fit your needs or are no longer maintained. It's not meant to compete with other excellent tools, but to provide a smooth migration path.
+:::
 
 :::tip
 **📖 Full Documentation**: For more details on CLI usage, see our [**CLI documentation**](./packages/cli.md).
@@ -153,6 +177,7 @@ For detailed information, explore these guides:
 - 🐙 [**GitHub Actions**](./integrations/github-action.md) - GitHub Actions integration guide
 - 🦊 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI integration guide
 - 🗡️ [**Dagger.io**](./integrations/dagger.md) - Dagger.io integration guide
+- 🔄 [**Migration Guide**](./integrations/migration.md) - Migrate from other documentation tools
 - 💻 [**CLI Package**](./packages/cli.md) - Complete command-line reference
 - 📦 [**Core Architecture**](./packages/core.md) - Learn about the internal architecture
 - 👨‍💻 [**Developer Guide**](./developers/index.md) - Contribute to the project
