@@ -378,5 +378,56 @@ describe('HeaderSectionGenerator', () => {
 `
       );
     });
+
+    it('should handle file:// URL without destination (fallback to original path)', async () => {
+      // Arrange
+      const manifest: GitHubAction = GitHubActionMockFactory.create();
+
+      mockRepositoryProvider.getLogo.mockResolvedValue('file://.github/logo.png');
+
+      // Act (no destination provided)
+      const result = await generator.generateSection({ 
+        formatterAdapter, 
+        manifest, 
+        repositoryProvider: mockRepositoryProvider
+      });
+
+      // Assert
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result.toString()).toEqual(
+        `<div align="center">
+  <img src="file://.github/logo.png" width="60px" align="center" alt="Test Action" />
+</div>
+
+# GitHub Action: Test Action
+`
+      );
+    });
+
+    it('should not modify external URLs even with destination', async () => {
+      // Arrange
+      const manifest: GitHubAction = GitHubActionMockFactory.create();
+
+      mockRepositoryProvider.getLogo.mockResolvedValue('https://example.com/logo.png');
+
+      // Act
+      const result = await generator.generateSection({ 
+        formatterAdapter, 
+        manifest, 
+        repositoryProvider: mockRepositoryProvider,
+        destination: 'docs/nested/README.md'
+      });
+
+      // Assert
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result.toString()).toEqual(
+        `<div align="center">
+  <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
+</div>
+
+# GitHub Action: Test Action
+`
+      );
+    });
   });
 });
