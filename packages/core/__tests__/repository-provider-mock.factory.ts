@@ -10,6 +10,7 @@ type RepositoryProviderDefaults<Options extends RepositoryOptions> = Partial<{
     getLogo: Awaited<ReturnType<RepositoryProvider<Options>['getLogo']>>;
     getLicense: Awaited<ReturnType<RepositoryProvider<Options>['getLicense']>>;
     getContributing: Awaited<ReturnType<RepositoryProvider<Options>['getContributing']>>;
+    getSecurity: Awaited<ReturnType<RepositoryProvider<Options>['getSecurity']>>;
     getLatestVersion: Awaited<ReturnType<RepositoryProvider<Options>['getLatestVersion']>>;
     getOptions: ReturnType<RepositoryProvider<Options>['getOptions']>;
     setOptions: ReturnType<RepositoryProvider<Options>['setOptions']>;
@@ -25,6 +26,7 @@ export class RepositoryProviderMockFactory {
             getLogo: vi.fn() as Mocked<RepositoryProvider<Options>['getLogo']>,
             getLicense: vi.fn() as Mocked<RepositoryProvider<Options>['getLicense']>,
             getContributing: vi.fn() as Mocked<RepositoryProvider<Options>['getContributing']>,
+            getSecurity: vi.fn() as Mocked<RepositoryProvider<Options>['getSecurity']>,
             getLatestVersion: vi.fn() as Mocked<RepositoryProvider<Options>['getLatestVersion']>,
             getOptions: vi.fn() as Mocked<RepositoryProvider<Options>['getOptions']>,
             setOptions: vi.fn() as Mocked<RepositoryProvider<Options>['setOptions']>,
@@ -50,6 +52,9 @@ export class RepositoryProviderMockFactory {
         }
         if (defaults?.getContributing !== undefined) {
             mock.getContributing.mockResolvedValue(defaults.getContributing);
+        }
+        if (defaults?.getSecurity !== undefined) {
+            mock.getSecurity.mockResolvedValue(defaults.getSecurity);
         }
         if (defaults?.getLatestVersion !== undefined) {
             mock.getLatestVersion.mockResolvedValue(defaults.getLatestVersion);

@@ -2,6 +2,7 @@ import {
   RepositoryInfo,
   LicenseInfo,
   ContributingInfo,
+  SecurityInfo,
   AbstractRepositoryProvider,
   LicenseService,
   RepositoryOptionsDescriptors,
@@ -188,6 +189,28 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
     if (contributingGuidelines) {
       return {
         url: contributingGuidelines.url,
+      };
+    }
+    return undefined;
+  }
+
+  protected async fetchSecurity(): Promise<SecurityInfo | undefined> {
+    const response = await this.graphqlQuery<{
+      repository?: {
+        securityPolicyUrl?: string;
+      }
+    }>(
+      `query getSecurity($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          securityPolicyUrl
+        }
+      }`
+    );
+
+    const securityPolicyUrl = response?.repository?.securityPolicyUrl;
+    if (securityPolicyUrl) {
+      return {
+        url: securityPolicyUrl,
       };
     }
     return undefined;

@@ -1,6 +1,6 @@
 import { ManifestVersion } from '../version/version.service.js';
 import { LicenseInfo } from '../license/license.service.js';
-import { RepositoryProvider, RepositoryInfo, ContributingInfo, RepositoryOptions, RepositoryOptionsDescriptors } from './repository.provider.js';
+import { RepositoryProvider, RepositoryInfo, ContributingInfo, SecurityInfo, RepositoryOptions, RepositoryOptionsDescriptors } from './repository.provider.js';
 
 /**
  * Abstract base class that provides caching for repository providers
@@ -41,6 +41,11 @@ export abstract class AbstractRepositoryProvider<Options extends RepositoryOptio
   protected abstract fetchContributing(): Promise<ContributingInfo | undefined>;
 
   /**
+   * Fetch security policy information (to be implemented by subclasses)
+   */
+  protected abstract fetchSecurity(): Promise<SecurityInfo | undefined>;
+
+  /**
    * Get basic repository information with caching
    */
   async getRepositoryInfo(): Promise<RepositoryInfo> {
@@ -66,6 +71,13 @@ export abstract class AbstractRepositoryProvider<Options extends RepositoryOptio
    */
   async getContributing(): Promise<ContributingInfo | undefined> {
     return this.getCached('contributing', () => this.fetchContributing());
+  }
+
+  /**
+   * Get security policy information with caching
+   */
+  async getSecurity(): Promise<SecurityInfo | undefined> {
+    return this.getCached('security', () => this.fetchSecurity());
   }
 
   /**

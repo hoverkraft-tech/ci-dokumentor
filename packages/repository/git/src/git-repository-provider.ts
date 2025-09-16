@@ -1,4 +1,4 @@
-import { RepositoryOptionsDescriptors, AbstractRepositoryProvider, RepositoryInfo, LicenseInfo, ContributingInfo, ManifestVersion } from '@ci-dokumentor/core';
+import { RepositoryOptionsDescriptors, AbstractRepositoryProvider, RepositoryInfo, LicenseInfo, ContributingInfo, SecurityInfo, ManifestVersion } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import gitUrlParse from 'git-url-parse';
 import { simpleGit } from 'simple-git';
@@ -99,6 +99,11 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
 
   protected async fetchContributing(): Promise<ContributingInfo | undefined> {
     // Basic git provider doesn't provide contributing functionality
+    return undefined;
+  }
+
+  protected async fetchSecurity(): Promise<SecurityInfo | undefined> {
+    // Basic git provider doesn't provide security functionality
     return undefined;
   }
 
