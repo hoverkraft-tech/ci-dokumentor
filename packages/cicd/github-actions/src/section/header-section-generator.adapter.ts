@@ -4,6 +4,7 @@ import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-g
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 import { icons } from 'feather-icons';
 import { injectable } from 'inversify';
+import { relative, dirname } from 'node:path';
 
 @injectable()
 export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
@@ -11,7 +12,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     return SectionIdentifier.Header;
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider, destination }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
     const [repositoryInfo, logo] = await Promise.all([
       repositoryProvider.getRepositoryInfo(),
       repositoryProvider.getLogo(),
@@ -27,7 +28,8 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     const logoContent = this.generateLogo(
       formatterAdapter,
       manifest,
-      logo
+      logo,
+      destination
     );
 
     if (logoContent.length > 0) {
@@ -44,14 +46,23 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private generateLogo(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
-    logoPath: string | undefined
+    logoPath: string | undefined,
+    destination?: string
   ): Buffer {
     if (!logoPath) {
       return Buffer.alloc(0);
     }
 
+    // Calculate relative path for file:// URLs
+    let resolvedLogoPath = logoPath;
+    if (logoPath.startsWith('file://') && destination) {
+      const filePath = logoPath.replace(/^file:\/\//, '');
+      const destinationDir = dirname(destination);
+      resolvedLogoPath = relative(destinationDir, filePath);
+    }
+
     const logoAltText = this.getDisplayName(manifest);
-    const logoImage = formatterAdapter.image(Buffer.from(logoPath), logoAltText, {
+    const logoImage = formatterAdapter.image(Buffer.from(resolvedLogoPath), logoAltText, {
       width: '60px',
       align: 'center',
     });

@@ -24,11 +24,10 @@ export abstract class AbstractRendererAdapter implements RendererAdapter {
         return this.formatterAdapter;
     }
 
-    protected getDestination(): string {
+    getDestination(): string {
         if (!this.destination) {
             throw new Error('Destination not initialized');
         }
-
         return this.destination;
     }
 
