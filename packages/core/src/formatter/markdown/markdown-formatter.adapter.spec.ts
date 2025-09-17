@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { MarkdownFormatterAdapter } from './markdown-formatter.adapter.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { FormatterLanguage } from '../formatter-language.js';
+import { LinkFormat } from '../formatter.adapter.js';
 
 describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
@@ -288,6 +289,184 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toEqual('First line\nSecond line\n');
+    });
+
+    describe('URL transformation', () => {
+      describe('autolink format (default)', () => {
+        it('should transform URLs to autolinks by default', () => {
+          // Arrange
+          const input = Buffer.from('Visit https://example.com for more information');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Visit <https://example.com> for more information\n');
+        });
+
+        it('should transform multiple URLs to autolinks', () => {
+          // Arrange
+          const input = Buffer.from('Check https://github.com and https://stackoverflow.com');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Check <https://github.com> and <https://stackoverflow.com>\n');
+        });
+
+        it('should handle URLs with query parameters and fragments', () => {
+          // Arrange
+          const input = Buffer.from('Search https://google.com/search?q=test#results');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Search <https://google.com/search?q=test#results>\n');
+        });
+
+        it('should not transform URLs that are already in markdown links', () => {
+          // Arrange
+          const input = Buffer.from('Visit [Example](https://example.com) for more');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Visit [Example](https://example.com) for more\n');
+        });
+
+        it('should transform standalone URLs but preserve existing markdown links', () => {
+          // Arrange
+          const input = Buffer.from('Visit [Example](https://example.com) or https://github.com');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Visit [Example](https://example.com) or <https://github.com>\n');
+        });
+      });
+
+      describe('full link format', () => {
+        it('should transform URLs to full links when linkFormat is Full', () => {
+          // Arrange
+          const input = Buffer.from('Visit https://example.com for more information');
+          adapter.setOptions({ linkFormat: LinkFormat.Full });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Visit [https://example.com](https://example.com) for more information\n');
+        });
+
+        it('should transform multiple URLs to full links', () => {
+          // Arrange
+          const input = Buffer.from('Check https://github.com and https://stackoverflow.com');
+          adapter.setOptions({ linkFormat: LinkFormat.Full });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Check [https://github.com](https://github.com) and [https://stackoverflow.com](https://stackoverflow.com)\n');
+        });
+
+        it('should handle URLs with complex paths in full link format', () => {
+          // Arrange
+          const input = Buffer.from('API docs at https://api.example.com/v1/docs?format=json');
+          adapter.setOptions({ linkFormat: LinkFormat.Full });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('API docs at [https://api.example.com/v1/docs?format=json](https://api.example.com/v1/docs?format=json)\n');
+        });
+      });
+
+      describe('no URL transformation', () => {
+        it('should not transform URLs when linkFormat is None', () => {
+          // Arrange
+          const input = Buffer.from('Visit https://example.com for more information');
+          adapter.setOptions({ linkFormat: LinkFormat.None });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Visit https://example.com for more information\n');
+        });
+      });
+
+      describe('edge cases', () => {
+        it('should handle empty input with URL transformation enabled', () => {
+          // Arrange
+          const input = Buffer.alloc(0);
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('\n');
+        });
+
+        it('should handle text with no URLs', () => {
+          // Arrange
+          const input = Buffer.from('This is just regular text without any URLs');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('This is just regular text without any URLs\n');
+        });
+
+        it('should handle URLs at the beginning and end of text', () => {
+          // Arrange
+          const input = Buffer.from('https://start.com middle text https://end.com');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('<https://start.com> middle text <https://end.com>\n');
+        });
+
+        it('should only transform http and https URLs', () => {
+          // Arrange
+          const input = Buffer.from('Visit https://example.com and ftp://files.com and mailto:test@example.com');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Visit <https://example.com> and ftp://files.com and mailto:test@example.com\n');
+        });
+
+        it('should handle URLs with trailing punctuation', () => {
+          // Arrange
+          const input = Buffer.from('Check https://example.com, https://github.com. Also https://stackoverflow.com!');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Check <https://example.com>, <https://github.com>. Also <https://stackoverflow.com>!\n');
+        });
+      });
     });
   });
 

@@ -5,7 +5,7 @@ import {
   GenerateDocumentationUseCase,
   GenerateDocumentationUseCaseInput,
 } from '../usecases/generate-documentation.usecase.js';
-import { GenerateSectionsOptions, RepositoryOptions, SectionOptions } from '@ci-dokumentor/core';
+import { GenerateSectionsOptions, RepositoryOptions, SectionOptions, LinkFormat, FormatterOptions } from '@ci-dokumentor/core';
 
 export type GenerateCommandOptions = {
   outputFormat: string;
@@ -16,6 +16,7 @@ export type GenerateCommandOptions = {
   includeSections?: string;
   excludeSections?: string;
   dryRun: boolean;
+  formatLink?: string | boolean;
   [key: string]: unknown; // Allow dynamic keys for provider-specific options and section options
 };
 
@@ -79,6 +80,11 @@ export class GenerateCommand extends BaseCommand {
         '--dry-run',
         'Preview what would be generated without writing files',
         false
+      )
+      .option(
+        '--format-link [type]',
+        'Transform bare URLs to links. Types: auto (default autolinks <url>), full ([url](url)), false (disabled)',
+        LinkFormat.Auto
       )
       .hook('preAction', async (thisCommand) => {
         await this.populateSupportedOptions(thisCommand);
@@ -160,6 +166,7 @@ export class GenerateCommand extends BaseCommand {
       outputFormat: this.getOutputFormatOption(this),
       dryRun: options.dryRun,
       sections: this.getSectionsOptions(options),
+      formatterOptions: this.getFormatterOptions(options),
     };
 
     // Handle repository platform options
@@ -175,7 +182,6 @@ export class GenerateCommand extends BaseCommand {
         platform: options.cicd,
       };
     }
-
     return generateOptions;
   }
 
@@ -247,6 +253,30 @@ export class GenerateCommand extends BaseCommand {
       return this.getOutputFormatOption(command.parent);
     }
     return undefined;
+  }
+
+  private getFormatterOptions(options: GenerateCommandOptions): FormatterOptions {
+    let formatLink: LinkFormat | undefined;
+    switch (options.formatLink) {
+      case 'false':
+      case false:
+        formatLink = LinkFormat.None;
+        break;
+      case 'full':
+        formatLink = LinkFormat.Full;
+        break;
+      case 'auto':
+      case true:
+      case undefined:
+        formatLink = LinkFormat.Auto;
+        break;
+      default:
+        throw new Error(`Invalid value for --format-link: ${options.formatLink}. Valid values are: auto, full, false.`);
+    }
+
+    return {
+      linkFormat: formatLink,
+    };
   }
 
   private async mapSupportedOptions(

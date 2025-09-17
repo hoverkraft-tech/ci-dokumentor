@@ -16,7 +16,7 @@ inputs:
     description: Repository platform (auto-detected if not specified).
     required: false
   cicd:
-    description: CI/CD platform (github-actions, gitlab-ci, etc.).
+    description: CI/CD platform (`github-actions`, `gitlab-ci`, etc.).
     required: false
   include-sections:
     description: Comma-separated list of sections to include.
@@ -32,7 +32,7 @@ inputs:
     description: Version to document (auto-detected if not specified).
     required: false
   extra-badges:
-    description: JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties.
+    description: JSON array of extra badges to include in the documentation. Each badge should have `label`, `url`, and optional `linkUrl` properties.
     required: false
     default: ''
   github-token:
@@ -40,7 +40,7 @@ inputs:
     default: ${{ github.token }}
     required: false
   ci-dokumentor-version:
-    description: Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
+    description: Version of CI Dokumentor to use. See https://github.com/hoverkraft-tech/ci-dokumentor/releases.
     required: false
     default: latest
 

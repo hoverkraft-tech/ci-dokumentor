@@ -15,32 +15,32 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
-    source: ""
+    source: ''
 
     # Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
-    destination: ""
+    destination: ''
 
     # Repository platform (auto-detected if not specified).
-    repository: ""
+    repository: ''
 
     # CI/CD platform (github-actions, gitlab-ci, etc.).
-    cicd: ""
+    cicd: ''
 
     # Comma-separated list of sections to include.
-    include-sections: ""
+    include-sections: ''
 
     # Comma-separated list of sections to exclude.
-    exclude-sections: ""
+    exclude-sections: ''
 
     # Whether to perform a dry run (no files are written).
     # Default: `false`
-    dry-run: "false"
+    dry-run: 'false'
 
     # Version to document (auto-detected if not specified).
-    version: ""
+    version: ''
 
     # JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties.
-    extra-badges: ""
+    extra-badges: ''
 
     # The GitHub token used to fetch repository information.
     # Default: `${{ github.token }}`
@@ -158,7 +158,7 @@ jobs:
 | **`version`**               | Version to document (auto-detected if not specified).                                                                                 | **false**    | -                     |
 | **`extra-badges`**          | JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties. | **false**    | -                     |
 | **`github-token`**          | The GitHub token used to fetch repository information.                                                                                | **false**    | `${{ github.token }}` |
-| **`ci-dokumentor-version`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.                                     | **false**    | `latest`              |
+| **`ci-dokumentor-version`** | Version of CI Dokumentor to use. See https://github.com/hoverkraft-tech/ci-dokumentor/releases.                                       | **false**    | `latest`              |
 
 <!-- inputs:end -->
 <!-- outputs:start -->

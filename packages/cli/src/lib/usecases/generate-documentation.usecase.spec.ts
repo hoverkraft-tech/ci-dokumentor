@@ -2,7 +2,7 @@ import { describe, vi, beforeEach, afterEach, Mocked } from 'vitest';
 import mockFs from 'mock-fs';
 
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
-import { GeneratorService, RepositoryService } from '@ci-dokumentor/core';
+import { GeneratorService, LinkFormat, RepositoryService } from '@ci-dokumentor/core';
 import { GeneratorServiceMockFactory, RepositoryServiceMockFactory, RepositoryProviderMockFactory, GeneratorAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
@@ -157,7 +157,15 @@ describe('GenerateDocumentationUseCase', () => {
         data: undefined,
       });
 
-      const result = await generateDocumentationUseCase.execute({ outputFormat: 'text', source: './action.yml', dryRun: false, sections: {} });
+      const result = await generateDocumentationUseCase.execute({
+        outputFormat: 'text',
+        source: './action.yml',
+        dryRun: false,
+        sections: {},
+        formatterOptions: {
+          linkFormat: LinkFormat.Auto
+        }
+      });
 
       expect(result.success).toBe(true);
       expect(result.destination).toBe('/tmp/out/README.md');
@@ -169,24 +177,46 @@ describe('GenerateDocumentationUseCase', () => {
           sections: {},
           generatorAdapter: generatorAdapterMock,
           repositoryProvider: repositoryProviderMock,
+          formatterOptions: {
+            linkFormat: LinkFormat.Auto
+          }
         }
       );
       expect(mockLoggerService.info).toHaveBeenCalled();
     });
 
     it('throws when source is missing', async () => {
-      await expect(generateDocumentationUseCase.execute({ outputFormat: 'text', source: '', dryRun: false, sections: {} })).rejects.toThrow('Source manifest file path is required');
+      await expect(generateDocumentationUseCase.execute({
+        outputFormat: 'text',
+        source: '',
+        dryRun: false,
+        sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto }
+      })).rejects.toThrow('Source manifest file path is required');
     });
 
     it('throws when source file does not exist', async () => {
-      await expect(generateDocumentationUseCase.execute({ outputFormat: 'text', source: './no-such-file.yml', dryRun: false, sections: {} })).rejects.toThrow('Source manifest file does not exist');
+      await expect(generateDocumentationUseCase.execute({
+        outputFormat: 'text',
+        source: './no-such-file.yml',
+        dryRun: false,
+        sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto }
+      })).rejects.toThrow('Source manifest file does not exist');
     });
 
     it('throws when provided repository platform is invalid', async () => {
       mockRepositoryService.getSupportedRepositoryPlatforms.mockReturnValue(['github']);
 
       await expect(
-        generateDocumentationUseCase.execute({ outputFormat: 'text', source: './action.yml', repository: { platform: 'unknown' }, dryRun: false, sections: {} })
+        generateDocumentationUseCase.execute({
+          outputFormat: 'text',
+          source: './action.yml',
+          repository: { platform: 'unknown' },
+          dryRun: false,
+          sections: {},
+          formatterOptions: { linkFormat: LinkFormat.Auto }
+        })
       ).rejects.toThrow("Invalid repository platform 'unknown'");
     });
 
@@ -194,7 +224,14 @@ describe('GenerateDocumentationUseCase', () => {
       mockGeneratorService.getSupportedCicdPlatforms.mockReturnValue(['github-actions']);
 
       await expect(
-        generateDocumentationUseCase.execute({ outputFormat: 'text', source: './action.yml', cicd: { platform: 'invalid' }, dryRun: false, sections: {} })
+        generateDocumentationUseCase.execute({
+          outputFormat: 'text',
+          source: './action.yml',
+          cicd: { platform: 'invalid' },
+          dryRun: false,
+          sections: {},
+          formatterOptions: { linkFormat: LinkFormat.Auto }
+        })
       ).rejects.toThrow("Invalid CI/CD platform 'invalid'");
     });
 
@@ -205,7 +242,13 @@ describe('GenerateDocumentationUseCase', () => {
       const generatorAdapterMock = GeneratorAdapterMockFactory.create({ getPlatformName: 'github-actions' });
       mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(generatorAdapterMock);
 
-      await expect(generateDocumentationUseCase.execute({ outputFormat: 'text', source: './action.yml', dryRun: false, sections: {} })).rejects.toThrow('No repository platform could be auto-detected. Please specify one using --repository option.');
+      await expect(generateDocumentationUseCase.execute({
+        outputFormat: 'text',
+        source: './action.yml',
+        dryRun: false,
+        sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto }
+      })).rejects.toThrow('No repository platform could be auto-detected. Please specify one using --repository option.');
     });
 
     it('throws when cicd adapter cannot be auto-detected', async () => {
@@ -216,7 +259,13 @@ describe('GenerateDocumentationUseCase', () => {
       mockRepositoryService.autoDetectRepositoryProvider.mockResolvedValue(repositoryProviderMock);
       mockGeneratorService.autoDetectCicdAdapter.mockReturnValue(undefined);
 
-      await expect(generateDocumentationUseCase.execute({ outputFormat: 'text', source: './action.yml', dryRun: false, sections: {} })).rejects.toThrow("No CI/CD platform could be auto-detected for source './action.yml'");
+      await expect(generateDocumentationUseCase.execute({
+        outputFormat: 'text',
+        source: './action.yml',
+        dryRun: false,
+        sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto }
+      })).rejects.toThrow("No CI/CD platform could be auto-detected for source './action.yml'");
     });
 
   })

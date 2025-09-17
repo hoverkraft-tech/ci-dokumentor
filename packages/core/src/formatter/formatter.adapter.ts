@@ -2,8 +2,26 @@ import { FormatterLanguage } from './formatter-language.js';
 
 export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');
 
+export enum LinkFormat {
+  Auto = 'auto',
+  Full = 'full',
+  None = 'none'
+}
+
+export type FormatterOptions = {
+  /**
+   * Link format for transforming bare URLs in text to markdown links
+   */
+  linkFormat: LinkFormat;
+};
+
 export interface FormatterAdapter {
   supportsLanguage(language: FormatterLanguage): boolean;
+
+  /**
+   * Set formatter options that affect formatting behavior
+   */
+  setOptions(options: FormatterOptions): void;
 
   appendContent(...inputs: Buffer[]): Buffer;
 
