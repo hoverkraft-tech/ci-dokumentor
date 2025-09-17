@@ -78,6 +78,7 @@ jobs:
           destination: packages/docs/content/integrations/github-action.md
           include-sections: usage,inputs,outputs,secrets
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          format-link: full
 
       - uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: generate-token

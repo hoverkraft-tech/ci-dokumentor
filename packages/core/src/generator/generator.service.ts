@@ -8,6 +8,7 @@ import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
 import { FormatterService } from '../formatter/formatter.service.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
+import { FormatterOptions } from '../formatter/formatter.adapter.js';
 
 @injectable()
 export class GeneratorService {
@@ -74,6 +75,7 @@ export class GeneratorService {
     sections,
     generatorAdapter,
     repositoryProvider,
+    formatterOptions,
   }: {
     source: string;
     destination?: string;
@@ -81,6 +83,7 @@ export class GeneratorService {
     sections: GenerateSectionsOptions;
     generatorAdapter: GeneratorAdapter;
     repositoryProvider: RepositoryProvider;
+    formatterOptions: FormatterOptions;
   }): Promise<{ destination: string; data: string | undefined }> {
     // Check if the adapter supports the source path
     if (!generatorAdapter.supportsSource(source)) {
@@ -91,6 +94,9 @@ export class GeneratorService {
 
     const destinationPath = destination ?? generatorAdapter.getDocumentationPath(source);
     const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
+
+    // Set formatter options before initializing renderer
+    formatterAdapter.setOptions(formatterOptions);
 
     // Use provided renderer adapter or default to FileRenderer
     const rendererAdapter = dryRun ? this.diffRendererAdapter : this.fileRendererAdapter;

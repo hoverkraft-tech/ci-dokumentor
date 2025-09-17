@@ -9,6 +9,7 @@ import {
   RepositoryProvider,
   RepositoryService,
   SectionOptionsDescriptors,
+  FormatterOptions,
 } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
 
@@ -67,6 +68,11 @@ export interface GenerateDocumentationUseCaseInput {
    * Section generator options
    */
   sections: GenerateSectionsOptions;
+
+  /**
+   * Formatter options for output customization
+   */
+  formatterOptions: FormatterOptions;
 }
 
 export interface GenerateDocumentationUseCaseOutput {
@@ -225,6 +231,7 @@ export class GenerateDocumentationUseCase {
       sections: input.sections,
       generatorAdapter,
       repositoryProvider,
+      formatterOptions: input.formatterOptions,
     });
 
     this.loggerService.info('Documentation generated successfully!', input.outputFormat);

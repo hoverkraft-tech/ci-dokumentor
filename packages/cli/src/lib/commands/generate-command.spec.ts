@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest'
 import { GenerateCommand } from './generate-command.js';
 import { GenerateDocumentationUseCase } from '../usecases/generate-documentation.usecase.js';
 import { CommandTester } from '../../../__tests__/command-tester.js';
+import { LinkFormat } from '@ci-dokumentor/core';
 
 describe('GenerateCommand', () => {
   let generateCommand: GenerateCommand;
@@ -87,6 +88,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -114,6 +116,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -141,6 +144,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -167,6 +171,7 @@ describe('GenerateCommand', () => {
         },
         dryRun: false,
         outputFormat: undefined,
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -193,6 +198,7 @@ describe('GenerateCommand', () => {
         },
         dryRun: false,
         outputFormat: undefined,
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -222,6 +228,7 @@ describe('GenerateCommand', () => {
         },
         dryRun: false,
         outputFormat: undefined,
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -248,6 +255,7 @@ describe('GenerateCommand', () => {
         },
         dryRun: false,
         outputFormat: undefined,
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -274,6 +282,7 @@ describe('GenerateCommand', () => {
         },
         dryRun: false,
         outputFormat: undefined,
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -306,6 +315,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -349,6 +359,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
     });
 
@@ -389,6 +400,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         sections: {},
+        formatterOptions: { linkFormat: LinkFormat.Auto },
       });
 
     });
@@ -417,11 +429,12 @@ describe('GenerateCommand', () => {
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: './test-source',
         destination: undefined,
+        dryRun: false,
+        outputFormat: undefined,
         sections: {
           includeSections: ['header'],
         },
-        dryRun: false,
-        outputFormat: undefined,
+        formatterOptions: { linkFormat: 'auto' }
       });
 
     });
@@ -467,6 +480,9 @@ describe('GenerateCommand', () => {
         dryRun: true,
         outputFormat: undefined,
         sections: {},
+        formatterOptions: {
+          linkFormat: 'auto',
+        },
       });
     });
   });

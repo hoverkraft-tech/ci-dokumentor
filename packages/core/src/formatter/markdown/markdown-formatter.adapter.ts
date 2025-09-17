@@ -1,13 +1,21 @@
 import { inject, injectable } from 'inversify';
 import { FormatterLanguage } from '../formatter-language.js';
-import { FormatterAdapter } from '../formatter.adapter.js';
+import { FormatterAdapter, FormatterOptions, LinkFormat } from '../formatter.adapter.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
 
 @injectable()
 export class MarkdownFormatterAdapter implements FormatterAdapter {
+  private options: FormatterOptions = {
+    linkFormat: LinkFormat.Auto
+  };
+
   constructor(
     @inject(MarkdownTableGenerator) private readonly markdownTableGenerator: MarkdownTableGenerator
   ) { }
+
+  setOptions(options: FormatterOptions): void {
+    this.options = { ...options };
+  }
 
   supportsLanguage(language: FormatterLanguage): boolean {
     return language === FormatterLanguage.Markdown;
@@ -105,7 +113,11 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   paragraph(input: Buffer): Buffer {
-    return this.appendContent(input, this.lineBreak());
+    const linkFormat = this.options.linkFormat;
+    const processedInput = linkFormat && linkFormat !== LinkFormat.None
+      ? this.transformUrls(input, linkFormat === LinkFormat.Full)
+      : input;
+    return this.appendContent(processedInput, this.lineBreak());
   }
 
   bold(input: Buffer): Buffer {
@@ -219,8 +231,12 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * Escape special characters in the input buffer for markdown.
    */
   private escape(input: Buffer, search: string): Buffer {
-    if (!input || input.length === 0) return Buffer.alloc(0);
-    if (!search || search.length === 0) return input;
+    if (!input || input.length === 0) {
+      return Buffer.alloc(0);
+    }
+    if (!search || search.length === 0) {
+      return input;
+    }
 
     const searchBuf = Buffer.from(search);
     // Build replacement buffer: prefix each character with backslash
@@ -238,8 +254,12 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     }
     if (idx < input.length) parts.push(input.subarray(idx));
 
-    if (parts.length === 0) return Buffer.alloc(0);
-    if (parts.length === 1) return parts[0];
+    if (parts.length === 0) {
+      return Buffer.alloc(0);
+    }
+    if (parts.length === 1) {
+      return parts[0];
+    }
     return this.appendContent(...parts);
   }
 
@@ -275,8 +295,12 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       nextClose = input.indexOf(closeBuf, idx);
     }
     if (idx < input.length) parts.push(input.subarray(idx));
-    if (parts.length === 0) return Buffer.alloc(0);
-    if (parts.length === 1) return parts[0];
+    if (parts.length === 0) {
+      return Buffer.alloc(0);
+    }
+    if (parts.length === 1) {
+      return parts[0];
+    }
     return this.appendContent(...parts);
   }
 
@@ -291,6 +315,95 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     if (!buf || buf.length === 0) return false;
     const s = buf.toString();
     return /^\s*!?\[[^\]]*\]\([^)]*\)\s*$/.test(s);
+  }
+
+  /**
+   * Transform URLs in text to markdown links.
+   * By default creates autolinks (<url>), or full links if fullLinkFormat is true.
+   */
+  private transformUrls(input: Buffer, fullLinkFormat = false): Buffer {
+    if (!input || input.length === 0) return input;
+
+    const text = input.toString();
+
+    // URL regex pattern - matches http/https URLs, excluding common trailing punctuation
+    const urlRegex = /https?:\/\/[^\s)\]]+/g;
+
+    // Check if there are already markdown links in the text to avoid double-processing
+    const linkRegex = /\[([^\]]*)\]\(([^)]*)\)/g;
+    const hasExistingLinks = linkRegex.test(text);
+
+    let result = text;
+
+    if (!hasExistingLinks) {
+      // Simple case: no existing markdown links, just transform all URLs
+      result = text.replace(urlRegex, (url) => {
+        // Remove trailing punctuation from URL
+        const cleanUrl = url.replace(/[.,;!?]+$/, '');
+        const trailingPunct = url.slice(cleanUrl.length);
+
+        if (fullLinkFormat) {
+          return `[${cleanUrl}](${cleanUrl})${trailingPunct}`;
+        } else {
+          return `<${cleanUrl}>${trailingPunct}`;
+        }
+      });
+    } else {
+      // More careful processing when existing links are present
+      // Find all existing links and their positions
+      linkRegex.lastIndex = 0; // Reset regex
+      const links = [];
+      let match;
+      while ((match = linkRegex.exec(text)) !== null) {
+        links.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          fullMatch: match[0]
+        });
+      }
+
+      // Process text in chunks, avoiding existing links
+      let processedResult = '';
+      let lastIndex = 0;
+
+      for (const linkInfo of links) {
+        // Process text before this link
+        const beforeLink = text.substring(lastIndex, linkInfo.start);
+        processedResult += beforeLink.replace(urlRegex, (url) => {
+          // Remove trailing punctuation from URL
+          const cleanUrl = url.replace(/[.,;!?]+$/, '');
+          const trailingPunct = url.slice(cleanUrl.length);
+
+          if (fullLinkFormat) {
+            return `[${cleanUrl}](${cleanUrl})${trailingPunct}`;
+          } else {
+            return `<${cleanUrl}>${trailingPunct}`;
+          }
+        });
+
+        // Add the existing link unchanged
+        processedResult += linkInfo.fullMatch;
+        lastIndex = linkInfo.end;
+      }
+
+      // Process remaining text after the last link
+      const afterLastLink = text.substring(lastIndex);
+      processedResult += afterLastLink.replace(urlRegex, (url) => {
+        // Remove trailing punctuation from URL
+        const cleanUrl = url.replace(/[.,;!?]+$/, '');
+        const trailingPunct = url.slice(cleanUrl.length);
+
+        if (fullLinkFormat) {
+          return `[${cleanUrl}](${cleanUrl})${trailingPunct}`;
+        } else {
+          return `<${cleanUrl}>${trailingPunct}`;
+        }
+      });
+
+      result = processedResult;
+    }
+
+    return Buffer.from(result);
   }
 
   /**
