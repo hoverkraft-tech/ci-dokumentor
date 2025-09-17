@@ -44,7 +44,7 @@
   "dependencies": {
     "commander": "^14.0.0",
     "reflect-metadata": "^0.2.2",
-    "inversify": "^7.9.1"
+    "inversify": "^7.10.0"
   },
   "devDependencies": {
     "@ci-dokumentor/core": "workspace:*",
