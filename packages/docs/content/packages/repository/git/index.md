@@ -1,8 +1,8 @@
 ---
+title: Repository - Git Package
+description: A minimal, local Git-backed repository provider for CI Dokumentor.
 sidebar_position: 3
 ---
-
-# Repository - Git package
 
 The `@ci-dokumentor/repository-git` package provides a minimal, local Git-backed repository provider used by CI Dokumentor's repository discovery. It exposes a single concrete provider, `GitRepositoryProvider`, and a small DI container module used to register the provider.
 
@@ -108,10 +108,10 @@ repoInfos.forEach((repo) => {
 
 ## Related Packages
 
-- [Core Package](./core) - Base abstractions and services
-- [Repository GitHub](./repository-github) - GitHub-specific repository provider
-- [CLI Package](./cli) - Command-line interface
-- [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions integration
+[Core Package](/packages/core/) - Base abstractions and services
+[Repository GitHub](/packages/repository/github/) - GitHub-specific repository provider
+[CLI Package](/packages/cli/) - Command-line interface
+[CI/CD GitHub Actions](/packages/cicd/github-actions/) - GitHub Actions integration
 
 ## Contributing
 

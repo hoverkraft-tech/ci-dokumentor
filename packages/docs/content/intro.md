@@ -160,14 +160,14 @@ The migrate command serves as a **bridge solution** to help transition from othe
 :::
 
 :::tip
-**📖 Full Documentation**: For more details on CLI usage, see our [**CLI documentation**](./packages/cli.md).
+**📖 Full Documentation**: For more details on CLI usage, see our [**CLI documentation**](./packages/cli/).
 :::
 
 ## Supported Repository Platforms
 
-- ✅ [**Git**](./packages/repository-git.md) - Basic repository information
-- ✅ [**GitHub**](./packages/repository-github.md) - GitHub Repository information and metadata
-- 🚧 [**GitLab**](./packages/repository-gitlab.md) - GitLab Repository information and metadata
+- ✅ [**Git**](./packages/repository/git/) - Basic repository information
+- ✅ [**GitHub**](./packages/repository/github/) - GitHub Repository information and metadata
+- 🚧 [**GitLab**](./packages/repository/gitlab/) - GitLab Repository information and metadata
 
 ## Next Steps
 
@@ -178,6 +178,6 @@ For detailed information, explore these guides:
 - 🦊 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI integration guide
 - 🗡️ [**Dagger.io**](./integrations/dagger.md) - Dagger.io integration guide
 - 🔄 [**Migration Guide**](./integrations/migration.md) - Migrate from other documentation tools
-- 💻 [**CLI Package**](./packages/cli.md) - Complete command-line reference
-- 📦 [**Core Architecture**](./packages/core.md) - Learn about the internal architecture
-- 👨‍💻 [**Developer Guide**](./developers/index.md) - Contribute to the project
+- 💻 [**CLI Package**](./packages/cli/) - Complete command-line reference
+- 📦 [**Core Architecture**](./packages/core/) - Learn about the internal architecture
+- 👨‍💻 [**Developer Guide**](./developers/) - Contribute to the project

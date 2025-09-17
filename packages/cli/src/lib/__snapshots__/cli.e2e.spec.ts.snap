@@ -64,7 +64,7 @@ Documentation generated successfully!
 ===================================================================
 --- test.md
 +++ test.md
-@@ -0,0 +1,109 @@
+@@ -0,0 +1,119 @@
 +<!-- header:start -->
 +
 +# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYm9vay1vcGVuIiBjb2xvcj0iYmx1ZSI+PHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhMyAzIDAgMCAwLTMtM0gyeiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMiAzaC02YTQgNCAwIDAgMC00IDR2MTRhMyAzIDAgMCAxIDMtM2g3eiI+PC9wYXRoPjwvc3ZnPg==) GitHub Action: CI Dokumentor
@@ -102,7 +102,7 @@ Documentation generated successfully!
 +    # Repository platform (auto-detected if not specified).
 +    repository: ""
 +
-+    # CI/CD platform (github-actions, gitlab-ci, etc.).
++    # CI/CD platform (\`github-actions\`, \`gitlab-ci\`, etc.).
 +    cicd: ""
 +
 +    # Comma-separated list of sections to include.
@@ -118,14 +118,21 @@ Documentation generated successfully!
 +    # Version to document (auto-detected if not specified).
 +    version: ""
 +
-+    # JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties.
++    # JSON array of extra badges to include in the documentation.
++    # Each badge should have \`label\`, \`url\`, and optional \`linkUrl\` properties.
 +    extra-badges: ""
++
++    # Transform bare URLs to links.
++    # Types: \`auto\` (autolinks), \`full\` (full links), \`false\` (disabled).
++    #
++    # Default: \`auto\`
++    format-link: auto
 +
 +    # The GitHub token used to fetch repository information.
 +    # Default: \`\${{ github.token }}\`
 +    github-token: \${{ github.token }}
 +
-+    # Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.
++    # Version of CI Dokumentor to use. See https://github.com/hoverkraft-tech/ci-dokumentor/releases.
 +    # Default: \`latest\`
 +    ci-dokumentor-version: latest
 +\`\`\`
@@ -135,19 +142,22 @@ Documentation generated successfully!
 +
 +## Inputs
 +
-+| **Input**                   | **Description**                                                                                                                       | **Required** | **Default**           |
-+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------------- |
-+| **\`source\`**                | Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).                                                  | **true**     | -                     |
-+| **\`destination\`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).                | **false**    | -                     |
-+| **\`repository\`**            | Repository platform (auto-detected if not specified).                                                                                 | **false**    | -                     |
-+| **\`cicd\`**                  | CI/CD platform (github-actions, gitlab-ci, etc.).                                                                                     | **false**    | -                     |
-+| **\`include-sections\`**      | Comma-separated list of sections to include.                                                                                          | **false**    | -                     |
-+| **\`exclude-sections\`**      | Comma-separated list of sections to exclude.                                                                                          | **false**    | -                     |
-+| **\`dry-run\`**               | Whether to perform a dry run (no files are written).                                                                                  | **false**    | \`false\`               |
-+| **\`version\`**               | Version to document (auto-detected if not specified).                                                                                 | **false**    | -                     |
-+| **\`extra-badges\`**          | JSON array of extra badges to include in the documentation. Each badge should have 'label', 'url', and optional 'linkUrl' properties. | **false**    | -                     |
-+| **\`github-token\`**          | The GitHub token used to fetch repository information.                                                                                | **false**    | \`\${{ github.token }}\` |
-+| **\`ci-dokumentor-version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.                                     | **false**    | \`latest\`              |
++| **Input**                   | **Description**                                                                                                        | **Required** | **Default**           |
++| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------ | --------------------- |
++| **\`source\`**                | Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).                                   | **true**     | -                     |
++| **\`destination\`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter). | **false**    | -                     |
++| **\`repository\`**            | Repository platform (auto-detected if not specified).                                                                  | **false**    | -                     |
++| **\`cicd\`**                  | CI/CD platform (\`github-actions\`, \`gitlab-ci\`, etc.).                                                                  | **false**    | -                     |
++| **\`include-sections\`**      | Comma-separated list of sections to include.                                                                           | **false**    | -                     |
++| **\`exclude-sections\`**      | Comma-separated list of sections to exclude.                                                                           | **false**    | -                     |
++| **\`dry-run\`**               | Whether to perform a dry run (no files are written).                                                                   | **false**    | \`false\`               |
++| **\`version\`**               | Version to document (auto-detected if not specified).                                                                  | **false**    | -                     |
++| **\`extra-badges\`**          | JSON array of extra badges to include in the documentation.                                                            | **false**    | -                     |
++|                             | Each badge should have \`label\`, \`url\`, and optional \`linkUrl\` properties.                                              |              |                       |
++| **\`format-link\`**           | Transform bare URLs to links.                                                                                          | **false**    | \`auto\`                |
++|                             | Types: \`auto\` (autolinks), \`full\` (full links), \`false\` (disabled).                                                    |              |                       |
++| **\`github-token\`**          | The GitHub token used to fetch repository information.                                                                 | **false**    | \`\${{ github.token }}\` |
++| **\`ci-dokumentor-version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.                      | **false**    | \`latest\`              |
 +
 +<!-- inputs:end -->
 +<!-- outputs:start -->

@@ -1,8 +1,8 @@
 ---
+title: Repository - GitHub Package
+description: A GitHub repository provider for CI Dokumentor, integrating with GitHub's API for enhanced repository data.
 sidebar_position: 4
 ---
-
-# Repository - GitHub Package
 
 The `@ci-dokumentor/repository-github` package provides GitHub-specific repository information and features, extending the base Git repository functionality.
 
@@ -66,6 +66,8 @@ Fetches comprehensive repository data:
 - Repository name and description
 - Owner information
 - License details
+- Security information
+- Contributing guidelines
 - Repository URL and metadata
 
 ### GraphQL Integration
@@ -92,7 +94,7 @@ const container = initContainer();
 
 ## Related Packages
 
-- [Core Package](./core) - Base abstractions and services
-- [Repository Git](./repository-git) - Base Git repository functionality
-- [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions integration
-- [CLI Package](./cli) - Command-line interface
+[Core Package](/packages/core/) - Base abstractions and services
+[Repository Git](/packages/repository/git/) - Base Git repository functionality
+[CI/CD GitHub Actions](/packages/cicd/github-actions/) - GitHub Actions integration
+[CLI Package](/packages/cli/) - Command-line interface
