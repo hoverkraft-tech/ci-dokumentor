@@ -46,7 +46,10 @@ describe('SecuritySectionGenerator', () => {
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-      };
+
+        destination: 'README.md',
+
+        };
 
       // Act
       const result = await generator.generateSection(payload);
@@ -68,7 +71,10 @@ We take security seriously. Please see our [security policy](https://github.com/
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-      };
+
+        destination: 'README.md',
+
+        };
 
       // Act
       const result = await generator.generateSection(payload);
@@ -90,7 +96,10 @@ We take security seriously. Please see our [security policy](https://github.com/
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-      };
+
+        destination: 'README.md',
+
+        };
 
       // Act
       const result = await generator.generateSection(payload);

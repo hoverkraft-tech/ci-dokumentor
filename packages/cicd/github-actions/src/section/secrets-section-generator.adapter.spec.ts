@@ -25,7 +25,7 @@ describe('SecretsSectionGenerator', () => {
         const action = GitHubActionMockFactory.create();
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest: action as any, repositoryProvider: mockRepositoryProvider as any });
+        const result = await generator.generateSection({ formatterAdapter, manifest: action as any, repositoryProvider: mockRepositoryProvider as any , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -37,7 +37,7 @@ describe('SecretsSectionGenerator', () => {
         const workflow = GitHubWorkflowMockFactory.create();
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest: workflow, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest: workflow, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -54,7 +54,7 @@ describe('SecretsSectionGenerator', () => {
         const workflow = GitHubWorkflowMockFactory.create({ on: { workflow_call: { secrets } } });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest: workflow, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest: workflow, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);

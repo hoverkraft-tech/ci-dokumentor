@@ -45,7 +45,7 @@ describe('HeaderSectionGenerator', () => {
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -62,7 +62,7 @@ describe('HeaderSectionGenerator', () => {
         mockRepositoryProvider.getLogo.mockResolvedValue('https://example.com/logo.png');
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -135,7 +135,7 @@ describe('HeaderSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -158,7 +158,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -182,7 +182,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -208,7 +208,7 @@ describe('HeaderSectionGenerator', () => {
         mockRepositoryProvider.getLogo.mockResolvedValue('https://example.com/logo.png');
 
         // Act        
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -234,7 +234,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -255,7 +255,7 @@ describe('HeaderSectionGenerator', () => {
         mockRepositoryProvider.getLogo.mockResolvedValue('https://example.com/logo.png');
 
         // Act        
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -308,7 +308,7 @@ describe('HeaderSectionGenerator', () => {
         };
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -328,7 +328,7 @@ describe('HeaderSectionGenerator', () => {
       };
 
       // Act
-      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);
@@ -348,7 +348,7 @@ describe('HeaderSectionGenerator', () => {
       };
 
       // Act
-      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);
@@ -369,37 +369,12 @@ describe('HeaderSectionGenerator', () => {
 
 
       // Act
-      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+      const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
       // Assert
       expect(result).toBeInstanceOf(Buffer);
       expect(result.toString()).toEqual(
         `# GitHub Action: Test Action
-`
-      );
-    });
-
-    it('should handle file:// URL without destination (fallback to original path)', async () => {
-      // Arrange
-      const manifest: GitHubAction = GitHubActionMockFactory.create();
-
-      mockRepositoryProvider.getLogo.mockResolvedValue('file://.github/logo.png');
-
-      // Act (no destination provided)
-      const result = await generator.generateSection({ 
-        formatterAdapter, 
-        manifest, 
-        repositoryProvider: mockRepositoryProvider
-      });
-
-      // Assert
-      expect(result).toBeInstanceOf(Buffer);
-      expect(result.toString()).toEqual(
-        `<div align="center">
-  <img src="file://.github/logo.png" width="60px" align="center" alt="Test Action" />
-</div>
-
-# GitHub Action: Test Action
 `
       );
     });

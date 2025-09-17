@@ -109,7 +109,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -135,7 +138,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -160,7 +166,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -183,7 +192,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         const extraBadgesJson = JSON.stringify([
           { label: 'Custom Badge', url: 'https://img.shields.io/badge/custom-badge-green', linkUrl: 'https://example.com' }
@@ -214,7 +226,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         const extraBadgesJson = JSON.stringify([
           { label: 'Badge without linkUrl', url: 'https://img.shields.io/badge/badge-url-orange' }
@@ -246,7 +261,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -269,7 +287,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         const extraBadgesJson = JSON.stringify([
           { label: 'Workflow Badge', url: 'https://img.shields.io/badge/workflow-badge-red', linkUrl: 'https://workflow.com' }
@@ -301,7 +322,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         // Don't set any extra badges
 
@@ -327,7 +351,10 @@ describe('BadgesSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-        };
+
+          destination: 'README.md',
+
+          };
 
         generator.setSectionOptions({ extraBadges: JSON.stringify([]) });
 

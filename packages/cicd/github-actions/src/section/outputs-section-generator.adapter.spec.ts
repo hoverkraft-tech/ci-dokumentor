@@ -62,7 +62,7 @@ describe('OutputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -82,7 +82,7 @@ describe('OutputsSectionGenerator', () => {
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -96,7 +96,7 @@ describe('OutputsSectionGenerator', () => {
         const manifest: GitHubAction = GitHubActionMockFactory.create({ outputs: {} });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -110,7 +110,7 @@ describe('OutputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -131,7 +131,7 @@ describe('OutputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -152,7 +152,7 @@ describe('OutputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -175,7 +175,7 @@ describe('OutputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -196,7 +196,7 @@ describe('OutputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -218,7 +218,7 @@ describe('OutputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider
-        });
+        , destination: 'README.md' });
 
         // Assert
         expect(result).toBeInstanceOf(Buffer);
@@ -238,7 +238,7 @@ describe('OutputsSectionGenerator', () => {
         // Act & Assert
         await expect(generator.generateSection({
           formatterAdapter, manifest: invalidManifest, repositoryProvider: mockRepositoryProvider
-        })).rejects.toThrow('Unsupported manifest type for OutputsSectionGenerator');
+        , destination: 'README.md' })).rejects.toThrow('Unsupported manifest type for OutputsSectionGenerator');
       });
     });
   });

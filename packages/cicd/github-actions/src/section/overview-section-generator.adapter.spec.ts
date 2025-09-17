@@ -43,7 +43,7 @@ describe('OverviewSectionGenerator', () => {
                 });
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -62,7 +62,7 @@ A comprehensive test action for CI/CD workflows
                 });
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -76,7 +76,7 @@ A comprehensive test action for CI/CD workflows
                 });
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -90,7 +90,7 @@ A comprehensive test action for CI/CD workflows
                 });
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -111,7 +111,7 @@ of description
                 });
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -141,7 +141,7 @@ A test action with **bold**, *italic*, and \`code\` formatting
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -177,7 +177,7 @@ Continuous integration workflow for the project
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -212,7 +212,7 @@ Continuous integration workflow with permissions
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -243,7 +243,7 @@ Workflow with empty permissions
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -266,7 +266,7 @@ Workflow without permissions
                 });
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -304,7 +304,7 @@ Workflow without permissions
                 } as GitHubWorkflow & { description: string };
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -335,7 +335,7 @@ Automated release workflow
                     formatterAdapter,
                     manifest: undefined as unknown as GitHubActionsManifest,
                     repositoryProvider: mockRepositoryProvider
-                })).rejects.toThrow("Cannot use 'in' operator to search for 'description' in undefined");
+                , destination: 'README.md' })).rejects.toThrow("Cannot use 'in' operator to search for 'description' in undefined");
 
             });
 
@@ -348,7 +348,7 @@ Automated release workflow
                 } as GitHubAction;
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 expect(result).toBeInstanceOf(Buffer);
@@ -385,7 +385,7 @@ Automated release workflow
 
 
                 // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider });
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
                 // Assert
                 const expectedOutput = `## Overview

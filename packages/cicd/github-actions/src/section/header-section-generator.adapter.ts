@@ -47,7 +47,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
     logoPath: string | undefined,
-    destination?: string
+    destination: string
   ): Buffer {
     if (!logoPath) {
       return Buffer.alloc(0);
@@ -55,7 +55,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     // Calculate relative path for file:// URLs
     let resolvedLogoPath = logoPath;
-    if (logoPath.startsWith('file://') && destination) {
+    if (logoPath.startsWith('file://')) {
       const filePath = logoPath.replace(/^file:\/\//, '');
       const destinationDir = dirname(destination);
       resolvedLogoPath = relative(destinationDir, filePath);
