@@ -1,6 +1,6 @@
 export * from './formatter/formatter.adapter.js';
 export * from './formatter/formatter.service.js';
-export * from './formatter/markdown-formatter.adapter.js';
+export * from './formatter/markdown/markdown-formatter.adapter.js';
 export * from './generator/generator.adapter.js';
 export * from './generator/generator.service.js';
 export * from './generator/section-generator.adapter.js';

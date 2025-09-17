@@ -1,7 +1,14 @@
-import { FormatterLanguage } from './formatter-language.js';
-import { FormatterAdapter } from './formatter.adapter.js';
+import { inject, injectable } from 'inversify';
+import { FormatterLanguage } from '../formatter-language.js';
+import { FormatterAdapter } from '../formatter.adapter.js';
+import { MarkdownTableGenerator } from './markdown-table.generator.js';
 
+@injectable()
 export class MarkdownFormatterAdapter implements FormatterAdapter {
+  constructor(
+    @inject(MarkdownTableGenerator) private readonly markdownTableGenerator: MarkdownTableGenerator
+  ) { }
+
   supportsLanguage(language: FormatterLanguage): boolean {
     return language === FormatterLanguage.Markdown;
   }
@@ -139,7 +146,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   link(text: Buffer, url: Buffer): Buffer {
     // If the text is already a single inline markdown link or image (e.g. "![...](...)" or "[...]()"),
     // don't escape it - callers sometimes pass pre-formatted markdown (badges) as the link text.
-    const isInlineMarkdown = /^\s*!?\[[^\]]*\]\([^)]*\)\s*$/.test(text.toString());
+    const isInlineMarkdown = this.bufferLooksLikeInlineMarkdown(text);
     return this.appendContent(
       Buffer.from('['),
       isInlineMarkdown ? text : this.escape(this.escape(text, '['), ']'),
@@ -187,88 +194,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   table(headers: Buffer[], rows: Buffer[][]): Buffer {
-    const normalizeCell = (cell: Buffer): Buffer => {
-      return this.escape(this.trimBuffer(cell), '|');
-    };
-
-    const splitMultilineCell = (cell: Buffer): Buffer[] => {
-      return this.splitLines(this.trimBuffer(cell));
-    };
-
-    let result = '';
-
-    // If no headers, tests expect an empty string
-    const isEmptyTable = (!headers || headers.length === 0) && (!rows || rows.length === 0);
-    if (isEmptyTable) {
-      return Buffer.alloc(0)
-    }
-
-    // Handle multiline content with additional rows and compute column widths
-    const headerLines = headers.map(splitMultilineCell);
-    const numCols = headers.length;
-    const maxHeaderLines = Math.max(...headerLines.map((lines) => lines.length));
-
-    const colWidths: number[] = Array.from({ length: numCols }, () => 0);
-
-    // consider header lines
-    for (let c = 0; c < numCols; c++) {
-      (headerLines[c] || ['']).forEach((headerLine) => {
-        const cellContent = normalizeCell(Buffer.from(headerLine || ''));
-        colWidths[c] = Math.max(colWidths[c], cellContent.length);
-      });
-    }
-
-    // consider data rows
-    rows.forEach((row) => {
-      for (let c = 0; c < numCols; c++) {
-        const cell = row[c] || Buffer.alloc(0);
-        splitMultilineCell(cell).forEach((ln) => {
-          const s = normalizeCell(Buffer.from(ln || ''));
-          colWidths[c] = Math.max(colWidths[c], s.length);
-        });
-      }
-    });
-
-    const pad = (s: string, width: number) => s + ' '.repeat(Math.max(0, width - s.length));
-
-    // First header row (main headers) — pad to column widths
-    const mainHeaderRow = `| ${headers
-      .map((h, c) => pad(normalizeCell(splitMultilineCell(h)[0]).toString(), colWidths[c]))
-      .join(' | ')} |`;
-
-    // separator uses dashes matching column width (min 3)
-    const separatorRow = `| ${colWidths.map((w) => '-'.repeat(Math.max(3, w))).join(' | ')} |`;
-    result += `${mainHeaderRow}\n${separatorRow}\n`;
-
-    // Additional header rows if multiline headers exist
-    for (let lineIndex = 1; lineIndex < maxHeaderLines; lineIndex++) {
-      const additionalHeaderCells = headerLines.map((lines, c) =>
-        pad(normalizeCell(lines[lineIndex]).toString(), colWidths[c])
-      );
-      result += `| ${additionalHeaderCells.join(' | ')} |\n`;
-    }
-
-    // Process data rows — normalize to numCols and pad each cell line
-    rows.forEach((row) => {
-      const normalizedRow: Buffer[] = [];
-      for (let c = 0; c < numCols; c++) normalizedRow.push(row[c] || Buffer.alloc(0));
-
-      const cellLines = normalizedRow.map(splitMultilineCell);
-      const maxLines = Math.max(...cellLines.map((lines) => lines.length));
-
-      for (let lineIndex = 0; lineIndex < maxLines; lineIndex++) {
-        const outCells: string[] = [];
-        for (let c = 0; c < numCols; c++) {
-          const lines = cellLines[c] || [''];
-          const raw = lines[lineIndex] || '';
-          outCells.push(pad(normalizeCell(raw).toString(), colWidths[c]));
-        }
-        result += `| ${outCells.join(' | ')} |\n`;
-      }
-    });
-
-    // Use buffer-based trimming to avoid converting the whole table string to JS string
-    return this.trimTrailingNewlines(Buffer.from(result));
+    return this.markdownTableGenerator.table(headers, rows);
   }
 
   badge(label: Buffer, url: Buffer): Buffer {
@@ -355,6 +281,19 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   /**
+   * Split a cell Buffer into ordered segments of plain text and fenced code blocks.
+   * Returns an array of { type: 'text'|'code', content: Buffer } preserving original order.
+   */
+
+
+  // Quick heuristic to check if a buffer looks like a single inline markdown link/image
+  private bufferLooksLikeInlineMarkdown(buf: Buffer): boolean {
+    if (!buf || buf.length === 0) return false;
+    const s = buf.toString();
+    return /^\s*!?\[[^\]]*\]\([^)]*\)\s*$/.test(s);
+  }
+
+  /**
    * Trim trailing CR/LF bytes from a buffer.
    * Returns a buffer that ends with exactly one LF ("\n").
    * If the input is empty or contains only newlines, returns a buffer with a single "\n".
@@ -371,25 +310,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   /**
    * Trim leading/trailing spaces, tabs, CR/LF from buffer. Returns sliced buffer view.
    */
-  private trimBuffer(input: Buffer): Buffer {
-    if (!input || input.length === 0) {
-      return Buffer.alloc(0);
-    }
 
-    let start = 0;
-    let end = input.length - 1;
-    const isWhitespace = (b: number) => b === 0x20 /* space */ || b === 0x09 /* tab */ || b === 0x0A /* LF */ || b === 0x0D /* CR */;
-    while (start <= end && isWhitespace(input[start])) {
-      start++;
-    }
-    while (end >= start && isWhitespace(input[end])) {
-      end--;
-    }
-    if (end < start) {
-      return Buffer.alloc(0);
-    }
-    return input.subarray(start, end + 1);
-  }
 
   /**
    * Split buffer into lines on LF
@@ -397,31 +318,14 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * @param input
    * @returns an array of Buffers, each line without trailing CR.
    */
-  private splitLines(input: Buffer): Buffer[] {
-    if (!input || input.length === 0) return [Buffer.alloc(0)];
-    const lines: Buffer[] = [];
-    let lineStart = 0;
-    for (let i = 0; i < input.length; i++) {
-      if (input[i] === 0x0A /* LF */) {
-        let line = input.subarray(lineStart, i);
-        if (line.length > 0 && line[line.length - 1] === 0x0D) {
-          line = line.subarray(0, line.length - 1);
-        }
-        lines.push(line);
-        lineStart = i + 1;
-      }
-    }
-    // last line
-    if (lineStart <= input.length - 1) {
-      let line = input.subarray(lineStart, input.length);
-      if (line.length > 0 && line[line.length - 1] === 0x0D) {
-        line = line.subarray(0, line.length - 1);
-      }
-      lines.push(line);
-    } else if (lineStart === input.length) {
-      // trailing newline, add empty final line
-      lines.push(Buffer.alloc(0));
-    }
-    return lines;
-  }
+
+
+  /**
+   * Split buffer into lines on LF, but treat code blocks (```) as single lines.
+   * This prevents code blocks from being split across multiple table rows.
+   *
+   * @param input
+   * @returns an array of Buffers, each line without trailing CR.
+   */
+
 }

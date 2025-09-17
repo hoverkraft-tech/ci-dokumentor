@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MarkdownFormatterAdapter } from './markdown-formatter.adapter.js';
-import { FormatterLanguage } from './formatter-language.js';
+import { MarkdownTableGenerator } from './markdown-table.generator.js';
+import { FormatterLanguage } from '../formatter-language.js';
 
 describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
 
   beforeEach(() => {
-    adapter = new MarkdownFormatterAdapter();
+    adapter = new MarkdownFormatterAdapter(new MarkdownTableGenerator());
   });
 
   describe('supportsLanguage', () => {
@@ -777,6 +778,86 @@ describe('MarkdownFormatterAdapter', () => {
 | Jane  | Pending | This is a        |
 | Smith | Review  | multiline note   |
 |       |         | with details     |
+`
+      );
+    });
+
+    it('should treat code blocks as single lines in table cells', () => {
+      // Arrange
+      const headers = [Buffer.from('Language'), Buffer.from('Example Code')];
+      const rows = [
+        [
+          Buffer.from('JavaScript'),
+          Buffer.from('Example:\n```js\nfunction hello() {\n  return "Hello World";\n}\n```'),
+        ],
+        [
+          Buffer.from('Python'),
+          Buffer.from('Example:\n```python\ndef hello():\n    return "Hello World"\n```'),
+        ],
+      ];
+
+      // Act
+      const result = adapter.table(headers, rows);
+
+      // Assert: Markdown table with <pre lang="..."> for code cells and &#13; for inner newlines
+      expect(result.toString()).toEqual(
+        `| Language   | Example Code                                                             |
+| ---------- | ------------------------------------------------------------------------ |
+| JavaScript | Example:                                                                 |
+|            | <pre lang="js">function hello() {&#13; return "Hello World";&#13;}</pre> |
+| Python     | Example:                                                                 |
+|            | <pre lang="python">def hello():&#13; return "Hello World"</pre>          |
+`
+      );
+    });
+
+    it('should handle mixed code blocks and regular multiline content', () => {
+      // Arrange
+      const headers = [Buffer.from('Type'), Buffer.from('Content')];
+      const rows = [
+        [
+          Buffer.from('Code'),
+          Buffer.from('```js\nconst x = 1;\nconsole.log(x);\n```'),
+        ],
+        [
+          Buffer.from('Text'),
+          Buffer.from('Line 1\nLine 2\nLine 3'),
+        ],
+      ];
+
+      // Act
+      const result = adapter.table(headers, rows);
+
+      // Assert: Markdown table; code cell rendered in <pre lang="..."> with &#13;, text cell uses <br>
+      expect(result.toString()).toEqual(
+        `| Type | Content                                               |
+| ---- | ----------------------------------------------------- |
+| Code | <pre lang="js">const x = 1;&#13;console.log(x);</pre> |
+| Text | Line 1                                                |
+|      | Line 2                                                |
+|      | Line 3                                                |
+`
+      );
+    });
+
+    it('should preserve ~~~ fenced code blocks as single lines in table cells', () => {
+      // Arrange
+      const headers = [Buffer.from('Lang'), Buffer.from('Example')];
+      const rows = [
+        [
+          Buffer.from('Custom'),
+          Buffer.from('~~~text\nline a\nline b\n~~~'),
+        ],
+      ];
+
+      // Act
+      const result = adapter.table(headers, rows);
+
+      // Assert: Markdown table with <pre lang="text"> and &#13; for inner newlines
+      expect(result.toString()).toEqual(
+        `| Lang   | Example                                  |
+| ------ | ---------------------------------------- |
+| Custom | <pre lang="text">line a&#13;line b</pre> |
 `
       );
     });
