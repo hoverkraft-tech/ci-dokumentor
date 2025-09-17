@@ -256,7 +256,7 @@ export class GenerateCommand extends BaseCommand {
   }
 
   private getFormatterOptions(options: GenerateCommandOptions): FormatterOptions {
-    let formatLink: LinkFormat | undefined;
+    let formatLink: LinkFormat;
     switch (options.formatLink) {
       case 'false':
       case false:
@@ -267,7 +267,6 @@ export class GenerateCommand extends BaseCommand {
         break;
       case 'auto':
       case true:
-      case undefined:
         formatLink = LinkFormat.Auto;
         break;
       default:

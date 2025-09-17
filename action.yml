@@ -35,6 +35,10 @@ inputs:
     description: JSON array of extra badges to include in the documentation. Each badge should have `label`, `url`, and optional `linkUrl` properties.
     required: false
     default: ''
+  format-link:
+    description: Transform bare URLs to links. Types: `auto` (autolinks), `full` (full links), `false` (disabled).
+    required: false
+    default: 'auto'
   github-token:
     description: The GitHub token used to fetch repository information.
     default: ${{ github.token }}
@@ -65,6 +69,7 @@ runs:
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
         INPUT_VERSION: ${{ inputs.version }}
         INPUT_EXTRA_BADGES: ${{ inputs.extra-badges }}
+        INPUT_FORMAT_LINK: ${{ inputs.format-link }}
         INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
         INPUT_CI_DOKUMENTOR_VERSION: ${{ inputs.ci-dokumentor-version }}
       run: |
@@ -107,6 +112,11 @@ runs:
           # Preserve the whole JSON value as a single argument
           args+=(--extra-badges "$INPUT_EXTRA_BADGES")
           echo "::debug::Extra badges set to: $INPUT_EXTRA_BADGES"
+        fi
+
+        if [ -n "$INPUT_FORMAT_LINK" ]; then
+          args+=(--format-link "$INPUT_FORMAT_LINK")
+          echo "::debug::Format link set to: $INPUT_FORMAT_LINK"
         fi
 
         echo "::debug::Args set to: ${args[*]}"
