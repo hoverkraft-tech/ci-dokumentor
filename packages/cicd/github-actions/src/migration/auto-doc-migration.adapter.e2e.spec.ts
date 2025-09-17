@@ -5,6 +5,7 @@ import mockFs from 'mock-fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { initTestContainer } from '../container.js';
 
 describe('AutoDocMigrationAdapter', () => {
   let adapter: AutoDocMigrationAdapter;
@@ -12,10 +13,12 @@ describe('AutoDocMigrationAdapter', () => {
   let rendererAdapter: FileRendererAdapter;
 
   beforeEach(() => {
-    // Use real dependencies for e2e testing
-    formatterAdapter = new MarkdownFormatterAdapter();
-    rendererAdapter = new FileRendererAdapter();
-    adapter = new AutoDocMigrationAdapter();
+    // Use real dependencies from the container for e2e testing
+    const container = initTestContainer();
+
+    formatterAdapter = container.get(MarkdownFormatterAdapter);
+    rendererAdapter = container.get(FileRendererAdapter);
+    adapter = container.get(AutoDocMigrationAdapter);
   });
 
   afterEach(() => {

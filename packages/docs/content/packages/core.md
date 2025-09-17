@@ -160,6 +160,10 @@ interface FormatterAdapter {
 }
 ```
 
+##### MarkdownFormatterAdapter
+
+Provides Markdown-specific formatting capabilities.
+
 #### RendererAdapter
 
 Interface for rendering/finalization adapters (used by generator adapters to produce output or diffs):
@@ -182,15 +186,13 @@ interface RendererAdapter {
 }
 ```
 
-### Adapters
-
-#### MarkdownFormatterAdapter
-
-Provides Markdown-specific formatting capabilities.
-
-#### FileOutputAdapter
+##### FileRendererAdapter
 
 Handles file system operations for documentation output.
+
+##### DiffRendererAdapter
+
+Generates diffs between existing and new documentation.
 
 ## Dependency Injection
 

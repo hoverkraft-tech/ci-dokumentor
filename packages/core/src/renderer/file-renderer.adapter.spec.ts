@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'node:fs';
-import { MarkdownFormatterAdapter } from '../formatter/markdown-formatter.adapter.js';
+import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
+import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
 
 describe('FileRendererAdapter', () => {
@@ -47,7 +48,7 @@ describe('FileRendererAdapter', () => {
       },
     });
 
-    formatterAdapter = new MarkdownFormatterAdapter();
+    formatterAdapter = new MarkdownFormatterAdapter(new MarkdownTableGenerator());
 
     fileRendererAdapter = new FileRendererAdapter();
   });

@@ -3,13 +3,19 @@ import mockFs from 'mock-fs';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
-import { MarkdownFormatterAdapter } from '../formatter/markdown-formatter.adapter.js';
+import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
+import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { DiffRendererAdapter } from './diff-renderer.adapter.js';
+import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 
 describe('DiffRendererAdapter', () => {
     const fixedNow = 1234567890;
     let dateSpy: MockInstance<typeof Date.now>;
+
+    let formatter: FormatterAdapter;
+    let fileRenderer: FileRendererAdapter;
+    let adapter: DiffRendererAdapter;
 
     beforeEach(() => {
         // Provide a deterministic tmpdir and test file structure
@@ -21,6 +27,11 @@ describe('DiffRendererAdapter', () => {
         });
 
         dateSpy = vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
+
+        formatter = new MarkdownFormatterAdapter(new MarkdownTableGenerator());
+        fileRenderer = new FileRendererAdapter();
+
+        adapter = new DiffRendererAdapter(fileRenderer);
     });
 
     afterEach(() => {
@@ -32,9 +43,6 @@ describe('DiffRendererAdapter', () => {
 
         it('should delegate writeSection to FileRendererAdapter and write to a temp file', async () => {
             // Arrange
-            const formatter = new MarkdownFormatterAdapter();
-            const fileRenderer = new FileRendererAdapter();
-            const adapter = new DiffRendererAdapter(fileRenderer);
 
             await adapter.initialize('/test/document.md', formatter);
 
@@ -54,9 +62,6 @@ describe('DiffRendererAdapter', () => {
     describe('finalize', () => {
         it('should return a unified patch between destination and temp file', async () => {
             // Arrange
-            const fileRenderer = new FileRendererAdapter();
-            const adapter = new DiffRendererAdapter(fileRenderer);
-
             // Prepare original and temp files
             const dest = '/test/document.md';
             const tmpPath = join(tmpdir(), `${basename(dest)}.${fixedNow}.tmp`);
@@ -64,7 +69,7 @@ describe('DiffRendererAdapter', () => {
             writeFileSync(tmpPath, 'modified line\n');
 
             // initialize adapter so it knows destination/temp
-            await adapter.initialize(dest, new MarkdownFormatterAdapter());
+            await adapter.initialize(dest, formatter);
 
             // Act
             const patch = await adapter.finalize();
@@ -83,15 +88,12 @@ describe('DiffRendererAdapter', () => {
 
         it('should get patch for non existing destination file', async () => {
             // Arrange
-            const fileRenderer = new FileRendererAdapter();
-            const adapter = new DiffRendererAdapter(fileRenderer);
-
             const dest = '/test/new-document.md';
             const tmpPath = join(tmpdir(), `${basename(dest)}.${fixedNow}.tmp`);
             writeFileSync(tmpPath, 'new file content\n');
 
             // initialize adapter so it knows destination/temp
-            await adapter.initialize(dest, new MarkdownFormatterAdapter());
+            await adapter.initialize(dest, formatter);
 
             // Act
             const patch = await adapter.finalize();
@@ -110,12 +112,9 @@ describe('DiffRendererAdapter', () => {
 
         it('should throw when temp file is missing', async () => {
             // Arrange
-            const fileRenderer = new FileRendererAdapter();
-            const adapter = new DiffRendererAdapter(fileRenderer);
-
             const dest = '/test/document.md';
             // initialize to set destination but do not create temp
-            await adapter.initialize(dest, new MarkdownFormatterAdapter());
+            await adapter.initialize(dest, formatter);
 
             // Act & Assert
             await expect(adapter.finalize()).rejects.toThrow("ENOENT, no such file or directory '/tmp/document.md");
@@ -125,12 +124,10 @@ describe('DiffRendererAdapter', () => {
     describe('getDestination', () => {
         it('should return the destination path after initialization', async () => {
             // Arrange
-            const fileRenderer = new FileRendererAdapter();
-            const adapter = new DiffRendererAdapter(fileRenderer);
             const testDestination = '/test/document.md';
 
             // Act
-            await adapter.initialize(testDestination, new MarkdownFormatterAdapter());
+            await adapter.initialize(testDestination, formatter);
             const destination = adapter.getDestination();
 
             // Assert

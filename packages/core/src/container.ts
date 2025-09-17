@@ -1,7 +1,7 @@
 import { Container as InversifyContainer } from 'inversify';
 import { GeneratorService } from './generator/generator.service.js';
 import { FormatterService } from './formatter/formatter.service.js';
-import { MarkdownFormatterAdapter } from './formatter/markdown-formatter.adapter.js';
+import { MarkdownFormatterAdapter } from './formatter/markdown/markdown-formatter.adapter.js';
 import { FORMATTER_ADAPTER_IDENTIFIER } from './formatter/formatter.adapter.js';
 import { RepositoryService } from './repository/repository.service.js';
 import { LicenseService } from './license/license.service.js';
@@ -9,6 +9,7 @@ import { FileRendererAdapter } from './renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from './renderer/diff-renderer.adapter.js';
 import { VersionService } from './version/version.service.js';
 import { MigrationService } from './migration/migration.service.js';
+import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
 
 export type Container = InversifyContainer;
 
@@ -47,6 +48,7 @@ export function initContainer(
   container.bind(MigrationService).toSelf().inSingletonScope();
 
   // Formatter adapters
+  container.bind(MarkdownTableGenerator).toSelf().inSingletonScope();
   container.bind(MarkdownFormatterAdapter).toSelf().inSingletonScope();
   container
     .bind<MarkdownFormatterAdapter>(FORMATTER_ADAPTER_IDENTIFIER)
