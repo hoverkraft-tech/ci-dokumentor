@@ -360,4 +360,33 @@ Footer content
       expect(fileContent).toContain('<!-- section-2:end -->');
     });
   });
+
+  describe('getDestination', () => {
+    it('should return the destination path after initialization', async () => {
+      // Act
+      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
+      const destination = fileRendererAdapter.getDestination();
+
+      // Assert
+      expect(destination).toBe(testFilePath);
+    });
+
+    it('should throw error when trying to get destination before initialization', () => {
+      // Act & Assert
+      expect(() => fileRendererAdapter.getDestination()).toThrow('Destination not initialized');
+    });
+
+    it('should return correct destination for different file paths', async () => {
+      // Arrange
+      const differentPath = '/test/different-document.md';
+      const differentAdapter = new FileRendererAdapter();
+
+      // Act
+      await differentAdapter.initialize(differentPath, formatterAdapter);
+      const destination = differentAdapter.getDestination();
+
+      // Assert
+      expect(destination).toBe(differentPath);
+    });
+  });
 });
