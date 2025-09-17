@@ -46,7 +46,7 @@ describe('ContributingSectionGenerator', () => {
             });
 
             // Act
-            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider });
+            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
@@ -58,7 +58,7 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
 
         it('should return empty buffer when repository has no contributing information', async () => {
             // Act
-            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider });
+            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
@@ -70,7 +70,7 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
             mockRepositoryProvider.getContributing.mockResolvedValue({} as { url: string });
 
             // Act
-            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider });
+            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
@@ -82,7 +82,7 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
             mockRepositoryProvider.getContributing.mockResolvedValue({ url: '' });
 
             // Act
-            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider });
+            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
@@ -115,7 +115,7 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
             mockRepositoryProvider.getContributing.mockResolvedValue({ url });
 
             // Act
-            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider });
+            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
@@ -132,7 +132,7 @@ Contributions are welcome! Please see the [contributing guidelines](${url}) for 
             });
 
             // Act
-            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider });
+            const result = await generator.generateSection({ formatterAdapter, manifest: mockManifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);
@@ -175,7 +175,7 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
 `;
 
             // Act
-            const result = await generator.generateSection({ formatterAdapter, manifest: manifest as GitHubAction, repositoryProvider: mockRepositoryProvider });
+            const result = await generator.generateSection({ formatterAdapter, manifest: manifest as GitHubAction, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
 
             // Assert
             expect(result).toBeInstanceOf(Buffer);

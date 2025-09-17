@@ -49,7 +49,10 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-      };
+
+        destination: 'README.md',
+
+        };
 
       // Act
       const result = await generator.generateSection(payload);
@@ -77,7 +80,10 @@ For more details, see the [license](https://api.github.com/licenses/apache-2.0).
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-      };
+
+        destination: 'README.md',
+
+        };
 
       // Act
       const result = await generator.generateSection(payload);
@@ -100,7 +106,10 @@ For more details, see the [license](https://api.github.com/licenses/apache-2.0).
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-      };
+
+        destination: 'README.md',
+
+        };
 
       // Act
       const result = await generator.generateSection(payload);
