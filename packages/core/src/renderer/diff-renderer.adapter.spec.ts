@@ -121,4 +121,29 @@ describe('DiffRendererAdapter', () => {
             await expect(adapter.finalize()).rejects.toThrow("ENOENT, no such file or directory '/tmp/document.md");
         });
     });
+
+    describe('getDestination', () => {
+        it('should return the destination path after initialization', async () => {
+            // Arrange
+            const fileRenderer = new FileRendererAdapter();
+            const adapter = new DiffRendererAdapter(fileRenderer);
+            const testDestination = '/test/document.md';
+
+            // Act
+            await adapter.initialize(testDestination, new MarkdownFormatterAdapter());
+            const destination = adapter.getDestination();
+
+            // Assert
+            expect(destination).toBe(testDestination);
+        });
+
+        it('should throw error when trying to get destination before initialization', () => {
+            // Arrange
+            const fileRenderer = new FileRendererAdapter();
+            const adapter = new DiffRendererAdapter(fileRenderer);
+
+            // Act & Assert
+            expect(() => adapter.getDestination()).toThrow('Destination not initialized');
+        });
+    });
 });
