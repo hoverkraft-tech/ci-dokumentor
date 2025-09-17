@@ -34,7 +34,19 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       return;
     }
 
-    const parsed = JSON.parse(extraBadges);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(extraBadges);
+    } catch (error: unknown) {
+      // Improve the error message to help users who pass multiline JSON through GitHub Actions inputs
+      const hint = 'When using this option in GitHub Actions, ensure the JSON is passed as a single argument or encode it (e.g. base64).';
+      const maybeError = error as { message?: unknown } | undefined;
+      const message = maybeError && typeof maybeError.message === 'string'
+        ? maybeError.message
+        : 'Failed to parse extra badges JSON.';
+      throw new Error([message, hint].map(part => part.trim()).filter(Boolean).join('. '));
+    }
+
     if (!Array.isArray(parsed)) {
       throw new Error('The extra badges option must be a JSON array of badge objects.');
     }

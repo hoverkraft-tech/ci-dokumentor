@@ -83,7 +83,9 @@ describe('BadgesSectionGenerator', () => {
       const invalidJson = 'invalid json';
 
       // Act & Assert - should not throw
-      expect(() => generator.setSectionOptions({ extraBadges: invalidJson })).toThrow(`Unexpected token 'i', "invalid json" is not valid JSON`);
+      expect(() => generator.setSectionOptions({ extraBadges: invalidJson })).toThrow(
+        `Unexpected token 'i', "invalid json" is not valid JSON. When using this option in GitHub Actions, ensure the JSON is passed as a single argument or encode it (e.g. base64).`
+      );
     });
 
     it('should handle non-array JSON', () => {
@@ -112,7 +114,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -141,7 +143,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -169,7 +171,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -195,7 +197,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         const extraBadgesJson = JSON.stringify([
           { label: 'Custom Badge', url: 'https://img.shields.io/badge/custom-badge-green', linkUrl: 'https://example.com' }
@@ -229,7 +231,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         const extraBadgesJson = JSON.stringify([
           { label: 'Badge without linkUrl', url: 'https://img.shields.io/badge/badge-url-orange' }
@@ -264,7 +266,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         // Act
         const result = await generator.generateSection(payload);
@@ -290,7 +292,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         const extraBadgesJson = JSON.stringify([
           { label: 'Workflow Badge', url: 'https://img.shields.io/badge/workflow-badge-red', linkUrl: 'https://workflow.com' }
@@ -325,7 +327,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         // Don't set any extra badges
 
@@ -354,7 +356,7 @@ describe('BadgesSectionGenerator', () => {
 
           destination: 'README.md',
 
-          };
+        };
 
         generator.setSectionOptions({ extraBadges: JSON.stringify([]) });
 

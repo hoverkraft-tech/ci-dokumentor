@@ -56,55 +56,60 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_SOURCE: ${{ inputs.source }}
+        INPUT_DESTINATION: ${{ inputs.destination }}
+        INPUT_REPOSITORY: ${{ inputs.repository }}
+        INPUT_CICD: ${{ inputs.cicd }}
+        INPUT_INCLUDE_SECTIONS: ${{ inputs.include-sections }}
+        INPUT_EXCLUDE_SECTIONS: ${{ inputs.exclude-sections }}
+        INPUT_DRY_RUN: ${{ inputs.dry-run }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_EXTRA_BADGES: ${{ inputs.extra-badges }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_CI_DOKUMENTOR_VERSION: ${{ inputs.ci-dokumentor-version }}
       run: |
-        source="${{ inputs.source }}"
-        echo "::debug::Source path set to: $source"
+        echo "::debug::Source path set to: $INPUT_SOURCE"
         envs="-e GITHUB_OUTPUT"
-        args="generate --output-format "github-action" --source "$source""
+        # Build command as an array to preserve arguments containing spaces/newlines (e.g. multiline JSON)
+        args=(generate --output-format "github-action" --source "$INPUT_SOURCE")
 
-        destination="${{ inputs.destination }}"
-        if [ -n "$destination" ]; then
-          args="$args --destination "$destination""
-          echo "::debug::Destination path set to: $destination"
+        if [ -n "$INPUT_DESTINATION" ]; then
+          args+=(--destination "$INPUT_DESTINATION")
+          echo "::debug::Destination path set to: $INPUT_DESTINATION"
         fi
 
-        repository="${{ inputs.repository }}"
-        if [ -n "$repository" ]; then
-          args="$args --repository "$repository""
-          echo "::debug::Repository set to: $repository"
+        if [ -n "$INPUT_REPOSITORY" ]; then
+          args+=(--repository "$INPUT_REPOSITORY")
+          echo "::debug::Repository set to: $INPUT_REPOSITORY"
         fi
 
-        cicd="${{ inputs.cicd }}"
-        if [ -n "$cicd" ]; then
-          args="$args --cicd "$cicd""
-          echo "::debug::CI/CD set to: $cicd"
+        if [ -n "$INPUT_CICD" ]; then
+          args+=(--cicd "$INPUT_CICD")
+          echo "::debug::CI/CD set to: $INPUT_CICD"
         fi
 
-        include_sections="${{ inputs.include_sections }}"
-        if [ -n "$include_sections" ]; then
-          args="$args --include-sections "$include_sections""
-          echo "::debug::Include sections set to: $include_sections"
+        if [ -n "$INPUT_INCLUDE_SECTIONS" ]; then
+          args+=(--include-sections "$INPUT_INCLUDE_SECTIONS")
+          echo "::debug::Include sections set to: $INPUT_INCLUDE_SECTIONS"
         fi
 
-        exclude_sections="${{ inputs.exclude_sections }}"
-        if [ -n "$exclude_sections" ]; then
-          args="$args --exclude-sections "$exclude_sections""
-          echo "::debug::Exclude sections set to: $exclude_sections"
+        if [ -n "$INPUT_EXCLUDE_SECTIONS" ]; then
+          args+=(--exclude-sections "$INPUT_EXCLUDE_SECTIONS")
+          echo "::debug::Exclude sections set to: $INPUT_EXCLUDE_SECTIONS"
         fi
 
-        dry_run="${{ inputs.dry-run }}"
-        if [ "$dry_run" = "true" ]; then
-          args="$args --dry-run"
+        if [ "$INPUT_DRY_RUN" = "true" ]; then
+          args+=(--dry-run)
           echo "::debug::Dry run enabled"
         fi
 
-        extra_badges=${{ toJson(inputs.extra-badges && fromJson(inputs.extra-badges) || '') }}
-        if [ -n "$extra_badges" ]; then
-          args="$args --extra-badges $extra_badges"
-          echo "::debug::Extra badges set to: $extra_badges"
+        if [ -n "$INPUT_EXTRA_BADGES" ]; then
+          # Preserve the whole JSON value as a single argument
+          args+=(--extra-badges "$INPUT_EXTRA_BADGES")
+          echo "::debug::Extra badges set to: $INPUT_EXTRA_BADGES"
         fi
 
-        echo "::debug::Args set to: $args"
+        echo "::debug::Args set to: ${args[*]}"
 
         if [ -n "$GITHUB_TOKEN" ]; then
           envs="$envs -e GITHUB_TOKEN"
@@ -113,8 +118,7 @@ runs:
 
         echo "::debug::Env args set to: $envs"
 
-        ci_dokumentor_version="${{ inputs.ci-dokumentor-version }}"
-        echo "::debug::CI Dokumentor version set to: $ci_dokumentor_version"
+        echo "::debug::CI Dokumentor version set to: $INPUT_CI_DOKUMENTOR_VERSION"
 
         docker run --rm \
           -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
@@ -122,5 +126,5 @@ runs:
           -u "$(id -u):$(id -g)" \
           -w "$GITHUB_WORKSPACE" \
           $envs \
-          ghcr.io/hoverkraft-tech/ci-dokumentor/cli:$ci_dokumentor_version \
-          $args
+          ghcr.io/hoverkraft-tech/ci-dokumentor/cli:$INPUT_CI_DOKUMENTOR_VERSION \
+          "${args[@]}"
