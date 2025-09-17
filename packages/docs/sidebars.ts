@@ -41,11 +41,36 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Packages',
       items: [
-        'packages/core',
-        'packages/cli',
-        'packages/repository-git',
-        'packages/repository-github',
-        'packages/cicd-github-actions',
+        'packages/index',
+        {
+          type: 'category',
+          label: 'Core',
+          items: [
+            'packages/core/index',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'CLI',
+          items: [
+            'packages/cli/index',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'CI/CD',
+          items: [
+            'packages/cicd/github-actions/index',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Repository',
+          items: [
+            'packages/repository/git/index',
+            'packages/repository/github/index',
+          ],
+        },
       ],
     },
   ],

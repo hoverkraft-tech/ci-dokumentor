@@ -52,7 +52,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     const rows = Object.entries(manifest.inputs || {}).map(([name, input]) => {
       return [
         this.getInputName(name, formatterAdapter),
-        this.getInputDescription(input),
+        this.getInputDescription(input, formatterAdapter),
         this.getInputRequired(input, formatterAdapter),
         this.getInputDefault(input, formatterAdapter),
       ];
@@ -115,7 +115,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     const rows = inputs.map(([name, input]) => {
       return [
         this.getInputName(name, formatterAdapter),
-        this.getInputDescription(input),
+        this.getInputDescription(input, formatterAdapter),
         this.getInputRequired(input, formatterAdapter),
         this.getInputType(input, formatterAdapter),
         this.getInputDefault(input, formatterAdapter),
@@ -136,9 +136,13 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private getInputDescription(
-    input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput
+    input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
+    formatterAdapter: FormatterAdapter
   ): Buffer {
     let description = (input.description || '').trim();
+    if (description.length > 0) {
+      description = formatterAdapter.paragraph(Buffer.from(description)).toString();
+    }
 
     const deprecationMessage = this.getInputDeprecationMessage(input);
     if (deprecationMessage) {

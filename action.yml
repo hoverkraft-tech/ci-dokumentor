@@ -32,11 +32,15 @@ inputs:
     description: Version to document (auto-detected if not specified).
     required: false
   extra-badges:
-    description: JSON array of extra badges to include in the documentation. Each badge should have `label`, `url`, and optional `linkUrl` properties.
+    description: |
+      JSON array of extra badges to include in the documentation.
+      Each badge should have `label`, `url`, and optional `linkUrl` properties.
     required: false
     default: ''
   format-link:
-    description: Transform bare URLs to links. Types: `auto` (autolinks), `full` (full links), `false` (disabled).
+    description: |
+      Transform bare URLs to links.
+      Types: `auto` (autolinks), `full` (full links), `false` (disabled).
     required: false
     default: 'auto'
   github-token:

@@ -1,8 +1,8 @@
 ---
+title: CLI Package
+description: Command-line interface for generating documentation from CI/CD manifest files.
 sidebar_position: 2
 ---
-
-# CLI Package
 
 The `@ci-dokumentor/cli` package provides a command-line interface for generating documentation from CI/CD manifest files.
 
@@ -287,7 +287,59 @@ ci-dokumentor --output-format json generate --source ./my-project/action.yml
 | `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)                                     | -          |
 | `--include-sections <sections>` | -     | Comma-separated list of sections to include                                         | -          |
 | `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude                                         | -          |
+| `--format-link [type]`          | -     | Transform bare URLs to links (`auto`, `full`, `false`)                              | -          |
 | `--dry-run`                     | -     | Preview what would be generated without writing files                               | `false`    |
+
+#### URL Link Formatting
+
+The `--format-link` option controls how bare URLs in text content are transformed in the generated documentation:
+
+**Option Values:**
+
+- `auto` - Transforms URLs to autolinks: `<https://example.com>`
+- `full` - Transforms URLs to full Markdown links: `[https://example.com](https://example.com)`
+- `false` - Disables URL transformation (preserves original bare URLs)
+
+**Behavior:**
+
+- When option is not provided: No URL transformation (backward compatible)
+- Only transforms `http://` and `https://` URLs
+- Preserves existing Markdown links to avoid double-processing
+- Handles URLs with trailing punctuation correctly (.,;!?)
+- Supports mixed content with both existing links and standalone URLs
+
+**Examples:**
+
+```bash
+# Transform URLs to autolinks (default when option used)
+ci-dokumentor generate --source action.yml --format-link auto
+# Input:  "Visit https://example.com for more info"
+# Output: "Visit <https://example.com> for more info"
+
+# Transform URLs to full markdown links
+ci-dokumentor generate --source action.yml --format-link full
+# Input:  "Visit https://example.com for more info"
+# Output: "Visit [https://example.com](https://example.com) for more info"
+
+# Explicitly disable URL transformation
+ci-dokumentor generate --source action.yml --format-link false
+# Input:  "Visit https://example.com for more info"
+# Output: "Visit https://example.com for more info"
+
+# No transformation (backward compatible)
+ci-dokumentor generate --source action.yml
+# Input:  "Visit https://example.com for more info"
+# Output: "Visit https://example.com for more info"
+```
+
+**Smart URL Detection:**
+
+The URL transformation feature includes intelligent handling:
+
+- Preserves existing Markdown links: `[GitHub](https://github.com)` remains unchanged
+- Handles punctuation: `Visit https://example.com.` → `Visit <https://example.com>.`
+- Processes multiple URLs: `See https://github.com and https://stackoverflow.com`
+- Only processes `http://` and `https://` protocols for security
 
 #### Platform-Specific Options
 
@@ -307,12 +359,12 @@ Depending on the context, the following platforms are supported:
 
 **Repository Platforms:**
 
-- [`git`](./repository-git.md) - Git repository support
-- [`github`](./repository-github.md) - GitHub-specific features
+- [`git`](/packages/repository/git/) - Git repository support
+- [`github`](/packages/repository/github/) - GitHub-specific features
 
 **CI/CD Platforms:**
 
-- [`github-actions`](./cicd-github-actions.md) - GitHub Actions workflows and action files
+- [`github-actions`](/packages/cicd/github-actions/) - GitHub Actions workflows and action files
 
 #### Examples
 
@@ -484,7 +536,7 @@ Build and test the CLI via the workspace commands so behavior matches the actual
 
 ## Related Packages
 
-- [Core Package](./core) - Core services and interfaces
-- [Repository Git](./repository-git) - Git repository provider
-- [Repository GitHub](./repository-github) - GitHub repository provider
-- [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions support
+- [Core Package](/packages/core/) - Core services and interfaces
+- [Repository Git](/packages/repository/git/) - Git repository provider
+- [Repository GitHub](/packages/repository/github/) - GitHub repository provider
+- [CI/CD GitHub Actions](/packages/cicd/github-actions/) - GitHub Actions support

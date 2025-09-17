@@ -1,8 +1,8 @@
 ---
+title: Core Package
+description: Fundamental building blocks and abstractions powering the CI Dokumentor ecosystem.
 sidebar_position: 1
 ---
-
-# Core Package
 
 The `@ci-dokumentor/core` package contains the fundamental building blocks and abstractions that power the entire CI Dokumentor ecosystem.
 
@@ -225,7 +225,7 @@ Testing for the core package is covered by the centralized developer testing gui
 
 ## Related Packages
 
-- [CLI Package](./cli) - Command-line interface built on core
-- [Repository Git](./repository-git) - Git repository provider implementation
-- [Repository GitHub](./repository-github) - GitHub-specific repository provider
-- [CI/CD GitHub Actions](./cicd-github-actions) - GitHub Actions manifest parser and generator
+- [CLI Package](/packages/cli/) - Command-line interface built on core
+- [Repository Git](/packages/repository/git/) - Git repository provider implementation
+- [Repository GitHub](/packages/repository/github/) - GitHub-specific repository provider
+- [CI/CD GitHub Actions](/packages/cicd/github-actions/) - GitHub Actions manifest parser and generator

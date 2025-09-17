@@ -1,8 +1,8 @@
 ---
+title: CI/CD - GitHub Actions Package
+description: GitHub Actions-specific CI/CD manifest parsing and documentation generation capabilities.
 sidebar_position: 5
 ---
-
-# CI/CD - GitHub Actions Package
 
 The `@ci-dokumentor/cicd-github-actions` package provides GitHub Actions-specific CI/CD manifest parsing and documentation generation capabilities.
 
@@ -145,7 +145,7 @@ const container = initContainer();
 
 ## Related Packages
 
-- [Core Package](./core) - Base abstractions and services
-- [Repository Git](./repository-git) - Git repository functionality
-- [Repository GitHub](./repository-github) - GitHub-specific features
-- [CLI Package](./cli) - Command-line interface
+[Core Package](/packages/core/) - Base abstractions and services
+[Repository Git](/packages/repository/git/) - Git repository functionality
+[Repository GitHub](/packages/repository/github/) - GitHub-specific features
+[CLI Package](/packages/cli/) - Command-line interface

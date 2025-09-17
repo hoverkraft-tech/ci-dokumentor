@@ -1,8 +1,8 @@
 ---
+title: CI/CD - Dagger.io Package
+description: Dagger.io-specific CI/CD manifest parsing and documentation generation capabilities.
 sidebar_position: 5
 ---
-
-# CI/CD - Dagger.io Package
 
 The `@ci-dokumentor/cicd-dagger` package provides Dagger.io-specific CI/CD manifest parsing and documentation generation capabilities.
 

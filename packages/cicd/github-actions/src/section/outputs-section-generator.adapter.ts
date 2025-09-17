@@ -71,7 +71,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       ([name, output]) => {
         return [
           this.getOutputName(name, formatterAdapter),
-          this.getOutputDescription(output),
+          this.getOutputDescription(output, formatterAdapter),
         ];
       }
     );
@@ -95,7 +95,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     );
   }
 
-  private getOutputDescription(output: GitHubActionOutput | GitHubWorkflowOutput): Buffer {
-    return Buffer.from((output.description || '').trim());
+  private getOutputDescription(output: GitHubActionOutput | GitHubWorkflowOutput, formatterAdapter: FormatterAdapter): Buffer {
+    return formatterAdapter.paragraph(Buffer.from((output.description || '').trim()));
   }
 }
