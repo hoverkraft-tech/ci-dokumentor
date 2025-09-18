@@ -1,5 +1,7 @@
 ---
-sidebar_position: 2
+title: Node.js Package Integration
+description: Install and use CI Dokumentor as an npm package in your Node.js projects
+sidebar_position: 6
 ---
 
 # Node.js Package

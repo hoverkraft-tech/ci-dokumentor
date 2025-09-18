@@ -1,6 +1,7 @@
 ---
 title: Developers
-description: Developer-focused documentation index
+description: Developer-focused documentation index for contributors and maintainers
+sidebar_position: 1
 ---
 
 This section contains guides and reference material for contributors and maintainers of the project.

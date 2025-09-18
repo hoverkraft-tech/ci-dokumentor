@@ -1,4 +1,6 @@
 ---
+title: Development Setup
+description: Complete development environment setup guide for CI Dokumentor contributors
 sidebar_position: 2
 ---
 

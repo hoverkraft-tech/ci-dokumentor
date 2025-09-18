@@ -1,4 +1,6 @@
 ---
+title: GitHub Action Integration
+description: Use CI Dokumentor as a GitHub Action in your workflows for automated documentation generation
 sidebar_position: 2
 ---
 
@@ -11,7 +13,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@ab7d2f6fc8cc932b006d69c9cba9f0b6f4f32e92 # main
+- uses: hoverkraft-tech/ci-dokumentor@v1 # Use latest stable version
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
@@ -64,7 +66,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: hoverkraft-tech/ci-dokumentor@main
+  uses: hoverkraft-tech/ci-dokumentor@v1
   with:
     source: '.github/workflows/ci.yml'
 ```
@@ -75,7 +77,7 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
 
 ```yaml
 - name: Generate Enhanced Documentation
-  uses: hoverkraft-tech/ci-dokumentor@main
+  uses: hoverkraft-tech/ci-dokumentor@v1
   with:
     source: 'action.yml'
     output: 'docs/README.md'
@@ -92,7 +94,7 @@ To preview changes without modifying files, set the `dry-run` input to `true`. T
 
 ```yaml
 - name: Generate Documentation (dry-run)
-  uses: hoverkraft-tech/ci-dokumentor@main
+  uses: hoverkraft-tech/ci-dokumentor@v1
   with:
     source: 'action.yml'
     dry-run: 'true'
@@ -103,9 +105,9 @@ To preview changes without modifying files, set the `dry-run` input to `true`. T
 Control how bare URLs in your documentation are formatted:
 
 ```yaml
-# Transform URLs to autolinks (default)
+# Transform URLs to autolinks (default when option used)
 - name: Generate with Autolinks
-  uses: hoverkraft-tech/ci-dokumentor@main
+  uses: hoverkraft-tech/ci-dokumentor@v1
   with:
     source: 'action.yml'
     format-link: 'auto'
@@ -113,7 +115,7 @@ Control how bare URLs in your documentation are formatted:
 
 # Transform URLs to full markdown links
 - name: Generate with Full Links
-  uses: hoverkraft-tech/ci-dokumentor@main
+  uses: hoverkraft-tech/ci-dokumentor@v1
   with:
     source: 'action.yml'
     format-link: 'full'
@@ -121,7 +123,7 @@ Control how bare URLs in your documentation are formatted:
 
 # Disable URL transformation
 - name: Generate with Raw URLs
-  uses: hoverkraft-tech/ci-dokumentor@main
+  uses: hoverkraft-tech/ci-dokumentor@v1
   with:
     source: 'action.yml'
     format-link: 'false'
@@ -157,7 +159,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Documentation
-        uses: hoverkraft-tech/ci-dokumentor@main
+        uses: hoverkraft-tech/ci-dokumentor@v1
         with:
           source: 'action.yml'
 

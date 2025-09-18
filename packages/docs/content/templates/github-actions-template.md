@@ -1,5 +1,7 @@
 ---
-sidebar_position: 5
+title: GitHub Actions Documentation Template
+description: Complete template for GitHub Actions documentation with all available sections
+sidebar_position: 2
 ---
 
 # GitHub Actions documentation template
