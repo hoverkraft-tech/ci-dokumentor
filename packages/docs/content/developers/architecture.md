@@ -1,4 +1,8 @@
-# Repository Platforms vs CI/CD Platforms Architecture
+---
+title: Architecture Overview
+description: Comprehensive overview of CI Dokumentor's architecture and design patterns
+sidebar_position: 3
+---
 
 This document describes the separation of concerns between repository platforms and CI/CD platforms in the ci-dokumentor project.
 

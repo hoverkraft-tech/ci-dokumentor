@@ -1,5 +1,7 @@
 ---
-sidebar_position: 2
+title: Docker Integration
+description: Use CI Dokumentor Docker image for containerized environments and CI/CD pipelines
+sidebar_position: 5
 ---
 
 # Docker Integration

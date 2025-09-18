@@ -1,4 +1,6 @@
 ---
+title: Migration Guide
+description: Migrate from other documentation tools to CI Dokumentor with step-by-step guidance
 sidebar_position: 7
 ---
 

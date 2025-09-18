@@ -1,5 +1,7 @@
 ---
-sidebar_position: 3
+title: Testing Guide
+description: Comprehensive testing strategies and tools for CI Dokumentor development
+sidebar_position: 6
 ---
 
 # Testing

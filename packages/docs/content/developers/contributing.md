@@ -1,5 +1,7 @@
 ---
-sidebar_position: 1
+title: Contributing Guide
+description: Guidelines for contributing to CI Dokumentor project
+sidebar_position: 5
 ---
 
 # Contributing
