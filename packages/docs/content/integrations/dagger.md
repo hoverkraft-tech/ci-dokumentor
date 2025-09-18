@@ -12,12 +12,11 @@ sidebar_position: 4
 We're actively working on adding Dagger.io support to CI Dokumentor. This integration will enable automatic documentation generation for Dagger modules and pipelines.
 
 **Planned Features:**
+
 - Parse `dagger.json` module configuration files
-- Generate documentation for Dagger functions and pipelines  
+- Generate documentation for Dagger functions and pipelines
 - Support for Dagger SDK documentation
 - Integration with Dagger Universe modules
-
-**Expected Timeline:** Q2 2024
 
 **Interested in contributing?** Check out our [contributing guidelines](../developers/contributing.md) and join the discussion in our [GitHub issues](https://github.com/hoverkraft-tech/ci-dokumentor/issues).
 :::

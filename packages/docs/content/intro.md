@@ -121,8 +121,8 @@ For a full, copyable templates including all anchored sections for supported CI/
 Integrate CI Dokumentor into your CI/CD pipeline:
 
 - ✅ [**GitHub Actions**](./integrations/github-action.md) - GitHub Action files (`action.yml`) and workflow files (`.github/workflows/*.yml`)
-- 🚧 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI Component files (`templates/my-component.yml`)
-- 🚧 [**Dagger.io**](./integrations/dagger.md) - Dagger.io Module files (`dagger.json`)
+- 🚧 [**GitLab CI**](./integrations/gitlab-ci.md) - GitLab CI Component files (`templates/my-component.yml`) _(planned for future development)_
+- 🚧 [**Dagger.io**](./integrations/dagger.md) - Dagger.io Module files (`dagger.json`) _(planned for future development)_
 
 ## CLI Usage
 
@@ -165,9 +165,9 @@ The migrate command serves as a **bridge solution** to help transition from othe
 
 ## Supported Repository Platforms
 
-- ✅ [**Git**](./packages/repository/git/) - Basic repository information
-- ✅ [**GitHub**](./packages/repository/github/) - GitHub Repository information and metadata
-- 🚧 [**GitLab**](./packages/repository/gitlab/) - GitLab Repository information and metadata
+- ✅ [**Git**](./packages/repository/git/) - Basic repository information from local Git remotes
+- ✅ [**GitHub**](./packages/repository/github/) - GitHub Repository information and metadata via GraphQL API
+- 🚧 [**GitLab**](./packages/repository/gitlab/) - GitLab Repository information and metadata _(planned for future development)_
 
 ## Next Steps
 
