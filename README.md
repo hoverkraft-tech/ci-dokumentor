@@ -1,7 +1,5 @@
 # CI Dokumentor
 
-**⚠️ Work in Progress!**
-
 <p align="center">
   <a href="https://github.com/hoverkraft-tech/ci-dokumentor" target="_blank"><img src="https://repository-images.githubusercontent.com/967387766/275872f7-f4bc-40f8-b3d2-4a39496728bc" width="600" alt="CI Dokumentor - Automated documentation generator for CI/CD components" /></a>
 </p>

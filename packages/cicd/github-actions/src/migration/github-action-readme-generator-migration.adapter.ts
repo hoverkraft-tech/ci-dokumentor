@@ -5,6 +5,7 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
 
 /**
  * Migration adapter for GitHub Action's Readme Generator tool
+ * https://github.com/bitflight-devops/github-action-readme-generator
  * Transforms markers like:
  * <!-- start branding --> / <!-- end branding --> -> <!-- badges:start --> / <!-- badges:end -->
  * <!-- start title --> / <!-- end title --> -> <!-- header:start --> / <!-- header:end -->
