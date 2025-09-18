@@ -327,10 +327,10 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     const text = input.toString();
 
     // URL regex pattern - matches http/https URLs, excluding common trailing punctuation
-    const urlRegex = /https?:\/\/[^\s)\]]+/g;
+    const urlRegex = /https?:\/\/[^\s)\]]{1,500}/g;
 
     // Check if there are already markdown links in the text to avoid double-processing
-    const linkRegex = /\[([^\]]*)\]\(([^)]*)\)/g;
+    const linkRegex = /\[([^\]]{0,200})\]\(([^)]{0,500})\)/g;
     const hasExistingLinks = linkRegex.test(text);
 
     let result = text;
@@ -339,7 +339,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       // Simple case: no existing markdown links, just transform all URLs
       result = text.replace(urlRegex, (url) => {
         // Remove trailing punctuation from URL
-        const cleanUrl = url.replace(/[.,;!?]+$/, '');
+        const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
         const trailingPunct = url.slice(cleanUrl.length);
 
         if (fullLinkFormat) {
@@ -354,12 +354,15 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       linkRegex.lastIndex = 0; // Reset regex
       const links = [];
       let match;
-      while ((match = linkRegex.exec(text)) !== null) {
+      let loopCount = 0;
+      const maxLoops = 1000; // Prevent infinite loops
+      while ((match = linkRegex.exec(text)) !== null && loopCount < maxLoops) {
         links.push({
           start: match.index,
           end: match.index + match[0].length,
           fullMatch: match[0]
         });
+        loopCount++;
       }
 
       // Process text in chunks, avoiding existing links
@@ -371,7 +374,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         const beforeLink = text.substring(lastIndex, linkInfo.start);
         processedResult += beforeLink.replace(urlRegex, (url) => {
           // Remove trailing punctuation from URL
-          const cleanUrl = url.replace(/[.,;!?]+$/, '');
+          const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
           const trailingPunct = url.slice(cleanUrl.length);
 
           if (fullLinkFormat) {
@@ -390,7 +393,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       const afterLastLink = text.substring(lastIndex);
       processedResult += afterLastLink.replace(urlRegex, (url) => {
         // Remove trailing punctuation from URL
-        const cleanUrl = url.replace(/[.,;!?]+$/, '');
+        const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
         const trailingPunct = url.slice(cleanUrl.length);
 
         if (fullLinkFormat) {
