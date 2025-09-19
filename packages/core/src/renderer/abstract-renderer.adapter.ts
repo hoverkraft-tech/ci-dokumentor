@@ -31,14 +31,6 @@ export abstract class AbstractRendererAdapter implements RendererAdapter {
         return this.destination;
     }
 
-    protected getSectionStart(sectionIdentifier: string): Buffer {
-        return this.getFormatterAdapter().comment(Buffer.from(`${sectionIdentifier}:start`));
-    }
-
-    protected getSectionEnd(sectionIdentifier: string): Buffer {
-        return this.getFormatterAdapter().comment(Buffer.from(`${sectionIdentifier}:end`));
-    }
-
     abstract writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
 
     abstract readExistingContent(): Promise<Buffer>;

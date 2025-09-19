@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 import { FormatterLanguage } from '../formatter-language.js';
 import { FormatterAdapter, FormatterOptions, LinkFormat } from '../formatter.adapter.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
+import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
 
 @injectable()
 export class MarkdownFormatterAdapter implements FormatterAdapter {
@@ -103,15 +104,6 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return this.appendContent(...parts);
   }
 
-  comment(input: Buffer): Buffer {
-    return this.appendContent(
-      Buffer.from(`<!-- `),
-      this.escapeComment(input),
-      Buffer.from(` -->`),
-      this.lineBreak()
-    );
-  }
-
   paragraph(input: Buffer): Buffer {
     const linkFormat = this.options.linkFormat;
     const processedInput = linkFormat && linkFormat !== LinkFormat.None
@@ -141,7 +133,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       Buffer.from('```'),
       language || Buffer.alloc(0),
       this.lineBreak(),
-      this.trimTrailingNewlines(input),
+      this.trimTrailingLineBreaks(input),
       Buffer.from('```'),
       this.lineBreak(),
     );
@@ -227,6 +219,33 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return Buffer.from('\n');
   }
 
+  section(section: SectionIdentifier, input: Buffer): Buffer {
+    const startMarker = this.sectionStart(section);
+    const endMarker = this.sectionEnd(section);
+
+    if (!input.length) {
+      return this.appendContent(startMarker, this.lineBreak(), endMarker);
+    }
+
+    return this.appendContent(
+      startMarker,
+      this.lineBreak(),
+      this.lineBreak(),
+      this.trimTrailingLineBreaks(input),
+      this.lineBreak(),
+      endMarker,
+      this.lineBreak()
+    );
+  }
+
+  sectionStart(section: SectionIdentifier): Buffer {
+    return this.appendContent(Buffer.from('<!-- '), this.escape(Buffer.from(section), '<!-- '), Buffer.from(':start -->'));
+  }
+
+  sectionEnd(section: SectionIdentifier): Buffer {
+    return this.appendContent(Buffer.from('<!-- '), this.escape(Buffer.from(section), '<!-- '), Buffer.from(':end -->'));
+  }
+
   /**
    * Escape special characters in the input buffer for markdown.
    */
@@ -264,57 +283,15 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   /**
-   * Escape comment-specific sequences in the input buffer for markdown.
-   * Escape standalone closing sequences "-->" to avoid prematurely ending the outer comment,
-   * but do not escape occurrences that are the closing partner of an explicit opening "<!--" inside
-   * the content (e.g. when input contains a literal "<!-- ... -->" snippet we keep it).
+   * Quick heuristic to check if a buffer looks like a single inline markdown link/image
+   * (e.g. "[text](url)" or "![alt](url)"), ignoring surrounding whitespace.
    */
-  private escapeComment(input: Buffer): Buffer {
-    const closeBuf = Buffer.from('-->');
-    const openBuf = Buffer.from('<!--');
-    const parts: Buffer[] = [];
-    let idx = 0;
-    let nextClose = input.indexOf(closeBuf, idx);
-    while (nextClose !== -1) {
-      // find last '<!--' before nextClose
-      const lastOpen = input.lastIndexOf(openBuf, nextClose);
-      if (lastOpen !== -1) {
-        const interveningClose = input.indexOf(closeBuf, lastOpen);
-        if (interveningClose === nextClose) {
-          // keep the whole region including this close unescaped
-          if (nextClose + 3 > idx) parts.push(input.subarray(idx, nextClose + 3));
-          idx = nextClose + 3;
-          nextClose = input.indexOf(closeBuf, idx);
-          continue;
-        }
-      }
-      // otherwise escape this close
-      if (nextClose > idx) parts.push(input.subarray(idx, nextClose));
-      parts.push(Buffer.from('--\\>'));
-      idx = nextClose + 3;
-      nextClose = input.indexOf(closeBuf, idx);
+  private bufferLooksLikeInlineMarkdown(input: Buffer): boolean {
+    if (!input || input.length === 0) {
+      return false;
     }
-    if (idx < input.length) parts.push(input.subarray(idx));
-    if (parts.length === 0) {
-      return Buffer.alloc(0);
-    }
-    if (parts.length === 1) {
-      return parts[0];
-    }
-    return this.appendContent(...parts);
-  }
 
-  /**
-   * Split a cell Buffer into ordered segments of plain text and fenced code blocks.
-   * Returns an array of { type: 'text'|'code', content: Buffer } preserving original order.
-   */
-
-
-  // Quick heuristic to check if a buffer looks like a single inline markdown link/image
-  private bufferLooksLikeInlineMarkdown(buf: Buffer): boolean {
-    if (!buf || buf.length === 0) return false;
-    const s = buf.toString();
-    return /^\s*!?\[[^\]]*\]\([^)]*\)\s*$/.test(s);
+    return /^\s*!?\[[^\]]*\]\([^)]*\)\s*$/.test(input.toString());
   }
 
   /**
@@ -414,34 +391,21 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * Returns a buffer that ends with exactly one LF ("\n").
    * If the input is empty or contains only newlines, returns a buffer with a single "\n".
    */
-  private trimTrailingNewlines(buf: Buffer): Buffer {
-    if (!buf || buf.length === 0) return this.lineBreak();
-    let end = buf.length - 1;
-    while (end >= 0 && (buf[end] === 0x0A /* \n */ || buf[end] === 0x0D /* \r */)) end--;
-    if (end < 0) return this.lineBreak();
-    const contentPart = buf.subarray(0, end + 1);
+  private trimTrailingLineBreaks(input: Buffer): Buffer {
+    if (!input || input.length === 0) {
+      return this.lineBreak();
+    }
+
+    let end = input.length - 1;
+    while (end >= 0 && (input[end] === 0x0A /* \n */ || input[end] === 0x0D /* \r */)) {
+      end--;
+    }
+
+    if (end < 0) {
+      return this.lineBreak();
+    }
+
+    const contentPart = input.subarray(0, end + 1);
     return this.appendContent(contentPart, this.lineBreak());
   }
-
-  /**
-   * Trim leading/trailing spaces, tabs, CR/LF from buffer. Returns sliced buffer view.
-   */
-
-
-  /**
-   * Split buffer into lines on LF
-   *
-   * @param input
-   * @returns an array of Buffers, each line without trailing CR.
-   */
-
-
-  /**
-   * Split buffer into lines on LF, but treat code blocks (```) as single lines.
-   * This prevents code blocks from being split across multiple table rows.
-   *
-   * @param input
-   * @returns an array of Buffers, each line without trailing CR.
-   */
-
 }

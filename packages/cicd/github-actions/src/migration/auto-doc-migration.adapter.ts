@@ -46,12 +46,12 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
 
     const flushCurrent = () => {
       if (!current) return;
-      const std = this.mapToStandardSection(current.sectionKey.toLowerCase());
-      if (std) {
+      const sectionIdentifier = this.mapToStandardSection(current.sectionKey.toLowerCase());
+      if (sectionIdentifier) {
         const contentBuffer = current.parts.length
           ? Buffer.concat([Buffer.from(current.headerLine + '\n', 'utf-8'), ...current.parts])
           : Buffer.from(current.headerLine, 'utf-8');
-        const wrapped = this.wrapWithMarkers(std, contentBuffer, formatterAdapter);
+        const wrapped = formatterAdapter.section(sectionIdentifier, contentBuffer);
         outputParts.push(wrapped);
       } else {
         // Unknown section: emit original header + content as-is

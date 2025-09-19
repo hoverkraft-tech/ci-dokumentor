@@ -59,35 +59,34 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   describe('migrateDocumentation', () => {
     it('migrates github-action-readme-generator markers to ci-dokumentor format (e2e test)', async () => {
       // Arrange: create a file with github-action-readme-generator markers
-      const source = [
-        '<!-- start branding -->',
-        'Brand stuff',
-        '<!-- end branding -->',
-        '<!-- start title -->',
-        'Header here',
-        '<!-- end title -->',
-        '<!-- start badges -->',
-        'BadgeA',
-        '<!-- end badges -->',
-        '<!-- start description -->',
-        'A description',
-        '<!-- end description -->',
-        '<!-- start contents -->',
-        'Contents here',
-        '<!-- end contents -->',
-        '<!-- start usage -->',
-        'Usage details',
-        '<!-- end usage -->',
-        '<!-- start inputs -->',
-        'Input details',
-        '<!-- end inputs -->',
-        '<!-- start outputs -->',
-        'Output details',
-        '<!-- end outputs -->',
-        '<!-- START [.github/GHADOCS/EXAMPLES/] -->',
-        'ExampleX',
-        '<!-- end [.github/ghadocs/examples/] -->'
-      ].join('\n');
+      const source = `<!-- start branding -->
+Brand stuff
+<!-- end branding -->
+<!-- start title -->
+Header here
+<!-- end title -->
+<!-- start badges -->
+BadgeA
+<!-- end badges -->
+<!-- start description -->
+A description
+<!-- end description -->
+<!-- start contents -->
+Contents here
+<!-- end contents -->
+<!-- start usage -->
+Usage details
+<!-- end usage -->
+<!-- start inputs -->
+Input details
+<!-- end inputs -->
+<!-- start outputs -->
+Output details
+<!-- end outputs -->
+<!-- START [.github/GHADOCS/EXAMPLES/] -->
+ExampleX
+<!-- end [.github/ghadocs/examples/] -->
+`;
 
       const tmpPath = join(tmpdir(), `gharg-e2e-${Date.now()}.md`);
 
@@ -108,159 +107,68 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
 
       // Assert: read the actual file content and verify complete migration
       const actualContent = readFileSync(tmpPath, 'utf-8');
-      const expectedContent = [
-        '<!-- header:start -->',
-        '',
-        'Brand stuff',
-        '<!-- header:end -->',
-        '',
-        '<!-- header:start -->',
-        '',
-        'Header here',
-        '<!-- header:end -->',
-        '',
-        '<!-- badges:start -->',
-        '',
-        'BadgeA',
-        '<!-- badges:end -->',
-        '',
-        '<!-- overview:start -->',
-        '',
-        'A description',
-        '<!-- overview:end -->',
-        '',
-        '',
-        'Contents here',
-        '',
-        '<!-- usage:start -->',
-        '',
-        'Usage details',
-        '<!-- usage:end -->',
-        '',
-        '<!-- inputs:start -->',
-        '',
-        'Input details',
-        '<!-- inputs:end -->',
-        '',
-        '<!-- outputs:start -->',
-        '',
-        'Output details',
-        '<!-- outputs:end -->',
-        '<!-- secrets:start -->',
-        '',
-        '<!-- secrets:end -->',
-        '',
-        '',
-        '<!-- examples:start -->',
-        '',
-        'ExampleX',
-        '<!-- examples:end -->',
-        ''
-      ].join('\n');
+      const expectedContent = `<!-- header:start -->
 
-      expect(actualContent).toEqual(expectedContent);
-    });
+Brand stuff
 
-    it('removes unsupported markers while preserving content', async () => {
-      // Arrange: create a file with unsupported markers
-      const source = [
-        '<!-- start branding -->',
-        'Brand content',
-        '<!-- end branding -->',
-        '<!-- start unknown-section -->',
-        'Unknown content here',
-        '<!-- end unknown-section -->',
-        '<!-- start inputs -->',
-        'Input details',
-        '<!-- end inputs -->'
-      ].join('\n');
+Header here
 
-      const tmpPath = join(tmpdir(), `gharg-unsupported-${Date.now()}.md`);
-      mockFs({ [tmpPath]: source });
+<!-- header:end -->
 
-      // Initialize renderer
-      await rendererAdapter.initialize(tmpPath, formatterAdapter);
+<!-- badges:start -->
 
-      // Act: perform migration
-      await adapter.migrateDocumentation({
-        destination: tmpPath,
-        rendererAdapter: rendererAdapter
-      });
+BadgeA
 
-      await rendererAdapter.finalize();
+<!-- badges:end -->
 
-      // Assert: unsupported markers removed but content preserved
-      const actualContent = readFileSync(tmpPath, 'utf-8');
-      const expectedContent = [
-        '<!-- header:start -->',
-        '',
-        'Brand content',
-        '<!-- header:end -->',
-        '',
-        '',
-        'Unknown content here',
-        '',
-        '<!-- inputs:start -->',
-        '',
-        'Input details',
-        '<!-- inputs:end -->',
-        ''
-      ].join('\n');
+<!-- overview:start -->
 
-      expect(actualContent).toEqual(expectedContent);
-    });
+A description
 
-    it('adds missing secrets section after outputs', async () => {
-      // Arrange: create a file without secrets section
-      const source = [
-        '<!-- start inputs -->',
-        'Input details',
-        '<!-- end inputs -->',
-        '<!-- start outputs -->',
-        'Output details',
-        '<!-- end outputs -->',
-        '<!-- start examples -->',
-        'Example content',
-        '<!-- end examples -->'
-      ].join('\n');
+<!-- overview:end -->
 
-      const tmpPath = join(tmpdir(), `gharg-missing-secrets-${Date.now()}.md`);
-      mockFs({ [tmpPath]: source });
 
-      // Initialize renderer
-      await rendererAdapter.initialize(tmpPath, formatterAdapter);
+Contents here
 
-      // Act: perform migration
-      await adapter.migrateDocumentation({
-        destination: tmpPath,
-        rendererAdapter: rendererAdapter
-      });
+<!-- usage:start -->
 
-      await rendererAdapter.finalize();
+Usage details
 
-      // Assert: secrets section added after outputs
-      const actualContent = readFileSync(tmpPath, 'utf-8');
-      const expectedContent = [
-        '<!-- inputs:start -->',
-        '',
-        'Input details',
-        '<!-- inputs:end -->',
-        '',
-        '<!-- outputs:start -->',
-        '',
-        'Output details',
-        '<!-- outputs:end -->',
-        '<!-- secrets:start -->',
-        '',
-        '<!-- secrets:end -->',
-        '',
-        '',
-        '<!-- examples:start -->',
-        '',
-        'Example content',
-        '<!-- examples:end -->',
-        ''
-      ].join('\n');
+<!-- usage:end -->
+
+<!-- inputs:start -->
+
+Input details
+
+<!-- inputs:end -->
+
+<!-- outputs:start -->
+
+Output details
+
+<!-- outputs:end -->
+
+<!-- secrets:start -->
+<!-- secrets:end -->
+
+<!-- examples:start -->
+
+ExampleX
+
+<!-- examples:end -->
+
+<!-- contributing:start -->
+<!-- contributing:end -->
+
+<!-- security:start -->
+<!-- security:end -->
+
+<!-- license:start -->
+<!-- license:end -->
+
+<!-- generated:start -->
+<!-- generated:end -->
+`;
 
       expect(actualContent).toEqual(expectedContent);
     });

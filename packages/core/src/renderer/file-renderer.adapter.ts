@@ -7,6 +7,7 @@ import {
 import { createInterface } from 'node:readline';
 import { injectable } from 'inversify';
 import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
+import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 
 
 @injectable()
@@ -44,7 +45,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         });
     }
 
-    async writeSection(sectionIdentifier: string, data: Buffer): Promise<void> {
+    async writeSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
         await this.safeWriteWithLock(async () => {
             return this.performWriteSection(sectionIdentifier, data);
         });
@@ -76,8 +77,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         });
     }
 
-
-    private performWriteSection(sectionIdentifier: string, data: Buffer): Promise<void> {
+    private performWriteSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
         const destination = this.getDestination();
         const formatterAdapter = this.getFormatterAdapter();
 
@@ -106,26 +106,17 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                 let inSection = false;
                 let output: Buffer = Buffer.alloc(0);
 
-                const sectionStart = this.getSectionStart(sectionIdentifier);
-                const sectionEnd = this.getSectionEnd(sectionIdentifier);
 
-                const sectionContent = formatterAdapter.appendContent(
-                    sectionStart,
-                    ...(data.length ? [
-                        // Ensure an empty line before the section content
-                        formatterAdapter.lineBreak(),
-                        data,
-                        // Ensure an empty line before the end marker
-                        formatterAdapter.lineBreak(),
-                    ] : []),
-                    sectionEnd,
+                const sectionContent = formatterAdapter.section(
+                    sectionIdentifier,
+                    data
                 );
 
-                const sectionStartString = sectionStart.toString();
-                const sectionEndString = sectionEnd.toString();
+                const sectionStart = formatterAdapter.sectionStart(sectionIdentifier).toString();
+                const sectionEnd = formatterAdapter.sectionEnd(sectionIdentifier).toString();
 
                 readLine.on('line', (line) => {
-                    const isSectionStart = line.trim() === sectionStartString.trim();
+                    const isSectionStart = line.trim() === sectionStart;
                     if (isSectionStart) {
                         sectionFound = true;
                         inSection = true;
@@ -133,7 +124,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                         return;
                     }
 
-                    const isSectionEnd = line.trim() === sectionEndString.trim();
+                    const isSectionEnd = line.trim() === sectionEnd;
                     if (isSectionEnd && inSection) {
                         inSection = false;
                         // Skip the end marker as it's already included above

@@ -76,36 +76,19 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
 
         // Migrate the entire content using the adapter's migrateContent method
         // which can either process markers or wrap sections depending on the adapter
-        const output = this.migrateContent(input, formatterAdapter);
+        let output = this.migrateContent(input, formatterAdapter);
+
+        // Ensure all supported sections are present
+        output = this.addMissingSections(output, formatterAdapter);
+
+        // Merge consecutive sections with same mapping
+        output = this.mergeConsecutiveSections(output, formatterAdapter);
 
         // Replace the entire content through the renderer adapter
         await rendererAdapter.replaceContent(output);
     }
 
-
-
     protected abstract migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer;
-
-    protected getStartMarker(section: SectionIdentifier, formatterAdapter: FormatterAdapter): Buffer {
-        const marker = formatterAdapter.comment(Buffer.from(`${section}:start`));
-        return marker;
-    }
-
-    protected getEndMarker(section: SectionIdentifier, formatterAdapter: FormatterAdapter): Buffer {
-        const marker = formatterAdapter.comment(Buffer.from(`${section}:end`));
-        return marker;
-    }
-
-    protected wrapWithMarkers(section: SectionIdentifier, input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
-        const startMarker = this.getStartMarker(section, formatterAdapter);
-        const endMarker = this.getEndMarker(section, formatterAdapter);
-
-        if (!input.length) {
-            return startMarker;
-        }
-
-        return formatterAdapter.appendContent(startMarker, input, endMarker);
-    }
 
     /**
      * Generic helper that replaces tool-specific start/end markers inside a
@@ -146,9 +129,9 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                     // Alternate between start and end on successive matches
                     seenToggle = !seenToggle;
                     if (seenToggle) {
-                        return this.getStartMarker(standardSection, formatterAdapter).toString('utf-8');
+                        return formatterAdapter.appendContent(formatterAdapter.sectionStart(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
                     }
-                    return this.getEndMarker(standardSection, formatterAdapter).toString('utf-8');
+                    return formatterAdapter.appendContent(formatterAdapter.lineBreak(), formatterAdapter.sectionEnd(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
                 });
             } else {
                 // Replace end then start to avoid nested replacement issues when
@@ -159,8 +142,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                         if (!standardSection) {
                             return '';
                         }
-                        // formatterAdapter is required by contract
-                        return this.getEndMarker(standardSection, formatterAdapter).toString('utf-8');
+                        return formatterAdapter.appendContent(formatterAdapter.lineBreak(), formatterAdapter.sectionEnd(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
                     });
                 }
 
@@ -170,8 +152,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                         if (!standardSection) {
                             return '';
                         }
-                        // formatterAdapter is required by contract
-                        return this.getStartMarker(standardSection, formatterAdapter).toString('utf-8');
+                        return formatterAdapter.appendContent(formatterAdapter.sectionStart(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
                     });
                 }
             }
@@ -209,5 +190,176 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     protected mapToStandardSection(sectionName: string) {
         const normalizedName = sectionName.toLowerCase().trim();
         return (this.sectionMappings as Record<string, SectionIdentifier>)[normalizedName] || null;
+    }
+
+    /**
+     * Merge consecutive sections that map to the same target section
+     */
+    private mergeConsecutiveSections(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+        let result = content.toString('utf-8');
+
+        // Pattern to match section start and end markers
+        const sectionPattern = /<!--\s*(\w+):start\s*-->\s*\n([\s\S]*?)<!--\s*\1:end\s*-->/g;
+
+        // Find all sections and group consecutive ones by type
+        const sections: Array<{ type: SectionIdentifier, content: string, start: number, end: number }> = [];
+        let match;
+
+        while ((match = sectionPattern.exec(result)) !== null) {
+            sections.push({
+                type: match[1] as SectionIdentifier,
+                content: match[2],
+                start: match.index,
+                end: match.index + match[0].length
+            });
+        }
+
+        // Group consecutive sections of the same type
+        const mergedSections: Array<{ type: SectionIdentifier, contents: string[], start: number, end: number }> = [];
+        let currentGroup: { type: SectionIdentifier, contents: string[], start: number, end: number } | null = null;
+
+        for (let i = 0; i < sections.length; i++) {
+            const section = sections[i];
+
+            if (currentGroup && currentGroup.type === section.type) {
+                // Check if sections are consecutive (only whitespace between them)
+                const betweenContent = result.substring(currentGroup.end, section.start).trim();
+                if (betweenContent === '') {
+                    // Merge this section with the current group
+                    currentGroup.contents.push(section.content);
+                    currentGroup.end = section.end;
+                    continue;
+                }
+            }
+
+            // Start a new group or finish the current one
+            if (currentGroup) {
+                mergedSections.push(currentGroup);
+            }
+
+            currentGroup = {
+                type: section.type,
+                contents: [section.content],
+                start: section.start,
+                end: section.end
+            };
+        }
+
+        // Don't forget the last group
+        if (currentGroup) {
+            mergedSections.push(currentGroup);
+        }
+
+        // Replace sections from end to start to avoid offset issues
+        mergedSections.reverse().forEach(group => {
+            if (group.contents.length > 1) {
+                // Merge the contents
+                const mergedContent = group.contents.join('').replace(/^\s*\n|\n\s*$/g, '').trim();
+                const replacement = formatterAdapter.section(
+                    group.type,
+                    Buffer.from(mergedContent, 'utf-8')
+                ).toString('utf-8');
+
+                result = result.substring(0, group.start) + replacement.trim() + result.substring(group.end);
+            }
+        });
+
+        return Buffer.from(result, 'utf-8');
+    }
+
+    /**
+     * Add missing supported section markers in the appropriate positions
+     */
+    private addMissingSections(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+
+        const expectedSections: SectionIdentifier[] = Object.values(SectionIdentifier);
+
+        // Determine which sections are already present
+        const presentSections = new Set<string>();
+        const sectionPattern = /<!--\s*(\w+):start\s*-->/g;
+        let match;
+
+        const result = content.toString('utf-8');
+        while ((match = sectionPattern.exec(result)) !== null) {
+            presentSections.add(match[1]);
+        }
+
+        // Build list of missing sections in the canonical order
+        const missing = expectedSections.filter(s => !presentSections.has(s));
+
+        if (missing.length === 0) {
+            return content;
+        }
+
+        // We'll insert missing sections attempting to respect the expected order.
+        // Strategy: find the last occurrence in the file of any present section that
+        // comes before the missing section in the expected ordering and insert
+        // the missing section after it. If no such anchor is found, append at the end.
+
+        // Helper: find insertion index after a given section start/end pair
+        const findInsertAfterSection = (contentString: string, sectionName: SectionIdentifier): number => {
+            const endMarker = formatterAdapter.sectionEnd(sectionName).toString('utf-8');
+            const idx = contentString.lastIndexOf(endMarker);
+            if (idx !== -1) return idx + endMarker.length;
+
+            // If there's a start marker but no end (malformed), insert after start
+            const startMarker = formatterAdapter.sectionStart(sectionName).toString('utf-8');
+            const sidx = result.lastIndexOf(startMarker);
+            if (sidx !== -1) return sidx + startMarker.length;
+
+            return -1;
+        };
+
+        // Iterate expectedSections order and for each missing section decide anchor
+        for (const missingSection of missing) {
+            const contentString = content.toString('utf-8');
+
+            // Find the anchor: the last present section that appears before this
+            let anchorIndex = -1;
+            for (let i = 0; i < expectedSections.length; i++) {
+                const sek = expectedSections[i];
+                if (sek === missingSection) break;
+                if (presentSections.has(sek)) {
+                    const candidate = findInsertAfterSection(contentString, sek);
+                    if (candidate !== -1 && candidate > anchorIndex) {
+                        anchorIndex = candidate;
+                    }
+                }
+            }
+
+            const sectionBuffer = formatterAdapter.section(missingSection, Buffer.alloc(0));
+
+            if (anchorIndex !== -1) {
+                // Insert after anchorIndex, ensure there's a newline separation
+                const before = contentString.substring(0, anchorIndex);
+                const after = contentString.substring(anchorIndex);
+
+                // If before doesn't end with a newline, add one
+                const sep = /\n$/.test(before) ? '' : formatterAdapter.lineBreak();
+                content = formatterAdapter.appendContent(
+                    Buffer.from(before),
+                    Buffer.from(sep),
+                    formatterAdapter.lineBreak(),
+                    sectionBuffer,
+                    after.trim().length > 0 ? Buffer.from(after) : formatterAdapter.lineBreak()
+                );
+            } else {
+                // No suitable anchor, append at end with a preceding newline
+                const sep = /\n$/.test(contentString) ? '' : formatterAdapter.lineBreak();
+
+                content = formatterAdapter.appendContent(
+                    content,
+                    Buffer.from(sep),
+                    formatterAdapter.lineBreak(),
+                    sectionBuffer,
+                );
+            }
+
+            // Mark inserted section as present so subsequent missing sections can
+            // anchor after it if necessary.
+            presentSections.add(missingSection);
+        }
+
+        return content;
     }
 }

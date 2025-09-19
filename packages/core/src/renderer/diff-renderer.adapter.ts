@@ -6,6 +6,7 @@ import { injectable, inject } from 'inversify';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
+import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 
 @injectable()
 export class DiffRendererAdapter extends AbstractRendererAdapter {
@@ -24,7 +25,7 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
         await this.fileRenderer.initialize(tempFilePath, formatterAdapter);
     }
 
-    async writeSection(sectionIdentifier: string, data: Buffer): Promise<void> {
+    async writeSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
         await this.fileRenderer.writeSection(sectionIdentifier, data);
     }
 

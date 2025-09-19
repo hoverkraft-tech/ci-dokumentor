@@ -59,23 +59,22 @@ describe('ActionDocsMigrationAdapter', () => {
   describe('migrateDocumentation', () => {
     it('migrates action-docs markers to ci-dokumentor format (e2e test)', async () => {
       // Arrange: create a file with action-docs markers
-      const source = [
-        '<!-- action-docs-header source="action.yml" -->',
-        'Header here',
-        '<!-- action-docs-header source="action.yml" -->',
-        '<!-- action-docs-description source="action.yml" -->',
-        'Desc here',
-        '<!-- action-docs-description source="action.yml" -->',
-        '<!-- action-docs-inputs source="action.yml" -->',
-        'Input details here',
-        '<!-- action-docs-inputs source="action.yml" -->',
-        '<!-- action-docs-outputs source="action.yml" -->',
-        'Output details here',
-        '<!-- action-docs-outputs source="action.yml" -->',
-        '<!-- action-docs-runs source="action.yml" -->',
-        'Usage details here',
-        '<!-- action-docs-runs source="action.yml" -->'
-      ].join('\n');
+      const source = `<!-- action-docs-header source="action.yml" -->
+Header here
+<!-- action-docs-header source="action.yml" -->
+<!-- action-docs-description source="action.yml" -->
+Desc here
+<!-- action-docs-description source="action.yml" -->
+<!-- action-docs-inputs source="action.yml" -->
+Input details here
+<!-- action-docs-inputs source="action.yml" -->
+<!-- action-docs-outputs source="action.yml" -->
+Output details here
+<!-- action-docs-outputs source="action.yml" -->
+<!-- action-docs-runs source="action.yml" -->
+Usage details here
+<!-- action-docs-runs source="action.yml" -->
+`;
 
       const tmpPath = join(tmpdir(), `actiondocs-e2e-${Date.now()}.md`);
 
@@ -96,33 +95,57 @@ describe('ActionDocsMigrationAdapter', () => {
 
       // Assert: read the actual file content and verify complete migration
       const actualContent = readFileSync(tmpPath, 'utf-8');
-      const expectedContent = [
-        '<!-- header:start -->',
-        '',
-        'Header here',
-        '<!-- header:end -->',
-        '',
-        '<!-- overview:start -->',
-        '',
-        'Desc here',
-        '<!-- overview:end -->',
-        '',
-        '<!-- inputs:start -->',
-        '',
-        'Input details here',
-        '<!-- inputs:end -->',
-        '',
-        '<!-- outputs:start -->',
-        '',
-        'Output details here',
-        '<!-- outputs:end -->',
-        '',
-        '<!-- usage:start -->',
-        '',
-        'Usage details here',
-        '<!-- usage:end -->',
-        ''
-      ].join('\n');
+      const expectedContent = `<!-- header:start -->
+
+Header here
+
+<!-- header:end -->
+
+<!-- badges:start -->
+<!-- badges:end -->
+
+<!-- overview:start -->
+
+Desc here
+
+<!-- overview:end -->
+
+<!-- inputs:start -->
+
+Input details here
+
+<!-- inputs:end -->
+
+<!-- outputs:start -->
+
+Output details here
+
+<!-- outputs:end -->
+
+<!-- usage:start -->
+
+Usage details here
+
+<!-- usage:end -->
+
+<!-- secrets:start -->
+<!-- secrets:end -->
+
+<!-- examples:start -->
+<!-- examples:end -->
+
+<!-- contributing:start -->
+<!-- contributing:end -->
+
+<!-- security:start -->
+<!-- security:end -->
+
+<!-- license:start -->
+<!-- license:end -->
+
+<!-- generated:start -->
+<!-- generated:end -->
+`;
 
       expect(actualContent).toEqual(expectedContent);
     });
