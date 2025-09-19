@@ -11,7 +11,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@d7c033b24117049fcfc129f390d38f8d84bab2ee # main
+- uses: hoverkraft-tech/ci-dokumentor@225e95a339927c961fdd4ebc4a6952715766424b # main
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
