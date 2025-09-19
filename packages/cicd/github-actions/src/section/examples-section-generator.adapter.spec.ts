@@ -112,16 +112,16 @@ describe('ExamplesSectionGenerator', () => {
     });
 
     it('should generate examples section with examples from directory', async () => {
-      // Mock examples directory exists
+      // Mock examples directory exists and has files
       mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
         const pathStr = p.toString();
-        return pathStr === '/test/repo/examples';
+        return pathStr === '/test/repo/examples' || pathStr.includes('basic.yml');
       });
       mockFs.statSync.mockImplementation((p: fs.PathLike) => {
         const pathStr = p.toString();
         return {
           isDirectory: () => pathStr === '/test/repo/examples',
-          isFile: () => false
+          isFile: () => pathStr.includes('basic.yml')
         } as any;
       });
       mockFs.readdirSync.mockReturnValue(['basic.yml'] as any);
@@ -157,18 +157,17 @@ jobs:
       // Mock examples directory with YAML file containing action usage
       mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
         const pathStr = p.toString();
-        return pathStr === '/test/repo/examples';
+        return pathStr === '/test/repo/examples' || pathStr.includes('workflow.yml');
       });
       mockFs.statSync.mockImplementation((p: fs.PathLike) => {
         const pathStr = p.toString();
         return {
           isDirectory: () => pathStr === '/test/repo/examples',
-          isFile: () => false
+          isFile: () => pathStr.includes('workflow.yml')
         } as any;
       });
       mockFs.readdirSync.mockReturnValue(['workflow.yml'] as any);
-      mockFs.readFileSync.mockReturnValue(`
-name: Example Workflow
+      mockFs.readFileSync.mockReturnValue(`name: Example Workflow
 on: push
 jobs:
   test:
@@ -179,16 +178,15 @@ jobs:
           input: value
       - uses: ./
         with:
-          local: true
-`);
+          local: true`);
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# Examples'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
+      
+      let capturedCode = '';
       mockFormatterAdapter.code.mockImplementation((content: Buffer) => {
-        // Verify the code content has been processed for version replacement
-        const codeStr = content.toString();
-        expect(codeStr).toContain('owner/test-action@abc123456789 # v1.0.0');
-        expect(codeStr).toContain('./@abc123456789 # v1.0.0');
+        // Capture the processed code for verification
+        capturedCode = content.toString();
         return Buffer.from('```yaml\nprocessed code\n```');
       });
       mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('# Examples\ncode'));
@@ -200,6 +198,9 @@ jobs:
         destination: '/test/destination'
       });
 
+      // Verify the code content has been processed for version replacement
+      expect(capturedCode).toContain('owner/test-action@abc123456789 # v1.0.0');
+      expect(capturedCode).toContain('./@abc123456789 # v1.0.0');
       expect(mockFormatterAdapter.code).toHaveBeenCalled();
     });
 
@@ -258,9 +259,15 @@ with:
     });
 
     it('should handle file system errors gracefully', async () => {
-      // Mock file system to throw errors
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.statSync.mockImplementation(() => ({ isDirectory: () => true }) as any);
+      // Mock file system to have example directories but throw errors when reading
+      mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
+        const pathStr = p.toString();
+        return pathStr === '/test/repo/examples' || pathStr === '/test/repo/.github/examples' || pathStr === '/test/repo/.github/workflows';
+      });
+      mockFs.statSync.mockImplementation((p: fs.PathLike) => {
+        return { isDirectory: () => true } as any;
+      });
+      // Make readdirSync throw an error for all paths
       mockFs.readdirSync.mockImplementation(() => {
         throw new Error('Permission denied');
       });
@@ -310,13 +317,13 @@ with:
       
       mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
         const pathStr = p.toString();
-        return pathStr === '/test/repo/examples';
+        return pathStr === '/test/repo/examples' || pathStr.includes('test.yml');
       });
       mockFs.statSync.mockImplementation((p: fs.PathLike) => {
         const pathStr = p.toString();
         return {
           isDirectory: () => pathStr === '/test/repo/examples',
-          isFile: () => false
+          isFile: () => pathStr.includes('test.yml')
         } as any;
       });
       mockFs.readdirSync.mockReturnValue(['test.yml'] as any);

@@ -64,7 +64,7 @@ Documentation generated successfully!
 ===================================================================
 --- test.md
 +++ test.md
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,483 @@
 +<!-- header:start -->
 +
 +# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYm9vay1vcGVuIiBjb2xvcj0iYmx1ZSI+PHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhMyAzIDAgMCAwLTMtM0gyeiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMiAzaC02YTQgNCAwIDAgMC00IDR2MTRhMyAzIDAgMCAxIDMtM2g3eiI+PC9wYXRoPjwvc3ZnPg==) GitHub Action: CI Dokumentor
@@ -171,6 +171,370 @@ Documentation generated successfully!
 +<!-- outputs:end -->
 +<!-- secrets:start -->
 +<!-- secrets:end -->
++<!-- examples:start -->
++
++## Examples
++
++### Example: __shared-ci
++
++\`\`\`yaml
++name: Common Continuous Integration tasks
++
++on:
++  workflow_call:
++    inputs:
++      sign-images:
++        required: true
++        type: boolean
++    outputs:
++      image-tag:
++        description: The image tag for the CI Dokumentor CLI
++        value: \${{ fromJSON(jobs.docker.outputs.built-images).cli.tags[0] }}
++
++permissions:
++  actions: read
++  contents: read
++  packages: read
++  security-events: write
++  statuses: write
++  id-token: write
++
++jobs:
++  linter:
++    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@sha-version # tag.24.0
++    with:
++      linter-env: |
++        FILTER_REGEX_EXCLUDE=dist/**/*
++        VALIDATE_JSCPD=false
++        VALIDATE_TYPESCRIPT_ES=false
++        VALIDATE_TYPESCRIPT_PRETTIER=false
++        VALIDATE_JAVASCRIPT_ES=false
++        VALIDATE_TSX=false
++
++  nodejs:
++    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@sha-version # tag.14.1
++    permissions:
++      id-token: write
++      security-events: write
++      contents: read
++    with:
++      build: |
++        {
++          "commands": ["build"],
++          "artifact": ["packages/docs/build", "packages/cli/dist"]
++        }
++
++  package-test:
++    needs: [linter, nodejs]
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@sha-version # tag.0.0
++      - name: Setup Node.js
++        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@sha-version # tag.14.1
++      - name: Download build artifacts
++        uses: actions/download-artifact@sha-version # tag.0.0
++        with:
++          name: build
++          path: .
++      - name: Verify CLI build exists
++        run: |
++          echo "Checking if CLI binary exists..."
++          ls -la packages/cli/dist/bin/ || echo "CLI binary directory missing"
++          if [ ! -f "packages/cli/dist/bin/ci-dokumentor.js" ]; then
++            echo "CLI binary not found, building CLI package..."
++            npx nx build @ci-dokumentor/cli
++          fi
++          ls -la packages/cli/dist/bin/
++      - name: Create package tarball
++        run: |
++          cd packages/cli
++          npm pack --pack-destination \${{ runner.temp }}/
++      - name: Install package globally
++        run: |
++          cd \${{ runner.temp }}
++          npm install -g ./ci-dokumentor-cli-*.tgz
++
++      # Test version command
++      - name: Test version command
++        run: npx ci-dokumentor --version
++
++      # Test help command
++      - name: Test help command
++        run: npx ci-dokumentor --help
++
++      # Test generate command
++      - uses: actions/checkout@sha-version # tag.0.0
++      - name: Test generate command
++        run: |
++          npx ci-dokumentor generate \\
++          --source "action.yml" \\
++          --destination "packages/docs/content/integrations/github-action.md" \\
++          --dry-run
++        env:
++          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
++      - name: Upload package tarball
++        uses: actions/upload-artifact@sha-version # tag.6.2
++        with:
++          name: package-tarball
++          path: \${{ runner.temp }}/ci-dokumentor-cli-*.tgz
++
++  docker:
++    needs: [linter, nodejs]
++    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@sha-version # tag.27.1
++    permissions:
++      contents: read
++      issues: read
++      packages: write
++      pull-requests: read
++      id-token: write
++    secrets:
++      oci-registry-password: \${{ secrets.GITHUB_TOKEN }}
++    with:
++      sign: \${{ inputs.sign-images }}
++      images: |
++        [
++          {
++            "name": "cli",
++            "context": ".",
++            "dockerfile": "docker/Dockerfile",
++            "target": "production",
++            "platforms": [
++              "linux/amd64",
++              "linux/arm64"
++            ]
++          }
++        ]
++
++  docker-test:
++    needs: docker
++    runs-on: ubuntu-latest
++    env:
++      IMAGE: \${{ fromJSON(needs.docker.outputs.built-images).cli.images[0] }}
++    steps:
++      # Test version command
++      - run: docker run --rm "$IMAGE" --version
++
++      # Test help command
++      - run: docker run --rm "$IMAGE" --help
++
++      # Test generate command (dry-run) on this repository's action.yml file
++      - uses: actions/checkout@sha-version # tag.0.0
++      - run: |
++          docker run --rm \\
++          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \\
++          -u "$(id -u):$(id -g)" \\
++          -w "$GITHUB_WORKSPACE" \\
++          -e GITHUB_TOKEN \\
++          "$IMAGE" \\
++          generate \\
++          --source "action.yml" \\
++          --destination "packages/docs/content/integrations/github-action.md" \\
++          --dry-run
++        env:
++          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
++
++  action-test:
++    needs: docker
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@sha-version # tag.0.0
++
++      - id: generate-docs
++        uses: ./@sha-version # tag
++        with:
++          ci-dokumentor-version: \${{ fromJSON(needs.docker.outputs.built-images).cli.tags[0] }}
++          source: action.yml
++          destination: packages/docs/content/integrations/github-action.md
++          github-token: \${{ secrets.GITHUB_TOKEN }}
++
++      - run: |
++          # Assert generate-docs action outputs
++          output_destination="\${{ steps.generate-docs.outputs.destination }}"
++          expected_output_destination="packages/docs/content/integrations/github-action.md"
++          if [ "$output_destination" != "$expected_output_destination" ]; then
++            echo "Error: Unexpected output destination"
++            exit 1
++          fi
++\`\`\`
++
++### Example: main-ci
++
++\`\`\`yaml
++name: Internal - Main - Continuous Integration
++
++on:
++  push:
++    branches: [main]
++    tags: ['*']
++
++  workflow_dispatch:
++
++  schedule:
++    - cron: '25 8 * * 1'
++
++permissions:
++  actions: read
++  contents: read
++  issues: read
++  packages: write
++  pull-requests: read
++  security-events: write
++  statuses: write
++  # FIXME: This is a workaround for having workflow ref. See https://github.com/orgs/community/discussions/38659
++  id-token: write
++
++concurrency:
++  group: \${{ github.workflow }}-\${{ github.ref }}
++  cancel-in-progress: true
++
++jobs:
++  clean:
++    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@sha-version # tag.27.1
++    with:
++      images: '["cli"]'
++
++  ci:
++    uses: ./.github/workflows/__shared-ci.yml
++    secrets: inherit
++    with:
++      sign-images: true
++
++  docs-action:
++    needs: ci
++    if: github.event_name != 'schedule'
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@sha-version # tag.0.0
++
++      - id: generate-readme
++        uses: ./@sha-version # tag
++        with:
++          ci-dokumentor-version: \${{ needs.ci.outputs.image-tag }}
++          source: action.yml
++          include-sections: badges,contributing,license,generated
++          extra-badges: |
++            [
++              {
++                "label": "Total Downloads",
++                "url": "https://img.shields.io/npm/dm/@ci-dokumentor/cli",
++                "linkUrl": "https://www.npmjs.com/package/@ci-dokumentor/cli"
++              },
++              {
++                "label": "Coverage Status",
++                "url": "https://codecov.io/gh/hoverkraft-tech/ci-dokumentor/branch/main/graph/badge.svg",
++                "linkUrl": "https://codecov.io/gh/hoverkraft-tech/ci-dokumentor"
++              },
++              {
++                "label": "Continuous Integration",
++                "url": "https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml/badge.svg",
++                "linkUrl": "https://github.com/hoverkraft-tech/ci-dokumentor/actions/workflows/main-ci.yml"
++              }
++            ]
++          github-token: \${{ secrets.GITHUB_TOKEN }}
++
++      - id: generate-docs
++        uses: ./@sha-version # tag
++        with:
++          ci-dokumentor-version: \${{ needs.ci.outputs.image-tag }}
++          source: action.yml
++          destination: packages/docs/content/integrations/github-action.md
++          include-sections: usage,inputs,outputs,secrets
++          github-token: \${{ secrets.GITHUB_TOKEN }}
++          format-link: full
++
++      - uses: actions/create-github-app-token@sha-version # tag.1.4
++        id: generate-token
++        with:
++          app-id: \${{ vars.CI_BOT_APP_ID }}
++          private-key: \${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
++
++      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@sha-version # tag.24.0
++        with:
++          github-token: \${{ steps.generate-token.outputs.token }}
++          branch: docs/action-documentation-update
++          title: 'docs: update action documentation'
++          body: Update action documentation
++          commit-message: |
++            docs: update action documentation
++
++            [skip ci]
++
++  npm-publish:
++    needs: ci
++    if: github.event_name == 'push'
++    runs-on: ubuntu-latest
++    permissions:
++      contents: read
++      id-token: write
++    steps:
++      - uses: actions/checkout@sha-version # tag.0.0
++      - name: Setup Node.js
++        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@sha-version # tag.14.1
++
++      - name: Download package tarball
++        uses: actions/download-artifact@sha-version # tag.0.0
++        with:
++          name: package-tarball
++          path: .
++      - name: Publish CLI to npm
++        run: |
++          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --dry-run
++        env:
++          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}
++
++  docs-deploy:
++    needs: ci
++    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
++    runs-on: ubuntu-latest
++    permissions:
++      pages: write
++      id-token: write
++    environment:
++      name: github-pages
++      url: \${{ steps.deployment.outputs.url }}
++    steps:
++      - name: Deploy to GitHub Pages
++        id: deployment
++        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@sha-version # tag
++        with:
++          build-path: packages/docs/build
++          build-artifact-name: build
++\`\`\`
++
++### Example: pull-request-ci
++
++\`\`\`yaml
++name: Pull request - Continuous Integration
++
++on:
++  merge_group:
++  pull_request:
++    branches: [main]
++
++permissions:
++  actions: read
++  contents: read
++  id-token: write
++  issues: read
++  packages: write
++  pull-requests: read
++  security-events: write
++  statuses: write
++
++concurrency:
++  group: \${{ github.workflow }}-\${{ github.ref }}
++  cancel-in-progress: true
++
++jobs:
++  ci:
++    uses: ./.github/workflows/__shared-ci.yml
++    secrets: inherit
++    with:
++      sign-images: false
++\`\`\`
++
++
++<!-- examples:end -->
 +<!-- contributing:start -->
 +<!-- contributing:end -->
 +<!-- security:start -->
