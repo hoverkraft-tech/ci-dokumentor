@@ -39,11 +39,11 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     this.version = version;
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider, destination }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
     const version = await this.versionService.getVersion(this.version, repositoryProvider);
     const repositoryInfo = await repositoryProvider.getRepositoryInfo();
     
-    const examples = await this.findExamples(repositoryInfo.rootDir, manifest, version);
+    const examples = await this.findExamples(repositoryInfo.rootDir, manifest, version, destination);
     
     if (examples.length === 0) {
       return Buffer.alloc(0);
@@ -80,7 +80,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   /**
    * Find examples from various sources
    */
-  private async findExamples(rootDir: string, manifest: GitHubActionsManifest, version?: ManifestVersion): Promise<Example[]> {
+  private async findExamples(rootDir: string, manifest: GitHubActionsManifest, version?: ManifestVersion, destination?: string): Promise<Example[]> {
     const examples: Example[] = [];
     
     // Strategy 1: Look for examples/ directory
@@ -101,10 +101,9 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
       examples.push(...this.findExampleWorkflows(workflowsDir, manifest, version));
     }
 
-    // Strategy 4: Look for examples in README.md
-    const readmePath = join(rootDir, 'README.md');
-    if (existsSync(readmePath)) {
-      examples.push(...this.findExamplesFromReadme(readmePath, manifest, version));
+    // Strategy 4: Look for examples in destination file (if it exists)
+    if (destination && existsSync(destination)) {
+      examples.push(...this.findExamplesFromReadme(destination, manifest, version));
     }
 
     return examples;

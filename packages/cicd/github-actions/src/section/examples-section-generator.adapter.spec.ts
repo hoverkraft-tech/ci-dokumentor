@@ -1,16 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import mockFs from 'mock-fs';
 import { ExamplesSectionGenerator } from './examples-section-generator.adapter.js';
 import { VersionService, SectionIdentifier, ManifestVersion } from '@ci-dokumentor/core';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
-import * as fs from 'fs';
-import * as path from 'path';
-
-// Mock file system
-vi.mock('fs');
-vi.mock('path');
-
-const mockFs = vi.mocked(fs);
-const mockPath = vi.mocked(path);
 
 describe('ExamplesSectionGenerator', () => {
   let generator: ExamplesSectionGenerator;
@@ -35,8 +27,6 @@ describe('ExamplesSectionGenerator', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    
     mockVersionService = {
       getVersion: vi.fn()
     };
@@ -55,13 +45,6 @@ describe('ExamplesSectionGenerator', () => {
       getRepositoryInfo: vi.fn()
     };
     
-    // Setup default mocks
-    mockPath.join.mockImplementation((...args: string[]) => args.join('/'));
-    mockPath.extname.mockImplementation((p: string) => {
-      const parts = p.split('.');
-      return parts.length > 1 ? `.${parts[parts.length - 1]}` : '';
-    });
-    
     mockRepositoryProvider.getRepositoryInfo.mockResolvedValue({
       rootDir: '/test/repo',
       owner: 'owner',
@@ -71,6 +54,10 @@ describe('ExamplesSectionGenerator', () => {
     });
     
     mockVersionService.getVersion.mockResolvedValue(mockVersion);
+  });
+
+  afterEach(() => {
+    mockFs.restore();
   });
 
   describe('getSectionIdentifier', () => {
@@ -98,8 +85,10 @@ describe('ExamplesSectionGenerator', () => {
 
   describe('generateSection', () => {
     it('should return empty buffer when no examples found', async () => {
-      // Mock file system to return no examples
-      mockFs.existsSync.mockReturnValue(false);
+      // Mock empty file system
+      mockFs({
+        '/test/repo': {}
+      });
       
       const result = await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
@@ -112,21 +101,10 @@ describe('ExamplesSectionGenerator', () => {
     });
 
     it('should generate examples section with examples from directory', async () => {
-      // Mock examples directory exists and has files
-      mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
-        const pathStr = p.toString();
-        return pathStr === '/test/repo/examples' || pathStr.includes('basic.yml');
-      });
-      mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-        const pathStr = p.toString();
-        return {
-          isDirectory: () => pathStr === '/test/repo/examples',
-          isFile: () => pathStr.includes('basic.yml')
-        } as any;
-      });
-      mockFs.readdirSync.mockReturnValue(['basic.yml'] as any);
-      mockFs.readFileSync.mockReturnValue(`
-name: Test Workflow
+      // Mock examples directory with files
+      mockFs({
+        '/test/repo/examples': {
+          'basic.yml': `name: Test Workflow
 on: push
 jobs:
   test:
@@ -134,8 +112,9 @@ jobs:
     steps:
       - uses: owner/test-action@v1.0.0
         with:
-          input: value
-`);
+          input: value`
+        }
+      });
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# Examples'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
@@ -155,19 +134,9 @@ jobs:
 
     it('should process code snippets and replace version information', async () => {
       // Mock examples directory with YAML file containing action usage
-      mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
-        const pathStr = p.toString();
-        return pathStr === '/test/repo/examples' || pathStr.includes('workflow.yml');
-      });
-      mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-        const pathStr = p.toString();
-        return {
-          isDirectory: () => pathStr === '/test/repo/examples',
-          isFile: () => pathStr.includes('workflow.yml')
-        } as any;
-      });
-      mockFs.readdirSync.mockReturnValue(['workflow.yml'] as any);
-      mockFs.readFileSync.mockReturnValue(`name: Example Workflow
+      mockFs({
+        '/test/repo/examples': {
+          'workflow.yml': `name: Example Workflow
 on: push
 jobs:
   test:
@@ -178,7 +147,9 @@ jobs:
           input: value
       - uses: ./
         with:
-          local: true`);
+          local: true`
+        }
+      });
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# Examples'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
@@ -204,16 +175,10 @@ jobs:
       expect(mockFormatterAdapter.code).toHaveBeenCalled();
     });
 
-    it('should find examples from README.md', async () => {
-      // Mock README.md with examples section
-      mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
-        return p.toString() === '/test/repo/README.md';
-      });
-      mockFs.statSync.mockImplementation(() => ({ isDirectory: () => false, isFile: () => true }) as any);
-      mockFs.readFileSync.mockImplementation((p: fs.PathOrFileDescriptor) => {
-        if (p.toString() === '/test/repo/README.md') {
-          return `
-# Test Action
+    it('should find examples from destination file', async () => {
+      // Mock destination file with examples section
+      mockFs({
+        '/test/destination': `# Test Action
 
 ## Examples
 
@@ -234,9 +199,7 @@ uses: owner/test-action@latest
 with:
   input: advanced
 \`\`\`
-`;
-        }
-        return '';
+`
       });
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# heading'));
@@ -259,17 +222,12 @@ with:
     });
 
     it('should handle file system errors gracefully', async () => {
-      // Mock file system to have example directories but throw errors when reading
-      mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
-        const pathStr = p.toString();
-        return pathStr === '/test/repo/examples' || pathStr === '/test/repo/.github/examples' || pathStr === '/test/repo/.github/workflows';
-      });
-      mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-        return { isDirectory: () => true } as any;
-      });
-      // Make readdirSync throw an error for all paths
-      mockFs.readdirSync.mockImplementation(() => {
-        throw new Error('Permission denied');
+      // Mock file system with directory that will cause errors when accessed
+      mockFs({
+        '/test/repo/examples': mockFs.directory({
+          mode: 0o000, // No permissions to cause errors
+          items: {}
+        })
       });
 
       const result = await generator.generateSection({
@@ -296,7 +254,9 @@ with:
         }
       };
 
-      mockFs.existsSync.mockReturnValue(false);
+      mockFs({
+        '/test/repo': {}
+      });
 
       const result = await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
@@ -315,19 +275,11 @@ with:
       
       mockVersionService.getVersion.mockResolvedValue(versionWithoutSha);
       
-      mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
-        const pathStr = p.toString();
-        return pathStr === '/test/repo/examples' || pathStr.includes('test.yml');
+      mockFs({
+        '/test/repo/examples': {
+          'test.yml': 'uses: owner/test-action@v1.0.0'
+        }
       });
-      mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-        const pathStr = p.toString();
-        return {
-          isDirectory: () => pathStr === '/test/repo/examples',
-          isFile: () => pathStr.includes('test.yml')
-        } as any;
-      });
-      mockFs.readdirSync.mockReturnValue(['test.yml'] as any);
-      mockFs.readFileSync.mockReturnValue('uses: owner/test-action@v1.0.0');
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# heading'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
