@@ -22,7 +22,7 @@ export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrati
   protected readonly name = 'github-action-readme-generator';
 
   protected readonly sectionMappings: Record<string, SectionIdentifier> = {
-    'branding': SectionIdentifier.Badges,
+    'branding': SectionIdentifier.Header,
     'title': SectionIdentifier.Header,
     'badges': SectionIdentifier.Badges,
     'description': SectionIdentifier.Overview,
@@ -51,6 +51,27 @@ export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrati
       return `${p1}${normalized}${p3}`;
     });
 
-    return this.processMarkerMappings(Buffer.from(working, 'utf-8'), formatterAdapter);
+    // Process marker mappings first
+    let migrated = this.processMarkerMappings(Buffer.from(working, 'utf-8'), formatterAdapter);
+    
+    // Add missing supported section markers
+    migrated = this.addMissingSections(migrated, formatterAdapter);
+    
+    return migrated;
+  }
+
+  /**
+   * Add missing supported section markers in the appropriate positions
+   */
+  private addMissingSections(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+    let result = content.toString('utf-8');
+    
+    // Add missing secrets section after outputs section
+    if (!result.includes('<!-- secrets:start -->') && result.includes('<!-- outputs:end -->')) {
+      const secretsMarker = `\n${this.getStartMarker(SectionIdentifier.Secrets, formatterAdapter).toString('utf-8')}\n${this.getEndMarker(SectionIdentifier.Secrets, formatterAdapter).toString('utf-8')}`;
+      result = result.replace(/(<!-- outputs:end -->)/, `$1${secretsMarker}`);
+    }
+    
+    return Buffer.from(result, 'utf-8');
   }
 }
