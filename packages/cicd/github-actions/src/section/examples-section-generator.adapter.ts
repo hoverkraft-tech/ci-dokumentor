@@ -55,17 +55,17 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     ];
 
     for (const example of examples) {
-      if (example.type === 'heading') {
+      if (example.type === ExampleType.Heading) {
         examplesContent.push(
           formatterAdapter.heading(Buffer.from(example.content), example.level || 3),
           formatterAdapter.lineBreak()
         );
-      } else if (example.type === 'text') {
+      } else if (example.type === ExampleType.Text) {
         examplesContent.push(
           formatterAdapter.paragraph(Buffer.from(example.content)),
           formatterAdapter.lineBreak()
         );
-      } else if (example.type === 'code') {
+      } else if (example.type === ExampleType.Code) {
         const processedCode = this.processCodeSnippet(example.content, manifest.usesName, version);
         examplesContent.push(
           formatterAdapter.code(Buffer.from(processedCode), Buffer.from(example.language || 'yaml')),
@@ -127,12 +127,12 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
           if (['.yml', '.yaml'].includes(ext)) {
             const content = readFileSync(filePath, 'utf8');
             examples.push({
-              type: 'heading',
+              type: ExampleType.Heading,
               content: file.replace(/\.(yml|yaml)$/, ''),
               level: 3
             });
             examples.push({
-              type: 'code',
+              type: ExampleType.Code,
               content: content,
               language: 'yaml'
             });
@@ -168,12 +168,12 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
         // Check if this workflow uses the current action
         if (content.includes(manifest.usesName) || content.includes('uses: ./')) {
           examples.push({
-            type: 'heading',
+            type: ExampleType.Heading,
             content: `Example: ${file.replace(/\.(yml|yaml)$/, '')}`,
             level: 3
           });
           examples.push({
-            type: 'code',
+            type: ExampleType.Code,
             content: content,
             language: 'yaml'
           });
@@ -226,7 +226,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
               inCodeBlock = false;
               if (codeBlockContent.trim()) {
                 examples.push({
-                  type: 'code',
+                  type: ExampleType.Code,
                   content: codeBlockContent.trim(),
                   language: codeBlockLanguage
                 });
@@ -239,14 +239,14 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
             const level = (line.match(/^#+/) || [''])[0].length;
             const heading = line.replace(/^#+\s*/, '');
             examples.push({
-              type: 'heading',
+              type: ExampleType.Heading,
               content: heading,
               level: level + 2 // Offset since examples is already h2
             });
           } else if (line.trim()) {
             // Regular text content
             examples.push({
-              type: 'text',
+              type: ExampleType.Text,
               content: line
             });
           }
@@ -283,7 +283,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
             inCodeBlock = false;
             if (codeBlockContent.trim()) {
               examples.push({
-                type: 'code',
+                type: ExampleType.Code,
                 content: codeBlockContent.trim(),
                 language: codeBlockLanguage
               });
@@ -295,13 +295,13 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
           const level = (line.match(/^#+/) || [''])[0].length;
           const heading = line.replace(/^#+\s*/, '');
           examples.push({
-            type: 'heading',
+            type: ExampleType.Heading,
             content: heading,
             level: level + 2
           });
         } else if (line.trim()) {
           examples.push({
-            type: 'text',
+            type: ExampleType.Text,
             content: line
           });
         }
@@ -344,8 +344,14 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   }
 }
 
+export enum ExampleType {
+  Heading = 'heading',
+  Text = 'text',
+  Code = 'code',
+}
+
 interface Example {
-  type: 'heading' | 'text' | 'code';
+  type: ExampleType;
   content: string;
   language?: string;
   level?: number;
