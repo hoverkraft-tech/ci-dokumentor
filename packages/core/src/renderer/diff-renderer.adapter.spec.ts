@@ -8,6 +8,7 @@ import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.gen
 import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { DiffRendererAdapter } from './diff-renderer.adapter.js';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
+import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 
 describe('DiffRendererAdapter', () => {
     const fixedNow = 1234567890;
@@ -47,15 +48,18 @@ describe('DiffRendererAdapter', () => {
             await adapter.initialize('/test/document.md', formatter);
 
             // Act
-            await adapter.writeSection('my-section', Buffer.from('New section content'));
+            await adapter.writeSection(SectionIdentifier.Examples, Buffer.from('New section content'));
 
             // Assert
             const tmpPath = join(tmpdir(), `${basename('/test/document.md')}.${fixedNow}.tmp`);
             expect(existsSync(tmpPath)).toBe(true);
             const content = readFileSync(tmpPath, 'utf-8');
-            expect(content).toContain('New section content');
-            expect(content).toContain(`<!-- my-section:start -->`);
-            expect(content).toContain(`<!-- my-section:end -->`);
+            expect(content).toEqual(`<!-- examples:start -->
+
+New section content
+
+<!-- examples:end -->
+`);
         });
     });
 

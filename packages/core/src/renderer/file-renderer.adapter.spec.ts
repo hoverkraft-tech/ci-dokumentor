@@ -4,13 +4,14 @@ import { existsSync, readFileSync } from 'node:fs';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
 import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
+import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 
 describe('FileRendererAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
 
   let fileRendererAdapter: FileRendererAdapter;
   const testFilePath = '/test/document.md';
-  const testSectionIdentifier = 'test-section';
+  const testSectionIdentifier = SectionIdentifier.Examples;
   const testData = Buffer.from('New section content\n');
 
   beforeEach(() => {
@@ -20,23 +21,23 @@ describe('FileRendererAdapter', () => {
         'document.md': 'Initial content\nSome text\n',
         'existing-section.md': [
           'Content before section',
-          '<!-- test-section:start -->',
+          '<!-- examples:start -->',
           'Old section content',
-          '<!-- test-section:end -->',
+          '<!-- examples:end -->',
           'Content after section',
           '',
         ].join('\n'),
         'multiple-sections.md': [
           'Header content',
-          '<!-- first-section:start -->',
+          '<!-- examples:start -->',
           '',
           'First section content',
           '',
-          '<!-- first-section:end -->',
+          '<!-- examples:end -->',
           'Middle content',
-          '<!-- second-section:start -->',
+          '<!-- usage:start -->',
           'Second section content',
-          '<!-- second-section:end -->',
+          '<!-- usage:end -->',
           'Footer content',
           '',
         ].join('\n'),
@@ -117,24 +118,24 @@ New section content
 
       // Act
       await multipleSectionsAdapter.initialize('/test/multiple-sections.md', formatterAdapter);
-      await multipleSectionsAdapter.writeSection('second-section', newData);
+      await multipleSectionsAdapter.writeSection(SectionIdentifier.Usage, newData);
 
       // Assert
       const fileContent = readFileSync('/test/multiple-sections.md', 'utf-8');
 
       // Should preserve first section with blank lines around content
       expect(fileContent).toEqual(`Header content
-<!-- first-section:start -->
+<!-- examples:start -->
 
 First section content
 
-<!-- first-section:end -->
+<!-- examples:end -->
 Middle content
-<!-- second-section:start -->
+<!-- usage:start -->
 
 Updated second section
 
-<!-- second-section:end -->
+<!-- usage:end -->
 Footer content
 `);
     });
@@ -185,22 +186,6 @@ Footer content
       );
       // We expect three line breaks: the start marker's trailing newline plus two blank lines (before and after content)
       expect(sectionContent).toEqual('\n');
-    });
-
-    it('should handle special characters in section identifier', async () => {
-      // Arrange
-      const specialIdentifier = 'test-section_with.special@chars';
-      const specialData = Buffer.from('Special content');
-
-      // Act
-      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(specialIdentifier, specialData);
-
-      // Assert
-      const fileContent = readFileSync(testFilePath, 'utf-8');
-      expect(fileContent).toContain(`<!-- ${specialIdentifier}:start -->`);
-      expect(fileContent).toContain('Special content');
-      expect(fileContent).toContain(`<!-- ${specialIdentifier}:end -->`);
     });
 
     it('should preserve file content order when adding new section', async () => {
@@ -254,20 +239,6 @@ Footer content
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
       expect(fileContent).toContain(`<!-- ${testSectionIdentifier}:end -->`);
-    });
-
-    it('should handle empty section identifier in markers', async () => {
-      // Arrange
-      const emptyIdentifier = '';
-
-      // Act
-      await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(emptyIdentifier, testData);
-
-      // Assert
-      const fileContent = readFileSync(testFilePath, 'utf-8');
-      expect(fileContent).toContain('<!-- :start -->');
-      expect(fileContent).toContain('<!-- :end -->');
     });
   });
 
@@ -347,18 +318,25 @@ Footer content
       // Act - Simulate concurrent writes to different sections
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
       await Promise.all([
-        fileRendererAdapter.writeSection('section-1', section1Data),
-        fileRendererAdapter.writeSection('section-2', section2Data),
+        fileRendererAdapter.writeSection(SectionIdentifier.Examples, section1Data),
+        fileRendererAdapter.writeSection(SectionIdentifier.Usage, section2Data),
       ]);
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
-      expect(fileContent).toContain('Section 1 content');
-      expect(fileContent).toContain('Section 2 content');
-      expect(fileContent).toContain('<!-- section-1:start -->');
-      expect(fileContent).toContain('<!-- section-1:end -->');
-      expect(fileContent).toContain('<!-- section-2:start -->');
-      expect(fileContent).toContain('<!-- section-2:end -->');
+      expect(fileContent).toEqual(`Initial content
+Some text
+<!-- examples:start -->
+
+Section 1 content
+
+<!-- examples:end -->
+<!-- usage:start -->
+
+Section 2 content
+
+<!-- usage:end -->
+`);
     });
   });
 

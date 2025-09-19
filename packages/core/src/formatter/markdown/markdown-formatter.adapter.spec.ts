@@ -3,6 +3,7 @@ import { MarkdownFormatterAdapter } from './markdown-formatter.adapter.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { FormatterLanguage } from '../formatter-language.js';
 import { LinkFormat } from '../formatter.adapter.js';
+import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
 
 describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
@@ -176,84 +177,6 @@ describe('MarkdownFormatterAdapter', () => {
 </div>
 `
       );
-    });
-  });
-
-  describe('comment', () => {
-    it('should format text as markdown comment with proper syntax', () => {
-      // Arrange
-      const input = Buffer.from('This is a comment');
-
-      // Act
-      const result = adapter.comment(input);
-
-      // Assert
-      expect(result.toString()).toEqual('<!-- This is a comment -->\n');
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const input = Buffer.alloc(0);
-
-      // Act
-      const result = adapter.comment(input);
-
-      // Assert
-      expect(result.toString()).toEqual('<!--  -->\n');
-    });
-
-    it('should handle multi-line comments', () => {
-      // Arrange
-      const input = Buffer.from('First line\nSecond line');
-
-      // Act
-      const result = adapter.comment(input);
-
-      // Assert
-      expect(result.toString()).toEqual('<!-- First line\nSecond line -->\n');
-    });
-
-    it('should handle comments with special characters', () => {
-      // Arrange
-      const input = Buffer.from('Comment with "quotes" & symbols!');
-
-      // Act
-      const result = adapter.comment(input);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '<!-- Comment with "quotes" & symbols! -->\n'
-      );
-    });
-
-    it('should handle whitespace correctly', () => {
-      // Arrange
-      const input = Buffer.from('  spaced content  ');
-
-      // Act
-      const result = adapter.comment(input);
-
-      // Assert
-      expect(result.toString()).toEqual('<!--   spaced content   -->\n');
-    });
-
-    it('should handle comments with existing HTML comment syntax', () => {
-      // Arrange
-      const input = Buffer.from('Already has <!-- comment --> syntax');
-
-      // Act
-      const result = adapter.comment(input);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '<!-- Already has <!-- comment --> syntax -->\n'
-      );
-    });
-
-    it('should escape comment close sequence', () => {
-      const input = Buffer.from('okay --> not');
-      const result = adapter.comment(input);
-      expect(result.toString()).toEqual('<!-- okay --\\> not -->\n');
     });
   });
 
@@ -1109,6 +1032,51 @@ describe('MarkdownFormatterAdapter', () => {
 
       // Assert
       expect(result.toString()).toEqual('\n');
+    });
+  });
+
+  describe('section', () => {
+    it('should return input wrapped in section markers', () => {
+      // Act
+      const result = adapter.section(SectionIdentifier.Examples, Buffer.from('Section Content'));
+
+      // Assert
+      expect(result.toString()).toEqual(`<!-- examples:start -->
+
+Section Content
+
+<!-- examples:end -->
+`);
+    });
+
+    it('should handle empty content', () => {
+      // Act
+      const result = adapter.section(SectionIdentifier.Examples, Buffer.alloc(0));
+
+      // Assert
+      expect(result.toString()).toEqual(`<!-- examples:start -->
+<!-- examples:end -->`);
+    });
+  });
+
+  describe('sectionStart', () => {
+    it('should return section start markers', () => {
+      // Act
+      const result = adapter.sectionStart(SectionIdentifier.Examples);
+
+      // Assert
+      expect(result.toString()).toEqual("<!-- examples:start -->");
+    });
+
+  });
+
+  describe('sectionEnd', () => {
+    it('should return section end markers', () => {
+      // Act
+      const result = adapter.sectionEnd(SectionIdentifier.Examples);
+
+      // Assert
+      expect(result.toString()).toEqual("<!-- examples:end -->");
     });
   });
 });

@@ -1,3 +1,4 @@
+import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import { FormatterLanguage } from './formatter-language.js';
 
 export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');
@@ -29,8 +30,6 @@ export interface FormatterAdapter {
 
   center(input: Buffer): Buffer;
 
-  comment(input: Buffer): Buffer;
-
   paragraph(input: Buffer): Buffer;
 
   bold(input: Buffer): Buffer;
@@ -56,4 +55,13 @@ export interface FormatterAdapter {
   horizontalRule(): Buffer;
 
   lineBreak(): Buffer;
+
+  /**
+   * Wrap content in section markers
+   */
+  section(section: SectionIdentifier, input: Buffer): Buffer;
+
+  sectionStart(section: SectionIdentifier): Buffer;
+
+  sectionEnd(section: SectionIdentifier): Buffer;
 }

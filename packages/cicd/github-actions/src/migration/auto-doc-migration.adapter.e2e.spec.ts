@@ -59,28 +59,28 @@ describe('AutoDocMigrationAdapter', () => {
   describe('migrateDocumentation', () => {
     it('wraps markdown headers with ci-dokumentor markers (e2e test)', async () => {
       // Arrange: create a file with markdown headers that should be wrapped
-      const source = [
-        '## Description',
-        'Some description here',
-        '',
-        '## Inputs',
-        '',
-        '| Name | Description |',
-        '|------|-------------|',
-        '| input1 | First input |',
-        '',
-        '## Outputs',
-        '',
-        '| Name | Description |',
-        '|------|-------------|',
-        '| output1 | First output |',
-        '',
-        '## Secrets',
-        '',
-        '- SECRET_X'
-      ].join('\n');
+      const source = `## Description
 
-      const tmpPath = join(tmpdir(), `autodoc-e2e-${Date.now()}.md`);
+Some description here
+
+## Inputs
+
+| Name   | Description |
+|--------|-------------|
+| input1 | First input |
+
+## Outputs
+
+| Name    | Description  |
+|---------|--------------|
+| output1 | First output |
+
+## Secrets
+
+- SECRET_X
+`;
+
+      const tmpPath = join(tmpdir(), `autodoc-e2e - ${Date.now()}.md`);
 
       // Mock the file system with the source content
       mockFs({ [tmpPath]: source });
@@ -99,35 +99,63 @@ describe('AutoDocMigrationAdapter', () => {
 
       // Assert: read the actual file content and verify headers are wrapped with markers
       const actualContent = readFileSync(tmpPath, 'utf-8');
-      const expectedContent = [
-        '<!-- overview:start -->',
-        '## Description',
-        'Some description here',
-        '',
-        '<!-- overview:end -->',
-        '<!-- inputs:start -->',
-        '## Inputs',
-        '',
-        '| Name | Description |',
-        '|------|-------------|',
-        '| input1 | First input |',
-        '',
-        '<!-- inputs:end -->',
-        '<!-- outputs:start -->',
-        '## Outputs',
-        '',
-        '| Name | Description |',
-        '|------|-------------|',
-        '| output1 | First output |',
-        '',
-        '<!-- outputs:end -->',
-        '<!-- secrets:start -->',
-        '## Secrets',
-        '',
-        '- SECRET_X',
-        '<!-- secrets:end -->',
-        ''
-      ].join('\n');
+      const expectedContent = `<!-- overview:start -->
+
+## Description
+
+Some description here
+
+<!-- overview:end -->
+<!-- inputs:start -->
+
+## Inputs
+
+| Name   | Description |
+|--------|-------------|
+| input1 | First input |
+
+<!-- inputs:end -->
+<!-- outputs:start -->
+
+## Outputs
+
+| Name    | Description  |
+|---------|--------------|
+| output1 | First output |
+
+<!-- outputs:end -->
+<!-- secrets:start -->
+
+## Secrets
+
+- SECRET_X
+
+<!-- secrets:end -->
+
+<!-- header:start -->
+<!-- header:end -->
+
+<!-- badges:start -->
+<!-- badges:end -->
+
+<!-- usage:start -->
+<!-- usage:end -->
+
+<!-- examples:start -->
+<!-- examples:end -->
+
+<!-- contributing:start -->
+<!-- contributing:end -->
+
+<!-- security:start -->
+<!-- security:end -->
+
+<!-- license:start -->
+<!-- license:end -->
+
+<!-- generated:start -->
+<!-- generated:end -->
+`;
 
       expect(actualContent).toEqual(expectedContent);
     });
