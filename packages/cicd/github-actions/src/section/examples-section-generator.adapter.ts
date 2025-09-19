@@ -10,6 +10,19 @@ export interface ExamplesSectionOptions extends SectionOptions {
   version?: string;
 }
 
+/**
+ * Generates examples section for GitHub Actions documentation.
+ * 
+ * Examples can be stored in multiple formats and locations:
+ * - YAML files (.yml/.yaml): Pure code snippets containing workflow examples
+ * - Markdown files (.md): Rich content with descriptions and/or code snippets
+ * - Destination file: Existing examples in the documentation being generated (examples section)
+ * 
+ * Detection strategies:
+ * 1. Examples directory: Scans `examples/` folder for YAML and Markdown files
+ * 2. GitHub examples: Checks `.github/examples/` directory for examples
+ * 3. Destination file: Extracts existing examples from the target documentation file
+ */
 @injectable()
 export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapter implements SectionGeneratorAdapter<GitHubActionsManifest, ExamplesSectionOptions> {
   private version?: string;
@@ -95,13 +108,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
       examples.push(...this.findExamplesFromDirectory(githubExamplesDir, manifest, version));
     }
 
-    // Strategy 3: Look for example workflows in .github/workflows/
-    const workflowsDir = join(rootDir, '.github', 'workflows');
-    if (existsSync(workflowsDir) && statSync(workflowsDir).isDirectory()) {
-      examples.push(...this.findExampleWorkflows(workflowsDir, manifest, version));
-    }
-
-    // Strategy 4: Look for examples in destination file (if it exists)
+    // Strategy 3: Look for examples in destination file (if it exists)
     if (destination && existsSync(destination)) {
       examples.push(...this.findExamplesFromReadme(destination, manifest, version));
     }
@@ -149,45 +156,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   }
 
   /**
-   * Find example workflows that use the current action
-   */
-  private findExampleWorkflows(workflowsDir: string, manifest: GitHubActionsManifest, version?: ManifestVersion): Example[] {
-    const examples: Example[] = [];
-    
-    try {
-      const files = readdirSync(workflowsDir);
-      
-      for (const file of files) {
-        if (!['.yml', '.yaml'].includes(extname(file).toLowerCase())) {
-          continue;
-        }
-        
-        const filePath = join(workflowsDir, file);
-        const content = readFileSync(filePath, 'utf8');
-        
-        // Check if this workflow uses the current action
-        if (content.includes(manifest.usesName) || content.includes('uses: ./')) {
-          examples.push({
-            type: ExampleType.Heading,
-            content: `Example: ${file.replace(/\.(yml|yaml)$/, '')}`,
-            level: 3
-          });
-          examples.push({
-            type: ExampleType.Code,
-            content: content,
-            language: 'yaml'
-          });
-        }
-      }
-    } catch (error) {
-      // Silently handle directory read errors
-    }
-    
-    return examples;
-  }
-
-  /**
-   * Extract examples from README.md
+   * Extract examples from README.md or destination file
    */
   private findExamplesFromReadme(readmePath: string, manifest: GitHubActionsManifest, version?: ManifestVersion): Example[] {
     const examples: Example[] = [];
