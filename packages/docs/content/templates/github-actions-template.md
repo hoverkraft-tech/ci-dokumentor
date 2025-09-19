@@ -4,8 +4,6 @@ description: Complete template for GitHub Actions documentation with all availab
 sidebar_position: 2
 ---
 
-# GitHub Actions documentation template
-
 This template provides all available documentation sections for GitHub Actions. Copy and paste the sections you need into your README.md or documentation file.
 
 ## Complete Template

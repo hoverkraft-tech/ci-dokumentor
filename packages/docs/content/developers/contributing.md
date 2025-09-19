@@ -4,8 +4,6 @@ description: Guidelines for contributing to CI Dokumentor project
 sidebar_position: 5
 ---
 
-# Contributing
-
 Welcome to CI Dokumentor! We're excited that you're interested in contributing to this project.
 
 ## Quick Start

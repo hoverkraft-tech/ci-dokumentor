@@ -4,8 +4,6 @@ description: Migrate from other documentation tools to CI Dokumentor with step-b
 sidebar_position: 7
 ---
 
-# Migration Guide
-
 This guide helps you migrate from other popular documentation tools to ci-dokumentor using the `migrate` command.
 
 ## Migration Philosophy
