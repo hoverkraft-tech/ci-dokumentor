@@ -5,6 +5,7 @@ export * from './container.js';
 export * from './section/github-actions-section-generator.adapter.js';
 export * from './section/badges-section-generator.adapter.js';
 export * from './section/contributing-section-generator.adapter.js';
+export * from './section/examples-section-generator.adapter.js';
 export * from './section/header-section-generator.adapter.js';
 export * from './section/inputs-section-generator.adapter.js';
 export * from './section/license-section-generator.adapter.js';

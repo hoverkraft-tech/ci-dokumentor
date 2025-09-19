@@ -19,6 +19,7 @@ import { UsageSectionGenerator } from './section/usage-section-generator.adapter
 import { InputsSectionGenerator } from './section/inputs-section-generator.adapter.js';
 import { OutputsSectionGenerator } from './section/outputs-section-generator.adapter.js';
 import { SecretsSectionGenerator } from './section/secrets-section-generator.adapter.js';
+import { ExamplesSectionGenerator } from './section/examples-section-generator.adapter.js';
 import { ContributingSectionGenerator } from './section/contributing-section-generator.adapter.js';
 import { SecuritySectionGenerator } from './section/security-section-generator.adapter.js';
 import { LicenseSectionGenerator } from './section/license-section-generator.adapter.js';
@@ -86,6 +87,9 @@ export function initContainer(
   container
     .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(SecretsSectionGenerator);
+  container
+    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(ExamplesSectionGenerator);
   container
     .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(ContributingSectionGenerator);
