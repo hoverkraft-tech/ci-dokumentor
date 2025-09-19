@@ -141,7 +141,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                 out = out.replace(startPattern, (match: string, sectionName: string) => {
                     const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
                     if (!standardSection) {
-                        return match;
+                        return '';
                     }
                     // Alternate between start and end on successive matches
                     seenToggle = !seenToggle;
@@ -157,7 +157,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                     out = out.replace(endPattern, (match: string, sectionName: string) => {
                         const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
                         if (!standardSection) {
-                            return match;
+                            return '';
                         }
                         // formatterAdapter is required by contract
                         return this.getEndMarker(standardSection, formatterAdapter).toString('utf-8');
@@ -168,7 +168,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                     out = out.replace(startPattern, (match: string, sectionName: string) => {
                         const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
                         if (!standardSection) {
-                            return match;
+                            return '';
                         }
                         // formatterAdapter is required by contract
                         return this.getStartMarker(standardSection, formatterAdapter).toString('utf-8');
