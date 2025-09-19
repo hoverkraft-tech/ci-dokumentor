@@ -97,6 +97,10 @@ Comprehensive readme generator for GitHub Actions.
 - Complete input/output documentation
 - Example code sections
 
+**Smart Section Merging:**
+
+When multiple sections map to the same target (e.g., both `branding` and `title` map to `header`), they are automatically merged into a single section with combined content instead of creating duplicate sections.
+
 ## Migration Process
 
 ### Step 1: Preparation
@@ -261,6 +265,40 @@ Some description here.
 ## Secrets
 
 <!-- secrets:end -->
+```
+
+### Migrating from github-action-readme-generator
+
+**Before (github-action-readme-generator format):**
+
+```markdown
+<!-- start branding -->
+
+Brand content
+
+<!-- end branding -->
+<!-- start title -->
+
+My Action Title
+
+<!-- end title -->
+```
+
+**Migration command:**
+
+```bash
+ci-dokumentor migrate --tool github-action-readme-generator --destination README.md
+```
+
+**After (ci-dokumentor format with section merging):**
+
+```markdown
+<!-- header:start -->
+
+Brand content
+My Action Title
+
+<!-- header:end -->
 ```
 
 ## Post-Migration Benefits
