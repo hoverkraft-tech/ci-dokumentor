@@ -11,37 +11,37 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@v1 # Use latest stable version
+- uses: hoverkraft-tech/ci-dokumentor@14133141672b01589726d96cdb5bd494566a9109 # main
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
-    source: ''
+    source: ""
 
     # Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
-    destination: ''
+    destination: ""
 
     # Repository platform (auto-detected if not specified).
-    repository: ''
+    repository: ""
 
     # CI/CD platform (`github-actions`, `gitlab-ci`, etc.).
-    cicd: ''
+    cicd: ""
 
     # Comma-separated list of sections to include.
-    include-sections: ''
+    include-sections: ""
 
     # Comma-separated list of sections to exclude.
-    exclude-sections: ''
+    exclude-sections: ""
 
     # Whether to perform a dry run (no files are written).
     # Default: `false`
-    dry-run: 'false'
+    dry-run: "false"
 
     # Version to document (auto-detected if not specified).
-    version: ''
+    version: ""
 
     # JSON array of extra badges to include in the documentation.
     # Each badge should have `label`, `url`, and optional `linkUrl` properties.
-    extra-badges: ''
+    extra-badges: ""
 
     # Transform bare URLs to links.
     # Types: `auto` (autolinks), `full` (full links), `false` (disabled).
