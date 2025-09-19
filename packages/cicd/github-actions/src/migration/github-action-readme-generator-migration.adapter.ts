@@ -33,9 +33,9 @@ export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrati
   };
 
   protected readonly patterns = {
-    startMarkerPattern: /<!--\s*start\s+([\w[\]/.]+)\s*-->/gi,
-    endMarkerPattern: /<!--\s*end\s+([\w[\]/.]+)\s*-->/gi,
-    detectionPattern: /<!--\s*(start|end)\s+[\w[\]/.]+\s*-->/,
+    startMarkerPattern: /<!--\s*start\s+([\w[\]/.-]+)\s*-->/gi,
+    endMarkerPattern: /<!--\s*end\s+([\w[\]/.-]+)\s*-->/gi,
+    detectionPattern: /<!--\s*(start|end)\s+[\w[\]/.-]+\s*-->/,
   };
 
   protected migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {

@@ -160,5 +160,109 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
 
       expect(actualContent).toEqual(expectedContent);
     });
+
+    it('removes unsupported markers while preserving content', async () => {
+      // Arrange: create a file with unsupported markers
+      const source = [
+        '<!-- start branding -->',
+        'Brand content',
+        '<!-- end branding -->',
+        '<!-- start unknown-section -->',
+        'Unknown content here',
+        '<!-- end unknown-section -->',
+        '<!-- start inputs -->',
+        'Input details',
+        '<!-- end inputs -->'
+      ].join('\n');
+
+      const tmpPath = join(tmpdir(), `gharg-unsupported-${Date.now()}.md`);
+      mockFs({ [tmpPath]: source });
+
+      // Initialize renderer
+      await rendererAdapter.initialize(tmpPath, formatterAdapter);
+
+      // Act: perform migration
+      await adapter.migrateDocumentation({
+        destination: tmpPath,
+        rendererAdapter: rendererAdapter
+      });
+
+      await rendererAdapter.finalize();
+
+      // Assert: unsupported markers removed but content preserved
+      const actualContent = readFileSync(tmpPath, 'utf-8');
+      const expectedContent = [
+        '<!-- header:start -->',
+        '',
+        'Brand content',
+        '<!-- header:end -->',
+        '',
+        '',
+        'Unknown content here',
+        '',
+        '<!-- inputs:start -->',
+        '',
+        'Input details',
+        '<!-- inputs:end -->',
+        ''
+      ].join('\n');
+
+      expect(actualContent).toEqual(expectedContent);
+    });
+
+    it('adds missing secrets section after outputs', async () => {
+      // Arrange: create a file without secrets section
+      const source = [
+        '<!-- start inputs -->',
+        'Input details',
+        '<!-- end inputs -->',
+        '<!-- start outputs -->',
+        'Output details',
+        '<!-- end outputs -->',
+        '<!-- start examples -->',
+        'Example content',
+        '<!-- end examples -->'
+      ].join('\n');
+
+      const tmpPath = join(tmpdir(), `gharg-missing-secrets-${Date.now()}.md`);
+      mockFs({ [tmpPath]: source });
+
+      // Initialize renderer
+      await rendererAdapter.initialize(tmpPath, formatterAdapter);
+
+      // Act: perform migration
+      await adapter.migrateDocumentation({
+        destination: tmpPath,
+        rendererAdapter: rendererAdapter
+      });
+
+      await rendererAdapter.finalize();
+
+      // Assert: secrets section added after outputs
+      const actualContent = readFileSync(tmpPath, 'utf-8');
+      const expectedContent = [
+        '<!-- inputs:start -->',
+        '',
+        'Input details',
+        '<!-- inputs:end -->',
+        '',
+        '<!-- outputs:start -->',
+        '',
+        'Output details',
+        '<!-- outputs:end -->',
+        '<!-- secrets:start -->',
+        '',
+        '<!-- secrets:end -->',
+        '',
+        '',
+        '<!-- examples:start -->',
+        '',
+        'Example content',
+        '<!-- examples:end -->',
+        ''
+      ].join('\n');
+
+      expect(actualContent).toEqual(expectedContent);
+    });
   });
 });
