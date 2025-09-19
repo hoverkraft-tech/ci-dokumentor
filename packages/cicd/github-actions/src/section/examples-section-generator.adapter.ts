@@ -324,8 +324,8 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
 
     const lines = code.split('\n');
     const processedLines = lines.map(line => {
-      // Look for uses: lines that reference the current action
-      const usesMatch = line.match(/^(\s*uses:\s*)(.+)$/);
+      // Look for uses: lines that reference the current action (both YAML list syntax and regular uses)
+      const usesMatch = line.match(/^(\s*-?\s*uses:\s*)(.+)$/);
       if (usesMatch) {
         const [, prefix, actionRef] = usesMatch;
         

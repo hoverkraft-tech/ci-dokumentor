@@ -70,6 +70,8 @@ Builds the application and deploys it to the specified environment
 <!-- outputs:end -->
 <!-- secrets:start -->
 <!-- secrets:end -->
+<!-- examples:start -->
+<!-- examples:end -->
 <!-- contributing:start -->
 <!-- contributing:end -->
 <!-- security:start -->
@@ -159,6 +161,8 @@ jobs:
 | **\`github-token\`** | GitHub token for authentication | **false**    |
 
 <!-- secrets:end -->
+<!-- examples:start -->
+<!-- examples:end -->
 <!-- contributing:start -->
 <!-- contributing:end -->
 <!-- security:start -->
