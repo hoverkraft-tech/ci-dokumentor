@@ -4,8 +4,6 @@ description: Install and use CI Dokumentor as an npm package in your Node.js pro
 sidebar_position: 6
 ---
 
-# Node.js Package
-
 ## Using the published package: `@ci-dokumentor/cli`
 
 The CLI is published as a scoped npm package `@ci-dokumentor/cli`. The package includes all necessary dependencies bundled together, making it a standalone tool that works independently of the monorepo structure.

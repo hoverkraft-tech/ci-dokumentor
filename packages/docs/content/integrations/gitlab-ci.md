@@ -4,8 +4,6 @@ description: Integration guide for GitLab CI/CD components and pipelines (planne
 sidebar_position: 3
 ---
 
-# GitLab CI Integration
-
 :::warning
 **Status**: 🚧 This package is not available yet. It is planned for future development.
 

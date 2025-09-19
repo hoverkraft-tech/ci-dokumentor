@@ -4,8 +4,6 @@ description: Template for GitLab CI component documentation (planned for future 
 sidebar_position: 3
 ---
 
-# GitLab CI documentation template
-
 :::warning
 **Status**: 🚧 This template is not available yet. It is planned for future development alongside the GitLab CI integration.
 

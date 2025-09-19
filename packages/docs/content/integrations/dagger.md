@@ -4,8 +4,6 @@ description: Integration guide for Dagger.io CI/CD pipelines (planned for future
 sidebar_position: 4
 ---
 
-# Dagger.io Integration
-
 :::warning
 **Status**: 🚧 This package is not available yet. It is planned for future development.
 

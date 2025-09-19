@@ -4,8 +4,6 @@ description: Template for Dagger.io module documentation (planned for future dev
 sidebar_position: 4
 ---
 
-# Dagger.io documentation template
-
 :::warning
 **Status**: 🚧 This template is not available yet. It is planned for future development alongside the Dagger.io integration.
 

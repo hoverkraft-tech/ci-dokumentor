@@ -4,8 +4,6 @@ description: Use CI Dokumentor as a GitHub Action in your workflows for automate
 sidebar_position: 2
 ---
 
-# GitHub Action Integration
-
 CI Dokumentor can be used directly as a GitHub Action in your workflows, making it easy to automatically generate and maintain documentation for your CI/CD components.
 
 <!-- usage:start -->
