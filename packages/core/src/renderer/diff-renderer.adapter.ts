@@ -8,7 +8,7 @@ import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import { READER_ADAPTER_IDENTIFIER, readableToString } from '../reader/reader.adapter.js';
-import type { ReaderAdapter } from '../reader/reader.adapter.js';
+import type { ReaderAdapter, ReadableContent } from '../reader/reader.adapter.js';
 
 @injectable()
 export class DiffRendererAdapter extends AbstractRendererAdapter {
@@ -30,12 +30,12 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
         await this.fileRenderer.initialize(tempFilePath, formatterAdapter);
     }
 
-    async writeSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
-        await this.fileRenderer.writeSection(sectionIdentifier, data);
+    async writeSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
+        await this.fileRenderer.writeSection(sectionIdentifier, content);
     }
 
-    async replaceContent(data: Buffer): Promise<void> {
-        return this.fileRenderer.replaceContent(data);
+    async replaceContent(content: ReadableContent): Promise<void> {
+        return this.fileRenderer.replaceContent(content);
     }
 
     override async finalize(): Promise<string | undefined> {

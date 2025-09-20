@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { StringDecoder } from 'string_decoder';
-import { MigrationAdapter, SectionIdentifier, readableToBuffer } from '@ci-dokumentor/core';
+import { MigrationAdapter, SectionIdentifier, readableToBuffer, bufferToReadable } from '@ci-dokumentor/core';
 import type { FormatterAdapter, MigrateDocumentationPayload, ReaderAdapter } from '@ci-dokumentor/core';
 import { readFileSync, existsSync } from 'node:fs';
 
@@ -99,7 +99,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         output = this.mergeConsecutiveSections(output, formatterAdapter);
 
         // Replace the entire content through the renderer adapter
-        await rendererAdapter.replaceContent(output);
+        await rendererAdapter.replaceContent(bufferToReadable(output));
     }
 
     protected abstract migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer;

@@ -1,5 +1,6 @@
 import { RendererAdapter } from "./renderer.adapter.js";
 import { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import type { ReadableContent } from "../reader/reader.adapter.js";
 
 export abstract class AbstractRendererAdapter implements RendererAdapter {
     private destination?: string;
@@ -31,9 +32,9 @@ export abstract class AbstractRendererAdapter implements RendererAdapter {
         return this.destination;
     }
 
-    abstract writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
+    abstract writeSection(sectionIdentifier: string, content: ReadableContent): Promise<void>;
 
-    abstract replaceContent(data: Buffer): Promise<void>;
+    abstract replaceContent(content: ReadableContent): Promise<void>;
 
     async finalize(): Promise<string | undefined> {
         // Reset initialized parameters

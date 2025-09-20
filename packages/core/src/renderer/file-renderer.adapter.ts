@@ -8,19 +8,23 @@ import { createInterface } from 'node:readline';
 import { injectable } from 'inversify';
 import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import type { ReadableContent } from '../reader/reader.adapter.js';
+import { readableToBuffer } from '../reader/reader.adapter.js';
 
 
 @injectable()
 export class FileRendererAdapter extends AbstractRendererAdapter {
     private static readonly fileLocks = new Map<string, Promise<void>>();
 
-    async replaceContent(data: Buffer): Promise<void> {
+    async replaceContent(content: ReadableContent): Promise<void> {
+        const data = await readableToBuffer(content);
         await this.safeWriteWithLock(async () => {
             return this.performReplaceContent(data);
         });
     }
 
-    async writeSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
+    async writeSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
+        const data = await readableToBuffer(content);
         await this.safeWriteWithLock(async () => {
             return this.performWriteSection(sectionIdentifier, data);
         });

@@ -10,7 +10,7 @@ import { initTestContainer } from '../container.js';
 describe('ActionDocsMigrationAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
-  let readerAdapter: ReaderAdapter;
+  let readerAdapter: FileReaderAdapter;
   let adapter: ActionDocsMigrationAdapter;
 
   beforeEach(() => {

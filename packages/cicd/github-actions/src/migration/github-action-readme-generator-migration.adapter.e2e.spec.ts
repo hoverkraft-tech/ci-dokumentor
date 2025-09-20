@@ -11,7 +11,7 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   let adapter: GitHubActionReadmeGeneratorMigrationAdapter;
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
-  let readerAdapter: ReaderAdapter;
+  let readerAdapter: FileReaderAdapter;
 
   beforeEach(() => {
     // Use real dependencies from the container for e2e testing

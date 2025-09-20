@@ -53,3 +53,11 @@ export async function readableToString(readable: ReadableContent, encoding: Buff
         });
     });
 }
+
+/**
+ * Utility function to convert Buffer to ReadableContent
+ * This allows converting buffer data to stream format when needed
+ */
+export function bufferToReadable(buffer: Buffer): ReadableContent {
+    return Readable.from(buffer);
+}

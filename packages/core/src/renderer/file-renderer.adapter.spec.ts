@@ -5,6 +5,7 @@ import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatt
 import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { bufferToReadable } from '../reader/reader.adapter.js';
 
 describe('FileRendererAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
@@ -63,7 +64,7 @@ describe('FileRendererAdapter', () => {
     it('should append a new section when the file exists but has no matching section', async () => {
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData));
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -80,7 +81,7 @@ describe('FileRendererAdapter', () => {
 
       // Act
       await adapterWithExistingSection.initialize('/test/existing-section.md', formatterAdapter);
-      await adapterWithExistingSection.writeSection(testSectionIdentifier, testData);
+      await adapterWithExistingSection.writeSection(testSectionIdentifier, bufferToReadable(testData));
 
       // Assert
       const fileContent = readFileSync('/test/existing-section.md', 'utf-8');
@@ -98,7 +99,7 @@ describe('FileRendererAdapter', () => {
 
       // Act
       await emptyFileAdapter.initialize('/test/empty.md', formatterAdapter);
-      await emptyFileAdapter.writeSection(testSectionIdentifier, testData);
+      await emptyFileAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData));
 
       // Assert
       const fileContent = readFileSync('/test/empty.md', 'utf-8');
@@ -118,7 +119,7 @@ New section content
 
       // Act
       await multipleSectionsAdapter.initialize('/test/multiple-sections.md', formatterAdapter);
-      await multipleSectionsAdapter.writeSection(SectionIdentifier.Usage, newData);
+      await multipleSectionsAdapter.writeSection(SectionIdentifier.Usage, bufferToReadable(newData));
 
       // Assert
       const fileContent = readFileSync('/test/multiple-sections.md', 'utf-8');
@@ -148,7 +149,7 @@ Footer content
 
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, complexData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(complexData));
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -163,7 +164,7 @@ Footer content
 
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, emptyData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(emptyData));
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -191,7 +192,7 @@ Footer content
     it('should preserve file content order when adding new section', async () => {
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData));
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -214,7 +215,7 @@ Footer content
 
       // Act & Assert - This should fail because the file doesn't exist
       await newFileAdapter.initialize('/test/new-file.md', formatterAdapter);
-      await newFileAdapter.writeSection(testSectionIdentifier, testData);
+      await newFileAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData));
 
       expect(existsSync('/test/new-file.md')).toBe(true);
     });
@@ -224,7 +225,7 @@ Footer content
     it('should generate correct start markers', async () => {
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData));
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -234,7 +235,7 @@ Footer content
     it('should generate correct end markers', async () => {
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, testData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData));
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -260,7 +261,7 @@ Footer content
       // Act & Assert
       await readOnlyAdapter.initialize(testFilePath, formatterAdapter);
       await expect(
-        readOnlyAdapter.writeSection(testSectionIdentifier, testData)
+        readOnlyAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData))
       ).rejects.toThrow('test');
     });
 
@@ -271,7 +272,7 @@ Footer content
       // Act & Assert
       await invalidPathAdapter.initialize('/nonexistent/path/file.md', formatterAdapter);
       await expect(
-        invalidPathAdapter.writeSection(testSectionIdentifier, testData)
+        invalidPathAdapter.writeSection(testSectionIdentifier, bufferToReadable(testData))
       ).rejects.toThrow("ENOENT, no such file or directory '/nonexistent/path/file.md'");
     });
   });
@@ -285,9 +286,9 @@ Footer content
 
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, firstData);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, secondData);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, thirdData);
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(firstData));
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(secondData));
+      await fileRendererAdapter.writeSection(testSectionIdentifier, bufferToReadable(thirdData));
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
@@ -318,8 +319,8 @@ Footer content
       // Act - Simulate concurrent writes to different sections
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
       await Promise.all([
-        fileRendererAdapter.writeSection(SectionIdentifier.Examples, section1Data),
-        fileRendererAdapter.writeSection(SectionIdentifier.Usage, section2Data),
+        fileRendererAdapter.writeSection(SectionIdentifier.Examples, bufferToReadable(section1Data)),
+        fileRendererAdapter.writeSection(SectionIdentifier.Usage, bufferToReadable(section2Data)),
       ]);
 
       // Assert

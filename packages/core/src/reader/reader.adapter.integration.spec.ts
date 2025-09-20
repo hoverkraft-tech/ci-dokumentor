@@ -5,7 +5,7 @@ import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
 import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
-import { readableToBuffer, readableToString } from './reader.adapter.js';
+import { readableToBuffer, readableToString, bufferToReadable } from './reader.adapter.js';
 
 describe('ReaderAdapter Integration', () => {
   let readerAdapter: FileReaderAdapter;
@@ -42,7 +42,7 @@ describe('ReaderAdapter Integration', () => {
       // Act: Write new content using RendererAdapter (existing pattern)
       await rendererAdapter.initialize('/test/document.md', formatterAdapter);
       const formattedSection = formatterAdapter.section(SectionIdentifier.Overview, Buffer.from(newSectionContent));
-      await rendererAdapter.writeSection(SectionIdentifier.Overview, formattedSection);
+      await rendererAdapter.writeSection(SectionIdentifier.Overview, bufferToReadable(formattedSection));
       await rendererAdapter.finalize();
 
       // Assert: Verify the new content was written

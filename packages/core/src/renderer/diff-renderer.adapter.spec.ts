@@ -10,6 +10,7 @@ import { DiffRendererAdapter } from './diff-renderer.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { bufferToReadable } from '../reader/reader.adapter.js';
 
 describe('DiffRendererAdapter', () => {
     const fixedNow = 1234567890;
@@ -51,7 +52,7 @@ describe('DiffRendererAdapter', () => {
             await adapter.initialize('/test/document.md', formatter);
 
             // Act
-            await adapter.writeSection(SectionIdentifier.Examples, Buffer.from('New section content'));
+            await adapter.writeSection(SectionIdentifier.Examples, bufferToReadable(Buffer.from('New section content')));
 
             // Assert
             const tmpPath = join(tmpdir(), `${basename('/test/document.md')}.${fixedNow}.tmp`);

@@ -1,4 +1,5 @@
 import { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import type { ReadableContent } from "../reader/reader.adapter.js";
 
 /**
  * RendererAdapter is responsible for producing an OutputAdapter tied to a
@@ -7,8 +8,8 @@ import { FormatterAdapter } from "../formatter/formatter.adapter.js";
  *
  * Lifecycle:
  *  - initialize(destination, formatterAdapter)  // prepare adapter for a single rendering target
- *  - writeSection(sectionIdentifier, data)      // write successive sections
- *  - replaceContent(data)                       // replace entire content (for migrations)
+ *  - writeSection(sectionIdentifier, content)   // write successive sections as streams
+ *  - replaceContent(content)                    // replace entire content (for migrations) as stream
  *  - finalize()                                 // finalize and cleanup
  */
 export interface RendererAdapter {
@@ -18,14 +19,14 @@ export interface RendererAdapter {
 
     getDestination(): string;
 
-    writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
+    writeSection(sectionIdentifier: string, content: ReadableContent): Promise<void>;
 
     /**
      * Replace the entire content at the destination with the provided data.
      * This is useful for migration scenarios where the entire content needs
      * to be transformed and replaced, rather than appending sections.
      */
-    replaceContent(data: Buffer): Promise<void>;
+    replaceContent(content: ReadableContent): Promise<void>;
 
     /**
      * Finalize the rendering process and cleanup initialization.
