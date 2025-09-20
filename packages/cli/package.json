@@ -42,7 +42,7 @@
     }
   },
   "dependencies": {
-    "commander": "^14.0.0",
+    "commander": "^14.0.1",
     "reflect-metadata": "^0.2.2",
     "inversify": "^7.10.0"
   },
