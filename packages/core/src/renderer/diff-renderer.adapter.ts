@@ -7,12 +7,17 @@ import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { READER_ADAPTER_IDENTIFIER, readableToString } from '../reader/reader.adapter.js';
+import type { ReaderAdapter, ReadableContent } from '../reader/reader.adapter.js';
 
 @injectable()
 export class DiffRendererAdapter extends AbstractRendererAdapter {
     private tempFilePath?: string;
 
-    constructor(@inject(FileRendererAdapter) private readonly fileRenderer: FileRendererAdapter) {
+    constructor(
+        @inject(FileRendererAdapter) private readonly fileRenderer: FileRendererAdapter,
+        @inject(READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter
+    ) {
         super();
     }
 
@@ -25,16 +30,12 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
         await this.fileRenderer.initialize(tempFilePath, formatterAdapter);
     }
 
-    async writeSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
-        await this.fileRenderer.writeSection(sectionIdentifier, data);
+    async writeSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
+        await this.fileRenderer.writeSection(sectionIdentifier, content);
     }
 
-    async readExistingContent(): Promise<Buffer> {
-        return this.fileRenderer.readExistingContent();
-    }
-
-    async replaceContent(data: Buffer): Promise<void> {
-        return this.fileRenderer.replaceContent(data);
+    async replaceContent(content: ReadableContent): Promise<void> {
+        return this.fileRenderer.replaceContent(content);
     }
 
     override async finalize(): Promise<string | undefined> {
@@ -43,12 +44,15 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
 
         // Produce patch between destination and temp
         const destinationContent = existsSync(destination) ? readFileSync(destination, 'utf-8') : '';
-        const tempContent = await this.readExistingContent();
+        
+        // Use ReaderAdapter to read temp file content directly as string
+        const tempStream = await this.readerAdapter.getContent(temp);
+        const tempContent = await readableToString(tempStream, 'utf-8');
 
         const diff = createPatch(
             destination,
             destinationContent,
-            tempContent.toString('utf-8'),
+            tempContent,
         );
 
         // Reset initialized parameters

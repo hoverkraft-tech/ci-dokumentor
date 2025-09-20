@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { StringDecoder } from 'string_decoder';
 import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter } from '@ci-dokumentor/core';
+import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
 
 /**
@@ -28,7 +28,7 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
     detectionPattern: /^##\s+(Inputs|Outputs|Secrets|Description)\s*$/m,
   };
 
-  protected migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+  protected async migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent> {
 
     const decoder = new StringDecoder('utf8');
     const chunkSize = 8 * 1024;

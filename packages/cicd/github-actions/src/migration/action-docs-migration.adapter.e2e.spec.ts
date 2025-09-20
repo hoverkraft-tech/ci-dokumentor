@@ -4,12 +4,13 @@ import mockFs from 'mock-fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
+import { MarkdownFormatterAdapter, FileRendererAdapter, FileReaderAdapter } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
 
 describe('ActionDocsMigrationAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
+  let readerAdapter: FileReaderAdapter;
   let adapter: ActionDocsMigrationAdapter;
 
   beforeEach(() => {
@@ -18,6 +19,7 @@ describe('ActionDocsMigrationAdapter', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
+    readerAdapter = container.get(FileReaderAdapter);
     adapter = container.get(ActionDocsMigrationAdapter);
   });
 
@@ -87,7 +89,8 @@ Usage details here
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
+        readerAdapter: readerAdapter
       });
 
       // Finalize renderer

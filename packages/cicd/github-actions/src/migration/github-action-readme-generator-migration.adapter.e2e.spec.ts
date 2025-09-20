@@ -11,6 +11,7 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   let adapter: GitHubActionReadmeGeneratorMigrationAdapter;
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
+  let readerAdapter: FileReaderAdapter;
 
   beforeEach(() => {
     // Use real dependencies from the container for e2e testing
@@ -18,6 +19,7 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
+    readerAdapter = container.get(FileReaderAdapter);
     adapter = container.get(GitHubActionReadmeGeneratorMigrationAdapter);
   });
 
@@ -99,7 +101,8 @@ ExampleX
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
+        readerAdapter: readerAdapter
       });
 
       // Finalize renderer

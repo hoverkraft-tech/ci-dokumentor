@@ -7,6 +7,7 @@ import {
   RendererAdapter,
   SectionOptionsDescriptors,
   SectionGenerationPayload,
+  bufferToReadable,
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
@@ -132,7 +133,7 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
 
       await rendererAdapter.writeSection(
         sectionGeneratorAdapter.getSectionIdentifier(),
-        sectionContent,
+        bufferToReadable(sectionContent),
       );
     }
   }

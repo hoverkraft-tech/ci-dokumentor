@@ -4,6 +4,8 @@ export * from './formatter/markdown/markdown-formatter.adapter.js';
 export * from './generator/generator.adapter.js';
 export * from './generator/generator.service.js';
 export * from './generator/section-generator.adapter.js';
+export * from './reader/reader.adapter.js';
+export * from './reader/file-reader.adapter.js';
 export * from './renderer/renderer.adapter.js';
 export * from './renderer/file-renderer.adapter.js';
 export * from './renderer/diff-renderer.adapter.js';
