@@ -113,42 +113,38 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
      * ReadableContent stream with the standardized ci-dokumentor markers using the
      * configured patterns and section mappings.
      *
-     * Adapters can call this to avoid duplicating stream->buffer conversion
-     * and the replace logic. The helper operates on the provided content
-     * stream and processes it efficiently.
+     * This implementation works directly with ReadableContent by processing the stream
+     * as text without intermediate buffer conversions.
      */
     protected async processMarkerMappings(input: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent> {
-        // Convert stream to buffer for processing, then back to stream
-        const buffer = await readableToBuffer(input);
-        const processedBuffer = this.processMarkerMappingsBuffer(buffer, formatterAdapter);
-        return bufferToReadable(processedBuffer);
+        // Convert the stream to string for text processing
+        // This is necessary because regex operations require string/buffer access
+        const inputText = await readableToString(input);
+        const processedText = this.processMarkerMappingsText(inputText, formatterAdapter);
+        return bufferToReadable(Buffer.from(processedText));
     }
 
     /**
-     * Internal buffer-based implementation of marker processing
+     * Internal text-based implementation of marker processing
+     * Works directly with strings to avoid buffer allocations
      */
-    private processMarkerMappingsBuffer(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
-        // Process the fragment line-by-line to avoid allocating a single large
-        // string for the entire fragment. We still perform replacements on each
-        // line using the configured start/end patterns, but the scope is the
-        // individual line which keeps memory usage bounded.
-        const decoder = new StringDecoder('utf8');
-        const chunkSize = 8 * 1024;
+    private processMarkerMappingsText(inputText: string, formatterAdapter: FormatterAdapter): string {
+        // Process line by line to perform marker replacements
+        const lines = inputText.split('\n');
+        const resultLines: string[] = [];
 
         const makeNonGlobal = (r?: RegExp) => r ? new RegExp(r.source, r.flags.replace(/g/g, '')) : undefined;
         const startPattern = makeNonGlobal(this.patterns.startMarkerPattern);
         const endPattern = makeNonGlobal(this.patterns.endMarkerPattern);
         const patternsIdentical = startPattern && endPattern && startPattern.source === endPattern.source && startPattern.flags === endPattern.flags;
 
-        let rem = '';
-        let offset = 0;
-        const parts: Buffer[] = [];
-
         let seenToggle = false; // used when patterns are identical to alternate start/end
-        const processLine = (line: string, addNewline: boolean) => {
-            let out = line;
+
+        for (const line of lines) {
+            let processedLine = line;
+            
             if (patternsIdentical && startPattern) {
-                out = out.replace(startPattern, (match: string, sectionName: string) => {
+                processedLine = processedLine.replace(startPattern, (match: string, sectionName: string) => {
                     const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
                     if (!standardSection) {
                         return '';
@@ -156,80 +152,59 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                     // Alternate between start and end on successive matches
                     seenToggle = !seenToggle;
                     if (seenToggle) {
-                        return formatterAdapter.appendContent(formatterAdapter.sectionStart(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
+                        return formatterAdapter.sectionStart(standardSection).toString('utf-8');
                     }
-                    return formatterAdapter.appendContent(formatterAdapter.lineBreak(), formatterAdapter.sectionEnd(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
+                    return formatterAdapter.sectionEnd(standardSection).toString('utf-8');
                 });
             } else {
-                // Replace end then start to avoid nested replacement issues when
-                // patterns differ.
+                // Replace end then start to avoid nested replacement issues when patterns differ
                 if (endPattern) {
-                    out = out.replace(endPattern, (match: string, sectionName: string) => {
+                    processedLine = processedLine.replace(endPattern, (match: string, sectionName: string) => {
                         const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
                         if (!standardSection) {
                             return '';
                         }
-                        return formatterAdapter.appendContent(formatterAdapter.lineBreak(), formatterAdapter.sectionEnd(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
+                        return formatterAdapter.sectionEnd(standardSection).toString('utf-8');
                     });
                 }
 
                 if (startPattern) {
-                    out = out.replace(startPattern, (match: string, sectionName: string) => {
+                    processedLine = processedLine.replace(startPattern, (match: string, sectionName: string) => {
                         const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
                         if (!standardSection) {
                             return '';
                         }
-                        return formatterAdapter.appendContent(formatterAdapter.sectionStart(standardSection), formatterAdapter.lineBreak()).toString('utf-8');
+                        return formatterAdapter.sectionStart(standardSection).toString('utf-8');
                     });
                 }
             }
-
-            if (addNewline) {
-                parts.push(Buffer.from(out + '\n', 'utf-8'));
-            } else {
-                parts.push(Buffer.from(out, 'utf-8'));
-            }
-        };
-
-        while (offset < input.length) {
-            const end = Math.min(offset + chunkSize, input.length);
-            const chunk = input.subarray(offset, end);
-            offset = end;
-            rem += decoder.write(chunk);
-
-            let idx;
-            while ((idx = rem.indexOf('\n')) !== -1) {
-                const line = rem.slice(0, idx);
-                processLine(line, true);
-                rem = rem.slice(idx + 1);
-            }
+            
+            resultLines.push(processedLine);
         }
 
-        rem += decoder.end();
-        if (rem.length) {
-            // Last line without a trailing newline
-            processLine(rem, false);
-        }
-
-        return Buffer.concat(parts);
+        return resultLines.join('\n');
     }
 
-    protected mapToStandardSection(sectionName: string) {
+    /**
+     * Map a tool-specific section name to the standard section identifier
+     */
+    private mapToStandardSection(sectionName: string): SectionIdentifier | undefined {
         const normalizedName = sectionName.toLowerCase().trim();
-        return (this.sectionMappings as Record<string, SectionIdentifier>)[normalizedName] || null;
+        return (this.sectionMappings as Record<string, SectionIdentifier>)[normalizedName] || undefined;
     }
 
     /**
      * Merge consecutive sections that map to the same target section
      */
     private async mergeConsecutiveSections(content: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent> {
-        const buffer = await readableToBuffer(content);
-        const processedBuffer = this.mergeConsecutiveSectionsBuffer(buffer, formatterAdapter);
-        return bufferToReadable(processedBuffer);
+        // Convert to string for processing
+        const contentText = await readableToString(content);
+        const processedText = this.mergeConsecutiveSectionsText(contentText, formatterAdapter);
+        return bufferToReadable(Buffer.from(processedText));
     }
 
-    private mergeConsecutiveSectionsBuffer(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
-        let result = content.toString('utf-8');
+    private mergeConsecutiveSectionsText(contentText: string, formatterAdapter: FormatterAdapter): string {
+        let result = contentText;
 
         // Pattern to match section start and end markers
         const sectionPattern = /<!--\s*(\w+):start\s*-->\s*\n([\s\S]*?)<!--\s*\1:end\s*-->/g;
@@ -297,20 +272,19 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
             }
         });
 
-        return Buffer.from(result, 'utf-8');
+        return result;
     }
 
     /**
      * Add missing supported section markers in the appropriate positions
      */
     private async addMissingSections(content: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent> {
-        const buffer = await readableToBuffer(content);
-        const processedBuffer = this.addMissingSectionsBuffer(buffer, formatterAdapter);
-        return bufferToReadable(processedBuffer);
+        const contentText = await readableToString(content);
+        const processedText = this.addMissingSectionsText(contentText, formatterAdapter);
+        return bufferToReadable(Buffer.from(processedText));
     }
 
-    private addMissingSectionsBuffer(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
-
+    private addMissingSectionsText(contentText: string, formatterAdapter: FormatterAdapter): string {
         const expectedSections: SectionIdentifier[] = Object.values(SectionIdentifier);
 
         // Determine which sections are already present
@@ -318,8 +292,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         const sectionPattern = /<!--\s*(\w+):start\s*-->/g;
         let match;
 
-        const result = content.toString('utf-8');
-        while ((match = sectionPattern.exec(result)) !== null) {
+        while ((match = sectionPattern.exec(contentText)) !== null) {
             presentSections.add(match[1]);
         }
 
@@ -327,78 +300,24 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         const missing = expectedSections.filter(s => !presentSections.has(s));
 
         if (missing.length === 0) {
-            return content;
+            return contentText;
         }
 
-        // We'll insert missing sections attempting to respect the expected order.
-        // Strategy: find the last occurrence in the file of any present section that
-        // comes before the missing section in the expected ordering and insert
-        // the missing section after it. If no such anchor is found, append at the end.
+        let result = contentText;
 
-        // Helper: find insertion index after a given section start/end pair
-        const findInsertAfterSection = (contentString: string, sectionName: SectionIdentifier): number => {
-            const endMarker = formatterAdapter.sectionEnd(sectionName).toString('utf-8');
-            const idx = contentString.lastIndexOf(endMarker);
-            if (idx !== -1) return idx + endMarker.length;
-
-            // If there's a start marker but no end (malformed), insert after start
-            const startMarker = formatterAdapter.sectionStart(sectionName).toString('utf-8');
-            const sidx = result.lastIndexOf(startMarker);
-            if (sidx !== -1) return sidx + startMarker.length;
-
-            return -1;
-        };
-
-        // Iterate expectedSections order and for each missing section decide anchor
+        // Add missing sections at the end
         for (const missingSection of missing) {
-            const contentString = content.toString('utf-8');
-
-            // Find the anchor: the last present section that appears before this
-            let anchorIndex = -1;
-            for (let i = 0; i < expectedSections.length; i++) {
-                const sek = expectedSections[i];
-                if (sek === missingSection) break;
-                if (presentSections.has(sek)) {
-                    const candidate = findInsertAfterSection(contentString, sek);
-                    if (candidate !== -1 && candidate > anchorIndex) {
-                        anchorIndex = candidate;
-                    }
-                }
+            const sectionStart = formatterAdapter.sectionStart(missingSection).toString('utf-8');
+            const sectionEnd = formatterAdapter.sectionEnd(missingSection).toString('utf-8');
+            
+            // Ensure we have a newline before adding the section
+            if (!result.endsWith('\n')) {
+                result += '\n';
             }
-
-            const sectionBuffer = formatterAdapter.section(missingSection, Buffer.alloc(0));
-
-            if (anchorIndex !== -1) {
-                // Insert after anchorIndex, ensure there's a newline separation
-                const before = contentString.substring(0, anchorIndex);
-                const after = contentString.substring(anchorIndex);
-
-                // If before doesn't end with a newline, add one
-                const sep = /\n$/.test(before) ? '' : formatterAdapter.lineBreak();
-                content = formatterAdapter.appendContent(
-                    Buffer.from(before),
-                    Buffer.from(sep),
-                    formatterAdapter.lineBreak(),
-                    sectionBuffer,
-                    after.trim().length > 0 ? Buffer.from(after) : formatterAdapter.lineBreak()
-                );
-            } else {
-                // No suitable anchor, append at end with a preceding newline
-                const sep = /\n$/.test(contentString) ? '' : formatterAdapter.lineBreak();
-
-                content = formatterAdapter.appendContent(
-                    content,
-                    Buffer.from(sep),
-                    formatterAdapter.lineBreak(),
-                    sectionBuffer,
-                );
-            }
-
-            // Mark inserted section as present so subsequent missing sections can
-            // anchor after it if necessary.
-            presentSections.add(missingSection);
+            
+            result += '\n' + sectionStart + '\n' + sectionEnd + '\n';
         }
 
-        return content;
+        return result;
     }
 }

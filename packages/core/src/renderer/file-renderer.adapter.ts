@@ -10,7 +10,8 @@ import { injectable } from 'inversify';
 import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import type { ReadableContent } from '../reader/reader.adapter.js';
-import { readableToBuffer } from '../reader/reader.adapter.js';
+import { readableToBuffer, readableToString } from '../reader/reader.adapter.js';
+import { Transform } from 'node:stream';
 
 
 @injectable()
@@ -56,19 +57,29 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
     }
 
     private async performWriteSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
-        // For section writing, we need to read the content and process it
-        // Converting to buffer here is necessary for the complex section replacement logic
-        const data = await readableToBuffer(content);
-        return this.performWriteSectionWithBuffer(sectionIdentifier, data);
-    }
-
-    private performWriteSectionWithBuffer(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
         const destination = this.getDestination();
         const formatterAdapter = this.getFormatterAdapter();
 
-        // Look for the section in the file, replace content if it exists, or append if it doesn't.
+        // Create a transform stream that processes the section content
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Convert content to string for processing (this is unavoidable for text manipulation operations)
+                const contentString = await readableToString(content);
+                
+                // Format the section content
+                const sectionContent = formatterAdapter.section(sectionIdentifier, Buffer.from(contentString));
+                
+                // Perform the section writing operation
+                await this.writeSectionToFile(destination, sectionIdentifier, sectionContent, formatterAdapter);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 
-        // Read file line by line to find the section
+    private async writeSectionToFile(destination: string, sectionIdentifier: SectionIdentifier, sectionContent: Buffer, formatterAdapter: FormatterAdapter): Promise<void> {
+        // Look for the section in the file, replace content if it exists, or append if it doesn't.
         return new Promise((resolve, reject) => {
             try {
                 if (!existsSync(destination)) {
@@ -76,6 +87,63 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                 }
 
                 const fileStream = createReadStream(destination);
+
+                // Handle file read errors (like file not found)
+                fileStream.on('error', (err) => {
+                    reject(err);
+                });
+
+                const readLine = createInterface({
+                    input: fileStream,
+                    crlfDelay: Infinity,
+                });
+
+                let sectionFound = false;
+                let inSection = false;
+                let output: Buffer = Buffer.alloc(0);
+
+                const sectionStart = formatterAdapter.sectionStart(sectionIdentifier).toString();
+                const sectionEnd = formatterAdapter.sectionEnd(sectionIdentifier).toString();
+
+                readLine.on('line', (line) => {
+                    const isSectionStart = line.trim() === sectionStart;
+                    if (isSectionStart) {
+                        sectionFound = true;
+                        inSection = true;
+                        output = formatterAdapter.appendContent(output, sectionContent);
+                        return;
+                    }
+
+                    const isSectionEnd = line.trim() === sectionEnd;
+                    if (isSectionEnd && inSection) {
+                        inSection = false;
+                        // Skip the end marker as it's already included above
+                        return;
+                    }
+
+                    if (!inSection) {
+                        output = formatterAdapter.appendContent(output, Buffer.from(line), formatterAdapter.lineBreak());
+                    }
+                    // Skip lines inside the section (they get replaced)
+                });
+
+                readLine.on('close', () => {
+                    if (!sectionFound) {
+                        output = formatterAdapter.appendContent(output, sectionContent);
+                    }
+                    writeFile(destination, output, (err) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
 
                 // Handle file read errors (like file not found)
                 fileStream.on('error', (err) => {
