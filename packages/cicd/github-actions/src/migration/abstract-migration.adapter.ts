@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { StringDecoder } from 'string_decoder';
-import { MigrationAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter, MigrateDocumentationPayload } from '@ci-dokumentor/core';
+import { MigrationAdapter, SectionIdentifier, readableToBuffer } from '@ci-dokumentor/core';
+import type { FormatterAdapter, MigrateDocumentationPayload, ReaderAdapter } from '@ci-dokumentor/core';
 import { readFileSync, existsSync } from 'node:fs';
 
 /**
@@ -63,12 +63,25 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         return this.patterns.detectionPattern.test(acc);
     }
 
-    async migrateDocumentation({ rendererAdapter, rendererService }: MigrateDocumentationPayload): Promise<void> {
+    /**
+     * Read existing content from a destination path using ReaderAdapter
+     * Returns empty Buffer if destination doesn't exist or has no content
+     */
+    private async readExistingContent(destination: string, readerAdapter: ReaderAdapter): Promise<Buffer> {
+        if (!existsSync(destination)) {
+            return Buffer.alloc(0);
+        }
+
+        const stream = await readerAdapter.getContent(destination);
+        return readableToBuffer(stream);
+    }
+
+    async migrateDocumentation({ rendererAdapter, readerAdapter }: MigrateDocumentationPayload): Promise<void> {
         const formatterAdapter = rendererAdapter.getFormatterAdapter();
         const destination = rendererAdapter.getDestination();
 
-        // Use renderer service to read existing content (maintaining abstraction)
-        const input: Buffer = await rendererService.readExistingContent(destination);
+        // Use reader adapter to read existing content (maintaining abstraction)
+        const input: Buffer = await this.readExistingContent(destination, readerAdapter);
 
         if (input.length === 0) {
             // No existing content to migrate

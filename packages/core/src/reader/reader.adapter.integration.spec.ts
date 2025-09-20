@@ -2,11 +2,11 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mockFs from 'mock-fs';
 import { FileReaderAdapter } from './file-reader.adapter.js';
 import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
-import { RendererService } from '../renderer/renderer.service.js';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
 import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import { readableToBuffer } from './reader.adapter.js';
+import { existsSync } from 'node:fs';
 
 describe('ReaderAdapter Integration', () => {
   let readerAdapter: FileReaderAdapter;

@@ -4,13 +4,13 @@ import mockFs from 'mock-fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { MarkdownFormatterAdapter, FileRendererAdapter, RendererService } from '@ci-dokumentor/core';
+import { MarkdownFormatterAdapter, FileRendererAdapter, FileReaderAdapter } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
 
 describe('ActionDocsMigrationAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
-  let rendererService: RendererService;
+  let readerAdapter: ReaderAdapter;
   let adapter: ActionDocsMigrationAdapter;
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('ActionDocsMigrationAdapter', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
-    rendererService = container.get(RendererService);
+    readerAdapter = container.get(FileReaderAdapter);
     adapter = container.get(ActionDocsMigrationAdapter);
   });
 
@@ -90,7 +90,7 @@ Usage details here
       await adapter.migrateDocumentation({
         destination: tmpPath,
         rendererAdapter: rendererAdapter,
-        rendererService: rendererService
+        readerAdapter: rendererService
       });
 
       // Finalize renderer

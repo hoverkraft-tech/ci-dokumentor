@@ -9,7 +9,6 @@ export * from './reader/file-reader.adapter.js';
 export * from './renderer/renderer.adapter.js';
 export * from './renderer/file-renderer.adapter.js';
 export * from './renderer/diff-renderer.adapter.js';
-export * from './renderer/renderer.service.js';
 export * from './repository/repository.provider.js';
 export * from './repository/repository.service.js';
 export * from './license/license.service.js';

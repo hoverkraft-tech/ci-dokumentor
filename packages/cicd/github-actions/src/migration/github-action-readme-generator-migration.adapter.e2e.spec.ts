@@ -1,6 +1,6 @@
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { GitHubActionReadmeGeneratorMigrationAdapter } from './github-action-readme-generator-migration.adapter.js';
-import { FileRendererAdapter, MarkdownFormatterAdapter, RendererService } from '@ci-dokumentor/core';
+import { FileRendererAdapter, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
 import mockFs from 'mock-fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,7 +11,7 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   let adapter: GitHubActionReadmeGeneratorMigrationAdapter;
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
-  let rendererService: RendererService;
+  let readerAdapter: ReaderAdapter;
 
   beforeEach(() => {
     // Use real dependencies from the container for e2e testing
@@ -19,7 +19,7 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
-    rendererService = container.get(RendererService);
+    readerAdapter = container.get(FileReaderAdapter);
     adapter = container.get(GitHubActionReadmeGeneratorMigrationAdapter);
   });
 
@@ -102,7 +102,7 @@ ExampleX
       await adapter.migrateDocumentation({
         destination: tmpPath,
         rendererAdapter: rendererAdapter,
-        rendererService: rendererService
+        readerAdapter: rendererService
       });
 
       // Finalize renderer

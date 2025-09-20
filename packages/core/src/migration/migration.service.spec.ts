@@ -4,12 +4,12 @@ import { MigrationAdapter } from './migration.adapter.js';
 import { FormatterService } from '../formatter/formatter.service.js';
 import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
-import { RendererService } from '../renderer/renderer.service.js';
+import { ReaderAdapter } from '../reader/reader.adapter.js';
 import {
   FormatterServiceMockFactory,
   MigrationAdapterMockFactory,
   RendererAdapterMockFactory,
-  RendererServiceMockFactory,
+  ReaderAdapterMockFactory,
 } from '../../__tests__/index.js';
 
 describe('MigrationService', () => {
@@ -18,7 +18,7 @@ describe('MigrationService', () => {
   let mockFormatterService: FormatterService;
   let mockFileRenderer: Mocked<FileRendererAdapter>;
   let mockDiffRenderer: Mocked<DiffRendererAdapter>;
-  let mockRendererService: Mocked<RendererService>;
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,13 +31,13 @@ describe('MigrationService', () => {
     mockFormatterService = FormatterServiceMockFactory.create();
     mockFileRenderer = RendererAdapterMockFactory.create() as Mocked<FileRendererAdapter>;
     mockDiffRenderer = RendererAdapterMockFactory.create() as Mocked<DiffRendererAdapter>;
-    mockRendererService = RendererServiceMockFactory.create();
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
 
     service = new MigrationService(
       mockFormatterService,
       mockFileRenderer,
       mockDiffRenderer,
-      mockRendererService,
+      mockReaderAdapter,
       [adapter]
     );
   });
@@ -53,7 +53,7 @@ describe('MigrationService', () => {
         mockFormatterService,
         mockFileRenderer,
         mockDiffRenderer,
-        mockRendererService,
+        mockReaderAdapter,
         []
       );
       expect(emptyService.getSupportedTools()).toEqual([]);
