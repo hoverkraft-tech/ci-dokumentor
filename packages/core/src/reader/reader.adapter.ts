@@ -29,3 +29,27 @@ export async function readableToBuffer(readable: ReadableContent): Promise<Buffe
         });
     });
 }
+
+/**
+ * Utility function to convert ReadableContent directly to string
+ * This is more efficient than converting to buffer first when only string is needed
+ */
+export async function readableToString(readable: ReadableContent, encoding: BufferEncoding = 'utf-8'): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const chunks: string[] = [];
+
+        readable.setEncoding(encoding);
+
+        readable.on('data', (chunk: string) => {
+            chunks.push(chunk);
+        });
+
+        readable.on('end', () => {
+            resolve(chunks.join(''));
+        });
+
+        readable.on('error', (err) => {
+            reject(err);
+        });
+    });
+}

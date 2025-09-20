@@ -5,18 +5,15 @@ import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
 import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
-import { readableToBuffer } from './reader.adapter.js';
-import { existsSync } from 'node:fs';
+import { readableToBuffer, readableToString } from './reader.adapter.js';
 
 describe('ReaderAdapter Integration', () => {
   let readerAdapter: FileReaderAdapter;
-  let rendererService: RendererService;
   let rendererAdapter: FileRendererAdapter;
   let formatterAdapter: MarkdownFormatterAdapter;
 
   beforeEach(() => {
     readerAdapter = new FileReaderAdapter();
-    rendererService = new RendererService(readerAdapter);
     rendererAdapter = new FileRendererAdapter();
     formatterAdapter = new MarkdownFormatterAdapter(new MarkdownTableGenerator());
   });
@@ -42,10 +39,6 @@ describe('ReaderAdapter Integration', () => {
       // Verify reading works
       expect(readBuffer.toString()).toBe(existingContent);
 
-      // Act: Use RendererService to read content (the new way migrations work)
-      const serviceBuffer = await rendererService.readExistingContent('/test/document.md');
-      expect(serviceBuffer.toString()).toBe(existingContent);
-
       // Act: Write new content using RendererAdapter (existing pattern)
       await rendererAdapter.initialize('/test/document.md', formatterAdapter);
       const formattedSection = formatterAdapter.section(SectionIdentifier.Overview, Buffer.from(newSectionContent));
@@ -66,33 +59,45 @@ describe('ReaderAdapter Integration', () => {
       // Arrange
       mockFs({});
 
-      // Act & Assert: RendererService should return empty buffer for non-existent files
-      const buffer = await rendererService.readExistingContent('/test/nonexistent.md');
-      expect(buffer.length).toBe(0);
-
       // Act & Assert: ReaderAdapter should let the stream handle the error
       const stream = await readerAdapter.getContent('/test/nonexistent.md');
       await expect(readableToBuffer(stream)).rejects.toThrow();
     });
 
-    it('should maintain consistency between old Buffer-based processing and new stream-based reading', async () => {
+    it('should read content consistently using ReaderAdapter', async () => {
       // Arrange
       const testContent = '# Test Document\n\nSome content here.\n';
       mockFs({
         '/test/document.md': testContent,
       });
 
-      // Act: Read using new ReaderAdapter pattern
+      // Act: Read using ReaderAdapter pattern
       const streamContent = await readerAdapter.getContent('/test/document.md');
       const streamBuffer = await readableToBuffer(streamContent);
 
-      // Act: Read using RendererService (bridge pattern)
-      const serviceBuffer = await rendererService.readExistingContent('/test/document.md');
+      // Assert: Content should match what was written
+      expect(streamBuffer.toString()).toBe(testContent);
+    });
+
+    it('should convert stream directly to string efficiently', async () => {
+      // Arrange
+      const testContent = '# Test Document\n\nSome content here.\n';
+      mockFs({
+        '/test/document.md': testContent,
+      });
+
+      // Act: Read using readableToString for direct string conversion
+      const stream1 = await readerAdapter.getContent('/test/document.md');
+      const directString = await readableToString(stream1, 'utf-8');
+
+      // Act: Read using readableToBuffer then convert to string
+      const stream2 = await readerAdapter.getContent('/test/document.md');
+      const bufferThenString = (await readableToBuffer(stream2)).toString('utf-8');
 
       // Assert: Both methods should return identical content
-      expect(streamBuffer.toString()).toBe(testContent);
-      expect(serviceBuffer.toString()).toBe(testContent);
-      expect(streamBuffer.equals(serviceBuffer)).toBe(true);
+      expect(directString).toBe(testContent);
+      expect(bufferThenString).toBe(testContent);
+      expect(directString).toBe(bufferThenString);
     });
   });
 });

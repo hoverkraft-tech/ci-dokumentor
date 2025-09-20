@@ -7,7 +7,7 @@ import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
-import { READER_ADAPTER_IDENTIFIER, readableToBuffer } from '../reader/reader.adapter.js';
+import { READER_ADAPTER_IDENTIFIER, readableToString } from '../reader/reader.adapter.js';
 import type { ReaderAdapter } from '../reader/reader.adapter.js';
 
 @injectable()
@@ -45,14 +45,14 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
         // Produce patch between destination and temp
         const destinationContent = existsSync(destination) ? readFileSync(destination, 'utf-8') : '';
         
-        // Use ReaderAdapter to read temp file content
+        // Use ReaderAdapter to read temp file content directly as string
         const tempStream = await this.readerAdapter.getContent(temp);
-        const tempBuffer = await readableToBuffer(tempStream);
+        const tempContent = await readableToString(tempStream, 'utf-8');
 
         const diff = createPatch(
             destination,
             destinationContent,
-            tempBuffer.toString('utf-8'),
+            tempContent,
         );
 
         // Reset initialized parameters
