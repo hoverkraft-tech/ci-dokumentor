@@ -108,6 +108,9 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
 
 <!-- contributing:end -->
 
+<!-- security:start -->
+<!-- security:end -->
+
 ## Author
 
 👤 **[Hoverkraft](https://hoverkraft.cloud)**
