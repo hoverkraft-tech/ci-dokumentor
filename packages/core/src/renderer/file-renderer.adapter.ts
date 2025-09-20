@@ -3,6 +3,7 @@ import {
     existsSync,
     writeFile,
     writeFileSync,
+    createWriteStream,
 } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { injectable } from 'inversify';
@@ -17,16 +18,14 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
     private static readonly fileLocks = new Map<string, Promise<void>>();
 
     async replaceContent(content: ReadableContent): Promise<void> {
-        const data = await readableToBuffer(content);
         await this.safeWriteWithLock(async () => {
-            return this.performReplaceContent(data);
+            return this.performReplaceContent(content);
         });
     }
 
     async writeSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
-        const data = await readableToBuffer(content);
         await this.safeWriteWithLock(async () => {
-            return this.performWriteSection(sectionIdentifier, data);
+            return this.performWriteSection(sectionIdentifier, content);
         });
     }
 
@@ -42,21 +41,28 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         return undefined;
     }
 
-    private performReplaceContent(data: Buffer): Promise<void> {
+    private async performReplaceContent(content: ReadableContent): Promise<void> {
         const destination = this.getDestination();
 
         return new Promise((resolve, reject) => {
-            writeFile(destination, data, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
+            const writeStream = createWriteStream(destination);
+            
+            writeStream.on('error', reject);
+            writeStream.on('finish', resolve);
+            
+            content.on('error', reject);
+            content.pipe(writeStream);
         });
     }
 
-    private performWriteSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
+    private async performWriteSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
+        // For section writing, we need to read the content and process it
+        // Converting to buffer here is necessary for the complex section replacement logic
+        const data = await readableToBuffer(content);
+        return this.performWriteSectionWithBuffer(sectionIdentifier, data);
+    }
+
+    private performWriteSectionWithBuffer(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
         const destination = this.getDestination();
         const formatterAdapter = this.getFormatterAdapter();
 

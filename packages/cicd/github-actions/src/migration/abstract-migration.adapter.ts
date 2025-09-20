@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { StringDecoder } from 'string_decoder';
-import { MigrationAdapter, SectionIdentifier, readableToBuffer, bufferToReadable } from '@ci-dokumentor/core';
-import type { FormatterAdapter, MigrateDocumentationPayload, ReaderAdapter } from '@ci-dokumentor/core';
+import { MigrationAdapter, SectionIdentifier, readableToBuffer, bufferToReadable, readableToString } from '@ci-dokumentor/core';
+import type { FormatterAdapter, MigrateDocumentationPayload, ReaderAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { readFileSync, existsSync } from 'node:fs';
 
 /**
@@ -65,15 +65,14 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
 
     /**
      * Read existing content from a destination path using ReaderAdapter
-     * Returns empty Buffer if destination doesn't exist or has no content
+     * Returns empty ReadableContent if destination doesn't exist or has no content
      */
-    private async readExistingContent(destination: string, readerAdapter: ReaderAdapter): Promise<Buffer> {
+    private async readExistingContent(destination: string, readerAdapter: ReaderAdapter): Promise<ReadableContent> {
         if (!existsSync(destination)) {
-            return Buffer.alloc(0);
+            return bufferToReadable(Buffer.alloc(0));
         }
 
-        const stream = await readerAdapter.getContent(destination);
-        return readableToBuffer(stream);
+        return readerAdapter.getContent(destination);
     }
 
     async migrateDocumentation({ rendererAdapter, readerAdapter }: MigrateDocumentationPayload): Promise<void> {
@@ -81,40 +80,54 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         const destination = rendererAdapter.getDestination();
 
         // Use reader adapter to read existing content (maintaining abstraction)
-        const input: Buffer = await this.readExistingContent(destination, readerAdapter);
+        const input: ReadableContent = await this.readExistingContent(destination, readerAdapter);
 
-        if (input.length === 0) {
+        // Check if content is empty by trying to read from the stream
+        const inputString = await readableToString(input);
+        if (inputString.length === 0) {
             // No existing content to migrate
             return;
         }
 
+        // Convert back to stream for processing
+        const inputStream = bufferToReadable(Buffer.from(inputString));
+
         // Migrate the entire content using the adapter's migrateContent method
         // which can either process markers or wrap sections depending on the adapter
-        let output = this.migrateContent(input, formatterAdapter);
+        let output = await this.migrateContent(inputStream, formatterAdapter);
 
         // Ensure all supported sections are present
-        output = this.addMissingSections(output, formatterAdapter);
+        output = await this.addMissingSections(output, formatterAdapter);
 
         // Merge consecutive sections with same mapping
-        output = this.mergeConsecutiveSections(output, formatterAdapter);
+        output = await this.mergeConsecutiveSections(output, formatterAdapter);
 
         // Replace the entire content through the renderer adapter
-        await rendererAdapter.replaceContent(bufferToReadable(output));
+        await rendererAdapter.replaceContent(output);
     }
 
-    protected abstract migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer;
+    protected abstract migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent>;
 
     /**
      * Generic helper that replaces tool-specific start/end markers inside a
-     * Buffer fragment with the standardized ci-dokumentor markers using the
+     * ReadableContent stream with the standardized ci-dokumentor markers using the
      * configured patterns and section mappings.
      *
-     * Adapters can call this to avoid duplicating Buffer->string conversion
-     * and the replace logic. The helper operates on the provided fragment
-     * only (which is produced by the scanner) so it won't allocate the full
-     * destination file as a single string.
+     * Adapters can call this to avoid duplicating stream->buffer conversion
+     * and the replace logic. The helper operates on the provided content
+     * stream and processes it efficiently.
      */
-    protected processMarkerMappings(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+    protected async processMarkerMappings(input: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent> {
+        // Convert stream to buffer for processing, then back to stream
+        const buffer = await readableToBuffer(input);
+        const processedBuffer = this.processMarkerMappingsBuffer(buffer, formatterAdapter);
+        return bufferToReadable(processedBuffer);
+    }
+
+    /**
+     * Internal buffer-based implementation of marker processing
+     */
+    private processMarkerMappingsBuffer(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
         // Process the fragment line-by-line to avoid allocating a single large
         // string for the entire fragment. We still perform replacements on each
         // line using the configured start/end patterns, but the scope is the
@@ -209,7 +222,13 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     /**
      * Merge consecutive sections that map to the same target section
      */
-    private mergeConsecutiveSections(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+    private async mergeConsecutiveSections(content: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent> {
+        const buffer = await readableToBuffer(content);
+        const processedBuffer = this.mergeConsecutiveSectionsBuffer(buffer, formatterAdapter);
+        return bufferToReadable(processedBuffer);
+    }
+
+    private mergeConsecutiveSectionsBuffer(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
         let result = content.toString('utf-8');
 
         // Pattern to match section start and end markers
@@ -284,7 +303,13 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     /**
      * Add missing supported section markers in the appropriate positions
      */
-    private addMissingSections(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+    private async addMissingSections(content: ReadableContent, formatterAdapter: FormatterAdapter): Promise<ReadableContent> {
+        const buffer = await readableToBuffer(content);
+        const processedBuffer = this.addMissingSectionsBuffer(buffer, formatterAdapter);
+        return bufferToReadable(processedBuffer);
+    }
+
+    private addMissingSectionsBuffer(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
 
         const expectedSections: SectionIdentifier[] = Object.values(SectionIdentifier);
 
