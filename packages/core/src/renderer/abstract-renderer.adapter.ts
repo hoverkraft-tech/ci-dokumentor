@@ -33,8 +33,6 @@ export abstract class AbstractRendererAdapter implements RendererAdapter {
 
     abstract writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
 
-    abstract readExistingContent(): Promise<Buffer>;
-
     abstract replaceContent(data: Buffer): Promise<void>;
 
     async finalize(): Promise<string | undefined> {

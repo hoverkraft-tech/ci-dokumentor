@@ -14,31 +14,6 @@ import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 export class FileRendererAdapter extends AbstractRendererAdapter {
     private static readonly fileLocks = new Map<string, Promise<void>>();
 
-    async readExistingContent(): Promise<Buffer> {
-        const destination = this.getDestination();
-
-        if (!existsSync(destination)) {
-            return Buffer.alloc(0);
-        }
-
-        return new Promise((resolve, reject) => {
-            const fileStream = createReadStream(destination);
-            const chunks: Buffer[] = [];
-
-            fileStream.on('data', (chunk: string | Buffer) => {
-                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-            });
-
-            fileStream.on('end', () => {
-                resolve(Buffer.concat(chunks));
-            });
-
-            fileStream.on('error', (err) => {
-                reject(err);
-            });
-        });
-    }
-
     async replaceContent(data: Buffer): Promise<void> {
         await this.safeWriteWithLock(async () => {
             return this.performReplaceContent(data);

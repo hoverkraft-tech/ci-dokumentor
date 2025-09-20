@@ -1,6 +1,6 @@
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { AutoDocMigrationAdapter } from './auto-doc-migration.adapter.js';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
+import { MarkdownFormatterAdapter, FileRendererAdapter, RendererService } from '@ci-dokumentor/core';
 import mockFs from 'mock-fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,6 +11,7 @@ describe('AutoDocMigrationAdapter', () => {
   let adapter: AutoDocMigrationAdapter;
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
+  let rendererService: RendererService;
 
   beforeEach(() => {
     // Use real dependencies from the container for e2e testing
@@ -18,6 +19,7 @@ describe('AutoDocMigrationAdapter', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
+    rendererService = container.get(RendererService);
     adapter = container.get(AutoDocMigrationAdapter);
   });
 
@@ -91,7 +93,8 @@ Some description here
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
+        rendererService: rendererService
       });
 
       // Finalize renderer

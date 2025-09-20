@@ -63,11 +63,12 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         return this.patterns.detectionPattern.test(acc);
     }
 
-    async migrateDocumentation({ rendererAdapter }: MigrateDocumentationPayload): Promise<void> {
+    async migrateDocumentation({ rendererAdapter, rendererService }: MigrateDocumentationPayload): Promise<void> {
         const formatterAdapter = rendererAdapter.getFormatterAdapter();
+        const destination = rendererAdapter.getDestination();
 
-        // Use renderer adapter to read existing content (maintaining abstraction)
-        const input: Buffer = await rendererAdapter.readExistingContent();
+        // Use renderer service to read existing content (maintaining abstraction)
+        const input: Buffer = await rendererService.readExistingContent(destination);
 
         if (input.length === 0) {
             // No existing content to migrate

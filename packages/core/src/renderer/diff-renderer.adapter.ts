@@ -7,12 +7,17 @@ import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { READER_ADAPTER_IDENTIFIER, readableToBuffer } from '../reader/reader.adapter.js';
+import type { ReaderAdapter } from '../reader/reader.adapter.js';
 
 @injectable()
 export class DiffRendererAdapter extends AbstractRendererAdapter {
     private tempFilePath?: string;
 
-    constructor(@inject(FileRendererAdapter) private readonly fileRenderer: FileRendererAdapter) {
+    constructor(
+        @inject(FileRendererAdapter) private readonly fileRenderer: FileRendererAdapter,
+        @inject(READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter
+    ) {
         super();
     }
 
@@ -29,10 +34,6 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
         await this.fileRenderer.writeSection(sectionIdentifier, data);
     }
 
-    async readExistingContent(): Promise<Buffer> {
-        return this.fileRenderer.readExistingContent();
-    }
-
     async replaceContent(data: Buffer): Promise<void> {
         return this.fileRenderer.replaceContent(data);
     }
@@ -43,12 +44,15 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
 
         // Produce patch between destination and temp
         const destinationContent = existsSync(destination) ? readFileSync(destination, 'utf-8') : '';
-        const tempContent = await this.readExistingContent();
+        
+        // Use ReaderAdapter to read temp file content
+        const tempStream = await this.readerAdapter.getContent(temp);
+        const tempBuffer = await readableToBuffer(tempStream);
 
         const diff = createPatch(
             destination,
             destinationContent,
-            tempContent.toString('utf-8'),
+            tempBuffer.toString('utf-8'),
         );
 
         // Reset initialized parameters

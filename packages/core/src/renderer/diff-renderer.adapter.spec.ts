@@ -7,6 +7,7 @@ import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatt
 import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { DiffRendererAdapter } from './diff-renderer.adapter.js';
+import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 
@@ -16,6 +17,7 @@ describe('DiffRendererAdapter', () => {
 
     let formatter: FormatterAdapter;
     let fileRenderer: FileRendererAdapter;
+    let fileReader: FileReaderAdapter;
     let adapter: DiffRendererAdapter;
 
     beforeEach(() => {
@@ -31,8 +33,9 @@ describe('DiffRendererAdapter', () => {
 
         formatter = new MarkdownFormatterAdapter(new MarkdownTableGenerator());
         fileRenderer = new FileRendererAdapter();
+        fileReader = new FileReaderAdapter();
 
-        adapter = new DiffRendererAdapter(fileRenderer);
+        adapter = new DiffRendererAdapter(fileRenderer, fileReader);
     });
 
     afterEach(() => {
@@ -141,7 +144,8 @@ New section content
         it('should throw error when trying to get destination before initialization', () => {
             // Arrange
             const fileRenderer = new FileRendererAdapter();
-            const adapter = new DiffRendererAdapter(fileRenderer);
+            const fileReader = new FileReaderAdapter();
+            const adapter = new DiffRendererAdapter(fileRenderer, fileReader);
 
             // Act & Assert
             expect(() => adapter.getDestination()).toThrow('Destination not initialized');

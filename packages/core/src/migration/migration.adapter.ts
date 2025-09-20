@@ -1,10 +1,12 @@
 export const MIGRATION_ADAPTER_IDENTIFIER = Symbol('MigrationAdapter');
 
 import type { RendererAdapter } from '../renderer/renderer.adapter.js';
+import type { RendererService } from '../renderer/renderer.service.js';
 
 export type MigrateDocumentationPayload = {
   destination: string;
   rendererAdapter: RendererAdapter;
+  rendererService: RendererService;
 };
 
 /**

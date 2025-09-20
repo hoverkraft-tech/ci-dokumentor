@@ -3,6 +3,7 @@ import { MigrationAdapter, MIGRATION_ADAPTER_IDENTIFIER } from './migration.adap
 import { FormatterService } from '../formatter/formatter.service.js';
 import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
+import { RendererService } from '../renderer/renderer.service.js';
 
 /**
  * Service for migrating documentation from various tools to ci-dokumentor format
@@ -18,6 +19,8 @@ export class MigrationService {
     private readonly fileRendererAdapter: FileRendererAdapter,
     @inject(DiffRendererAdapter)
     private readonly diffRendererAdapter: DiffRendererAdapter,
+    @inject(RendererService)
+    private readonly rendererService: RendererService,
     @multiInject(MIGRATION_ADAPTER_IDENTIFIER) @optional() adapters: MigrationAdapter[] = []
   ) {
     for (const adapter of adapters) {
@@ -72,7 +75,11 @@ export class MigrationService {
     await rendererAdapter.initialize(destination, formatterAdapter);
 
     // Let the adapter perform migration and write through the renderer
-    await migrationAdapter.migrateDocumentation({ destination, rendererAdapter });
+    await migrationAdapter.migrateDocumentation({ 
+      destination, 
+      rendererAdapter, 
+      rendererService: this.rendererService 
+    });
 
     // Finalize renderer to obtain diff (for dry-run) or complete writes
     const data = await rendererAdapter.finalize();

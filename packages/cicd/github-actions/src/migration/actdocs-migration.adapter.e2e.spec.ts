@@ -1,6 +1,6 @@
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { ActdocsMigrationAdapter } from './actdocs-migration.adapter.js';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
+import { MarkdownFormatterAdapter, FileRendererAdapter, RendererService } from '@ci-dokumentor/core';
 import mockFs from 'mock-fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,6 +10,7 @@ import { initTestContainer } from '../container.js';
 describe('ActdocsMigrationAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
+  let rendererService: RendererService;
   let adapter: ActdocsMigrationAdapter;
 
   beforeEach(() => {
@@ -18,6 +19,8 @@ describe('ActdocsMigrationAdapter', () => {
 
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
+    rendererService = container.get(RendererService);
+    rendererService = container.get(RendererService);
     adapter = container.get(ActdocsMigrationAdapter);
   });
 
@@ -86,7 +89,8 @@ Perm stuff
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
+        rendererService: rendererService
       });
 
       // Finalize renderer
@@ -164,7 +168,8 @@ Perm stuff
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
+        rendererService: rendererService
       });
 
       // Finalize renderer
