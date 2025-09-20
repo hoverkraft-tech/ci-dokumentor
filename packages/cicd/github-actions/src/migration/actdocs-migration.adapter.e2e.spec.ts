@@ -89,7 +89,7 @@ Perm stuff
       await adapter.migrateDocumentation({
         destination: tmpPath,
         rendererAdapter: rendererAdapter,
-        readerAdapter: rendererService
+        readerAdapter: readerAdapter
       });
 
       // Finalize renderer
@@ -168,7 +168,7 @@ Perm stuff
       await adapter.migrateDocumentation({
         destination: tmpPath,
         rendererAdapter: rendererAdapter,
-        readerAdapter: rendererService
+        readerAdapter: readerAdapter
       });
 
       // Finalize renderer

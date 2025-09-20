@@ -94,7 +94,7 @@ Some description here
       await adapter.migrateDocumentation({
         destination: tmpPath,
         rendererAdapter: rendererAdapter,
-        readerAdapter: rendererService
+        readerAdapter: readerAdapter
       });
 
       // Finalize renderer

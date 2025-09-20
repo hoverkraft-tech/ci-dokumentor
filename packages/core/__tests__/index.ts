@@ -5,7 +5,6 @@ export * from './license-service-mock.factory.js';
 export * from './migration-adapter-mock.factory.js';
 export * from './reader-adapter-mock.factory.js';
 export * from './renderer-adapter-mock.factory.js';
-export * from './renderer-service-mock.factory.js';
 export * from './repository-info-mock.factory.js';
 export * from './repository-provider-mock.factory.js';
 export * from './repository-service-mock.factory.js';
