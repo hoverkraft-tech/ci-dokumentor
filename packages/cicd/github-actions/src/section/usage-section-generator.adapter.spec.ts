@@ -27,6 +27,8 @@ describe('UsageSectionGenerator', () => {
   let generator: UsageSectionGenerator;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
       getRepositoryInfo: RepositoryInfoMockFactory.create(),
     });
@@ -37,6 +39,10 @@ describe('UsageSectionGenerator', () => {
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new UsageSectionGenerator(mockVersionService);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe('getSectionIdentifier', () => {
@@ -59,7 +65,7 @@ describe('UsageSectionGenerator', () => {
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -89,7 +95,7 @@ describe('UsageSectionGenerator', () => {
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -134,7 +140,7 @@ describe('UsageSectionGenerator', () => {
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -177,7 +183,7 @@ describe('UsageSectionGenerator', () => {
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -202,7 +208,7 @@ describe('UsageSectionGenerator', () => {
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -227,7 +233,7 @@ describe('UsageSectionGenerator', () => {
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -286,7 +292,7 @@ jobs:
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -342,7 +348,7 @@ jobs:
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -376,7 +382,7 @@ jobs:
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -408,7 +414,7 @@ jobs:
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 
@@ -446,7 +452,7 @@ jobs:
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toBe(
           `## Usage
 

@@ -1,4 +1,4 @@
-import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions } from '@ci-dokumentor/core';
+import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, ReadableContent } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
@@ -51,7 +51,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     this.version = version;
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
 
     // Resolve version information from section options or auto-detection
     const version = await this.versionService.getVersion(this.version, repositoryProvider);
@@ -72,7 +72,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
     version?: ManifestVersion
-  ): Promise<Buffer> {
+  ): Promise<ReadableContent> {
     const usageContent = this.isGitHubAction(manifest)
       ? this.generateActionUsage(manifest, version)
       : this.generateWorkflowUsage(manifest, version);

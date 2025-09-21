@@ -1,4 +1,4 @@
-import { RepositoryProvider, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions } from '@ci-dokumentor/core';
+import { ReadableContent, RepositoryProvider, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
@@ -80,7 +80,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     });
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     const linkedBadges = await this.getAllBadges(manifest, repositoryProvider);
     return this.formatBadgeCollection(linkedBadges, formatterAdapter);
   }
@@ -188,20 +188,20 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private formatBadgeCollection(
     linkedBadges: LinkedBadge[],
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     if (linkedBadges.length === 0) {
       return Buffer.alloc(0);
     }
 
     const badgeCollectionContent = linkedBadges.map((linkedBadge) => {
-      let badgeBuffer = formatterAdapter.badge(Buffer.from(linkedBadge.badge.label), Buffer.from(linkedBadge.badge.url));
+      let badgeContent = formatterAdapter.badge(Buffer.from(linkedBadge.badge.label), Buffer.from(linkedBadge.badge.url));
       if (linkedBadge.url) {
-        badgeBuffer = formatterAdapter.link(
-          badgeBuffer,
+        badgeContent = formatterAdapter.link(
+          badgeContent,
           Buffer.from(linkedBadge.url)
         );
       }
-      return [badgeBuffer, formatterAdapter.lineBreak()];
+      return [badgeContent, formatterAdapter.lineBreak()];
     }).flat();
 
     return formatterAdapter.appendContent(...badgeCollectionContent);

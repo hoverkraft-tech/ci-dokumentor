@@ -1,35 +1,41 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import mockFs from 'mock-fs';
+import { describe, it, expect, beforeEach, afterEach, Mocked } from 'vitest';
 import { FilePackageService } from './file-package.service.js';
-import { join } from 'path';
+import { ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
+import { ReaderAdapter } from '@ci-dokumentor/core';
 
 describe('FilePackageService', () => {
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
+
   let filePackageService: FilePackageService;
-  let packageJsonPath: string;
 
   beforeEach(() => {
-    packageJsonPath = join(__dirname, '../../../package.json');
-    filePackageService = new FilePackageService();
+    vi.resetAllMocks();
+
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
+
+    filePackageService = new FilePackageService(mockReaderAdapter);
   });
 
   afterEach(() => {
-    mockFs.restore();
+    vi.resetAllMocks();
   });
 
   describe('getPackageInfo', () => {
-    it('should read package info from package.json at package root path', () => {
+    it('should read package info from package.json at package root path', async () => {
+      // Arrange
       const packageJson = {
         name: '@ci-dokumentor/cli',
         version: '1.0.0',
         description: 'CLI for generating documentation',
       };
 
-      mockFs({
-        [packageJsonPath]: JSON.stringify(packageJson, null, 2),
-      });
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
-      const packageInfo = filePackageService.getPackageInfo();
+      // Act
+      const packageInfo = await filePackageService.getPackageInfo();
 
+      // Assert
       expect(packageInfo).toEqual({
         name: '@ci-dokumentor/cli',
         version: '1.0.0',
@@ -38,32 +44,34 @@ describe('FilePackageService', () => {
     });
 
 
-    it('should cache package info after first load', () => {
+    it('should cache package info after first load', async () => {
+      // Arrange
       const packageJson = {
         name: '@ci-dokumentor/cli',
         version: '1.0.0',
         description: 'CLI for generating documentation',
       };
 
-      mockFs({
-        [packageJsonPath]: JSON.stringify(packageJson, null, 2),
-      });
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
+      // Act
       // First call
-      const packageInfo1 = filePackageService.getPackageInfo();
+      const packageInfo1 = await filePackageService.getPackageInfo();
 
       // Change the file system but should return cached result
-      mockFs({
-        [packageJsonPath]: JSON.stringify({
-          name: 'different-name',
-          version: '2.0.0',
-          description: 'Different description',
-        }, null, 2),
-      });
+      // Simulate file changed on disk but service should return cached value
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify({
+        name: 'different-name',
+        version: '2.0.0',
+        description: 'Different description',
+      }, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Second call should return cached result
-      const packageInfo2 = filePackageService.getPackageInfo();
+      const packageInfo2 = await filePackageService.getPackageInfo();
 
+      // Assert
       expect(packageInfo1).toEqual(packageInfo2);
       expect(packageInfo2).toEqual({
         name: '@ci-dokumentor/cli',
@@ -72,60 +80,65 @@ describe('FilePackageService', () => {
       });
     });
 
-    it('should throw error when package.json is missing name', () => {
+    it('should throw error when package.json is missing name', async () => {
+      // Arrange
       const packageJson = {
         version: '1.0.0',
         description: 'CLI for generating documentation',
       };
 
-      mockFs({
-        [packageJsonPath]: JSON.stringify(packageJson, null, 2),
-      });
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
-      expect(() => filePackageService.getPackageInfo()).toThrow(
+      // Act & Assert
+      await expect(filePackageService.getPackageInfo()).rejects.toThrow(
         'Invalid package.json: name, version, and description are required'
       );
     });
 
-    it('should throw error when package.json is missing version', () => {
+    it('should throw error when package.json is missing version', async () => {
+      // Arrange
       const packageJson = {
         name: '@ci-dokumentor/cli',
         description: 'CLI for generating documentation',
       };
 
-      mockFs({
-        [packageJsonPath]: JSON.stringify(packageJson, null, 2),
-      });
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
-      expect(() => filePackageService.getPackageInfo()).toThrow(
+      // Act & Assert
+      await expect(filePackageService.getPackageInfo()).rejects.toThrow(
         'Invalid package.json: name, version, and description are required'
       );
     });
 
-    it('should throw error when package.json is missing description', () => {
+    it('should throw error when package.json is missing description', async () => {
+      // Arrange
       const packageJson = {
         name: '@ci-dokumentor/cli',
         version: '1.0.0',
       };
 
-      mockFs({
-        [packageJsonPath]: JSON.stringify(packageJson, null, 2),
-      });
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
-      expect(() => filePackageService.getPackageInfo()).toThrow(
+      // Act & Assert
+      await expect(filePackageService.getPackageInfo()).rejects.toThrow(
         'Invalid package.json: name, version, and description are required'
       );
     });
 
-    it('should throw error when package.json contains invalid JSON', () => {
-      mockFs({
-        [packageJsonPath]: 'invalid json content',
-      });
+    it('should throw error when package.json contains invalid JSON', async () => {
+      // Arrange
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from('invalid json content'));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
-      expect(() => filePackageService.getPackageInfo()).toThrow(`Unexpected token 'i', "invalid json content" is not valid JSON`);
+      // Act & Assert
+      await expect(filePackageService.getPackageInfo()).rejects.toThrow(`Unexpected token 'i', "invalid json content" is not valid JSON`);
     });
 
-    it('should handle package.json with additional properties', () => {
+    it('should handle package.json with additional properties', async () => {
+      // Arrange
       const packageJson = {
         name: '@ci-dokumentor/cli',
         version: '1.0.0',
@@ -140,12 +153,13 @@ describe('FilePackageService', () => {
         },
       };
 
-      mockFs({
-        [packageJsonPath]: JSON.stringify(packageJson, null, 2),
-      });
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
-      const packageInfo = filePackageService.getPackageInfo();
+      // Act
+      const packageInfo = await filePackageService.getPackageInfo();
 
+      // Assert
       expect(packageInfo).toEqual({
         name: '@ci-dokumentor/cli',
         version: '1.0.0',
@@ -153,18 +167,19 @@ describe('FilePackageService', () => {
       });
     });
 
-    it('should work with empty string values for required fields', () => {
+    it('should work with empty string values for required fields', async () => {
+      // Arrange
       const packageJson = {
         name: '',
         version: '',
         description: '',
       };
 
-      mockFs({
-        [packageJsonPath]: JSON.stringify(packageJson, null, 2),
-      });
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
 
-      expect(() => filePackageService.getPackageInfo()).toThrow(
+      // Act & Assert
+      await expect(filePackageService.getPackageInfo()).rejects.toThrow(
         'Invalid package.json: name, version, and description are required'
       );
     });

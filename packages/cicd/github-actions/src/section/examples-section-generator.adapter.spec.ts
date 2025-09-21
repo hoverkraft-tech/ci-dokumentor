@@ -1,14 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import mockFs from 'mock-fs';
+import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
 import { ExamplesSectionGenerator } from './examples-section-generator.adapter.js';
-import { VersionService, SectionIdentifier, ManifestVersion } from '@ci-dokumentor/core';
+import { VersionService, SectionIdentifier, ManifestVersion, ReadableContent, FormatterAdapter, RepositoryProvider, ReaderAdapter } from '@ci-dokumentor/core';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { ReaderAdapterMockFactory, RepositoryInfoMockFactory, RepositoryProviderMockFactory, VersionServiceMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('ExamplesSectionGenerator', () => {
+  let mockFormatterAdapter: Mocked<FormatterAdapter>;
+  let mockRepositoryProvider: Mocked<RepositoryProvider>;
+  let mockVersionService: Mocked<VersionService>;
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
+
   let generator: ExamplesSectionGenerator;
-  let mockVersionService: any;
-  let mockFormatterAdapter: any;
-  let mockRepositoryProvider: any;
 
   const mockGitHubAction: GitHubAction = {
     name: 'Test Action',
@@ -27,37 +29,33 @@ describe('ExamplesSectionGenerator', () => {
   };
 
   beforeEach(() => {
-    mockVersionService = {
-      getVersion: vi.fn()
-    };
-    
-    generator = new ExamplesSectionGenerator(mockVersionService as VersionService);
-    
+    vi.resetAllMocks();
+
     mockFormatterAdapter = {
       heading: vi.fn(),
       lineBreak: vi.fn(),
       paragraph: vi.fn(),
       code: vi.fn(),
       appendContent: vi.fn()
-    };
-    
-    mockRepositoryProvider = {
-      getRepositoryInfo: vi.fn()
-    };
-    
-    mockRepositoryProvider.getRepositoryInfo.mockResolvedValue({
+    } as unknown as Mocked<FormatterAdapter>;
+
+    mockRepositoryProvider = RepositoryProviderMockFactory.create();
+
+    mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(RepositoryInfoMockFactory.create({
       rootDir: '/test/repo',
-      owner: 'owner',
-      name: 'test-action',
-      url: 'https://github.com/owner/test-action',
-      fullName: 'owner/test-action'
-    });
-    
+    }));
+
+
+    mockVersionService = VersionServiceMockFactory.create();
     mockVersionService.getVersion.mockResolvedValue(mockVersion);
+
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
+
+    generator = new ExamplesSectionGenerator(mockVersionService, mockReaderAdapter);
   });
 
   afterEach(() => {
-    mockFs.restore();
+    vi.resetAllMocks();
   });
 
   describe('getSectionIdentifier', () => {
@@ -69,7 +67,7 @@ describe('ExamplesSectionGenerator', () => {
   describe('getSectionOptions', () => {
     it('should return version option descriptor', () => {
       const options = generator.getSectionOptions();
-      
+
       expect(options).toHaveProperty('version');
       expect(options.version).toHaveProperty('flags', '--version <version>');
       expect(options.version).toHaveProperty('description');
@@ -85,11 +83,10 @@ describe('ExamplesSectionGenerator', () => {
 
   describe('generateSection', () => {
     it('should return empty buffer when no examples found', async () => {
-      // Mock empty file system
-      mockFs({
-        '/test/repo': {}
-      });
-      
+      // Arrange
+      mockReaderAdapter.resourceExists.mockReturnValue(false);
+
+      // Act
       const result = await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
         manifest: mockGitHubAction,
@@ -97,14 +94,17 @@ describe('ExamplesSectionGenerator', () => {
         destination: '/test/destination'
       });
 
-      expect(result).toEqual(Buffer.alloc(0));
+      // Assert
+      expect(result.toString()).toEqual("");
     });
 
     it('should generate examples section with examples from directory', async () => {
-      // Mock examples directory with files
-      mockFs({
-        '/test/repo/examples': {
-          'basic.yml': `name: Test Workflow
+      // Arrange
+      // Mock examples directory with YAML file containing action usage
+      mockReaderAdapter.containerExists.mockReturnValue(true);
+      mockReaderAdapter.readContainer.mockResolvedValue(['/test/examples/example1.yaml']);
+
+      const exampleContent = `name: Test Workflow
 on: push
 jobs:
   test:
@@ -112,15 +112,17 @@ jobs:
     steps:
       - uses: owner/test-action@v1.0.0
         with:
-          input: value`
-        }
-      });
+          input: value`;
+
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(exampleContent));
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# Examples'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
       mockFormatterAdapter.code.mockReturnValue(Buffer.from('```yaml\ncode\n```'));
       mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('# Examples\ncode'));
 
+      // Act
       const result = await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
         manifest: mockGitHubAction,
@@ -128,15 +130,18 @@ jobs:
         destination: '/test/destination'
       });
 
-      expect(result).not.toEqual(Buffer.alloc(0));
+      // Assert
+      expect(result.toString()).not.toEqual("");
       expect(mockFormatterAdapter.heading).toHaveBeenCalledWith(Buffer.from('Examples'), 2);
     });
 
     it('should process code snippets and replace version information', async () => {
+      // Arrange
       // Mock examples directory with YAML file containing action usage
-      mockFs({
-        '/test/repo/examples': {
-          'workflow.yml': `name: Example Workflow
+      mockReaderAdapter.containerExists.mockReturnValue(true);
+      mockReaderAdapter.readContainer.mockResolvedValue(['/test/examples/example1.yaml']);
+
+      const exampleContent = `name: Example Workflow
 on: push
 jobs:
   test:
@@ -147,21 +152,23 @@ jobs:
           input: value
       - uses: ./
         with:
-          local: true`
-        }
-      });
+          local: true`;
+
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(exampleContent));
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# Examples'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
-      
+
       let capturedCode = '';
-      mockFormatterAdapter.code.mockImplementation((content: Buffer) => {
+      mockFormatterAdapter.code.mockImplementation((content: ReadableContent) => {
         // Capture the processed code for verification
         capturedCode = content.toString();
         return Buffer.from('```yaml\nprocessed code\n```');
       });
       mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('# Examples\ncode'));
 
+      // Act
       await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
         manifest: mockGitHubAction,
@@ -169,6 +176,7 @@ jobs:
         destination: '/test/destination'
       });
 
+      // Assert
       // Verify the code content has been processed for version replacement
       expect(capturedCode).toContain('owner/test-action@abc123456789 # v1.0.0');
       expect(capturedCode).toContain('./@abc123456789 # v1.0.0');
@@ -176,9 +184,9 @@ jobs:
     });
 
     it('should find examples from destination file', async () => {
+      // Arrange
       // Mock destination file with examples section
-      mockFs({
-        '/test/destination': `# Test Action
+      const destinationContent = `# Test Action
 
 ## Examples
 
@@ -199,8 +207,10 @@ uses: owner/test-action@latest
 with:
   input: advanced
 \`\`\`
-`
-      });
+`;
+
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(destinationContent));
 
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# heading'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
@@ -208,6 +218,7 @@ with:
       mockFormatterAdapter.code.mockReturnValue(Buffer.from('```yaml\ncode\n```'));
       mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('content'));
 
+      // Act
       const result = await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
         manifest: mockGitHubAction,
@@ -215,33 +226,29 @@ with:
         destination: '/test/destination'
       });
 
+      // Assert
       expect(result).not.toEqual(Buffer.alloc(0));
       expect(mockFormatterAdapter.heading).toHaveBeenCalledWith(Buffer.from('Basic Usage'), 5);
       expect(mockFormatterAdapter.paragraph).toHaveBeenCalledWith(Buffer.from('This is an advanced example.'));
       expect(mockFormatterAdapter.code).toHaveBeenCalled();
     });
 
-    it('should handle file system errors gracefully', async () => {
-      // Mock file system with directory that will cause errors when accessed
-      mockFs({
-        '/test/repo/examples': mockFs.directory({
-          mode: 0o000, // No permissions to cause errors
-          items: {}
-        })
-      });
+    it('should throws on file system errors', async () => {
+      // Arrange
+      // Simulate permission error when trying to read examples
+      mockReaderAdapter.resourceExists.mockImplementation(() => { throw new Error("EACCES, permission denied '/test/repo/examples'"); });
 
-      const result = await generator.generateSection({
+      // Act & Assert
+      await expect(generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
-      });
-
-      // Should return empty buffer when no examples can be found due to errors
-      expect(result).toEqual(Buffer.alloc(0));
+      })).rejects.toThrow("EACCES, permission denied '/test/repo/examples'");
     });
 
     it('should work with GitHub Workflow manifests', async () => {
+      // Arrange
       const mockWorkflow: GitHubWorkflow = {
         name: 'Test Workflow',
         usesName: 'owner/test-workflow/.github/workflows/test.yml',
@@ -254,10 +261,9 @@ with:
         }
       };
 
-      mockFs({
-        '/test/repo': {}
-      });
+      mockReaderAdapter.resourceExists.mockReturnValue(false);
 
+      // Act
       const result = await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
         manifest: mockWorkflow,
@@ -265,22 +271,24 @@ with:
         destination: '/test/destination'
       });
 
+      // Assert
       expect(result).toEqual(Buffer.alloc(0));
     });
 
     it('should handle version information without SHA', async () => {
+      // Arrange
       const versionWithoutSha: ManifestVersion = {
         ref: 'v1.0.0'
       };
-      
-      mockVersionService.getVersion.mockResolvedValue(versionWithoutSha);
-      
-      mockFs({
-        '/test/repo/examples': {
-          'test.yml': 'uses: owner/test-action@v1.0.0'
-        }
-      });
 
+      mockVersionService.getVersion.mockResolvedValue(versionWithoutSha);
+
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      const destinationWithExamples = '# Examples\n\n' +
+        '```yaml\n' +
+        'uses: owner/test-action@v1.0.0\n' +
+        '```\n';
+      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(destinationWithExamples));
       mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# heading'));
       mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
       mockFormatterAdapter.code.mockImplementation((content: Buffer) => {
@@ -291,6 +299,7 @@ with:
       });
       mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('content'));
 
+      // Act
       await generator.generateSection({
         formatterAdapter: mockFormatterAdapter,
         manifest: mockGitHubAction,
@@ -298,6 +307,7 @@ with:
         destination: '/test/destination'
       });
 
+      // Assert
       expect(mockFormatterAdapter.code).toHaveBeenCalled();
     });
   });

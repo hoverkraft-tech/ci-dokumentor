@@ -13,6 +13,8 @@ describe('SecuritySectionGenerator', () => {
   let generator: SecuritySectionGenerator;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
       getRepositoryInfo: RepositoryInfoMockFactory.create(),
     });
@@ -21,6 +23,10 @@ describe('SecuritySectionGenerator', () => {
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new SecuritySectionGenerator();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe('getSectionIdentifier', () => {
@@ -49,13 +55,13 @@ describe('SecuritySectionGenerator', () => {
 
         destination: 'README.md',
 
-        };
+      };
 
       // Act
       const result = await generator.generateSection(payload);
 
       // Assert
-      expect(result).toBeInstanceOf(Buffer);
+
       expect(result.toString()).toEqual(
         `## Security
 
@@ -74,13 +80,13 @@ We take security seriously. Please see our [security policy](https://github.com/
 
         destination: 'README.md',
 
-        };
+      };
 
       // Act
       const result = await generator.generateSection(payload);
 
       // Assert
-      expect(result).toBeInstanceOf(Buffer);
+
       expect(result.toString()).toEqual('');
     });
 
@@ -89,7 +95,7 @@ We take security seriously. Please see our [security policy](https://github.com/
       const manifest: GitHubAction = GitHubActionMockFactory.create();
 
       mockRepositoryProvider.getSecurity.mockResolvedValue({
-        url: undefined as any,
+        url: undefined as unknown as string,
       });
 
       const payload: SectionGenerationPayload<GitHubAction> = {
@@ -99,13 +105,13 @@ We take security seriously. Please see our [security policy](https://github.com/
 
         destination: 'README.md',
 
-        };
+      };
 
       // Act
       const result = await generator.generateSection(payload);
 
       // Assert
-      expect(result).toBeInstanceOf(Buffer);
+
       expect(result.toString()).toEqual('');
     });
   });

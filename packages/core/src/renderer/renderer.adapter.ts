@@ -1,4 +1,5 @@
 import { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import { ReadableContent } from "../reader/reader.adapter.js";
 
 /**
  * RendererAdapter is responsible for producing an OutputAdapter tied to a
@@ -18,21 +19,14 @@ export interface RendererAdapter {
 
     getDestination(): string;
 
-    writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
-
-    /**
-     * Read existing content from the destination.
-     * Returns empty Buffer if destination doesn't exist or has no content.
-     * This method is agnostic to the storage mechanism (file, memory, etc.)
-     */
-    readExistingContent(): Promise<Buffer>;
+    writeSection(sectionIdentifier: string, data: ReadableContent): Promise<void>;
 
     /**
      * Replace the entire content at the destination with the provided data.
      * This is useful for migration scenarios where the entire content needs
      * to be transformed and replaced, rather than appending sections.
      */
-    replaceContent(data: Buffer): Promise<void>;
+    replaceContent(data: ReadableContent): Promise<void>;
 
     /**
      * Finalize the rendering process and cleanup initialization.

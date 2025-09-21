@@ -1,5 +1,6 @@
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import { FormatterLanguage } from './formatter-language.js';
+import { ReadableContent } from '../reader/reader.adapter.js';
 
 export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');
 
@@ -24,44 +25,44 @@ export interface FormatterAdapter {
    */
   setOptions(options: FormatterOptions): void;
 
-  appendContent(...inputs: Buffer[]): Buffer;
+  appendContent(...inputs: ReadableContent[]): ReadableContent;
 
-  heading(input: Buffer, level?: number): Buffer;
+  heading(input: ReadableContent, level?: number): ReadableContent;
 
-  center(input: Buffer): Buffer;
+  center(input: ReadableContent): ReadableContent;
 
-  paragraph(input: Buffer): Buffer;
+  paragraph(input: ReadableContent): ReadableContent;
 
-  bold(input: Buffer): Buffer;
+  bold(input: ReadableContent): ReadableContent;
 
-  italic(input: Buffer): Buffer;
+  italic(input: ReadableContent): ReadableContent;
 
-  code(input: Buffer, language?: Buffer): Buffer;
+  code(input: ReadableContent, language?: ReadableContent): ReadableContent;
 
-  inlineCode(input: Buffer): Buffer;
+  inlineCode(input: ReadableContent): ReadableContent;
 
-  link(text: Buffer, url: Buffer): Buffer;
+  link(text: ReadableContent, url: ReadableContent): ReadableContent;
 
   image(
-    url: Buffer,
-    altText: Buffer,
+    url: ReadableContent,
+    altText: ReadableContent,
     options?: { width?: string; align?: string }
-  ): Buffer;
+  ): ReadableContent;
 
-  table(headers: Buffer[], rows: Buffer[][]): Buffer;
+  table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent;
 
-  badge(label: Buffer, message: Buffer, color?: Buffer): Buffer;
+  badge(label: ReadableContent, message: ReadableContent, color?: ReadableContent): ReadableContent;
 
-  horizontalRule(): Buffer;
+  horizontalRule(): ReadableContent;
 
-  lineBreak(): Buffer;
+  lineBreak(): ReadableContent;
 
   /**
    * Wrap content in section markers
    */
-  section(section: SectionIdentifier, input: Buffer): Buffer;
+  section(section: SectionIdentifier, input: ReadableContent): ReadableContent;
 
-  sectionStart(section: SectionIdentifier): Buffer;
+  sectionStart(section: SectionIdentifier): ReadableContent;
 
-  sectionEnd(section: SectionIdentifier): Buffer;
+  sectionEnd(section: SectionIdentifier): ReadableContent;
 }

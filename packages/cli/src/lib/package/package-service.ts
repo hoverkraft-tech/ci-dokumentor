@@ -13,5 +13,5 @@ export interface PackageService {
   /**
    * Get package information
    */
-  getPackageInfo(): PackageInfo;
+  getPackageInfo(): Promise<PackageInfo>;
 }

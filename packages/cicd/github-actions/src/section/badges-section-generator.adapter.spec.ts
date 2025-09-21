@@ -21,6 +21,8 @@ describe('BadgesSectionGenerator', () => {
 
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
       getRepositoryInfo: RepositoryInfoMockFactory.create(),
       getLicense: {
@@ -37,6 +39,10 @@ describe('BadgesSectionGenerator', () => {
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new BadgesSectionGenerator();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe('getSectionIdentifier', () => {
@@ -120,7 +126,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
@@ -149,7 +154,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
@@ -177,7 +181,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
@@ -209,7 +212,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
@@ -243,7 +245,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
@@ -272,7 +273,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
 [![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
@@ -304,7 +304,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
 [![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
@@ -335,7 +334,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
@@ -364,7 +362,6 @@ describe('BadgesSectionGenerator', () => {
         const result = await generator.generateSection(payload);
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
         expect(result.toString()).toEqual(
           `[![Marketplace](https://img.shields.io/badge/Marketplace-test--action-blue?logo=github-actions)](https://github.com/marketplace/actions/test-action)
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)

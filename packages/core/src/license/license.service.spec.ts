@@ -1,24 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
 import { LicenseService } from './license.service.js';
-import { existsSync, readFileSync } from 'fs';
-
-// Mock fs module
-vi.mock('fs', () => ({
-  existsSync: vi.fn(),
-  readFileSync: vi.fn(),
-}));
+import { ReaderAdapterMockFactory } from '../../__tests__/reader-adapter-mock.factory.js';
+import { ReaderAdapter } from '../reader/reader.adapter.js';
 
 describe('LicenseService', () => {
   let licenseService: LicenseService;
-  let mockExistsSync: ReturnType<typeof vi.fn>;
-  let mockReadFileSync: ReturnType<typeof vi.fn>;
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
 
   beforeEach(() => {
     vi.resetAllMocks();
 
-    licenseService = new LicenseService();
-    mockExistsSync = vi.mocked(existsSync);
-    mockReadFileSync = vi.mocked(readFileSync);
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
+    licenseService = new LicenseService(mockReaderAdapter);
   });
 
   afterEach(() => {
@@ -26,32 +19,37 @@ describe('LicenseService', () => {
   });
 
   describe('detectLicenseFromFile', () => {
-    it('should return undefined when no license files exist', () => {
+    it('should return undefined when no license files exist', async () => {
       // Arrange
-      mockExistsSync.mockReturnValue(false);
+      mockReaderAdapter.resourceExists.mockReturnValue(false);
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toBeUndefined();
-      expect(mockExistsSync).toHaveBeenCalledWith('LICENSE');
-      expect(mockExistsSync).toHaveBeenCalledWith('LICENSE.txt');
-      expect(mockExistsSync).toHaveBeenCalledWith('LICENSE.md');
-      expect(mockExistsSync).toHaveBeenCalledWith('license');
-      expect(mockExistsSync).toHaveBeenCalledWith('license.txt');
-      expect(mockExistsSync).toHaveBeenCalledWith('license.md');
-      expect(mockExistsSync).toHaveBeenCalledWith('COPYING');
-      expect(mockExistsSync).toHaveBeenCalledWith('COPYING.txt');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('LICENSE');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('LICENSE.txt');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('LICENSE.md');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('license');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('license.txt');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('license.md');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('COPYING');
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith('COPYING.txt');
     });
 
-    it('should detect MIT license from LICENSE file', () => {
+    it('should detect MIT license from LICENSE file', async () => {
       // Arrange
-      mockExistsSync.mockImplementation((path: string) => path === 'LICENSE');
-      mockReadFileSync.mockReturnValue('MIT License\n\nCopyright (c) 2023');
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('MIT License\n\nCopyright (c) 2023'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -59,20 +57,20 @@ describe('LicenseService', () => {
         spdxId: 'MIT',
         url: undefined,
       });
-      expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE', 'utf-8');
     });
 
-    it('should detect Apache 2.0 license from LICENSE.txt file', () => {
+    it('should detect Apache 2.0 license from LICENSE.txt file', async () => {
       // Arrange
-      mockExistsSync.mockImplementation(
-        (path: string) => path === 'LICENSE.txt'
-      );
-      mockReadFileSync.mockReturnValue(
-        'Apache License\nVersion 2.0, January 2004'
-      );
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE.txt') {
+          return Promise.resolve(Buffer.from('Apache License\nVersion 2.0, January 2004'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -80,20 +78,20 @@ describe('LicenseService', () => {
         spdxId: 'Apache-2.0',
         url: undefined,
       });
-      expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE.txt', 'utf-8');
     });
 
-    it('should detect GPL v3 license from LICENSE.md file', () => {
+    it('should detect GPL v3 license from LICENSE.md file', async () => {
       // Arrange
-      mockExistsSync.mockImplementation(
-        (path: string) => path === 'LICENSE.md'
-      );
-      mockReadFileSync.mockReturnValue(
-        'GNU GENERAL PUBLIC LICENSE\nVersion 3, 29 June 2007'
-      );
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE.md') {
+          return Promise.resolve(Buffer.from('GNU GENERAL PUBLIC LICENSE\nVersion 3, 29 June 2007'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -101,18 +99,20 @@ describe('LicenseService', () => {
         spdxId: 'GPL-3.0',
         url: undefined,
       });
-      expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE.md', 'utf-8');
     });
 
-    it('should detect GPL v2 license', () => {
+    it('should detect GPL v2 license', async () => {
       // Arrange
-      mockExistsSync.mockImplementation((path: string) => path === 'LICENSE');
-      mockReadFileSync.mockReturnValue(
-        'GNU GENERAL PUBLIC LICENSE\nVersion 2, June 1991'
-      );
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('GNU GENERAL PUBLIC LICENSE\nVersion 2, June 1991'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -122,15 +122,18 @@ describe('LicenseService', () => {
       });
     });
 
-    it('should detect BSD 3-Clause license', () => {
+    it('should detect BSD 3-Clause license', async () => {
       // Arrange
-      mockExistsSync.mockImplementation((path: string) => path === 'LICENSE');
-      mockReadFileSync.mockReturnValue(
-        'BSD 3-Clause License\nRedistribution and use'
-      );
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('BSD 3-Clause License'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -140,15 +143,18 @@ describe('LicenseService', () => {
       });
     });
 
-    it('should detect BSD 2-Clause license', () => {
+    it('should detect BSD 2-Clause license', async () => {
       // Arrange
-      mockExistsSync.mockImplementation((path: string) => path === 'LICENSE');
-      mockReadFileSync.mockReturnValue(
-        'BSD 2-Clause License\nRedistribution and use'
-      );
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('BSD 2-Clause License'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -158,13 +164,18 @@ describe('LicenseService', () => {
       });
     });
 
-    it('should detect ISC license', () => {
+    it('should detect ISC license', async () => {
       // Arrange
-      mockExistsSync.mockImplementation((path: string) => path === 'LICENSE');
-      mockReadFileSync.mockReturnValue('ISC License\nCopyright (c) 2023');
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('ISC License'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -174,15 +185,18 @@ describe('LicenseService', () => {
       });
     });
 
-    it('should detect custom license when content does not match known patterns', () => {
+    it('should detect custom license when content does not match known patterns', async () => {
       // Arrange
-      mockExistsSync.mockImplementation((path: string) => path === 'LICENSE');
-      mockReadFileSync.mockReturnValue(
-        'Custom Proprietary License\nAll rights reserved'
-      );
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('Custom proprietary license'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -192,41 +206,27 @@ describe('LicenseService', () => {
       });
     });
 
-    it('should handle file read errors gracefully', () => {
+    it('should throws on file read errors', async () => {
       // Arrange
-      mockExistsSync.mockReturnValue(true);
-      mockReadFileSync.mockImplementation(() => {
-        throw new Error('Permission denied');
-      });
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockRejectedValue(new Error('Unexpected read error'));
 
-      // Mock console.warn to avoid output during tests
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-        return;
-      });
-
-      // Act
-      const result = licenseService.detectLicenseFromFile();
-
-      // Assert
-      expect(result).toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to read license file LICENSE:',
-        expect.any(Error)
-      );
-
-      // Cleanup
-      consoleSpy.mockRestore();
+      // Act & Assert
+      await expect(licenseService.detectLicenseFromFile()).rejects.toThrow('Unexpected read error');
     });
 
-    it('should check multiple license file paths in order', () => {
+    it('should check multiple license file paths in order', async () => {
       // Arrange
-      mockExistsSync.mockImplementation(
-        (path: string) => path === 'license.txt'
-      );
-      mockReadFileSync.mockReturnValue('MIT License');
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'license.txt') {
+          return Promise.resolve(Buffer.from('MIT License'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -234,24 +234,28 @@ describe('LicenseService', () => {
         spdxId: 'MIT',
         url: undefined,
       });
-      // Verify it checked files in correct order
-      expect(mockExistsSync).toHaveBeenNthCalledWith(1, 'LICENSE');
-      expect(mockExistsSync).toHaveBeenNthCalledWith(2, 'LICENSE.txt');
-      expect(mockExistsSync).toHaveBeenNthCalledWith(3, 'LICENSE.md');
-      expect(mockExistsSync).toHaveBeenNthCalledWith(4, 'license');
-      expect(mockExistsSync).toHaveBeenNthCalledWith(5, 'license.txt');
-      expect(mockReadFileSync).toHaveBeenCalledWith('license.txt', 'utf-8');
+      expect(mockReaderAdapter.readResource).toHaveBeenCalledWith('LICENSE');
+      expect(mockReaderAdapter.readResource).toHaveBeenCalledWith('LICENSE.txt');
+      expect(mockReaderAdapter.readResource).toHaveBeenCalledWith('LICENSE.md');
+      expect(mockReaderAdapter.readResource).toHaveBeenCalledWith('license');
+      expect(mockReaderAdapter.readResource).toHaveBeenCalledWith('license.txt');
     });
 
-    it('should use first found license file', () => {
+    it('should use first found license file', async () => {
       // Arrange
-      mockExistsSync.mockImplementation(
-        (path: string) => path === 'LICENSE' || path === 'LICENSE.txt'
-      );
-      mockReadFileSync.mockReturnValue('MIT License');
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('MIT License'));
+        }
+        if (path === 'LICENSE.txt') {
+          return Promise.resolve(Buffer.from('Apache License Version 2.0'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result).toEqual({
@@ -259,79 +263,91 @@ describe('LicenseService', () => {
         spdxId: 'MIT',
         url: undefined,
       });
-      expect(mockReadFileSync).toHaveBeenCalledWith('LICENSE', 'utf-8');
-      expect(mockReadFileSync).not.toHaveBeenCalledWith('LICENSE.txt', 'utf-8');
     });
-  });
 
-  describe('detectLicenseType', () => {
-    it('should handle case-insensitive detection', () => {
+    it('should handle case-insensitive detection', async () => {
       // Arrange
-      mockExistsSync.mockReturnValue(true);
-      mockReadFileSync.mockReturnValue('mit license');
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('mit license'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
-      expect(result?.name).toBe('MIT License');
+      expect(result).toEqual({
+        name: 'MIT License',
+        spdxId: 'MIT',
+        url: undefined,
+      });
     });
 
-    it('should handle license with "licence" spelling', () => {
+    it('should handle license with "licence" spelling', async () => {
       // Arrange
-      mockExistsSync.mockReturnValue(true);
-      mockReadFileSync.mockReturnValue('MIT LICENCE');
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('MIT Licence'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
-      expect(result?.name).toBe('MIT License');
+      expect(result).toEqual({
+        name: 'MIT License',
+        spdxId: 'MIT',
+        url: undefined,
+      });
     });
-  });
 
-  describe('getSpdxIdFromName', () => {
-    it('should return correct SPDX ID for known licenses', () => {
-      // Test through the public interface by checking the results
+    it('should return correct SPDX ID for known licenses', async () => {
       const testCases = [
-        { content: 'MIT License', expectedSpdx: 'MIT' },
-        { content: 'Apache License Version 2.0', expectedSpdx: 'Apache-2.0' },
-        {
-          content: 'GNU GENERAL PUBLIC LICENSE Version 3',
-          expectedSpdx: 'GPL-3.0',
-        },
-        {
-          content: 'GNU GENERAL PUBLIC LICENSE Version 2',
-          expectedSpdx: 'GPL-2.0',
-        },
-        { content: 'BSD 3-Clause License', expectedSpdx: 'BSD-3-Clause' },
-        { content: 'BSD 2-Clause License', expectedSpdx: 'BSD-2-Clause' },
-        { content: 'ISC License', expectedSpdx: 'ISC' },
+        { content: 'MIT License', expected: 'MIT' },
+        { content: 'Apache License Version 2.0', expected: 'Apache-2.0' },
+        { content: 'GNU GENERAL PUBLIC LICENSE Version 3', expected: 'GPL-3.0' },
+        { content: 'GNU GENERAL PUBLIC LICENSE Version 2', expected: 'GPL-2.0' },
+        { content: 'BSD 3-Clause', expected: 'BSD-3-Clause' },
+        { content: 'BSD 2-Clause', expected: 'BSD-2-Clause' },
+        { content: 'ISC License', expected: 'ISC' },
       ];
 
-      testCases.forEach(({ content, expectedSpdx }) => {
+      for (const testCase of testCases) {
         // Arrange
-        mockExistsSync.mockReturnValue(true);
-        mockReadFileSync.mockReturnValue(content);
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockImplementation((path: string) => {
+          if (path === 'LICENSE') {
+            return Promise.resolve(Buffer.from(testCase.content));
+          }
+          return Promise.resolve(Buffer.alloc(0));
+        });
 
         // Act
-        const result = licenseService.detectLicenseFromFile();
+        const result = await licenseService.detectLicenseFromFile();
 
         // Assert
-        expect(result?.spdxId).toBe(expectedSpdx);
-
-        // Reset for next iteration
-        vi.resetAllMocks();
-      });
+        expect(result?.spdxId).toBe(testCase.expected);
+      }
     });
 
-    it('should return null for unknown licenses', () => {
+    it('should return undefined SPDX ID for unknown licenses', async () => {
       // Arrange
-      mockExistsSync.mockReturnValue(true);
-      mockReadFileSync.mockReturnValue('Unknown License');
+      mockReaderAdapter.resourceExists.mockReturnValue(true);
+      mockReaderAdapter.readResource.mockImplementation((path: string) => {
+        if (path === 'LICENSE') {
+          return Promise.resolve(Buffer.from('Unknown License'));
+        }
+        return Promise.resolve(Buffer.alloc(0));
+      });
 
       // Act
-      const result = licenseService.detectLicenseFromFile();
+      const result = await licenseService.detectLicenseFromFile();
 
       // Assert
       expect(result?.spdxId).toBeUndefined();

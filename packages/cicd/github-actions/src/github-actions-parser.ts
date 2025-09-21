@@ -1,7 +1,8 @@
-import { readFileSync } from 'node:fs';
+import { FileReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
+import type { ReaderAdapter } from '@ci-dokumentor/core';
+import { inject, injectable } from 'inversify';
 import { basename, dirname, extname, join, relative } from 'node:path';
 import { parse } from 'yaml';
-import { RepositoryInfo } from '@ci-dokumentor/core';
 
 // See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-action.json
 
@@ -101,7 +102,10 @@ export type GitHubWorkflowOutput = {
 
 export type GitHubActionsManifest = GitHubAction | GitHubWorkflow;
 
+@injectable()
 export class GitHubActionsParser {
+  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
+
   isGitHubActionFile(source: string): boolean {
     // Check if the source is a GitHub Action by looking for action.yml or action.yaml
     return /action\.ya?ml$/i.test(source);
@@ -112,11 +116,16 @@ export class GitHubActionsParser {
     return source.includes('.github/workflows/');
   }
 
-  parseFile(
+  async parseFile(
     source: string,
     repositoryInfo: RepositoryInfo
-  ): GitHubActionsManifest {
-    const parsed = parse(readFileSync(source, 'utf8'));
+  ): Promise<GitHubActionsManifest> {
+    if (!this.readerAdapter.resourceExists(source)) {
+      throw new Error(`Source file does not exist: "${source}"`);
+    }
+
+    const content = await this.readerAdapter.readResource(source);
+    const parsed = parse(content.toString('utf8'));
     if (!parsed) {
       throw new Error(`Unsupported source file: ${source}`);
     }

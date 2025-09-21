@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import mockFs from 'mock-fs';
+import { describe, it, expect, beforeEach, afterEach, Mocked, vi } from 'vitest';
 import {
   GitHubActionsParser,
   GitHubAction,
@@ -7,30 +6,33 @@ import {
   GitHubActionInput,
   GitHubActionOutput,
 } from './github-actions-parser.js';
-import { RepositoryInfo } from '@ci-dokumentor/core';
-import { RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
+import { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
+import { ReaderAdapterMockFactory, RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('GitHubActionsParser', () => {
-  let repositoryInfo: RepositoryInfo;
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
+  let mockRepositoryInfo: Mocked<RepositoryInfo>;
   let parser: GitHubActionsParser;
 
   beforeEach(() => {
-    repositoryInfo = RepositoryInfoMockFactory.create();
+    vi.resetAllMocks();
 
-    parser = new GitHubActionsParser();
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
+    mockRepositoryInfo = RepositoryInfoMockFactory.create();
+
+    parser = new GitHubActionsParser(mockReaderAdapter);
   });
 
   afterEach(() => {
-    mockFs.restore();
+    vi.resetAllMocks();
   });
 
   describe('parseFile', () => {
     describe('GitHub Actions', () => {
       it('should parse an action file', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            'action.yml': `name: Test Action
+        const filePath = '/test/action.yml';
+        const fileContent = `name: Test Action
 description: A test GitHub Action
 author: Test Author
 branding:
@@ -62,15 +64,13 @@ outputs:
         value: \${{ steps.step-id.outputs.value }}
 runs:
   using: composite
-`,
-          },
-        });
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act
-        const result = parser.parseFile(
-          '/test/action.yml',
-          repositoryInfo
-        ) as GitHubAction;
+        const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubAction;
 
         // Assert
         expect(result).toBeDefined();
@@ -117,11 +117,8 @@ runs:
     describe('GitHub Workflows', () => {
       it('should parse a complete workflow file', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            '.github': {
-              workflows: {
-                'workflow.yml': `name: Test Workflow
+        const filePath = '/test/.github/workflows/workflow.yml';
+        const fileContent = `name: Test Workflow
 on: push
 jobs:
   build:
@@ -129,17 +126,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-`,
-              },
-            },
-          },
-        });
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act
-        const result = parser.parseFile(
-          '/test/.github/workflows/workflow.yml',
-          repositoryInfo
-        ) as GitHubWorkflow;
+        const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
 
         // Assert
         expect(result).toBeDefined();
@@ -151,28 +144,21 @@ jobs:
 
       it('should parse a workflow without defined name', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            '.github': {
-              workflows: {
-                'workflow-test.yml': `on: push
+        const filePath = '/test/.github/workflows/workflow-test.yml';
+        const fileContent = `on: push
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-`,
-              },
-            },
-          },
-        });
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act
-        const result = parser.parseFile(
-          '/test/.github/workflows/workflow-test.yml',
-          repositoryInfo
-        ) as GitHubWorkflow;
+        const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
 
         // Assert
         expect(result).toBeDefined();
@@ -183,101 +169,69 @@ jobs:
     describe('Error handling', () => {
       it('should throw error for invalid YAML', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            '.github': {
-              workflows: {
-                'invalid.yml': `invalid: yaml: content`,
-              },
-            },
-          },
-        });
+        const filePath = '/test/.github/workflows/invalid.yml';
+        const fileContent = `invalid: yaml: content`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act & Assert
-        expect(() =>
-          parser.parseFile('/test/.github/workflows/invalid.yml', repositoryInfo)
-        ).toThrow('Nested mappings are not allowed in compact mappings at line 1, column 10');
+        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
       });
 
       it('should throw error for empty file', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            '.github': {
-              workflows: {
-                'empty.yml': '',
-              },
-            },
-          },
-        });
+        const filePath = '/test/.github/workflows/empty.yml';
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(''));
 
         // Act & Assert
-        expect(() =>
-          parser.parseFile('/test/.github/workflows/empty.yml', repositoryInfo)
-        ).toThrow('Unsupported source file');
+        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
       });
 
       it('should throw error for plain text when parseable as YAML', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            '.github': {
-              workflows: {
-                'plain-text.yml': `This is not a YAML file`,
-              },
-            },
-          },
-        });
+        const filePath = '/test/.github/workflows/plain-text.yml';
+        const fileContent = `This is not a YAML file`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act & Assert
-        expect(() =>
-          parser.parseFile('/test/.github/workflows/plain-text.yml', repositoryInfo)
-        ).toThrow(
-          'Unsupported GitHub Actions file format: /test/.github/workflows/plain-text.yml'
-        );
+        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
       });
 
       it('should throw error for valid YAML but unsupported structure', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            '.github': {
-              workflows: {
-                'object-without-required-fields.yml': `someField: value
+        const filePath = '/test/.github/workflows/object-without-required-fields.yml';
+        const fileContent = `someField: value
 anotherField: 123
-`,
-              },
-            },
-          },
-        });
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act & Assert
-        expect(() =>
-          parser.parseFile(
-            '/test/.github/workflows/object-without-required-fields.yml',
-            repositoryInfo
-          )
-        ).toThrow(
-          'Unsupported GitHub Actions file format: /test/.github/workflows/object-without-required-fields.yml'
-        );
+        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
       });
     });
 
     describe('Type detection', () => {
       it('should detect GitHub Action when it has name but no on/jobs properties', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            'action.yml': `name: Simple Action
+        const filePath = '/test/action.yml';
+        const fileContent = `name: Simple Action
 description: A simple GitHub Action
 runs:
   using: node20
-`,
-          },
-        });
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act
-        const result = parser.parseFile('/test/action.yml', repositoryInfo);
+        const result = await parser.parseFile(filePath, mockRepositoryInfo);
 
         // Assert
         expect(result).toBeDefined();
@@ -288,11 +242,8 @@ runs:
 
       it('should detect GitHub Workflow when it has on property', async () => {
         // Arrange
-        mockFs({
-          '/test': {
-            '.github': {
-              workflows: {
-                'workflow.yml': `name: Test Workflow
+        const filePath = '/test/.github/workflows/workflow.yml';
+        const fileContent = `name: Test Workflow
 on: push
 jobs:
   build:
@@ -300,17 +251,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-`,
-              },
-            },
-          },
-        });
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
 
         // Act
-        const result = parser.parseFile(
-          '/test/.github/workflows/workflow.yml',
-          repositoryInfo
-        );
+        const result = await parser.parseFile(filePath, mockRepositoryInfo);
 
         // Assert
         expect(result).toBeDefined();

@@ -13,6 +13,8 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
   let generator: LicenseSectionGenerator;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
       getRepositoryInfo: RepositoryInfoMockFactory.create(),
     });
@@ -21,6 +23,10 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new LicenseSectionGenerator();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe('getSectionIdentifier', () => {
@@ -52,13 +58,13 @@ describe('LicenseSectionGenerator - Enhanced License Support', () => {
 
         destination: 'README.md',
 
-        };
+      };
 
       // Act
       const result = await generator.generateSection(payload);
 
       // Assert
-      expect(result).toBeInstanceOf(Buffer);
+
       expect(result.toString()).toEqual(
         `## License
 
@@ -83,13 +89,13 @@ For more details, see the [license](https://api.github.com/licenses/apache-2.0).
 
         destination: 'README.md',
 
-        };
+      };
 
       // Act
       const result = await generator.generateSection(payload);
 
       // Assert
-      expect(result).toBeInstanceOf(Buffer);
+
       expect(result.toString()).toEqual('');
     });
 
@@ -109,13 +115,13 @@ For more details, see the [license](https://api.github.com/licenses/apache-2.0).
 
         destination: 'README.md',
 
-        };
+      };
 
       // Act
       const result = await generator.generateSection(payload);
 
       // Assert
-      expect(result).toBeInstanceOf(Buffer);
+
       expect(result.toString()).toEqual('');
     });
   });

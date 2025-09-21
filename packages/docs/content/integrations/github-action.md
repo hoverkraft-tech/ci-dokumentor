@@ -60,6 +60,50 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 <!-- usage:end -->
 
+<!-- inputs:start -->
+
+## Inputs
+
+| **Input**                   | **Description**                                                                                                                                              | **Required** | **Default**           |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ | --------------------- |
+| **`source`**                | Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).                                                                         | **true**     | -                     |
+| **`destination`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).                                       | **false**    | -                     |
+| **`repository`**            | Repository platform (auto-detected if not specified).                                                                                                        | **false**    | -                     |
+| **`cicd`**                  | CI/CD platform (`github-actions`, `gitlab-ci`, etc.).                                                                                                        | **false**    | -                     |
+| **`include-sections`**      | Comma-separated list of sections to include.                                                                                                                 | **false**    | -                     |
+| **`exclude-sections`**      | Comma-separated list of sections to exclude.                                                                                                                 | **false**    | -                     |
+| **`dry-run`**               | Whether to perform a dry run (no files are written).                                                                                                         | **false**    | `false`               |
+| **`version`**               | Version to document (auto-detected if not specified).                                                                                                        | **false**    | -                     |
+| **`extra-badges`**          | JSON array of extra badges to include in the documentation.                                                                                                  | **false**    | -                     |
+|                             | Each badge should have `label`, `url`, and optional `linkUrl` properties.                                                                                    |              |                       |
+| **`format-link`**           | Transform bare URLs to links.                                                                                                                                | **false**    | `auto`                |
+|                             | Types: `auto` (autolinks), `full` (full links), `false` (disabled).                                                                                          |              |                       |
+| **`github-token`**          | The GitHub token used to fetch repository information.                                                                                                       | **false**    | `${{ github.token }}` |
+| **`ci-dokumentor-version`** | Version of CI Dokumentor to use. See [https://github.com/hoverkraft-tech/ci-dokumentor/releases](https://github.com/hoverkraft-tech/ci-dokumentor/releases). | **false**    | `latest`              |
+
+<!-- inputs:end -->
+<!-- outputs:start -->
+
+## Outputs
+
+| **Output**        | **Description**                               |
+| ----------------- | --------------------------------------------- |
+| **`destination`** | Destination path for generated documentation. |
+
+<!-- outputs:end -->
+
+## Related Documentation
+
+- [CLI Package](../packages/cli/) - Command-line interface reference
+- [CI/CD - GitHub Package](../packages/cicd/github-actions/) - CI/CD GitHub package reference
+- [Introduction](../intro.md) - Quick start and basic usage examples
+- [Developers Guide](../developers/ci-cd.md) - Advanced CI/CD integration patterns
+
+<!-- secrets:start -->
+<!-- secrets:end -->
+
+<!-- examples:start -->
+
 ### Generate Documentation for Workflows
 
 ```yaml
@@ -180,44 +224,4 @@ jobs:
           git push
 ```
 
-<!-- inputs:start -->
-
-## Inputs
-
-| **Input**                   | **Description**                                                                                                                                              | **Required** | **Default**           |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ | --------------------- |
-| **`source`**                | Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).                                                                         | **true**     | -                     |
-| **`destination`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).                                       | **false**    | -                     |
-| **`repository`**            | Repository platform (auto-detected if not specified).                                                                                                        | **false**    | -                     |
-| **`cicd`**                  | CI/CD platform (`github-actions`, `gitlab-ci`, etc.).                                                                                                        | **false**    | -                     |
-| **`include-sections`**      | Comma-separated list of sections to include.                                                                                                                 | **false**    | -                     |
-| **`exclude-sections`**      | Comma-separated list of sections to exclude.                                                                                                                 | **false**    | -                     |
-| **`dry-run`**               | Whether to perform a dry run (no files are written).                                                                                                         | **false**    | `false`               |
-| **`version`**               | Version to document (auto-detected if not specified).                                                                                                        | **false**    | -                     |
-| **`extra-badges`**          | JSON array of extra badges to include in the documentation.                                                                                                  | **false**    | -                     |
-|                             | Each badge should have `label`, `url`, and optional `linkUrl` properties.                                                                                    |              |                       |
-| **`format-link`**           | Transform bare URLs to links.                                                                                                                                | **false**    | `auto`                |
-|                             | Types: `auto` (autolinks), `full` (full links), `false` (disabled).                                                                                          |              |                       |
-| **`github-token`**          | The GitHub token used to fetch repository information.                                                                                                       | **false**    | `${{ github.token }}` |
-| **`ci-dokumentor-version`** | Version of CI Dokumentor to use. See [https://github.com/hoverkraft-tech/ci-dokumentor/releases](https://github.com/hoverkraft-tech/ci-dokumentor/releases). | **false**    | `latest`              |
-
-<!-- inputs:end -->
-<!-- outputs:start -->
-
-## Outputs
-
-| **Output**        | **Description**                               |
-| ----------------- | --------------------------------------------- |
-| **`destination`** | Destination path for generated documentation. |
-
-<!-- outputs:end -->
-
-## Related Documentation
-
-- [CLI Package](../packages/cli/) - Command-line interface reference
-- [CI/CD - GitHub Package](../packages/cicd/github-actions/) - CI/CD GitHub package reference
-- [Introduction](../intro.md) - Quick start and basic usage examples
-- [Developers Guide](../developers/ci-cd.md) - Advanced CI/CD integration patterns
-
-<!-- secrets:start -->
-<!-- secrets:end -->
+<!-- examples:end -->

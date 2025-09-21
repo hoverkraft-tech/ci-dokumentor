@@ -1,7 +1,7 @@
-import { injectable } from 'inversify';
+import { injectable, injectFromBase } from 'inversify';
 import { StringDecoder } from 'string_decoder';
 import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter } from '@ci-dokumentor/core';
+import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
 
 /**
@@ -13,6 +13,9 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
  * ## Description -> <!-- overview:start -->\n## Description\n<!-- overview:end -->
  */
 @injectable()
+@injectFromBase({
+  extendConstructorArguments: true,
+})
 export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
   protected readonly name = 'auto-doc';
 
@@ -28,7 +31,7 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
     detectionPattern: /^##\s+(Inputs|Outputs|Secrets|Description)\s*$/m,
   };
 
-  protected migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
 
     const decoder = new StringDecoder('utf8');
     const chunkSize = 8 * 1024;
@@ -40,23 +43,23 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
 
     const headerRegex = /^(##\s+(Inputs|Outputs|Secrets|Description))\s*$/i;
 
-    type Section = { headerLine: string; sectionKey: string; parts: Buffer[] };
+    type Section = { headerLine: string; sectionKey: string; parts: ReadableContent[] };
     let current: Section | null = null;
-    const outputParts: Buffer[] = [];
+    const outputParts: ReadableContent[] = [];
 
     const flushCurrent = () => {
       if (!current) return;
       const sectionIdentifier = this.mapToStandardSection(current.sectionKey.toLowerCase());
       if (sectionIdentifier) {
-        const contentBuffer = current.parts.length
-          ? Buffer.concat([Buffer.from(current.headerLine + '\n', 'utf-8'), ...current.parts])
+        const contentPart = current.parts.length
+          ? formatterAdapter.appendContent(Buffer.from(current.headerLine), formatterAdapter.lineBreak(), ...current.parts)
           : Buffer.from(current.headerLine, 'utf-8');
-        const wrapped = formatterAdapter.section(sectionIdentifier, contentBuffer);
+        const wrapped = formatterAdapter.section(sectionIdentifier, contentPart);
         outputParts.push(wrapped);
       } else {
         // Unknown section: emit original header + content as-is
-        outputParts.push(Buffer.from(current.headerLine + '\n', 'utf-8'));
-        if (current.parts.length) outputParts.push(Buffer.concat(current.parts));
+        outputParts.push(Buffer.from(current.headerLine, 'utf-8'), formatterAdapter.lineBreak());
+        if (current.parts.length) outputParts.push(formatterAdapter.appendContent(...current.parts));
       }
       current = null;
     };
@@ -76,16 +79,16 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
 
       // Not a header
       if (current) {
-        current.parts.push(Buffer.from(line + '\n', 'utf-8'));
+        current.parts.push(Buffer.from(line, 'utf-8'), formatterAdapter.lineBreak());
       } else {
         // Outside any section, preserve original content
-        outputParts.push(Buffer.from(line + '\n', 'utf-8'));
+        outputParts.push(Buffer.from(line, 'utf-8'), formatterAdapter.lineBreak());
       }
     };
 
-    while (offset < input.length) {
-      const end = Math.min(offset + chunkSize, input.length);
-      const chunk = input.subarray(offset, end);
+    while (offset < content.length) {
+      const end = Math.min(offset + chunkSize, content.length);
+      const chunk = content.subarray(offset, end);
       offset = end;
       rem += decoder.write(chunk);
 
@@ -103,6 +106,6 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
     // Flush any final open section
     flushCurrent();
 
-    return Buffer.concat(outputParts);
+    return formatterAdapter.appendContent(...outputParts);
   }
 }

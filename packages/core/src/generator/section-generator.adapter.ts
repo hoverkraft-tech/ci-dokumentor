@@ -1,6 +1,7 @@
 import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
 import { OptionDescriptor } from '../options/options.js';
+import { ReadableContent } from '../reader/reader.adapter.js';
 
 export const SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
   'SectionGeneratorAdapter'
@@ -44,7 +45,7 @@ export interface SectionGeneratorAdapter<TManifest, Options extends SectionOptio
   /**
    * Generate the section content using a structured payload object
    */
-  generateSection(payload: SectionGenerationPayload<TManifest>): Promise<Buffer>;
+  generateSection(payload: SectionGenerationPayload<TManifest>): Promise<ReadableContent>;
 
   /**
    * Provide CLI option descriptors specific to this section generator

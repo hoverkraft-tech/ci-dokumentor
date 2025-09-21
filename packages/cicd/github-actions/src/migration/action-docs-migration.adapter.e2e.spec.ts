@@ -37,20 +37,20 @@ describe('ActionDocsMigrationAdapter', () => {
   });
 
   describe('supportsDestination', () => {
-    it('detects markers in files', () => {
+    it('detects markers in files', async () => {
       // Arrange
       const tmpPath = join(tmpdir(), `actiondocs-support-${Date.now()}.md`);
       mockFs({ [tmpPath]: '<!-- action-docs-inputs source="action.yml" -->' });
       // Act
-      const supported = adapter.supportsDestination(tmpPath);
+      const supported = await adapter.supportsDestination(tmpPath);
       // Assert
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', () => {
+    it('returns false for missing files', async () => {
       // Arrange
       // Act
-      const supported = adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
       // Assert
       expect(supported).toBe(false);
     });

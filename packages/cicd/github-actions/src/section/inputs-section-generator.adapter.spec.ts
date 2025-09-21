@@ -25,6 +25,8 @@ describe('InputsSectionGenerator', () => {
   let generator: InputsSectionGenerator;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
       getRepositoryInfo: RepositoryInfoMockFactory.create(),
     });
@@ -33,6 +35,10 @@ describe('InputsSectionGenerator', () => {
     formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     generator = new InputsSectionGenerator();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe('getSectionIdentifier', () => {
@@ -64,10 +70,10 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           `## Inputs
 
@@ -84,10 +90,10 @@ describe('InputsSectionGenerator', () => {
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           `## Inputs
 
@@ -102,10 +108,10 @@ describe('InputsSectionGenerator', () => {
         const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs: {} });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           `## Inputs
 
@@ -122,10 +128,10 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           `## Inputs
 
@@ -161,10 +167,10 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           `## Inputs
 
@@ -185,10 +191,10 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           ``
         );
@@ -205,10 +211,11 @@ describe('InputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider
-        , destination: 'README.md' });
+          , destination: 'README.md'
+        });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           ``
         );
@@ -230,10 +237,10 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           `## Inputs
 
@@ -262,10 +269,10 @@ describe('InputsSectionGenerator', () => {
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' });
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        expect(result).toBeInstanceOf(Buffer);
+
         expect(result.toString()).toEqual(
           `## Inputs
 
@@ -287,7 +294,7 @@ describe('InputsSectionGenerator', () => {
         } as unknown as GitHubActionsManifest;
 
         // Act & Assert
-        expect(generator.generateSection({ formatterAdapter, manifest: invalidManifest, repositoryProvider: mockRepositoryProvider , destination: 'README.md' })).rejects.toThrow('Unsupported manifest type for InputsSectionGenerator');
+        expect(generator.generateSection({ formatterAdapter, manifest: invalidManifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' })).rejects.toThrow('Unsupported manifest type for InputsSectionGenerator');
       });
     });
   });

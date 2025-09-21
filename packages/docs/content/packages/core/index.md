@@ -128,35 +128,39 @@ Interface for content formatters:
 interface FormatterAdapter {
   supportsLanguage(language: FormatterLanguage): boolean;
 
-  heading(input: Buffer, level?: number): Buffer;
+  heading(input: ReadableContent, level?: number): ReadableContent;
 
-  center(input: Buffer): Buffer;
+  center(input: ReadableContent): ReadableContent;
 
-  comment(input: Buffer): Buffer;
+  comment(input: ReadableContent): ReadableContent;
 
-  paragraph(input: Buffer): Buffer;
+  paragraph(input: ReadableContent): ReadableContent;
 
-  bold(input: Buffer): Buffer;
+  bold(input: ReadableContent): ReadableContent;
 
-  italic(input: Buffer): Buffer;
+  italic(input: ReadableContent): ReadableContent;
 
-  code(input: Buffer, language?: Buffer): Buffer;
+  code(input: ReadableContent, language?: ReadableContent): ReadableContent;
 
-  inlineCode(input: Buffer): Buffer;
+  inlineCode(input: ReadableContent): ReadableContent;
 
-  link(text: Buffer, url: Buffer): Buffer;
+  link(text: ReadableContent, url: ReadableContent): ReadableContent;
 
   image(
-    url: Buffer,
-    altText: Buffer,
+    url: ReadableContent,
+    altText: ReadableContent,
     options?: { width?: string; align?: string },
-  ): Buffer;
+  ): ReadableContent;
 
-  table(headers: Buffer[], rows: Buffer[][]): Buffer;
+  table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent;
 
-  badge(label: Buffer, message: Buffer, color?: Buffer): Buffer;
+  badge(
+    label: ReadableContent,
+    message: ReadableContent,
+    color?: ReadableContent,
+  ): ReadableContent;
 
-  lineBreak(): Buffer;
+  lineBreak(): ReadableContent;
 }
 ```
 
@@ -177,7 +181,7 @@ interface RendererAdapter {
 
   getFormatterAdapter(): FormatterAdapter;
 
-  writeSection(sectionIdentifier: string, data: Buffer): Promise<void>;
+  writeSection(sectionIdentifier: string, data: ReadableContent): Promise<void>;
 
   /**
    * Finalize rendering and return an optional string (for example a diff)

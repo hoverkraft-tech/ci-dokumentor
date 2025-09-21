@@ -2,19 +2,23 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'node:fs';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
-import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
+import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { initContainer, resetContainer } from '../container.js';
 
 describe('FileRendererAdapter', () => {
-  let formatterAdapter: MarkdownFormatterAdapter;
-
-  let fileRendererAdapter: FileRendererAdapter;
   const testFilePath = '/test/document.md';
   const testSectionIdentifier = SectionIdentifier.Examples;
   const testData = Buffer.from('New section content\n');
 
+  let formatterAdapter: MarkdownFormatterAdapter;
+
+  let fileRendererAdapter: FileRendererAdapter;
+
   beforeEach(() => {
+    vi.resetAllMocks();
+
     // Set up mock filesystem
     mockFs({
       '/test': {
@@ -49,14 +53,20 @@ describe('FileRendererAdapter', () => {
       },
     });
 
-    formatterAdapter = new MarkdownFormatterAdapter(new MarkdownTableGenerator());
+    const container = initContainer();
 
-    fileRendererAdapter = new FileRendererAdapter();
+    formatterAdapter = container.get(MarkdownFormatterAdapter);
+
+    fileRendererAdapter = container.get(FileRendererAdapter);
   });
 
   afterEach(() => {
+    resetContainer();
+
     // Restore real filesystem
     mockFs.restore();
+
+    vi.resetAllMocks();
   });
 
   describe('writeSection', () => {
@@ -76,7 +86,7 @@ describe('FileRendererAdapter', () => {
 
     it('should replace existing section content when section already exists', async () => {
       // Arrange
-      const adapterWithExistingSection = new FileRendererAdapter();
+      const adapterWithExistingSection = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act
       await adapterWithExistingSection.initialize('/test/existing-section.md', formatterAdapter);
@@ -94,7 +104,7 @@ describe('FileRendererAdapter', () => {
 
     it('should handle empty files correctly', async () => {
       // Arrange
-      const emptyFileAdapter = new FileRendererAdapter();
+      const emptyFileAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act
       await emptyFileAdapter.initialize('/test/empty.md', formatterAdapter);
@@ -113,7 +123,7 @@ New section content
 
     it('should handle multiple sections without affecting other sections', async () => {
       // Arrange
-      const multipleSectionsAdapter = new FileRendererAdapter();
+      const multipleSectionsAdapter = new FileRendererAdapter(new FileReaderAdapter());
       const newData = Buffer.from('Updated second section\n');
 
       // Act
@@ -210,7 +220,7 @@ Footer content
 
     it('should handle non-existent file by creating it', async () => {
       // Arrange
-      const newFileAdapter = new FileRendererAdapter();
+      const newFileAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act & Assert - This should fail because the file doesn't exist
       await newFileAdapter.initialize('/test/new-file.md', formatterAdapter);
@@ -255,7 +265,7 @@ Footer content
         },
       });
 
-      const readOnlyAdapter = new FileRendererAdapter();
+      const readOnlyAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act & Assert
       await readOnlyAdapter.initialize(testFilePath, formatterAdapter);
@@ -266,7 +276,7 @@ Footer content
 
     it('should handle invalid file paths', async () => {
       // Arrange
-      const invalidPathAdapter = new FileRendererAdapter();
+      const invalidPathAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act & Assert
       await invalidPathAdapter.initialize('/nonexistent/path/file.md', formatterAdapter);
@@ -358,7 +368,7 @@ Section 2 content
     it('should return correct destination for different file paths', async () => {
       // Arrange
       const differentPath = '/test/different-document.md';
-      const differentAdapter = new FileRendererAdapter();
+      const differentAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act
       await differentAdapter.initialize(differentPath, formatterAdapter);

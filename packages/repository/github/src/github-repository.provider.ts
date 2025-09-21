@@ -7,11 +7,12 @@ import {
   LicenseService,
   RepositoryOptionsDescriptors,
   ManifestVersion,
+  FileReaderAdapter,
 } from '@ci-dokumentor/core';
+import type { ReaderAdapter } from '@ci-dokumentor/core';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { graphql } from "@octokit/graphql";
 import { injectable, inject } from 'inversify';
-import { existsSync } from 'fs';
 import { createTokenAuth, } from '@octokit/auth-token';
 import { RequestParameters } from 'node_modules/@octokit/auth-token/dist-types/types.js';
 
@@ -31,6 +32,7 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
     @inject(GitRepositoryProvider)
     private gitRepositoryProvider: GitRepositoryProvider,
     @inject(LicenseService) private licenseService: LicenseService,
+    @inject(FileReaderAdapter) private readerAdapter: ReaderAdapter,
   ) {
     super();
   }
@@ -113,7 +115,7 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
     ];
 
     for (const path of possibleLogoPaths) {
-      if (existsSync(path)) {
+      if (this.readerAdapter.resourceExists(path)) {
         return `file://${path}`;
       }
     }
@@ -165,7 +167,7 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
     }
 
     // Fallback to reading license file directly if no license info from GitHub
-    return this.licenseService.detectLicenseFromFile();
+    return await this.licenseService.detectLicenseFromFile();
   }
 
   protected async fetchContributing(): Promise<ContributingInfo | undefined> {

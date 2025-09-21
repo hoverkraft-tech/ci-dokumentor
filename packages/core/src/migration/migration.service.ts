@@ -42,9 +42,9 @@ export class MigrationService {
   /**
    * Auto-detect CI/CD platform for a given source
    */
-  autoDetectMigrationAdapter(destination: string): MigrationAdapter | undefined {
+  async autoDetectMigrationAdapter(destination: string): Promise<MigrationAdapter | undefined> {
     for (const adapter of this.adapters.values()) {
-      if (adapter.supportsDestination(destination)) {
+      if (await adapter.supportsDestination(destination)) {
         return adapter;
       }
     }

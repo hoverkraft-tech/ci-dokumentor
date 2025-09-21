@@ -29,7 +29,10 @@ export class CliApplication {
     @inject(LoggerService) private readonly loggerService: LoggerService,
     @inject(ProgramConfiguratorService) private readonly programConfiguratorService: ProgramConfiguratorService
   ) {
-    this.setupProgram();
+  }
+
+  async setup() {
+    await this.setupProgram();
     this.registerCommands();
   }
 
@@ -43,8 +46,8 @@ export class CliApplication {
   /**
    * Setup the main program configuration
    */
-  private setupProgram(): void {
-    const packageInfo = this.packageService.getPackageInfo();
+  private async setupProgram(): Promise<void> {
+    const packageInfo = await this.packageService.getPackageInfo();
 
     this.program
       .name(packageInfo.name)

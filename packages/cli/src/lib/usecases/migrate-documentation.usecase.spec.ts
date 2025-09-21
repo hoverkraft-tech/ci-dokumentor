@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
-import mockFs from 'mock-fs';
-
 import { MigrateDocumentationUseCase } from './migrate-documentation.usecase.js';
-import { MigrationAdapter, MigrationService } from '@ci-dokumentor/core';
+import { MigrationAdapter, MigrationService, ReaderAdapter } from '@ci-dokumentor/core';
+import { ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
 
@@ -10,14 +9,10 @@ describe('MigrateDocumentationUseCase', () => {
   let migrateDocumentationUseCase: MigrateDocumentationUseCase;
   let mockLoggerService: Mocked<LoggerService>;
   let mockMigrationService: Mocked<MigrationService>;
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
 
   beforeEach(() => {
     vi.resetAllMocks();
-
-    mockFs({
-      './README.md': 'Content with old markers: <!-- action-docs-inputs source="action.yml" -->',
-      './empty.md': '',
-    });
 
     const migrationAdapter = {
       getName: vi.fn().mockReturnValue('action-docs'),
@@ -35,15 +30,21 @@ describe('MigrateDocumentationUseCase', () => {
         data: 'migration result'
       }) as Mocked<MigrationService>['migrateDocumentationFromTool'],
     } as Mocked<MigrationService>;
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
+
+    mockReaderAdapter.resourceExists.mockImplementation((path: string) => {
+      return path === './README.md';
+    });
 
     migrateDocumentationUseCase = new MigrateDocumentationUseCase(
       mockLoggerService,
-      mockMigrationService
+      mockMigrationService,
+      mockReaderAdapter
     );
   });
 
   afterEach(() => {
-    mockFs.restore();
+    vi.resetAllMocks();
   });
 
   describe('getAvailableTools', () => {

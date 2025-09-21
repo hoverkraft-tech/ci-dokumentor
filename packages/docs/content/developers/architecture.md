@@ -25,6 +25,17 @@ packages/
 └── cli/                               # CLI application
 ```
 
+## Core Architecture Patterns
+
+### ReaderAdapter Pattern
+
+The core package uses the ReaderAdapter pattern to abstract file system operations:
+
+- **ReaderAdapter Interface**: Defines methods for reading operations on resources and resource containers (files, directories...)
+- **FileReaderAdapter**: Concrete implementation for file system reading with graceful error handling
+
+This pattern separates reading concerns from rendering logic and enables easy mocking in tests.
+
 ## Repository Platforms
 
 Located in `packages/repository/`, these packages handle:

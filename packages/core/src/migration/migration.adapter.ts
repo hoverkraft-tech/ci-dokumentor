@@ -21,7 +21,7 @@ export interface MigrationAdapter {
    * Check whether this adapter can handle the given destination/file.
    * Adapters may inspect the destination path, its contents, or both.
    */
-  supportsDestination(destination: string): boolean;
+  supportsDestination(destination: string): Promise<boolean>;
 
   /**
    * Perform the migration for the provided destination and write using the

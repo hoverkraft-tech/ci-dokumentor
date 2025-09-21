@@ -1,4 +1,4 @@
-import { SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionOutput,
@@ -16,8 +16,8 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return SectionIdentifier.Outputs;
   }
 
-  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
-    let manifestOutputsContent: Buffer;
+  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
+    let manifestOutputsContent: ReadableContent;
     if (this.isGitHubAction(manifest)) {
       manifestOutputsContent = this.generateActionOutputsTable(formatterAdapter, manifest);
     } else if (this.isGitHubWorkflow(manifest)) {
@@ -40,7 +40,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   private generateActionOutputsTable(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubAction
-  ): Buffer {
+  ): ReadableContent {
     return this.generateOutputsTable(
       formatterAdapter,
       Object.entries(manifest.outputs || {})
@@ -50,7 +50,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   private generateWorkflowOutputsTable(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubWorkflow
-  ): Buffer {
+  ): ReadableContent {
     return this.generateOutputsTable(
       formatterAdapter,
       Object.entries(manifest?.on?.workflow_call?.outputs || {})
@@ -60,7 +60,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   private generateOutputsTable(
     formatterAdapter: FormatterAdapter,
     outputs: [string, GitHubActionOutput | GitHubWorkflowOutput][]
-  ): Buffer {
+  ): ReadableContent {
     if (outputs.length === 0) {
       return Buffer.alloc(0);
     }
@@ -79,7 +79,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return formatterAdapter.table(headers, rows);
   }
 
-  private getHeaders(formatterAdapter: FormatterAdapter): Buffer[] {
+  private getHeaders(formatterAdapter: FormatterAdapter): ReadableContent[] {
     return [
       formatterAdapter.bold(Buffer.from('Output')),
       formatterAdapter.bold(Buffer.from('Description')),
@@ -89,13 +89,13 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   private getOutputName(
     name: string,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     return formatterAdapter.bold(
       formatterAdapter.inlineCode(Buffer.from(name))
     );
   }
 
-  private getOutputDescription(output: GitHubActionOutput | GitHubWorkflowOutput, formatterAdapter: FormatterAdapter): Buffer {
+  private getOutputDescription(output: GitHubActionOutput | GitHubWorkflowOutput, formatterAdapter: FormatterAdapter): ReadableContent {
     return formatterAdapter.paragraph(Buffer.from((output.description || '').trim()));
   }
 }

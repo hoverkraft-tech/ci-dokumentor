@@ -1,6 +1,6 @@
-import { injectable } from 'inversify';
+import { injectable, injectFromBase } from 'inversify';
 import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter } from '@ci-dokumentor/core';
+import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
 
 /**
@@ -13,6 +13,9 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
  * <!-- action-docs-runs source="action.yml" --> -> <!-- usage:start -->
  */
 @injectable()
+@injectFromBase({
+  extendConstructorArguments: true,
+})
 export class ActionDocsMigrationAdapter extends AbstractMigrationAdapter {
   protected readonly name = 'action-docs';
 
@@ -30,10 +33,10 @@ export class ActionDocsMigrationAdapter extends AbstractMigrationAdapter {
     detectionPattern: /<!--\s*action-docs-\w+\s+source=["'][^"']+["']\s*-->/,
   };
 
-  protected migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
     // Delegate marker replacement and mapping to the base class helper which
-    // operates on the provided Buffer fragment to avoid allocating large
+    // operates on the provided content fragment to avoid allocating large
     // intermediate strings here.
-    return this.processMarkerMappings(input, formatterAdapter);
+    return this.processMarkerMappings(content, formatterAdapter);
   }
 }
