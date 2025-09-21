@@ -103,7 +103,7 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     rendererAdapter: RendererAdapter;
     repositoryProvider: RepositoryProvider;
   }): Promise<void> {
-    const gitHubActionOrWorkflow = this.gitHubActionsParser.parseFile(
+    const gitHubActionOrWorkflow = await this.gitHubActionsParser.parseFile(
       source,
       await repositoryProvider.getRepositoryInfo()
     );

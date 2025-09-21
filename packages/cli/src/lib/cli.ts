@@ -8,5 +8,8 @@ export async function cli(): Promise<void> {
   const container = initGlobalContainer();
 
   const cliApp = container.get(CliApplication);
+
+  await cliApp.setup();
+
   return cliApp.run();
 }

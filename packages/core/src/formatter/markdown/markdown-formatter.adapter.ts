@@ -3,6 +3,7 @@ import { FormatterLanguage } from '../formatter-language.js';
 import { FormatterAdapter, FormatterOptions, LinkFormat } from '../formatter.adapter.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
+import { ReadableContent } from '../../reader/reader.adapter.js';
 
 @injectable()
 export class MarkdownFormatterAdapter implements FormatterAdapter {
@@ -22,56 +23,65 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return language === FormatterLanguage.Markdown;
   }
 
-  appendContent(...parts: Buffer[]): Buffer {
+  appendContent(...parts: ReadableContent[]): ReadableContent {
     // Fast single-allocation concatenation. Convert string parts to buffers and copy into
-    // a pre-allocated Buffer to avoid multiple intermediate allocations from Buffer.concat.
-    if (!parts || parts.length === 0) return Buffer.alloc(0);
-
-    // First pass: compute total length and normalize buffers lazily
-    const buffers: Buffer[] = new Array(parts.length);
-    let total = 0;
-    for (let i = 0; i < parts.length; i++) {
-      const p = parts[i];
-      buffers[i] = p as Buffer;
-      total += buffers[i].length;
+    // a pre-allocated content to avoid multiple intermediate allocations.
+    if (!parts || parts.length === 0) {
+      return Buffer.alloc(0);
     }
 
-    if (buffers.length === 1) return buffers[0];
+    // First pass: compute total length and normalize buffers lazily
+    const contentParts: ReadableContent[] = new Array(parts.length);
+    let total = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      contentParts[i] = part;
+      total += contentParts[i].length;
+    }
+
+    if (contentParts.length === 1) {
+      return contentParts[0];
+    }
 
     const out = Buffer.allocUnsafe(total);
     let offset = 0;
-    for (let i = 0; i < buffers.length; i++) {
-      const b = buffers[i];
-      if (b.length === 0) continue;
-      b.copy(out, offset);
-      offset += b.length;
+    for (let i = 0; i < contentParts.length; i++) {
+      const contentPart = contentParts[i];
+      if (contentPart.length === 0) {
+        continue;
+      }
+      contentPart.copy(out, offset);
+      offset += contentPart.length;
     }
     return out;
   }
 
-  heading(input: Buffer, level = 1): Buffer {
+  heading(input: ReadableContent, level = 1): ReadableContent {
     const hashes = '#'.repeat(Math.max(1, Math.min(6, level)));
     return this.appendContent(Buffer.from(`${hashes} `), input, this.lineBreak());
   }
 
-  center(input: Buffer): Buffer {
-    // Buffer-based implementation: trim overall, split on LF, indent non-empty lines
+  center(input: ReadableContent): ReadableContent {
     const lb = 0x0A; // \n
     // Trim leading/trailing whitespace/newlines
     let start = 0;
     let end = input.length - 1;
-    while (start <= end && (input[start] === 0x20 /* space */ || input[start] === 0x09 /* tab */ || input[start] === 0x0A /* LF */ || input[start] === 0x0D /* CR */)) start++;
-    while (end >= start && (input[end] === 0x20 /* space */ || input[end] === 0x09 /* tab */ || input[end] === 0x0A /* LF */ || input[end] === 0x0D /* CR */)) end--;
+    while (start <= end && (input[start] === 0x20 /* space */ || input[start] === 0x09 /* tab */ || input[start] === 0x0A /* LF */ || input[start] === 0x0D /* CR */)) {
+      start++;
+    }
+    while (end >= start && (input[end] === 0x20 /* space */ || input[end] === 0x09 /* tab */ || input[end] === 0x0A /* LF */ || input[end] === 0x0D /* CR */)) {
+      end--;
+    }
 
     const hasContent = end >= start;
 
-    const parts: Buffer[] = [Buffer.from('<div align="center">')];
+    const parts: ReadableContent[] = [Buffer.from('<div align="center">')];
 
     if (hasContent) {
       // slice is zero-copy view over the original buffer
       const content = input.subarray(start, end + 1);
       // split on LF (0x0A), preserve lines; handle CR by trimming in each line
-      const lines: Buffer[] = [];
+      const lines: ReadableContent[] = [];
       let lineStart = 0;
       for (let i = 0; i < content.length; i++) {
         if (content[i] === lb) {
@@ -101,10 +111,11 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     }
 
     parts.push(Buffer.from('</div>'), this.lineBreak());
+
     return this.appendContent(...parts);
   }
 
-  paragraph(input: Buffer): Buffer {
+  paragraph(input: ReadableContent): ReadableContent {
     const linkFormat = this.options.linkFormat;
     const processedInput = linkFormat && linkFormat !== LinkFormat.None
       ? this.transformUrls(input, linkFormat === LinkFormat.Full)
@@ -112,7 +123,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return this.appendContent(processedInput, this.lineBreak());
   }
 
-  bold(input: Buffer): Buffer {
+  bold(input: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('**'),
       this.escape(input, '**'),
@@ -120,7 +131,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  italic(input: Buffer): Buffer {
+  italic(input: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('*'),
       this.escape(input, '*'),
@@ -128,7 +139,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  code(input: Buffer, language?: Buffer): Buffer {
+  code(input: ReadableContent, language?: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('```'),
       language || Buffer.alloc(0),
@@ -139,7 +150,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  inlineCode(input: Buffer): Buffer {
+  inlineCode(input: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('`'),
       this.escape(input, '`'),
@@ -147,7 +158,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  link(text: Buffer, url: Buffer): Buffer {
+  link(text: ReadableContent, url: ReadableContent): ReadableContent {
     // If the text is already a single inline markdown link or image (e.g. "![...](...)" or "[...]()"),
     // don't escape it - callers sometimes pass pre-formatted markdown (badges) as the link text.
     const isInlineMarkdown = this.bufferLooksLikeInlineMarkdown(text);
@@ -161,13 +172,13 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   image(
-    url: Buffer,
-    altText: Buffer,
+    url: ReadableContent,
+    altText: ReadableContent,
     options?: { width?: string; align?: string }
-  ): Buffer {
+  ): ReadableContent {
     if (options?.width || options?.align) {
       // Use HTML img tag for advanced formatting (buffer-based)
-      const attributes: Buffer[] = [];
+      const attributes: ReadableContent[] = [];
       if (options.width) {
         attributes.push(Buffer.from(` width="${options.width}"`));
       }
@@ -197,11 +208,11 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  table(headers: Buffer[], rows: Buffer[][]): Buffer {
+  table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent {
     return this.markdownTableGenerator.table(headers, rows);
   }
 
-  badge(label: Buffer, url: Buffer): Buffer {
+  badge(label: ReadableContent, url: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('!['),
       this.escape(this.escape(label, '*'), ')'),
@@ -211,15 +222,15 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  horizontalRule(): Buffer {
+  horizontalRule(): ReadableContent {
     return this.appendContent(Buffer.from('---'), this.lineBreak());
   }
 
-  lineBreak(): Buffer {
+  lineBreak(): ReadableContent {
     return Buffer.from('\n');
   }
 
-  section(section: SectionIdentifier, input: Buffer): Buffer {
+  section(section: SectionIdentifier, input: ReadableContent): ReadableContent {
     const startMarker = this.sectionStart(section);
     const endMarker = this.sectionEnd(section);
 
@@ -238,18 +249,18 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  sectionStart(section: SectionIdentifier): Buffer {
+  sectionStart(section: SectionIdentifier): ReadableContent {
     return this.appendContent(Buffer.from('<!-- '), this.escape(Buffer.from(section), '<!-- '), Buffer.from(':start -->'));
   }
 
-  sectionEnd(section: SectionIdentifier): Buffer {
+  sectionEnd(section: SectionIdentifier): ReadableContent {
     return this.appendContent(Buffer.from('<!-- '), this.escape(Buffer.from(section), '<!-- '), Buffer.from(':end -->'));
   }
 
   /**
    * Escape special characters in the input buffer for markdown.
    */
-  private escape(input: Buffer, search: string): Buffer {
+  private escape(input: ReadableContent, search: string): ReadableContent {
     if (!input || input.length === 0) {
       return Buffer.alloc(0);
     }
@@ -262,7 +273,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     const replaceStr = search.split('').map((c) => '\\' + c).join('');
     const replaceBuf = Buffer.from(replaceStr);
 
-    const parts: Buffer[] = [];
+    const parts: ReadableContent[] = [];
     let idx = 0;
     let found = input.indexOf(searchBuf, idx);
     while (found !== -1) {
@@ -286,7 +297,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * Quick heuristic to check if a buffer looks like a single inline markdown link/image
    * (e.g. "[text](url)" or "![alt](url)"), ignoring surrounding whitespace.
    */
-  private bufferLooksLikeInlineMarkdown(input: Buffer): boolean {
+  private bufferLooksLikeInlineMarkdown(input: ReadableContent): boolean {
     if (!input || input.length === 0) {
       return false;
     }
@@ -298,7 +309,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * Transform URLs in text to markdown links.
    * By default creates autolinks (<url>), or full links if fullLinkFormat is true.
    */
-  private transformUrls(input: Buffer, fullLinkFormat = false): Buffer {
+  private transformUrls(input: ReadableContent, fullLinkFormat = false): ReadableContent {
     if (!input || input.length === 0) return input;
 
     const text = input.toString();
@@ -391,7 +402,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * Returns a buffer that ends with exactly one LF ("\n").
    * If the input is empty or contains only newlines, returns a buffer with a single "\n".
    */
-  private trimTrailingLineBreaks(input: Buffer): Buffer {
+  private trimTrailingLineBreaks(input: ReadableContent): ReadableContent {
     if (!input || input.length === 0) {
       return this.lineBreak();
     }

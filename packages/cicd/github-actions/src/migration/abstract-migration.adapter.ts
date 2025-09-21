@@ -1,8 +1,7 @@
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { StringDecoder } from 'string_decoder';
-import { MigrationAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter, MigrateDocumentationPayload } from '@ci-dokumentor/core';
-import { readFileSync, existsSync } from 'node:fs';
+import { MigrationAdapter, SectionIdentifier, FileReaderAdapter } from '@ci-dokumentor/core';
+import type { FormatterAdapter, MigrateDocumentationPayload, ReadableContent, ReaderAdapter } from '@ci-dokumentor/core';
 
 /**
  * Abstract base class for migration adapters in the github-actions package.
@@ -23,12 +22,14 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         return this.name;
     }
 
-    supportsDestination(destination: string): boolean {
-        if (!existsSync(destination)) {
+    constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
+
+    async supportsDestination(destination: string): Promise<boolean> {
+        if (!this.readerAdapter.resourceExists(destination)) {
             return false;
         }
 
-        const content = readFileSync(destination);
+        const content = await this.readerAdapter.readResource(destination);
 
         // Stream-decode the buffer in chunks to avoid allocating a single
         // large string for very big inputs. We keep a sliding window of
@@ -66,41 +67,35 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     async migrateDocumentation({ rendererAdapter }: MigrateDocumentationPayload): Promise<void> {
         const formatterAdapter = rendererAdapter.getFormatterAdapter();
 
-        // Use renderer adapter to read existing content (maintaining abstraction)
-        const input: Buffer = await rendererAdapter.readExistingContent();
+        let content = await this.readerAdapter.readResource(rendererAdapter.getDestination());
 
-        if (input.length === 0) {
+        if (content.length === 0) {
             // No existing content to migrate
             return;
         }
 
         // Migrate the entire content using the adapter's migrateContent method
         // which can either process markers or wrap sections depending on the adapter
-        let output = this.migrateContent(input, formatterAdapter);
+        content = this.migrateContent(content, formatterAdapter);
 
         // Ensure all supported sections are present
-        output = this.addMissingSections(output, formatterAdapter);
+        content = this.addMissingSections(content, formatterAdapter);
 
         // Merge consecutive sections with same mapping
-        output = this.mergeConsecutiveSections(output, formatterAdapter);
+        content = this.mergeConsecutiveSections(content, formatterAdapter);
 
         // Replace the entire content through the renderer adapter
-        await rendererAdapter.replaceContent(output);
+        await rendererAdapter.replaceContent(content);
     }
 
-    protected abstract migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer;
+    protected abstract migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent;
 
     /**
      * Generic helper that replaces tool-specific start/end markers inside a
-     * Buffer fragment with the standardized ci-dokumentor markers using the
+     * content fragment with the standardized ci-dokumentor markers using the
      * configured patterns and section mappings.
-     *
-     * Adapters can call this to avoid duplicating Buffer->string conversion
-     * and the replace logic. The helper operates on the provided fragment
-     * only (which is produced by the scanner) so it won't allocate the full
-     * destination file as a single string.
      */
-    protected processMarkerMappings(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+    protected processMarkerMappings(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
         // Process the fragment line-by-line to avoid allocating a single large
         // string for the entire fragment. We still perform replacements on each
         // line using the configured start/end patterns, but the scope is the
@@ -115,7 +110,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
 
         let rem = '';
         let offset = 0;
-        const parts: Buffer[] = [];
+        const parts: ReadableContent[] = [];
 
         let seenToggle = false; // used when patterns are identical to alternate start/end
         const processLine = (line: string, addNewline: boolean) => {
@@ -157,21 +152,21 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                 }
             }
 
+            parts.push(Buffer.from(out, 'utf-8'));
+
             if (addNewline) {
-                parts.push(Buffer.from(out + '\n', 'utf-8'));
-            } else {
-                parts.push(Buffer.from(out, 'utf-8'));
+                parts.push(formatterAdapter.lineBreak());
             }
         };
 
-        while (offset < input.length) {
-            const end = Math.min(offset + chunkSize, input.length);
-            const chunk = input.subarray(offset, end);
+        while (offset < content.length) {
+            const end = Math.min(offset + chunkSize, content.length);
+            const chunk = content.subarray(offset, end);
             offset = end;
             rem += decoder.write(chunk);
 
             let idx;
-            while ((idx = rem.indexOf('\n')) !== -1) {
+            while ((idx = rem.indexOf(formatterAdapter.lineBreak().toString('utf-8'))) !== -1) {
                 const line = rem.slice(0, idx);
                 processLine(line, true);
                 rem = rem.slice(idx + 1);
@@ -184,7 +179,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
             processLine(rem, false);
         }
 
-        return Buffer.concat(parts);
+        return formatterAdapter.appendContent(...parts);
     }
 
     protected mapToStandardSection(sectionName: string) {
@@ -195,7 +190,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     /**
      * Merge consecutive sections that map to the same target section
      */
-    private mergeConsecutiveSections(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+    private mergeConsecutiveSections(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
         let result = content.toString('utf-8');
 
         // Pattern to match section start and end markers
@@ -270,7 +265,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     /**
      * Add missing supported section markers in the appropriate positions
      */
-    private addMissingSections(content: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+    private addMissingSections(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
 
         const expectedSections: SectionIdentifier[] = Object.values(SectionIdentifier);
 
@@ -327,7 +322,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                 }
             }
 
-            const sectionBuffer = formatterAdapter.section(missingSection, Buffer.alloc(0));
+            const sectionContent = formatterAdapter.section(missingSection, Buffer.alloc(0));
 
             if (anchorIndex !== -1) {
                 // Insert after anchorIndex, ensure there's a newline separation
@@ -340,7 +335,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                     Buffer.from(before),
                     Buffer.from(sep),
                     formatterAdapter.lineBreak(),
-                    sectionBuffer,
+                    sectionContent,
                     after.trim().length > 0 ? Buffer.from(after) : formatterAdapter.lineBreak()
                 );
             } else {
@@ -351,7 +346,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                     content,
                     Buffer.from(sep),
                     formatterAdapter.lineBreak(),
-                    sectionBuffer,
+                    sectionContent,
                 );
             }
 

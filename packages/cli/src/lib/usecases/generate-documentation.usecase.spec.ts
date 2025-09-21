@@ -1,9 +1,8 @@
 import { describe, vi, beforeEach, afterEach, Mocked } from 'vitest';
-import mockFs from 'mock-fs';
 
 import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
-import { GeneratorService, LinkFormat, RepositoryService } from '@ci-dokumentor/core';
-import { GeneratorServiceMockFactory, RepositoryServiceMockFactory, RepositoryProviderMockFactory, GeneratorAdapterMockFactory } from '@ci-dokumentor/core/tests';
+import { GeneratorService, LinkFormat, RepositoryService, ReaderAdapter } from '@ci-dokumentor/core';
+import { GeneratorServiceMockFactory, RepositoryServiceMockFactory, RepositoryProviderMockFactory, GeneratorAdapterMockFactory, ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
 
@@ -12,29 +11,29 @@ describe('GenerateDocumentationUseCase', () => {
   let mockLoggerService: Mocked<LoggerService>;
   let mockGeneratorService: Mocked<GeneratorService>;
   let mockRepositoryService: Mocked<RepositoryService>;
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
 
   beforeEach(() => {
     vi.resetAllMocks();
 
-    mockFs({
-      './action.yml': 'name: test-action\n',
-      './README.md': '',
-    });
-
     mockLoggerService = LoggerServiceMockFactory.create();
     mockGeneratorService = GeneratorServiceMockFactory.create();
     mockRepositoryService = RepositoryServiceMockFactory.create();
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
+
+    mockReaderAdapter.resourceExists.mockImplementation((p: string) => {
+      return p === './action.yml' || p === './README.md';
+    });
 
     generateDocumentationUseCase = new GenerateDocumentationUseCase(
       mockLoggerService,
       mockGeneratorService,
-      mockRepositoryService
+      mockRepositoryService,
+      mockReaderAdapter
     );
   });
 
   afterEach(() => {
-    // Restore real filesystem after each test
-    mockFs.restore();
     vi.resetAllMocks();
   });
 

@@ -28,7 +28,7 @@ describe('GitRepositoryProvider', () => {
     vi.mocked(simpleGit).mockReturnValue(mockGit);
 
     // Mock gitUrlParse
-    mockGitUrlParse = vi.mocked(gitUrlParse) as unknown as MockInstance<typeof gitUrlParse>;
+    mockGitUrlParse = gitUrlParse as unknown as MockInstance<typeof gitUrlParse>;
 
   });
 
@@ -177,7 +177,7 @@ describe('GitRepositoryProvider', () => {
         name: 'test-repo',
         source: 'github.com',
         full_name: 'test-owner/test-repo',
-        toString: (format?: string) => 'https://github.com/test-owner/test-repo.git',
+        toString: () => 'https://github.com/test-owner/test-repo.git',
       } as unknown as gitUrlParse.GitUrl;
       mockGitUrlParse.mockReturnValue(mockParsedUrl);
 
@@ -225,7 +225,7 @@ describe('GitRepositoryProvider', () => {
       mockGit.revparse.mockImplementation((arg: unknown) => {
         return Promise.resolve(arg === 'HEAD' ? mockSha : 'feature/x') as Response<string>;
       });
-      mockGit.tags!.mockResolvedValue({ latest: undefined } as TagResult);
+      mockGit.tags.mockResolvedValue({ latest: undefined } as TagResult);
 
       // Act
       const result = await provider.getLatestVersion();

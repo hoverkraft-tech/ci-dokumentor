@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
-import { existsSync, statSync } from 'fs';
-import { MigrationAdapter, MigrationService } from '@ci-dokumentor/core';
+import { FileReaderAdapter, MigrationAdapter, MigrationService } from '@ci-dokumentor/core';
+import type { ReaderAdapter } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
 
 export interface MigrateDocumentationUseCaseInput {
@@ -39,7 +39,8 @@ export interface MigrateDocumentationUseCaseOutput {
 export class MigrateDocumentationUseCase {
   constructor(
     @inject(LoggerService) private readonly loggerService: LoggerService,
-    @inject(MigrationService) private readonly migrationService: MigrationService
+    @inject(MigrationService) private readonly migrationService: MigrationService,
+    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter
   ) { }
 
   /**
@@ -59,7 +60,7 @@ export class MigrateDocumentationUseCase {
       `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation migration...`, input.outputFormat);
     this.loggerService.info(`Target file: ${input.destination}`, input.outputFormat);
 
-    const migrationAdapter = this.resolveMigrationAdapter(input);
+    const migrationAdapter = await this.resolveMigrationAdapter(input);
     this.loggerService.info(`Migration tool: ${migrationAdapter.getName()}`, input.outputFormat);
 
     // Use migration service to handle the full migration process with proper architecture
@@ -96,7 +97,7 @@ export class MigrateDocumentationUseCase {
     }
 
     // Validate that the destination exists and is a file
-    if (!existsSync(input.destination) || !statSync(input.destination).isFile()) {
+    if (!this.readerAdapter.resourceExists(input.destination)) {
       throw new Error(`Destination file does not exist or is not a file: ${input.destination}`);
     }
 
@@ -112,7 +113,7 @@ export class MigrateDocumentationUseCase {
     }
   }
 
-  private resolveMigrationAdapter(input: MigrateDocumentationUseCaseInput): MigrationAdapter {
+  private async resolveMigrationAdapter(input: MigrateDocumentationUseCaseInput): Promise<MigrationAdapter> {
     if (input.tool) {
       const migrationAdapter = this.migrationService.getMigrationAdapterByTool(input.tool);
       if (migrationAdapter) {
@@ -121,7 +122,7 @@ export class MigrateDocumentationUseCase {
       throw new Error(`Migration adapter not found for tool: ${input.tool}`);
     }
 
-    const detectedMigrationAdapter = this.migrationService.autoDetectMigrationAdapter(input.destination);
+    const detectedMigrationAdapter = await this.migrationService.autoDetectMigrationAdapter(input.destination);
     if (detectedMigrationAdapter) {
       return detectedMigrationAdapter;
     }

@@ -4,7 +4,7 @@ import type { MigrationAdapter } from '../src/migration/migration.adapter.js';
 
 export interface MigrationAdapterDefaults {
     getName: ReturnType<MigrationAdapter['getName']>
-    supportsDestination: ReturnType<MigrationAdapter['supportsDestination']>
+    supportsDestination: Awaited<ReturnType<MigrationAdapter['supportsDestination']>>
     migrateDocumentation: Awaited<ReturnType<MigrationAdapter['migrateDocumentation']>>
 }
 
@@ -20,7 +20,7 @@ export class MigrationAdapterMockFactory {
             mock.getName.mockReturnValue(defaults.getName);
         }
         if (defaults?.supportsDestination !== undefined) {
-            mock.supportsDestination.mockReturnValue(defaults.supportsDestination);
+            mock.supportsDestination.mockResolvedValue(defaults.supportsDestination);
         }
         if (defaults?.migrateDocumentation !== undefined) {
             mock.migrateDocumentation.mockResolvedValue(defaults.migrateDocumentation);

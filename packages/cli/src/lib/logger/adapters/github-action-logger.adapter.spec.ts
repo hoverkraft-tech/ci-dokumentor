@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GitHubActionLoggerAdapter } from './github-action-logger.adapter.js';
 import { ConsoleMockFactory, MockedConsole } from '../../../../__tests__/console-mock.factory.js';
 import mockFs from 'mock-fs';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 
 describe('GitHubActionLoggerAdapter', () => {
   let githubActionLoggerAdapter: GitHubActionLoggerAdapter;

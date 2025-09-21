@@ -21,7 +21,7 @@ CI Dokumentor follows these testing principles:
 CI Dokumentor uses a modern testing stack:
 
 - **[Vitest](https://vitest.dev/)** - Fast unit testing framework with native TypeScript support
-- **[Mock-fs](https://github.com/tschaub/mock-fs)** - File system mocking for integration tests
+- **[Mock-fs](https://github.com/tschaub/mock-fs)** - File system mocking for end-to-end tests
 - **[InversifyJS Testing](https://inversify.io/)** - Dependency injection mocking and testing patterns
 - **[@vitest/coverage-v8](https://vitest.dev/guide/coverage)** - Code coverage reporting
 
@@ -36,9 +36,9 @@ Fast, isolated tests focusing on individual components:
 pnpm test
 
 # Run tests for specific package
-nx test core
-nx test cli
-nx test repository-github
+pnpm nx test core
+pnpm nx test cli
+pnpm nx test repository-github
 ```
 
 #### Integration Tests
@@ -153,7 +153,7 @@ beforeEach(() => {
 
 ### File System Testing
 
-Use mock-fs for file system operations:
+Use mock-fs for **End-to-end** file system operations tests **only**:
 
 ```typescript
 import mockFs from 'mock-fs';

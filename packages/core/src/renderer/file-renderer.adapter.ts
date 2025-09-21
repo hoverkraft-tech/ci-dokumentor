@@ -1,51 +1,32 @@
 import {
     createReadStream,
-    existsSync,
     writeFile,
     writeFileSync,
 } from 'node:fs';
 import { createInterface } from 'node:readline';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import type { ReaderAdapter } from '../reader/reader.adapter.js';
+import { ReadableContent } from '../reader/reader.adapter.js';
+import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 
 
 @injectable()
 export class FileRendererAdapter extends AbstractRendererAdapter {
     private static readonly fileLocks = new Map<string, Promise<void>>();
 
-    async readExistingContent(): Promise<Buffer> {
-        const destination = this.getDestination();
-
-        if (!existsSync(destination)) {
-            return Buffer.alloc(0);
-        }
-
-        return new Promise((resolve, reject) => {
-            const fileStream = createReadStream(destination);
-            const chunks: Buffer[] = [];
-
-            fileStream.on('data', (chunk: string | Buffer) => {
-                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-            });
-
-            fileStream.on('end', () => {
-                resolve(Buffer.concat(chunks));
-            });
-
-            fileStream.on('error', (err) => {
-                reject(err);
-            });
-        });
+    constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) {
+        super();
     }
 
-    async replaceContent(data: Buffer): Promise<void> {
+    async replaceContent(data: ReadableContent): Promise<void> {
         await this.safeWriteWithLock(async () => {
             return this.performReplaceContent(data);
         });
     }
 
-    async writeSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
+    async writeSection(sectionIdentifier: SectionIdentifier, data: ReadableContent): Promise<void> {
         await this.safeWriteWithLock(async () => {
             return this.performWriteSection(sectionIdentifier, data);
         });
@@ -63,7 +44,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         return undefined;
     }
 
-    private performReplaceContent(data: Buffer): Promise<void> {
+    private performReplaceContent(data: ReadableContent): Promise<void> {
         const destination = this.getDestination();
 
         return new Promise((resolve, reject) => {
@@ -77,7 +58,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         });
     }
 
-    private performWriteSection(sectionIdentifier: SectionIdentifier, data: Buffer): Promise<void> {
+    private performWriteSection(sectionIdentifier: SectionIdentifier, data: ReadableContent): Promise<void> {
         const destination = this.getDestination();
         const formatterAdapter = this.getFormatterAdapter();
 
@@ -86,7 +67,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         // Read file line by line to find the section
         return new Promise((resolve, reject) => {
             try {
-                if (!existsSync(destination)) {
+                if (!this.readerAdapter.resourceExists(destination)) {
                     writeFileSync(destination, '');
                 }
 
@@ -104,7 +85,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
 
                 let sectionFound = false;
                 let inSection = false;
-                let output: Buffer = Buffer.alloc(0);
+                let output: ReadableContent = Buffer.alloc(0);
 
 
                 const sectionContent = formatterAdapter.section(
@@ -179,5 +160,10 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
 
     private getExistingLock(): Promise<void> | undefined {
         return FileRendererAdapter.fileLocks.get(this.getDestination());
+    }
+
+    async getExistingContent(): Promise<ReadableContent> {
+        const destination = this.getDestination();
+        return this.readerAdapter.readResource(destination);
     }
 }

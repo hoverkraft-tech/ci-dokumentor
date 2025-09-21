@@ -1,6 +1,6 @@
-import { injectable } from 'inversify';
+import { injectable, injectFromBase } from 'inversify';
 import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter } from '@ci-dokumentor/core';
+import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
 
 /**
@@ -18,6 +18,9 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
  * <!-- start [.github/ghadocs/examples/] --> / <!-- end [.github/ghadocs/examples/] --> -> <!-- examples:start --> / <!-- examples:end -->
  */
 @injectable()
+@injectFromBase({
+  extendConstructorArguments: true,
+})
 export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrationAdapter {
   protected readonly name = 'github-action-readme-generator';
 
@@ -38,12 +41,12 @@ export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrati
     detectionPattern: /<!--\s*(start|end)\s+[\w[\]/.-]+\s*-->/,
   };
 
-  protected migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
+  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
     // The adapter needs some special normalization for example paths; we
     // perform normalization first by mapping any examples-like identifiers to
     // a canonical 'examples' key inside the fragment before handing it to the
     // shared `processMarkerMappings` helper.
-    let working = input.toString('utf-8');
+    let working = content.toString('utf-8');
 
     // Normalize example paths inside the fragment to the 'examples' token
     working = working.replace(/(<!--\s*(?:start|end)\s+)([\w[\]/.]+)(\s*-->)/gi, (m, p1, p2, p3) => {

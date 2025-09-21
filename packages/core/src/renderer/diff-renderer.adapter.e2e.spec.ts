@@ -1,24 +1,26 @@
-import { describe, it, expect, beforeEach, afterEach, vi, MockInstance, } from 'vitest';
-import mockFs from 'mock-fs';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
+import mockFs from 'mock-fs';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
-import { MarkdownTableGenerator } from '../formatter/markdown/markdown-table.generator.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
+import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import { DiffRendererAdapter } from './diff-renderer.adapter.js';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { initContainer, resetContainer } from '../container.js';
 
 describe('DiffRendererAdapter', () => {
     const fixedNow = 1234567890;
-    let dateSpy: MockInstance<typeof Date.now>;
 
     let formatter: FormatterAdapter;
-    let fileRenderer: FileRendererAdapter;
     let adapter: DiffRendererAdapter;
 
     beforeEach(() => {
+        // Reset mocks before each test
+        vi.resetAllMocks();
+
         // Provide a deterministic tmpdir and test file structure
         mockFs({
             [tmpdir()]: {},
@@ -27,17 +29,21 @@ describe('DiffRendererAdapter', () => {
             },
         });
 
-        dateSpy = vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
+        const container = initContainer();
 
-        formatter = new MarkdownFormatterAdapter(new MarkdownTableGenerator());
-        fileRenderer = new FileRendererAdapter();
+        vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
 
-        adapter = new DiffRendererAdapter(fileRenderer);
+        formatter = container.get(MarkdownFormatterAdapter);
+
+        adapter = container.get(DiffRendererAdapter);
     });
 
     afterEach(() => {
-        dateSpy.mockRestore();
+        resetContainer();
+
         mockFs.restore();
+
+        vi.resetAllMocks();
     });
 
     describe('writeSection', () => {
@@ -140,8 +146,8 @@ New section content
 
         it('should throw error when trying to get destination before initialization', () => {
             // Arrange
-            const fileRenderer = new FileRendererAdapter();
-            const adapter = new DiffRendererAdapter(fileRenderer);
+            const fileRenderer = new FileRendererAdapter(new FileReaderAdapter());
+            const adapter = new DiffRendererAdapter(fileRenderer, new FileReaderAdapter());
 
             // Act & Assert
             expect(() => adapter.getDestination()).toThrow('Destination not initialized');

@@ -36,20 +36,20 @@ describe('ActdocsMigrationAdapter', () => {
   });
 
   describe('supportsDestination', () => {
-    it('returns true when a file contains actdocs markers', () => {
+    it('returns true when a file contains actdocs markers', async () => {
       // Arrange
       const tmpPath = join(tmpdir(), `actdocs-support-${Date.now()}.md`);
       mockFs({ [tmpPath]: '<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->' });
       // Act
-      const supported = adapter.supportsDestination(tmpPath);
+      const supported = await adapter.supportsDestination(tmpPath);
       // Assert
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', () => {
+    it('returns false for missing files', async () => {
       // Arrange
       // Act
-      const supported = adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
       // Assert
       expect(supported).toBe(false);
     });

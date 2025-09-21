@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
 import { GitRepositoryProvider, ParsedRemoteUrl } from '@ci-dokumentor/repository-git';
-import { LicenseService, LicenseInfo, ManifestVersion } from '@ci-dokumentor/core';
+import { LicenseService, LicenseInfo, ManifestVersion, ReaderAdapter } from '@ci-dokumentor/core';
 import { OcktokitMockFactory } from '../__tests__/octokit-mock.factory.js';
-import mockFs from 'mock-fs';
 import { GitHubRepositoryProvider } from './github-repository.provider.js'
-import { LicenseServiceMockFactory, RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
+import { LicenseServiceMockFactory, RepositoryInfoMockFactory, ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 
 const { graphqlMock } = OcktokitMockFactory.create();
 
@@ -12,6 +11,7 @@ describe('GitHubRepositoryProvider', () => {
   let gitHubRepositoryProvider: GitHubRepositoryProvider;
   let mockGitRepositoryService: Mocked<GitRepositoryProvider>;
   let mockLicenseService: Mocked<LicenseService>;
+  let mockReaderAdapter: Mocked<ReaderAdapter>;
 
   beforeEach(async () => {
     // Reset mocks before each test
@@ -28,14 +28,18 @@ describe('GitHubRepositoryProvider', () => {
     // Create a mock license service
     mockLicenseService = LicenseServiceMockFactory.create();
 
+    // Create a mock reader adapter
+    mockReaderAdapter = ReaderAdapterMockFactory.create();
+
     gitHubRepositoryProvider = new GitHubRepositoryProvider(
       mockGitRepositoryService,
-      mockLicenseService
+      mockLicenseService,
+      mockReaderAdapter
     );
   });
 
   afterEach(() => {
-    mockFs.restore();
+    vi.resetAllMocks();
   });
 
   describe('getPlatformName', () => {
@@ -173,7 +177,9 @@ describe('GitHubRepositoryProvider', () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
       mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
-      mockFs({ '.github': { 'logo.png': 'png' } });
+      mockReaderAdapter.resourceExists.mockImplementation((path: string) => {
+        return path === '.github/logo.png';
+      });
 
       // Act
       const uri = await gitHubRepositoryProvider.getLogo();
@@ -187,7 +193,7 @@ describe('GitHubRepositoryProvider', () => {
       const repositoryInfo = RepositoryInfoMockFactory.create();
       mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
       // Ensure no local files
-      mockFs({});
+      mockReaderAdapter.resourceExists.mockReturnValue(false);
 
       // Mock graphql to return openGraphImageUrl
       graphqlMock.mockResolvedValue({ repository: { openGraphImageUrl: 'https://img.local/og.png' } });

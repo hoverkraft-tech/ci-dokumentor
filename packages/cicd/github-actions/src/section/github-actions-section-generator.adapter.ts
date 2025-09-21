@@ -4,6 +4,7 @@ import {
   SectionOptions,
   SectionGenerationPayload,
   SectionOptionsDescriptors,
+  ReadableContent,
 } from '@ci-dokumentor/core';
 import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from 'src/github-actions-parser.js';
 
@@ -15,7 +16,7 @@ export abstract class GitHubActionsSectionGeneratorAdapter
   /**
    * Generate section content using a structured payload object
    */
-  abstract generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer>;
+  abstract generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent>;
 
   /**
    * Provide CLI option descriptors specific to this section generator

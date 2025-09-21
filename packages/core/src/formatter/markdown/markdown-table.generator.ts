@@ -1,15 +1,17 @@
-import { Buffer } from 'buffer';
+import { ReadableContent } from '../../reader/reader.adapter.js';
 
 /**
  * Class responsible for generating markdown tables from headers and rows.
  * Self-contained: implements the small set of helpers needed to render tables.
  */
 export class MarkdownTableGenerator {
-    table(headers: Buffer[], rows: Buffer[][]): Buffer {
-        const normalizeCell = (cell: Buffer): Buffer => this.escape(this.trimBuffer(cell), '|');
+    table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent {
+        const normalizeCell = (cell: ReadableContent): ReadableContent => this.escape(this.trimContent(cell), '|');
 
         const isEmptyTable = (!headers || headers.length === 0) && (!rows || rows.length === 0);
-        if (isEmptyTable) return Buffer.alloc(0);
+        if (isEmptyTable) {
+            return Buffer.alloc(0);
+        }
 
         const headerLines = headers.map(this.splitMultilineCell.bind(this));
         const numCols = headers.length;
@@ -18,35 +20,51 @@ export class MarkdownTableGenerator {
         const colWidths: number[] = Array.from({ length: numCols }, () => 0);
 
         const hasFence = () => {
-            for (let c = 0; c < numCols; c++) if (this.containsFence(headers[c] || Buffer.alloc(0))) return true;
-            for (const row of rows) for (let c = 0; c < numCols; c++) if (this.containsFence(row[c] || Buffer.alloc(0))) return true;
+            for (let c = 0; c < numCols; c++) {
+                if (this.containsFence(headers[c] || Buffer.alloc(0))) {
+                    return true;
+                }
+            }
+            for (const row of rows) {
+                for (let c = 0; c < numCols; c++) {
+                    if (this.containsFence(row[c] || Buffer.alloc(0))) {
+                        return true;
+                    }
+                }
+            }
             return false;
         };
 
         if (hasFence()) {
-            const transformLine = (lineBuf: Buffer): Buffer => {
+            const transformLine = (lineBuf: ReadableContent): ReadableContent => {
                 const segments = this.splitCellIntoSegments(lineBuf);
-                if (segments.length === 0) return Buffer.alloc(0);
-                const parts: Buffer[] = [];
+                if (segments.length === 0) {
+                    return Buffer.alloc(0);
+                }
+                const parts: ReadableContent[] = [];
                 for (const seg of segments) {
                     if (seg.type === 'text') {
-                        const t = this.trimBuffer(seg.content);
-                        if (t.length > 0) parts.push(this.htmlEscapeBuffer(t));
+                        const t = this.trimContent(seg.content);
+                        if (t.length > 0) {
+                            parts.push(this.htmlEscapeContent(t));
+                        }
                     } else {
                         const langAttr = seg.lang ? ` lang="${seg.lang}"` : '';
                         const inner = seg.content || Buffer.alloc(0);
-                        const innerParts: Buffer[] = [];
+                        const innerParts: ReadableContent[] = [];
                         let last = 0;
                         for (let i = 0; i < inner.length; i++) {
                             if (inner[i] === 0x0A /* LF */) {
-                                if (i > last) innerParts.push(inner.subarray(last, i));
+                                if (i > last) {
+                                    innerParts.push(inner.subarray(last, i));
+                                }
                                 innerParts.push(Buffer.from('&#13;'));
                                 last = i + 1;
                             }
                         }
                         if (last < inner.length) innerParts.push(inner.subarray(last));
                         for (let pi = 0; pi < innerParts.length; pi += 2) {
-                            const seg2 = innerParts[pi] as Buffer;
+                            const seg2 = innerParts[pi] as ReadableContent;
                             if (!seg2 || seg2.length === 0) continue;
                             let sStart = 0;
                             while (sStart < seg2.length && (seg2[sStart] === 0x20 || seg2[sStart] === 0x09 || seg2[sStart] === 0x0D)) sStart++;
@@ -83,8 +101,8 @@ export class MarkdownTableGenerator {
                 }
             }
 
-            const parts: Buffer[] = [];
-            const padCell = (buf: Buffer, width: number) => this.bufferToPaddedString(normalizeCell(buf || Buffer.alloc(0)), width);
+            const parts: ReadableContent[] = [];
+            const padCell = (content: ReadableContent, width: number) => this.bufferToPaddedString(normalizeCell(content || Buffer.alloc(0)), width);
 
             const mainHeaderCells: string[] = [];
             for (let c = 0; c < numCols; c++) {
@@ -110,11 +128,11 @@ export class MarkdownTableGenerator {
             }
 
             for (const row of rows) {
-                const cellLines = [] as Buffer[][];
+                const cellLines = [] as ReadableContent[][];
                 for (let c = 0; c < numCols; c++) {
                     const lines = this.splitMultilineCell(row[c] || Buffer.alloc(0));
                     const tlines = lines.map((l) => transformLine(l || Buffer.alloc(0)));
-                    cellLines.push(tlines as Buffer[]);
+                    cellLines.push(tlines as ReadableContent[]);
                 }
                 const maxLines = Math.max(...cellLines.map((l) => l.length));
                 for (let li = 0; li < maxLines; li++) {
@@ -165,7 +183,7 @@ export class MarkdownTableGenerator {
         }
 
         rows.forEach((row) => {
-            const normalizedRow: Buffer[] = [];
+            const normalizedRow: ReadableContent[] = [];
             for (let c = 0; c < numCols; c++) normalizedRow.push(row[c] || Buffer.alloc(0));
 
             const cellLines = normalizedRow.map(this.splitMultilineCell.bind(this));
@@ -186,22 +204,22 @@ export class MarkdownTableGenerator {
     }
 
     // The methods below are extracted and simplified copies from the adapter to keep
-    // the generator self-contained. They intentionally operate on Buffers.
+    // the generator self-contained. They intentionally operate on ReadableContent.
 
-    private appendContent(...parts: Buffer[]): Buffer {
+    private appendContent(...parts: ReadableContent[]): ReadableContent {
         if (!parts || parts.length === 0) return Buffer.alloc(0);
-        const buffers: Buffer[] = new Array(parts.length);
+        const contentParts: ReadableContent[] = new Array(parts.length);
         let total = 0;
         for (let i = 0; i < parts.length; i++) {
-            const p = parts[i];
-            buffers[i] = p as Buffer;
-            total += buffers[i].length;
+            const part = parts[i];
+            contentParts[i] = part as ReadableContent;
+            total += contentParts[i].length;
         }
-        if (buffers.length === 1) return buffers[0];
+        if (contentParts.length === 1) return contentParts[0];
         const out = Buffer.allocUnsafe(total);
         let offset = 0;
-        for (let i = 0; i < buffers.length; i++) {
-            const b = buffers[i];
+        for (let i = 0; i < contentParts.length; i++) {
+            const b = contentParts[i];
             if (b.length === 0) continue;
             b.copy(out, offset);
             offset += b.length;
@@ -209,17 +227,17 @@ export class MarkdownTableGenerator {
         return out;
     }
 
-    private lineBreak(): Buffer {
+    private lineBreak(): ReadableContent {
         return Buffer.from('\n');
     }
 
-    private escape(input: Buffer, search: string): Buffer {
+    private escape(input: ReadableContent, search: string): ReadableContent {
         if (!input || input.length === 0) return Buffer.alloc(0);
         if (!search || search.length === 0) return input;
         const searchBuf = Buffer.from(search);
         const replaceStr = search.split('').map((c) => '\\' + c).join('');
         const replaceBuf = Buffer.from(replaceStr);
-        const parts: Buffer[] = [];
+        const parts: ReadableContent[] = [];
         let idx = 0;
         let found = input.indexOf(searchBuf, idx);
         while (found !== -1) {
@@ -234,7 +252,7 @@ export class MarkdownTableGenerator {
         return this.appendContent(...parts);
     }
 
-    private trimTrailingNewlines(buf: Buffer): Buffer {
+    private trimTrailingNewlines(buf: ReadableContent): ReadableContent {
         if (!buf || buf.length === 0) return this.lineBreak();
         let end = buf.length - 1;
         while (end >= 0 && (buf[end] === 0x0A || buf[end] === 0x0D)) end--;
@@ -243,7 +261,7 @@ export class MarkdownTableGenerator {
         return this.appendContent(contentPart, this.lineBreak());
     }
 
-    private trimBuffer(input: Buffer): Buffer {
+    private trimContent(input: ReadableContent): ReadableContent {
         if (!input || input.length === 0) return Buffer.alloc(0);
         let start = 0;
         let end = input.length - 1;
@@ -254,9 +272,9 @@ export class MarkdownTableGenerator {
         return input.subarray(start, end + 1);
     }
 
-    private splitLines(input: Buffer): Buffer[] {
+    private splitLines(input: ReadableContent): ReadableContent[] {
         if (!input || input.length === 0) return [Buffer.alloc(0)];
-        const lines: Buffer[] = [];
+        const lines: ReadableContent[] = [];
         let lineStart = 0;
         for (let i = 0; i < input.length; i++) {
             if (input[i] === 0x0A) {
@@ -276,8 +294,8 @@ export class MarkdownTableGenerator {
         return lines;
     }
 
-    private splitMultilineCell(input: Buffer): Buffer[] {
-        input = this.trimBuffer(input);
+    private splitMultilineCell(input: ReadableContent): ReadableContent[] {
+        input = this.trimContent(input);
         if (!input || input.length === 0) return [Buffer.alloc(0)];
         const str = input.toString();
         const backtickRegex = /```[\s\S]*?```/g;
@@ -301,7 +319,7 @@ export class MarkdownTableGenerator {
             modifiedStr = modifiedStr.substring(0, block.start) + block.replacement + modifiedStr.substring(block.end);
         }
         const lines = this.splitLines(Buffer.from(modifiedStr));
-        const restoredLines: Buffer[] = [];
+        const restoredLines: ReadableContent[] = [];
         for (const line of lines) {
             let lineStr = line.toString();
             for (let i = 0; i < codeBlocks.length; i++) {
@@ -316,8 +334,8 @@ export class MarkdownTableGenerator {
         return restoredLines;
     }
 
-    private splitCellIntoSegments(cell: Buffer): Array<{ type: 'text' | 'code'; content: Buffer; lang?: string }> {
-        const out: Array<{ type: 'text' | 'code'; content: Buffer; lang?: string }> = [];
+    private splitCellIntoSegments(cell: ReadableContent): Array<{ type: 'text' | 'code'; content: ReadableContent; lang?: string }> {
+        const out: Array<{ type: 'text' | 'code'; content: ReadableContent; lang?: string }> = [];
         if (!cell || cell.length === 0) return out;
         const blocks = this.findFencedBlocks(cell);
         if (blocks.length === 0) {
@@ -327,7 +345,7 @@ export class MarkdownTableGenerator {
         let last = 0;
         for (const b of blocks) {
             if (b.start > last) out.push({ type: 'text', content: cell.subarray(last, b.start) });
-            const seg: { type: 'code'; content: Buffer; lang?: string } = { type: 'code', content: cell.subarray(b.innerStart, b.innerEnd) };
+            const seg: { type: 'code'; content: ReadableContent; lang?: string } = { type: 'code', content: cell.subarray(b.innerStart, b.innerEnd) };
             if (b.lang) seg.lang = b.lang;
             out.push(seg);
             last = b.end;
@@ -336,13 +354,13 @@ export class MarkdownTableGenerator {
         return out;
     }
 
-    private containsFence(input: Buffer): boolean {
+    private containsFence(input: ReadableContent): boolean {
         if (!input || input.length === 0) return false;
         const blocks = this.findFencedBlocks(input);
         return blocks.length > 0;
     }
 
-    private findFencedBlocks(buf: Buffer): Array<{ start: number; end: number; innerStart: number; innerEnd: number; lang?: string }> {
+    private findFencedBlocks(buf: ReadableContent): Array<{ start: number; end: number; innerStart: number; innerEnd: number; lang?: string }> {
         const res: Array<{ start: number; end: number; innerStart: number; innerEnd: number; lang?: string }> = [];
         if (!buf || buf.length === 0) return res;
         const len = buf.length;
@@ -399,48 +417,48 @@ export class MarkdownTableGenerator {
         return res;
     }
 
-    private bufferToPaddedString(buf: Buffer, width: number): string {
-        const t = this.trimBuffer(buf);
+    private bufferToPaddedString(content: ReadableContent, width: number): string {
+        const t = this.trimContent(content);
         const len = t.length;
         const s = t.toString();
         const pad = Math.max(0, width - len);
         return s + ' '.repeat(pad);
     }
 
-    private htmlEscapeBuffer(buf: Buffer): Buffer {
-        if (!buf || buf.length === 0) return Buffer.alloc(0);
-        const parts: Buffer[] = [];
+    private htmlEscapeContent(content: ReadableContent): ReadableContent {
+        if (!content || content.length === 0) return Buffer.alloc(0);
+        const parts: ReadableContent[] = [];
         let last = 0;
-        for (let i = 0; i < buf.length; i++) {
-            const b = buf[i];
+        for (let i = 0; i < content.length; i++) {
+            const b = content[i];
             if (b === 0x26 || b === 0x3C || b === 0x3E) {
-                if (i > last) parts.push(buf.subarray(last, i));
+                if (i > last) parts.push(content.subarray(last, i));
                 if (b === 0x26) parts.push(Buffer.from('&amp;'));
                 else if (b === 0x3C) parts.push(Buffer.from('&lt;'));
                 else parts.push(Buffer.from('&gt;'));
                 last = i + 1;
             }
         }
-        if (last < buf.length) parts.push(buf.subarray(last));
+        if (last < content.length) parts.push(content.subarray(last));
         if (parts.length === 0) return Buffer.alloc(0);
         if (parts.length === 1) return parts[0];
         return this.appendContent(...parts);
     }
 
-    private htmlEscapePreserveEntities(buf: Buffer): Buffer {
-        if (!buf || buf.length === 0) return Buffer.alloc(0);
-        const parts: Buffer[] = [];
+    private htmlEscapePreserveEntities(content: ReadableContent): ReadableContent {
+        if (!content || content.length === 0) return Buffer.alloc(0);
+        const parts: ReadableContent[] = [];
         let last = 0;
-        for (let i = 0; i < buf.length; i++) {
-            const b = buf[i];
+        for (let i = 0; i < content.length; i++) {
+            const b = content[i];
             if (b === 0x3C || b === 0x3E) {
-                if (i > last) parts.push(buf.subarray(last, i));
+                if (i > last) parts.push(content.subarray(last, i));
                 if (b === 0x3C) parts.push(Buffer.from('&lt;'));
                 else parts.push(Buffer.from('&gt;'));
                 last = i + 1;
             }
         }
-        if (last < buf.length) parts.push(buf.subarray(last));
+        if (last < content.length) parts.push(content.subarray(last));
         if (parts.length === 0) return Buffer.alloc(0);
         if (parts.length === 1) return parts[0];
         return this.appendContent(...parts);

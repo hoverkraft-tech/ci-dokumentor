@@ -1,4 +1,4 @@
-import { appendFileSync } from 'fs';
+import { appendFileSync } from 'node:fs';
 import type { LoggerAdapter } from './logger.adapter.js';
 import { inject, injectable } from 'inversify';
 

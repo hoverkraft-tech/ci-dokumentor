@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from 'fs';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
+import type { ReaderAdapter, ReadableContent } from '../reader/reader.adapter.js';
+import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 
 export type LicenseInfo = {
   name: string;
@@ -9,10 +10,12 @@ export type LicenseInfo = {
 
 @injectable()
 export class LicenseService {
+  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
+
   /**
    * Detect license information from local license files
    */
-  detectLicenseFromFile(): LicenseInfo | undefined {
+  async detectLicenseFromFile(): Promise<LicenseInfo | undefined> {
     const possibleLicensePaths = [
       'LICENSE',
       'LICENSE.txt',
@@ -25,29 +28,30 @@ export class LicenseService {
     ];
 
     for (const licensePath of possibleLicensePaths) {
-      if (existsSync(licensePath)) {
-        try {
-          const licenseContent = readFileSync(licensePath, 'utf-8');
+      if (!this.readerAdapter.resourceExists(licensePath)) {
+        continue;
+      }
 
-          // Try to detect license type from content
-          const licenseName = this.detectLicenseType(licenseContent);
+      const licenseContent = await this.readerAdapter.readResource(licensePath);
 
-          return {
-            name: licenseName,
-            spdxId: this.getSpdxIdFromName(licenseName),
-            url: undefined,
-          };
-        } catch (error) {
-          console.warn(`Failed to read license file ${licensePath}:`, error);
-        }
+      // If file exists and has content
+      if (licenseContent.length > 0) {
+        // Try to detect license type from content
+        const licenseName = this.detectLicenseType(licenseContent);
+
+        return {
+          name: licenseName,
+          spdxId: this.getSpdxIdFromName(licenseName),
+          url: undefined,
+        };
       }
     }
 
     return undefined;
   }
 
-  private detectLicenseType(content: string): string {
-    const upperContent = content.toUpperCase();
+  private detectLicenseType(content: ReadableContent): string {
+    const upperContent = content.toString('utf-8').toUpperCase();
 
     if (
       upperContent.includes('MIT LICENSE') ||

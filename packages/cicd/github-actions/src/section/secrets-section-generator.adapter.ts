@@ -1,4 +1,4 @@
-import { SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload } from '@ci-dokumentor/core';
 import {
   GitHubActionsManifest,
   GitHubWorkflow,
@@ -14,7 +14,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return SectionIdentifier.Secrets;
   }
 
-  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     if (this.isGitHubAction(manifest)) {
       return Buffer.alloc(0);
     }
@@ -38,7 +38,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   private generateWorkflowSecretsTable(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubWorkflow
-  ): Buffer {
+  ): ReadableContent {
     const secrets = Object.entries(manifest.on?.workflow_call?.secrets || {});
 
     if (secrets.length === 0) {
@@ -66,20 +66,20 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   private getSecretName(
     name: string,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     return formatterAdapter.bold(
       formatterAdapter.inlineCode(Buffer.from(name))
     );
   }
 
-  private getSecretDescription(secret: GitHubWorkflowSecret): Buffer {
+  private getSecretDescription(secret: GitHubWorkflowSecret): ReadableContent {
     return Buffer.from((secret.description || '').trim());
   }
 
   private getSecretRequired(
     secret: GitHubWorkflowSecret,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     return formatterAdapter.bold(
       Buffer.from(secret.required ? 'true' : 'false')
     );

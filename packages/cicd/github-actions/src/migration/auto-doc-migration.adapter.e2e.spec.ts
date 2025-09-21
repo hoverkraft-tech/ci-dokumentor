@@ -13,6 +13,8 @@ describe('AutoDocMigrationAdapter', () => {
   let rendererAdapter: FileRendererAdapter;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     // Use real dependencies from the container for e2e testing
     const container = initTestContainer();
 
@@ -24,11 +26,12 @@ describe('AutoDocMigrationAdapter', () => {
   afterEach(() => {
     // Restore the real file system after each test
     mockFs.restore();
+
+    vi.resetAllMocks();
   });
 
   describe('getName', () => {
     it('returns the adapter name', () => {
-      // Arrange
       // Act
       const name = adapter.getName();
       // Assert
@@ -37,22 +40,21 @@ describe('AutoDocMigrationAdapter', () => {
   });
 
   describe('supportsDestination', () => {
-    it('detects headers in files', () => {
+    it('detects headers in files', async () => {
       // Arrange
       const tmpPath = join(tmpdir(), `autodoc-support-${Date.now()}.md`);
       mockFs({ [tmpPath]: '## Inputs' });
       // Act
-      const supported = adapter.supportsDestination(tmpPath);
+      const supported = await adapter.supportsDestination(tmpPath);
       // Assert
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', () => {
-      // Arrange
+    it('returns false for missing files', async () => {
       // Act
-      const supported = adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
       // Assert
-      expect(supported).toBe(false);
+      return expect(supported).toBe(false);
     });
   });
 

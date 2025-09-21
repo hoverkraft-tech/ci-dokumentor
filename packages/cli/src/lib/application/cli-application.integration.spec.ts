@@ -19,7 +19,7 @@ describe('CliApplication Integration Tests', () => {
     let processExitSpy: MockInstance<typeof process.exit>;
     const originalArgv = process.argv.slice();
 
-    beforeEach(() => {
+    beforeEach(async () => {
         // Reset mocks before each test
         vi.resetAllMocks();
 
@@ -29,6 +29,7 @@ describe('CliApplication Integration Tests', () => {
         // Initialize the global container and get the CliApplication instance
         container = initGlobalContainer();
         cliApp = container.get(CliApplication);
+        await cliApp.setup();
 
         // Mock console methods
         consoleMock = ConsoleMockFactory.create();

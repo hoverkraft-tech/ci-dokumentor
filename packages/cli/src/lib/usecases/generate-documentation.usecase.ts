@@ -1,5 +1,4 @@
 import { inject, injectable } from 'inversify';
-import { existsSync, statSync } from 'fs';
 import {
   GenerateSectionsOptions,
   GeneratorAdapter,
@@ -10,8 +9,10 @@ import {
   RepositoryService,
   SectionOptionsDescriptors,
   FormatterOptions,
+  FileReaderAdapter
 } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
+import type { ReaderAdapter } from '@ci-dokumentor/core';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -92,7 +93,8 @@ export class GenerateDocumentationUseCase {
     @inject(GeneratorService)
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
-    private readonly repositoryService: RepositoryService
+    private readonly repositoryService: RepositoryService,
+    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter
   ) { }
 
 
@@ -260,8 +262,8 @@ export class GenerateDocumentationUseCase {
       throw new Error('Source manifest file path is required');
     }
 
-    // Validate that the source exists and is a file
-    if (!existsSync(input.source) || !statSync(input.source).isFile()) {
+    // Validate that the source exists
+    if (!this.readerAdapter.resourceExists(input.source)) {
       throw new Error(`Source manifest file does not exist or is not a file: ${input.source}`);
     }
 

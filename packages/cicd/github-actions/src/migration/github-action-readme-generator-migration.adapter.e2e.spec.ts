@@ -13,6 +13,8 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   let rendererAdapter: FileRendererAdapter;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     // Use real dependencies from the container for e2e testing
     const container = initTestContainer();
 
@@ -24,6 +26,8 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   afterEach(() => {
     // Restore the real file system after each test
     mockFs.restore();
+
+    vi.resetAllMocks();
   });
 
   describe('getName', () => {
@@ -37,20 +41,20 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   });
 
   describe('supportsDestination', () => {
-    it('detects start/end markers in files', () => {
+    it('detects start/end markers in files', async () => {
       // Arrange
       const tmpPath = join(tmpdir(), `gharg-support-${Date.now()}.md`);
       mockFs({ [tmpPath]: '<!-- start inputs -->' });
       // Act
-      const supported = adapter.supportsDestination(tmpPath);
+      const supported = await adapter.supportsDestination(tmpPath);
       // Assert
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', () => {
+    it('returns false for missing files', async () => {
       // Arrange
       // Act
-      const supported = adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
       // Assert
       expect(supported).toBe(false);
     });

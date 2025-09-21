@@ -1,4 +1,4 @@
-import { SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload } from '@ci-dokumentor/core';
 import {
   GitHubAction,
   GitHubActionInput,
@@ -17,8 +17,8 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     return SectionIdentifier.Inputs;
   }
 
-  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
-    let manifestInputsContent: Buffer;
+  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
+    let manifestInputsContent: ReadableContent;
     if (this.isGitHubAction(manifest)) {
       manifestInputsContent = this.generateActionInputsTable(formatterAdapter, manifest);
     } else if (this.isGitHubWorkflow(manifest)) {
@@ -41,7 +41,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private generateActionInputsTable(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubAction
-  ): Buffer {
+  ): ReadableContent {
     const headers = [
       formatterAdapter.bold(Buffer.from('Input')),
       formatterAdapter.bold(Buffer.from('Description')),
@@ -64,8 +64,8 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private generateWorkflowInputsTable(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubWorkflow
-  ): Buffer {
-    let content: Buffer = Buffer.alloc(0);
+  ): ReadableContent {
+    let content: ReadableContent = Buffer.alloc(0);
 
     const workflowDispatchInputs = Object.entries(manifest.on?.workflow_dispatch?.inputs || {});
     if (workflowDispatchInputs.length) {
@@ -128,8 +128,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private getInputName(
     name: string,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
-
+  ): ReadableContent {
     return formatterAdapter.bold(
       formatterAdapter.inlineCode(Buffer.from(name))
     );
@@ -138,7 +137,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private getInputDescription(
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     let description = (input.description || '').trim();
     if (description.length > 0) {
       description = formatterAdapter.paragraph(Buffer.from(description)).toString();
@@ -174,7 +173,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private getInputDefault(
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     return input.default
       ? formatterAdapter.inlineCode(Buffer.from(input.default))
       : Buffer.from('-');
@@ -183,7 +182,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private getInputRequired(
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     return formatterAdapter.bold(
       Buffer.from(input.required ? 'true' : 'false')
     );
@@ -192,7 +191,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private getInputType(
     input: GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
-  ): Buffer {
+  ): ReadableContent {
     return formatterAdapter.bold(Buffer.from(input.type));
   }
 

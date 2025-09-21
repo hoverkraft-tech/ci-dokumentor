@@ -4,6 +4,7 @@ import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { FormatterLanguage } from '../formatter-language.js';
 import { LinkFormat } from '../formatter.adapter.js';
 import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
+import { ReadableContent } from '../../reader/reader.adapter.js';
 
 describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
@@ -34,7 +35,7 @@ describe('MarkdownFormatterAdapter', () => {
   });
 
   describe('appendContent', () => {
-    it('should concatenate multiple Buffers into one', () => {
+    it('should concatenate multiple contents into one', () => {
       // Arrange
       const buffer1 = Buffer.from('Hello');
       const buffer2 = Buffer.from('World');
@@ -739,8 +740,8 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle empty table', () => {
       // Arrange
-      const headers: Buffer[] = [];
-      const rows: Buffer[][] = [];
+      const headers: ReadableContent[] = [];
+      const rows: ReadableContent[][] = [];
 
       // Act
       const result = adapter.table(headers, rows);
@@ -752,7 +753,7 @@ describe('MarkdownFormatterAdapter', () => {
     it('should handle table with only headers', () => {
       // Arrange
       const headers = [Buffer.from('Column 1'), Buffer.from('Column 2')];
-      const rows: Buffer[][] = [];
+      const rows: ReadableContent[][] = [];
 
       // Act
       const result = adapter.table(headers, rows);

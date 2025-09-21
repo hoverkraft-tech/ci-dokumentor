@@ -5,21 +5,21 @@ import { FormatterLanguage } from './formatter-language.js';
 
 describe('FormatterService', () => {
   let formatterService: FormatterService;
-  let mockFormatterAdapters: FormatterAdapter[];
+  let mockFormatterAdapters: Mocked<FormatterAdapter>[];
 
   beforeEach(() => {
     // Create mock formatter adapters
-    const mockMarkdownAdapter: FormatterAdapter = {
+    const mockMarkdownAdapter: Mocked<FormatterAdapter> = {
       supportsLanguage: vi.fn(
         (language: FormatterLanguage) => language === FormatterLanguage.Markdown
-      ),
-    } as unknown as Mocked<FormatterAdapter>;
+      ) as Mocked<FormatterAdapter>['supportsLanguage'],
+    } as Mocked<FormatterAdapter>;
 
-    const mockGenericAdapter: FormatterAdapter = {
+    const mockGenericAdapter: Mocked<FormatterAdapter> = {
       supportsLanguage: vi.fn(
         (language: FormatterLanguage) => language !== FormatterLanguage.Markdown
-      ),
-    } as unknown as Mocked<FormatterAdapter>;
+      ) as Mocked<FormatterAdapter>['supportsLanguage'],
+    } as Mocked<FormatterAdapter>;
 
     mockFormatterAdapters = [mockMarkdownAdapter, mockGenericAdapter];
     formatterService = new FormatterService(mockFormatterAdapters);
@@ -70,10 +70,10 @@ describe('FormatterService', () => {
       const filePath = 'test.md';
 
       // Mock both adapters to not support any language
-      vi.mocked(mockFormatterAdapters[0].supportsLanguage).mockReturnValue(
+      mockFormatterAdapters[0].supportsLanguage.mockReturnValue(
         false
       );
-      vi.mocked(mockFormatterAdapters[1].supportsLanguage).mockReturnValue(
+      mockFormatterAdapters[1].supportsLanguage.mockReturnValue(
         false
       );
 
@@ -155,11 +155,11 @@ describe('FormatterService', () => {
       const filePath = 'test.md';
 
       // Mock first adapter to not support markdown
-      vi.mocked(mockFormatterAdapters[0].supportsLanguage).mockReturnValue(
+      mockFormatterAdapters[0].supportsLanguage.mockReturnValue(
         false
       );
       // Mock second adapter to support markdown
-      vi.mocked(mockFormatterAdapters[1].supportsLanguage).mockReturnValue(
+      mockFormatterAdapters[1].supportsLanguage.mockReturnValue(
         true
       );
 

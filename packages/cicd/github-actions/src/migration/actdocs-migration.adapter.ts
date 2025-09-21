@@ -1,6 +1,6 @@
-import { injectable } from 'inversify';
+import { injectable, injectFromBase } from 'inversify';
 import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter } from '@ci-dokumentor/core';
+import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
 
 /**
@@ -13,6 +13,9 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
  * <!-- actdocs permissions start --> / <!-- actdocs permissions end --> -> <!-- security:start --> / <!-- security:end -->
  */
 @injectable()
+@injectFromBase({
+  extendConstructorArguments: true,
+})
 export class ActdocsMigrationAdapter extends AbstractMigrationAdapter {
   protected readonly name = 'actdocs';
 
@@ -30,9 +33,8 @@ export class ActdocsMigrationAdapter extends AbstractMigrationAdapter {
     detectionPattern: /<!--\s*actdocs\s+\w+\s+(start|end)\s*-->/i,
   };
 
-  protected migrateContent(input: Buffer, formatterAdapter: FormatterAdapter): Buffer {
-    // Delegate the replacement logic to the shared helper in the abstract
-    // adapter to avoid repeated Buffer -> string conversions across adapters.
-    return this.processMarkerMappings(input, formatterAdapter);
+  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
+    // Delegate the replacement logic to the shared helper in the abstract class.
+    return this.processMarkerMappings(content, formatterAdapter);
   }
 }

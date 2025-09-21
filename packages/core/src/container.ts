@@ -7,6 +7,7 @@ import { RepositoryService } from './repository/repository.service.js';
 import { LicenseService } from './license/license.service.js';
 import { FileRendererAdapter } from './renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from './renderer/diff-renderer.adapter.js';
+import { FileReaderAdapter } from './reader/file-reader.adapter.js';
 import { VersionService } from './version/version.service.js';
 import { MigrationService } from './migration/migration.service.js';
 import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
@@ -40,6 +41,7 @@ export function initContainer(
   // Bind core services only - no dependencies on other packages
   container.bind(FormatterService).toSelf().inSingletonScope();
   container.bind(GeneratorService).toSelf().inSingletonScope();
+  container.bind(FileReaderAdapter).toSelf().inSingletonScope();
   container.bind(FileRendererAdapter).toSelf().inSingletonScope();
   container.bind(DiffRendererAdapter).toSelf().inSingletonScope();
   container.bind(RepositoryService).toSelf().inSingletonScope();

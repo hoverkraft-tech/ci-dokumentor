@@ -1,4 +1,4 @@
-import { SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { SectionIdentifier } from '@ci-dokumentor/core';
@@ -10,7 +10,7 @@ export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     return SectionIdentifier.Overview;
   }
 
-  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     const description =
       'description' in manifest ? manifest.description : undefined;
     if (!description) {

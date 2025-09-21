@@ -1,7 +1,6 @@
-import { RepositoryInfo, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { FormatterAdapter, SectionIdentifier, ReadableContent, RepositoryInfo, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 import { icons } from 'feather-icons';
 import { injectable } from 'inversify';
 import { relative, dirname } from 'node:path';
@@ -12,7 +11,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     return SectionIdentifier.Header;
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider, destination }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider, destination }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     const [repositoryInfo, logo] = await Promise.all([
       repositoryProvider.getRepositoryInfo(),
       repositoryProvider.getLogo(),
@@ -48,7 +47,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     manifest: GitHubActionsManifest,
     logoPath: string | undefined,
     destination: string
-  ): Buffer {
+  ): ReadableContent {
     if (!logoPath) {
       return Buffer.alloc(0);
     }
@@ -73,7 +72,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private getDisplayName(
     manifest: GitHubActionsManifest,
     repositoryInfo?: RepositoryInfo
-  ): Buffer {
+  ): ReadableContent {
     const name = manifest.name || repositoryInfo?.name || 'Unknown';
     // Convert to pascal case
     return Buffer.from(name.replace(/(?:^|_)(\w)/g, (_, c) => c.toUpperCase()));
@@ -83,13 +82,13 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
     repositoryInfo: RepositoryInfo
-  ): Buffer {
+  ): ReadableContent {
     const title = Buffer.from(
       this.getTitlePrefix(manifest) + this.getDisplayName(manifest, repositoryInfo)
     );
     const branchingIcon = this.generateBrandingIcon(formatterAdapter, manifest);
 
-    const headingContent = branchingIcon
+    const headingContent = branchingIcon.length > 0
       ? formatterAdapter.appendContent(branchingIcon, Buffer.from(' '), title)
       : title;
 
@@ -103,9 +102,9 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   private generateBrandingIcon(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest
-  ): Buffer | null {
+  ): ReadableContent {
     if (!('branding' in manifest) || !manifest.branding?.icon) {
-      return null;
+      return Buffer.alloc(0);
     }
 
     const icon = manifest.branding.icon as keyof typeof icons;
@@ -114,7 +113,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       color: manifest.branding.color || 'gray-dark',
     });
     if (!featherIcon) {
-      return null;
+      return Buffer.alloc(0);
     }
 
     // Get data URI for the icon

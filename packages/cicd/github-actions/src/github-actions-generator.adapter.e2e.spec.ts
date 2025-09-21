@@ -9,10 +9,10 @@ import {
 } from '@ci-dokumentor/core';
 import { initTestContainer } from './container.js';
 import mockFs from 'mock-fs';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
-import { join } from 'path';
+import { join } from 'node:path';
 
 const rootPath = join(__dirname, '../../../..');
 
@@ -406,7 +406,7 @@ runs:
           rendererAdapter,
           repositoryProvider,
         })
-      ).rejects.toThrow('ENOENT, no such file or directory \'/test/action.yml\'');
+      ).rejects.toThrow('Source file does not exist: "/test/action.yml"');
 
       await rendererAdapter.finalize();
     });
