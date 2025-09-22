@@ -58,6 +58,7 @@ import { GitHubActionsParser } from '@ci-dokumentor/cicd-github-actions';
 
 // Parses action.yml files into GitHubAction objects
 // Parses workflow files into GitHubWorkflow objects
+// Extracts workflow descriptions from YAML comments
 ```
 
 ## Section Generators
@@ -96,6 +97,7 @@ Supports parsing of:
 
 - `action.yml` and `action.yaml` files
 - GitHub workflow files in `.github/workflows/`
+- Workflow descriptions from YAML comments
 - Composite actions
 - Docker-based actions
 - JavaScript/TypeScript actions
