@@ -4,7 +4,7 @@ import { createReadStream } from 'node:fs';
 
 @injectable()
 export class FileReaderAdapter implements ReaderAdapter {
-    async getContent(path: string): Promise<ReadableContent> {
+    getContent(path: string): ReadableContent {
         return createReadStream(path);
     }
 }

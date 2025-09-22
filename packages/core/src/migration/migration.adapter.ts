@@ -31,5 +31,5 @@ export interface MigrationAdapter {
    * persist output (via writeSection) and return when
    * finished.
    */
-  migrateDocumentation(payload: MigrateDocumentationPayload): Promise<void>;
+  migrateDocumentation(payload: MigrateDocumentationPayload): void;
 }
