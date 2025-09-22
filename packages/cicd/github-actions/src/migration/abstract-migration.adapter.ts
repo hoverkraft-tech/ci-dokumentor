@@ -295,12 +295,16 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         const findInsertAfterSection = (contentString: string, sectionName: SectionIdentifier): number => {
             const endMarker = formatterAdapter.sectionEnd(sectionName).toString('utf-8');
             const idx = contentString.lastIndexOf(endMarker);
-            if (idx !== -1) return idx + endMarker.length;
+            if (idx !== -1) {
+                return idx + endMarker.length;
+            }
 
             // If there's a start marker but no end (malformed), insert after start
             const startMarker = formatterAdapter.sectionStart(sectionName).toString('utf-8');
             const sidx = result.lastIndexOf(startMarker);
-            if (sidx !== -1) return sidx + startMarker.length;
+            if (sidx !== -1) {
+                return sidx + startMarker.length;
+            }
 
             return -1;
         };
@@ -313,7 +317,9 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
             let anchorIndex = -1;
             for (let i = 0; i < expectedSections.length; i++) {
                 const sek = expectedSections[i];
-                if (sek === missingSection) break;
+                if (sek === missingSection) {
+                    break;
+                }
                 if (presentSections.has(sek)) {
                     const candidate = findInsertAfterSection(contentString, sek);
                     if (candidate !== -1 && candidate > anchorIndex) {
@@ -336,7 +342,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
                     Buffer.from(sep),
                     formatterAdapter.lineBreak(),
                     sectionContent,
-                    after.trim().length > 0 ? Buffer.from(after) : formatterAdapter.lineBreak()
+                    after.trim().length > 0 ? Buffer.from(after) : Buffer.alloc(0)
                 );
             } else {
                 // No suitable anchor, append at end with a preceding newline

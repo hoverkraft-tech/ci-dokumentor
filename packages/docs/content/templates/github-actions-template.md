@@ -23,6 +23,8 @@ This template provides all available documentation sections for GitHub Actions. 
 <!-- outputs:end -->
 <!-- secrets:start -->
 <!-- secrets:end -->
+<!-- examples:start -->
+<!-- examples:end -->
 <!-- contributing:start -->
 <!-- contributing:end -->
 <!-- security:start -->
@@ -44,6 +46,7 @@ This template provides all available documentation sections for GitHub Actions. 
 | `inputs`       | Input parameter documentation                         |
 | `outputs`      | Output parameter documentation                        |
 | `secrets`      | Required secrets documentation (For GitHub Workflows) |
+| `examples`     | Detailed usage examples                               |
 | `contributing` | Contributing guidelines                               |
 | `security`     | Security guidelines                                   |
 | `license`      | License information                                   |

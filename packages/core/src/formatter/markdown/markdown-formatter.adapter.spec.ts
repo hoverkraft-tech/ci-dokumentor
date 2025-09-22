@@ -1056,7 +1056,8 @@ Section Content
 
       // Assert
       expect(result.toString()).toEqual(`<!-- examples:start -->
-<!-- examples:end -->`);
+<!-- examples:end -->
+`);
     });
   });
 

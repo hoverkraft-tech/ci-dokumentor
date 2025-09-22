@@ -23,28 +23,28 @@ describe('FileRendererAdapter', () => {
     mockFs({
       '/test': {
         'document.md': 'Initial content\nSome text\n',
-        'existing-section.md': [
-          'Content before section',
-          '<!-- examples:start -->',
-          'Old section content',
-          '<!-- examples:end -->',
-          'Content after section',
-          '',
-        ].join('\n'),
-        'multiple-sections.md': [
-          'Header content',
-          '<!-- examples:start -->',
-          '',
-          'First section content',
-          '',
-          '<!-- examples:end -->',
-          'Middle content',
-          '<!-- usage:start -->',
-          'Second section content',
-          '<!-- usage:end -->',
-          'Footer content',
-          '',
-        ].join('\n'),
+        'existing-section.md': `Content before section
+<!-- examples:start -->
+Old section content
+<!-- examples:end -->
+Content after section
+`,
+        'multiple-sections.md': `Header content
+<!-- usage:start -->
+Second section content
+<!-- usage:end -->
+Middle content
+<!-- examples:start -->
+
+First section content
+
+<!-- examples:end -->
+<!-- security:start -->
+<!-- security:end -->
+<!-- license:start -->
+License content
+<!-- license:end -->
+`,
         'empty.md': '',
       },
       '/unsupported': {
@@ -77,11 +77,14 @@ describe('FileRendererAdapter', () => {
 
       // Assert
       const fileContent = readFileSync(testFilePath, 'utf-8');
-      expect(fileContent).toContain('Initial content');
-      expect(fileContent).toContain('Some text');
-      expect(fileContent).toContain(`<!-- ${testSectionIdentifier}:start -->`);
-      expect(fileContent).toContain('New section content');
-      expect(fileContent).toContain(`<!-- ${testSectionIdentifier}:end -->`);
+      expect(fileContent).toEqual(`Initial content
+Some text
+<!-- examples:start -->
+
+New section content
+
+<!-- examples:end -->
+`);
     });
 
     it('should replace existing section content when section already exists', async () => {
@@ -94,12 +97,14 @@ describe('FileRendererAdapter', () => {
 
       // Assert
       const fileContent = readFileSync('/test/existing-section.md', 'utf-8');
-      expect(fileContent).toContain('Content before section');
-      expect(fileContent).toContain('Content after section');
-      expect(fileContent).toContain(`<!-- ${testSectionIdentifier}:start -->`);
-      expect(fileContent).toContain('New section content');
-      expect(fileContent).toContain(`<!-- ${testSectionIdentifier}:end -->`);
-      expect(fileContent).not.toContain('Old section content');
+      expect(fileContent).toEqual(`Content before section
+<!-- examples:start -->
+
+New section content
+
+<!-- examples:end -->
+Content after section
+`);
     });
 
     it('should handle empty files correctly', async () => {
@@ -124,29 +129,38 @@ New section content
     it('should handle multiple sections without affecting other sections', async () => {
       // Arrange
       const multipleSectionsAdapter = new FileRendererAdapter(new FileReaderAdapter());
-      const newData = Buffer.from('Updated second section\n');
+      const newUsageContent = Buffer.from('Updated usage section\n');
+      const newLicenseContent = Buffer.from('Updated license section\n');
 
       // Act
       await multipleSectionsAdapter.initialize('/test/multiple-sections.md', formatterAdapter);
-      await multipleSectionsAdapter.writeSection(SectionIdentifier.Usage, newData);
+      await multipleSectionsAdapter.writeSection(SectionIdentifier.Usage, newUsageContent);
+      await multipleSectionsAdapter.writeSection(SectionIdentifier.Security, Buffer.alloc(0)); // Empty content for security section
+      await multipleSectionsAdapter.writeSection(SectionIdentifier.License, newLicenseContent);
 
       // Assert
       const fileContent = readFileSync('/test/multiple-sections.md', 'utf-8');
 
       // Should preserve first section with blank lines around content
       expect(fileContent).toEqual(`Header content
+<!-- usage:start -->
+
+Updated usage section
+
+<!-- usage:end -->
+Middle content
 <!-- examples:start -->
 
 First section content
 
 <!-- examples:end -->
-Middle content
-<!-- usage:start -->
+<!-- security:start -->
+<!-- security:end -->
+<!-- license:start -->
 
-Updated second section
+Updated license section
 
-<!-- usage:end -->
-Footer content
+<!-- license:end -->
 `);
     });
 
