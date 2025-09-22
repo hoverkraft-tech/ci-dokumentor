@@ -235,7 +235,12 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     const endMarker = this.sectionEnd(section);
 
     if (!input.length) {
-      return this.appendContent(startMarker, this.lineBreak(), endMarker);
+      return this.appendContent(
+        startMarker,
+        this.lineBreak(),
+        endMarker,
+        this.lineBreak()
+      );
     }
 
     return this.appendContent(

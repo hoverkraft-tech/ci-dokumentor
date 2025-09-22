@@ -49,7 +49,7 @@ jobs:
         with:
           ci-dokumentor-version: ${{ needs.ci.outputs.image-tag }}
           source: action.yml
-          include-sections: badges,contributing,license,generated
+          exclude-sections: overview,usage,inputs,outputs,secrets,examples
           extra-badges: |
             [
               {
@@ -76,7 +76,7 @@ jobs:
           ci-dokumentor-version: ${{ needs.ci.outputs.image-tag }}
           source: action.yml
           destination: packages/docs/content/integrations/github-action.md
-          include-sections: usage,inputs,outputs,secrets
+          exclude-sections: header,badges,overview,contributing,security,license,generated
           github-token: ${{ secrets.GITHUB_TOKEN }}
           format-link: full
 

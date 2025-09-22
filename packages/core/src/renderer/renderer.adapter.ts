@@ -19,14 +19,14 @@ export interface RendererAdapter {
 
     getDestination(): string;
 
-    writeSection(sectionIdentifier: string, data: ReadableContent): Promise<void>;
+    writeSection(sectionIdentifier: string, content: ReadableContent): Promise<void>;
 
     /**
      * Replace the entire content at the destination with the provided data.
      * This is useful for migration scenarios where the entire content needs
      * to be transformed and replaced, rather than appending sections.
      */
-    replaceContent(data: ReadableContent): Promise<void>;
+    replaceContent(content: ReadableContent): Promise<void>;
 
     /**
      * Finalize the rendering process and cleanup initialization.

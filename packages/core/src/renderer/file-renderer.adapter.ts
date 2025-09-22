@@ -20,15 +20,15 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         super();
     }
 
-    async replaceContent(data: ReadableContent): Promise<void> {
+    async replaceContent(content: ReadableContent): Promise<void> {
         await this.safeWriteWithLock(async () => {
-            return this.performReplaceContent(data);
+            return this.performReplaceContent(content);
         });
     }
 
-    async writeSection(sectionIdentifier: SectionIdentifier, data: ReadableContent): Promise<void> {
+    async writeSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
         await this.safeWriteWithLock(async () => {
-            return this.performWriteSection(sectionIdentifier, data);
+            return this.performWriteSection(sectionIdentifier, content);
         });
     }
 
@@ -44,11 +44,11 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         return undefined;
     }
 
-    private performReplaceContent(data: ReadableContent): Promise<void> {
+    private performReplaceContent(content: ReadableContent): Promise<void> {
         const destination = this.getDestination();
 
         return new Promise((resolve, reject) => {
-            writeFile(destination, data, (err) => {
+            writeFile(destination, content, (err) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -58,12 +58,20 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         });
     }
 
-    private performWriteSection(sectionIdentifier: SectionIdentifier, data: ReadableContent): Promise<void> {
+    private performWriteSection(sectionIdentifier: SectionIdentifier, content: ReadableContent): Promise<void> {
         const destination = this.getDestination();
         const formatterAdapter = this.getFormatterAdapter();
 
-        // Look for the section in the file, replace content if it exists, or append if it doesn't.
+        const sectionContent = formatterAdapter.section(
+            sectionIdentifier,
+            content
+        );
 
+        const sectionStart = formatterAdapter.sectionStart(sectionIdentifier).toString();
+        const sectionEnd = formatterAdapter.sectionEnd(sectionIdentifier).toString();
+
+
+        // Look for the section in the file, replace content if it exists, or append if it doesn't.
         // Read file line by line to find the section
         return new Promise((resolve, reject) => {
             try {
@@ -86,15 +94,6 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                 let sectionFound = false;
                 let inSection = false;
                 let output: ReadableContent = Buffer.alloc(0);
-
-
-                const sectionContent = formatterAdapter.section(
-                    sectionIdentifier,
-                    data
-                );
-
-                const sectionStart = formatterAdapter.sectionStart(sectionIdentifier).toString();
-                const sectionEnd = formatterAdapter.sectionEnd(sectionIdentifier).toString();
 
                 readLine.on('line', (line) => {
                     const isSectionStart = line.trim() === sectionStart;

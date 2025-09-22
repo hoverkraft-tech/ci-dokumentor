@@ -67,26 +67,25 @@ The package includes the following section generators:
 ### Core Sections
 
 - **HeaderSectionGenerator** - Action/workflow title and description
-- **OverviewSectionGenerator** - General information and summary
 - **BadgesSectionGenerator** - Status badges and shields (supports custom badges via `--extra-badges`)
+- **OverviewSectionGenerator** - General information and summary
 
 ### Action-Specific Sections
 
+- **UsageSectionGenerator** - Usage examples and code snippets
 - **InputsSectionGenerator** - Input parameters documentation
 - **OutputsSectionGenerator** - Output values documentation
-- **UsageSectionGenerator** - Usage examples and code snippets
-- **ExamplesSectionGenerator** - Detailed usage examples
 
 ### Workflow-Specific Sections
 
-- **JobsSectionGenerator** - Job definitions and descriptions
 - **SecretsSectionGenerator** - Required secrets documentation
 
 ### Additional Sections
 
+- **ExamplesSectionGenerator** - Detailed usage examples
+- **ContributingSectionGenerator** - Contributing guidelines
 - **SecuritySectionGenerator** - Security considerations
 - **LicenseSectionGenerator** - License information
-- **ContributingSectionGenerator** - Contributing guidelines
 - **GeneratedSectionGenerator** - CI Dokumentor attribution
 
 ## Features
