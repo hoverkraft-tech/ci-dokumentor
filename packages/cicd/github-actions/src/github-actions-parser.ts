@@ -57,6 +57,7 @@ export type GitHubWorkflowJob = {
 export type GitHubWorkflow = {
   usesName: string; // e.g., 'hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml'
   name: string;
+  description?: string; // Description extracted from comments at the beginning of the YAML file
   on: {
     [key: string]: unknown;
     workflow_dispatch?: GitHubWorkflowDispatchEvent;
@@ -148,6 +149,14 @@ export class GitHubActionsParser {
 
     parsed.usesName = this.getUsesName(source, repositoryInfo);
 
+    // Extract description from comments for workflows
+    if (this.isGitHubWorkflowFile(source) && this.isGitHubWorkflow(parsed)) {
+      const description = this.extractDescriptionFromComments(content.toString('utf8'));
+      if (description) {
+        (parsed as GitHubWorkflow).description = description;
+      }
+    }
+
     if (this.isGitHubAction(parsed)) {
       return parsed as GitHubAction;
     }
@@ -173,6 +182,47 @@ export class GitHubActionsParser {
     }
 
     throw new Error(`Unsupported source file: ${source}`);
+  }
+
+  private extractDescriptionFromComments(content: string): string | undefined {
+    const lines = content.split('\n');
+    const commentLines: string[] = [];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Stop if we encounter the YAML document separator
+      if (trimmedLine === '---') {
+        break;
+      }
+      
+      // Skip empty lines at the beginning
+      if (trimmedLine === '' && commentLines.length === 0) {
+        continue;
+      }
+      
+      // If we encounter a non-comment line after starting to collect comments, stop
+      if (trimmedLine !== '' && !trimmedLine.startsWith('#')) {
+        break;
+      }
+      
+      // Extract comment content
+      if (trimmedLine.startsWith('#')) {
+        const commentContent = trimmedLine.substring(1).trim();
+        commentLines.push(commentContent);
+      } else if (trimmedLine === '' && commentLines.length > 0) {
+        // Allow empty lines within comment blocks
+        commentLines.push('');
+      }
+    }
+    
+    if (commentLines.length === 0) {
+      return undefined;
+    }
+    
+    // Join the comment lines and clean up extra whitespace
+    const description = commentLines.join('\n').trim();
+    return description || undefined;
   }
 
   private isGitHubAction(parsed: unknown): parsed is GitHubAction {
