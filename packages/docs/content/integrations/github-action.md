@@ -11,7 +11,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@2cfa34821d58c4814fe8056a4a001fbcd2c21be2 # main
+- uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
@@ -99,22 +99,22 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ## Examples
 
-### Generate Documentation for Workflows
+##### Generate Documentation for Workflows
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: hoverkraft-tech/ci-dokumentor@v1
+  uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
   with:
     source: '.github/workflows/ci.yml'
 ```
 
-### Advanced Usage with All Options
+##### Advanced Usage with All Options
 
 The CLI accepts a single `--source <file>` per invocation. To generate documentation for multiple files in a workflow, run the action multiple times or script the Docker/CLI call for each file. Example using a shell step to process multiple manifest files:
 
 ```yaml
 - name: Generate Enhanced Documentation
-  uses: hoverkraft-tech/ci-dokumentor@v1
+  uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
   with:
     source: 'action.yml'
     output: 'docs/README.md'
@@ -125,99 +125,21 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
     format-link: 'full'
 ```
 
-### Dry-run Example
+##### Dry-run Example
 
 To preview changes without modifying files, set the `dry-run` input to `true`. The action will pass `--dry-run` to the CLI and the core generator will produce a diff instead of writing files.
 
 ```yaml
 - name: Generate Documentation (dry-run)
-  uses: hoverkraft-tech/ci-dokumentor@v1
+  uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
   with:
     source: 'action.yml'
     dry-run: 'true'
 ```
 
-### URL Link Formatting Examples
+##### URL Link Formatting Examples
 
 Control how bare URLs in your documentation are formatted:
-
-```yaml
-# Transform URLs to autolinks (default when option used)
-- name: Generate with Autolinks
-  uses: hoverkraft-tech/ci-dokumentor@v1
-  with:
-    source: 'action.yml'
-    format-link: 'auto'
-  # URLs like https://example.com become <https://example.com>
-
-# Transform URLs to full markdown links
-- name: Generate with Full Links
-  uses: hoverkraft-tech/ci-dokumentor@v1
-  with:
-    source: 'action.yml'
-    format-link: 'full'
-  # URLs like https://example.com become [https://example.com](https://example.com)
-
-# Disable URL transformation
-- name: Generate with Raw URLs
-  uses: hoverkraft-tech/ci-dokumentor@v1
-  with:
-    source: 'action.yml'
-    format-link: 'false'
-  # URLs remain as bare text: https://example.com
-```
-
-## Complete Workflow Examples
-
-### Auto-Commit Documentation
-
-This workflow automatically generates and commits documentation when CI/CD files change:
-
-```yaml title=".github/workflows/auto-docs.yml"
-name: Auto-Generate Documentation
-
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'action.yml'
-      - '.github/workflows/*.yml'
-
-permissions:
-  contents: write
-
-jobs:
-  generate-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate Documentation
-        uses: hoverkraft-tech/ci-dokumentor@v1
-        with:
-          source: 'action.yml'
-
-      - name: Check for Documentation Changes
-        id: verify-changed-files
-        run: |
-          if [ -n "$(git status --porcelain README.md)" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Commit Documentation Updates
-        if: steps.verify-changed-files.outputs.changed == 'true'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add README.md
-          git commit -m "docs: update action documentation\n[skip ci]"
-          git push
-```
 
 <!-- examples:end -->
 
