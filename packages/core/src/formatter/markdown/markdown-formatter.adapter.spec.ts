@@ -964,6 +964,26 @@ describe('MarkdownFormatterAdapter', () => {
 `
       );
     });
+
+    it('should treat inline backtick spans with newlines as single blocks in table cells', () => {
+      // Arrange
+      const headers = [Buffer.from('Example')];
+      // inline backtick span using single backticks but containing a newline
+      const rows = [[Buffer.from('This is inline `a\nb` span')]];
+
+      // Act
+      const result = adapter.table(headers, rows);
+
+      // Assert: the inline backtick span should be preserved and rendered as a
+      // single block (we expect a <pre> fragment containing the inner content
+      // where inner newlines are encoded as &#13;). We assert substring to keep
+      // the test robust to column width/padding differences.
+      const out = result.toString();
+      expect(out).toEqual(`| Example                              |
+| ------------------------------------ |
+| This is inline<pre>a&#13;b</pre>span |
+`);
+    });
   });
 
   describe('badge', () => {
