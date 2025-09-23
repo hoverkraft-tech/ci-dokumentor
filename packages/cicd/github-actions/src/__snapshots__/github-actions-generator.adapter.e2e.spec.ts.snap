@@ -29,7 +29,7 @@ Builds the application and deploys it to the specified environment
   with:
     # Target environment (staging, production)
     # This input is required.
-    environment: ''
+    environment: ""
 
     # Version to deploy
     # Default: \`latest\`
@@ -37,7 +37,7 @@ Builds the application and deploys it to the specified environment
 
     # Run in dry-run mode
     # Default: \`false\`
-    dry-run: 'false'
+    dry-run: "false"
 
     # Path to configuration file
     # Default: \`config/deploy.yml\`
@@ -123,7 +123,7 @@ jobs:
     uses: hoverkraft-tech/ci-dokumentor/.github/workflows/ci-cd.yml@sha-version # tag
     secrets:
       # GitHub token for authentication
-      github-token: ''
+      github-token: ""
     with:
       # Deployment environment
       # This input is required.

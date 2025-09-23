@@ -104,11 +104,11 @@ describe('UsageSectionGenerator', () => {
   with:
     # API key for authentication
     # This input is required.
-    api-key: ''
+    api-key: ""
 
     # Request timeout in seconds
     # Default: \`30\`
-    timeout: '30'
+    timeout: "30"
 \`\`\`
 `
         );
@@ -149,20 +149,20 @@ describe('UsageSectionGenerator', () => {
   with:
     # A boolean input
     # Default: \`true\`
-    boolean-input: 'true'
+    boolean-input: "true"
 
     # A number input
     # This input is required.
-    number-input: ''
+    number-input: ""
 
     # An optional input
-    optional-input: ''
+    optional-input: ""
 
     # An optional input
     # with multiline
     #
     # description
-    optional-input-with-multiline-description: ''
+    optional-input-with-multiline-description: ""
 \`\`\`
 `
         );
@@ -311,14 +311,14 @@ jobs:
     secrets:
       # Token for deployment
       # This input is required.
-      DEPLOY_TOKEN: ''
+      DEPLOY_TOKEN: ""
 
       # Optional API key
-      API_KEY: ''
+      API_KEY: ""
     with:
       # Deployment environment
       # This input is required.
-      environment: ''
+      environment: ""
 
       # Version to deploy
       # Default: \`latest\`
