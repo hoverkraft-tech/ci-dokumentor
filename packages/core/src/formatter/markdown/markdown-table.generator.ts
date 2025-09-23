@@ -274,6 +274,11 @@ export class MarkdownTableGenerator {
                 if (codeBlocks.some((b) => matchStart >= b.start && matchStart < b.end)) continue;
                 const placeholder = `__CODEBLOCK_${codeBlocks.length}__`;
                 codeBlocks.push({ start: matchStart, end: matchEnd, replacement: placeholder });
+                
+                // Prevent infinite loop if regex matches empty string
+                if (matchEnd === matchStart) {
+                    regex.lastIndex = matchStart + 1;
+                }
             }
         };
 
@@ -335,6 +340,11 @@ export class MarkdownTableGenerator {
                 const innerEnd = end - delimLen;
                 out.push({ type: 'code', content: cell.subarray(innerStart, innerEnd) });
                 last = end;
+                
+                // Prevent infinite loop if regex matches empty string
+                if (end === start) {
+                    inlineRegex.lastIndex = start + 1;
+                }
             }
             if (foundAny) {
                 if (last < cell.length) out.push({ type: 'text', content: cell.subarray(last) });
@@ -370,6 +380,11 @@ export class MarkdownTableGenerator {
             // m[0] is the whole match including delimiters
             const inner = m[0].slice(m[1].length, m[0].length - m[1].length);
             if (inner.includes('\n') || inner.includes('\r')) return true;
+            
+            // Prevent infinite loop if regex matches empty string
+            if (m[0].length === 0) {
+                inlineRegexGlobal.lastIndex = m.index + 1;
+            }
         }
         return false;
     }
