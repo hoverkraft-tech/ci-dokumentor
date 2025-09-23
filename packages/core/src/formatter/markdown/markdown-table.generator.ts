@@ -194,22 +194,22 @@ export class MarkdownTableGenerator {
         return Buffer.from('\n');
     }
 
-    private escape(input: ReadableContent, search: string): ReadableContent {
-        if (!input || input.length === 0) return Buffer.alloc(0);
-        if (!search || search.length === 0) return input;
+    private escape(content: ReadableContent, search: string): ReadableContent {
+        if (!content || content.length === 0) return Buffer.alloc(0);
+        if (!search || search.length === 0) return content;
         const searchBuf = Buffer.from(search);
         const replaceStr = search.split('').map((c) => '\\' + c).join('');
         const replaceBuf = Buffer.from(replaceStr);
         const parts: ReadableContent[] = [];
         let idx = 0;
-        let found = input.indexOf(searchBuf, idx);
+        let found = content.indexOf(searchBuf, idx);
         while (found !== -1) {
-            if (found > idx) parts.push(input.subarray(idx, found));
+            if (found > idx) parts.push(content.subarray(idx, found));
             parts.push(replaceBuf);
             idx = found + searchBuf.length;
-            found = input.indexOf(searchBuf, idx);
+            found = content.indexOf(searchBuf, idx);
         }
-        if (idx < input.length) parts.push(input.subarray(idx));
+        if (idx < content.length) parts.push(content.subarray(idx));
         if (parts.length === 0) return Buffer.alloc(0);
         if (parts.length === 1) return parts[0];
         return this.appendContent(...parts);
@@ -217,82 +217,63 @@ export class MarkdownTableGenerator {
 
 
 
-    private trimContent(input: ReadableContent): ReadableContent {
-        if (!input || input.length === 0) return Buffer.alloc(0);
+    private trimContent(content: ReadableContent): ReadableContent {
+        if (!content || content.length === 0) return Buffer.alloc(0);
         let start = 0;
-        let end = input.length - 1;
+        let end = content.length - 1;
         const isWhitespace = (b: number) => b === 0x20 || b === 0x09 || b === 0x0A || b === 0x0D;
-        while (start <= end && isWhitespace(input[start])) start++;
-        while (end >= start && isWhitespace(input[end])) end--;
+        while (start <= end && isWhitespace(content[start])) start++;
+        while (end >= start && isWhitespace(content[end])) end--;
         if (end < start) return Buffer.alloc(0);
-        return input.subarray(start, end + 1);
+        return content.subarray(start, end + 1);
     }
 
-    private splitLines(input: ReadableContent): ReadableContent[] {
-        if (!input || input.length === 0) return [Buffer.alloc(0)];
+    private splitLines(content: ReadableContent): ReadableContent[] {
+        if (!content || content.length === 0) return [Buffer.alloc(0)];
         const lines: ReadableContent[] = [];
         let lineStart = 0;
-        for (let i = 0; i < input.length; i++) {
-            if (input[i] === 0x0A) {
-                let line = input.subarray(lineStart, i);
+        for (let i = 0; i < content.length; i++) {
+            if (content[i] === 0x0A) {
+                let line = content.subarray(lineStart, i);
                 if (line.length > 0 && line[line.length - 1] === 0x0D) line = line.subarray(0, line.length - 1);
                 lines.push(line);
                 lineStart = i + 1;
             }
         }
-        if (lineStart <= input.length - 1) {
-            let line = input.subarray(lineStart, input.length);
+        if (lineStart <= content.length - 1) {
+            let line = content.subarray(lineStart, content.length);
             if (line.length > 0 && line[line.length - 1] === 0x0D) line = line.subarray(0, line.length - 1);
             lines.push(line);
-        } else if (lineStart === input.length) {
+        } else if (lineStart === content.length) {
             lines.push(Buffer.alloc(0));
         }
         return lines;
     }
 
-    private splitMultilineCell(input: ReadableContent): ReadableContent[] {
-        input = this.trimContent(input);
-        if (!input || input.length === 0) return [Buffer.alloc(0)];
-        const str = input.toString();
-        // Find fenced code blocks (``` or ~~~) and inline code spans (one or more backticks
-        // used as delimiters). We replace them with placeholders before splitting into
-        // lines so their internal newlines won't cause the cell to be split across rows.
-        const backtickFenceRegex = /```[\s\S]*?```/g;
-        const tildeFenceRegex = /~~~[\s\S]*?~~~/g;
-        // Inline code spans use a sequence of one or more backticks as delimiter and must
-        // be closed by the same number of backticks. Use a backreference to match closing
-        // delimiter: (`+)[\s\S]*?\1
-        const inlineBacktickRegex = /(`+)[\s\S]*?\1/g;
+    private splitMultilineCell(content: ReadableContent): ReadableContent[] {
+        content = this.trimContent(content);
+        if (!content || content.length === 0) return [Buffer.alloc(0)];
+        // Use the buffer-based fenced block finder first (safe, linear scan).
+        const fenced = this.findFencedBlocks(content);
+        // Find inline backtick spans (one or more backticks) outside fenced blocks.
+        const inlineSpans = this.findInlineBacktickSpans(content, fenced);
 
         const codeBlocks: { start: number; end: number; replacement: string }[] = [];
-        const collectMatches = (regex: RegExp) => {
-            let m;
-            while ((m = regex.exec(str)) !== null) {
-                const matchStart = m.index;
-                const matchEnd = m.index + m[0].length;
-                // skip matches that are inside an already collected block
-                if (codeBlocks.some((b) => matchStart >= b.start && matchStart < b.end)) continue;
-                const placeholder = `__CODEBLOCK_${codeBlocks.length}__`;
-                codeBlocks.push({ start: matchStart, end: matchEnd, replacement: placeholder });
-                
-                // Prevent infinite loop if regex matches empty string
-                if (matchEnd === matchStart) {
-                    regex.lastIndex = matchStart + 1;
-                }
-            }
-        };
-
-        // collect fenced blocks first so inline spans inside fences are ignored
-        collectMatches(backtickFenceRegex);
-        collectMatches(tildeFenceRegex);
-        // then collect inline backtick spans (may contain newlines in non-standard inputs)
-        collectMatches(inlineBacktickRegex);
-
-        if (codeBlocks.length === 0) {
-            return this.splitLines(input);
+        for (const b of fenced) {
+            codeBlocks.push({ start: b.start, end: b.end, replacement: `__CODEBLOCK_${codeBlocks.length}__` });
+        }
+        for (const s of inlineSpans) {
+            // skip inline spans that are inside already collected blocks
+            if (codeBlocks.some((b) => s.start >= b.start && s.start < b.end)) continue;
+            codeBlocks.push({ start: s.start, end: s.end, replacement: `__CODEBLOCK_${codeBlocks.length}__` });
         }
 
-        let modifiedStr = str;
+        if (codeBlocks.length === 0) {
+            return this.splitLines(content);
+        }
+
+        const contentString = content.toString();
+        let modifiedStr = contentString;
         const order = codeBlocks.map((_, idx) => idx).sort((a, b) => codeBlocks[a].start - codeBlocks[b].start);
         for (let k = order.length - 1; k >= 0; k--) {
             const i = order[k];
@@ -307,7 +288,7 @@ export class MarkdownTableGenerator {
             for (let i = 0; i < codeBlocks.length; i++) {
                 const placeholder = codeBlocks[i].replacement;
                 if (lineStr.includes(placeholder)) {
-                    const originalCodeBlock = str.substring(codeBlocks[i].start, codeBlocks[i].end);
+                    const originalCodeBlock = contentString.substring(codeBlocks[i].start, codeBlocks[i].end);
                     lineStr = lineStr.replace(placeholder, originalCodeBlock);
                 }
             }
@@ -324,33 +305,20 @@ export class MarkdownTableGenerator {
         // treat them as code segments. This mirrors fenced block handling so that
         // inline code spans with newlines are rendered as <pre> in tables.
         if (blocks.length === 0) {
-            const str = cell.toString();
-            const inlineRegex = /(`+)[\s\S]*?\1/g;
-            let m: RegExpExecArray | null;
-            let last = 0;
-            let foundAny = false;
-            while ((m = inlineRegex.exec(str)) !== null) {
-                foundAny = true;
-                const start = m.index;
-                const end = m.index + m[0].length;
-                if (start > last) out.push({ type: 'text', content: cell.subarray(last, start) });
-                // inner content excluding delimiters
-                const delimLen = m[1].length;
-                const innerStart = start + delimLen;
-                const innerEnd = end - delimLen;
-                out.push({ type: 'code', content: cell.subarray(innerStart, innerEnd) });
-                last = end;
-                
-                // Prevent infinite loop if regex matches empty string
-                if (end === start) {
-                    inlineRegex.lastIndex = start + 1;
-                }
-            }
-            if (foundAny) {
-                if (last < cell.length) out.push({ type: 'text', content: cell.subarray(last) });
+            const spans = this.findInlineBacktickSpans(cell, []);
+            if (spans.length === 0) {
+                out.push({ type: 'text', content: cell });
                 return out;
             }
-            out.push({ type: 'text', content: cell });
+            let last = 0;
+            for (const span of spans) {
+                if (span.start > last) out.push({ type: 'text', content: cell.subarray(last, span.start) });
+                const innerStart = span.start + span.delimLen;
+                const innerEnd = span.end - span.delimLen;
+                out.push({ type: 'code', content: cell.subarray(innerStart, innerEnd) });
+                last = span.end;
+            }
+            if (last < cell.length) out.push({ type: 'text', content: cell.subarray(last) });
             return out;
         }
         let last = 0;
@@ -365,28 +333,60 @@ export class MarkdownTableGenerator {
         return out;
     }
 
-    private containsFence(input: ReadableContent): boolean {
-        if (!input || input.length === 0) return false;
-        const blocks = this.findFencedBlocks(input);
+    private containsFence(content: ReadableContent): boolean {
+        if (!content || content.length === 0) return false;
+        const blocks = this.findFencedBlocks(content);
         if (blocks.length > 0) return true;
         // also detect inline backtick spans (e.g. `code` or ``code``) but only
         // treat them as fences if they contain an inner newline. That avoids
         // switching the whole table rendering to fenced mode for simple inline
         // code spans that are single-line.
-        const s = input.toString();
-        const inlineRegexGlobal = /(`+)[\s\S]*?\1/g;
-        let m: RegExpExecArray | null;
-        while ((m = inlineRegexGlobal.exec(s)) !== null) {
-            // m[0] is the whole match including delimiters
-            const inner = m[0].slice(m[1].length, m[0].length - m[1].length);
+        const spans = this.findInlineBacktickSpans(content, []);
+        const contentString = content.toString();
+        for (const span of spans) {
+            const inner = contentString.slice(span.start + span.delimLen, span.end - span.delimLen);
             if (inner.includes('\n') || inner.includes('\r')) return true;
-            
-            // Prevent infinite loop if regex matches empty string
-            if (m[0].length === 0) {
-                inlineRegexGlobal.lastIndex = m.index + 1;
-            }
         }
         return false;
+    }
+
+    /**
+     * Find inline backtick spans (e.g. `code` or ``code``). Returns ranges with
+     * delimiter length. This is a safe linear scan and avoids expensive regexes.
+     * existingBlocks is an optional list of ranges to ignore (e.g. fenced blocks).
+     */
+    private findInlineBacktickSpans(content: ReadableContent, existingBlocks: Array<{ start: number; end: number }>): Array<{ start: number; end: number; delimLen: number }> {
+        const res: Array<{ start: number; end: number; delimLen: number }> = [];
+        if (!content || content.length === 0) return res;
+        const len = content.length;
+        let pos = 0;
+
+        const contentString = content.toString();
+        while (pos < len) {
+            const idx = contentString.indexOf('`', pos);
+            if (idx === -1) break;
+            // skip if inside existing fenced block
+            if (existingBlocks.some((b) => idx >= b.start && idx < b.end)) { pos = idx + 1; continue; }
+            let k = idx;
+            while (k < len && contentString[k] === '`') k++;
+            const delimLen = k - idx;
+            let searchPos = k;
+            let found = -1;
+            while (searchPos < len) {
+                const next = contentString.indexOf('`', searchPos);
+                if (next === -1) break;
+                if (existingBlocks.some((b) => next >= b.start && next < b.end)) { searchPos = next + 1; continue; }
+                let kk = next;
+                while (kk < len && contentString[kk] === '`') kk++;
+                const closeLen = kk - next;
+                if (closeLen === delimLen) { found = next; break; }
+                searchPos = kk;
+            }
+            if (found === -1) { pos = k; continue; }
+            res.push({ start: idx, end: found + delimLen, delimLen });
+            pos = found + delimLen;
+        }
+        return res;
     }
 
     private findFencedBlocks(buf: ReadableContent): Array<{ start: number; end: number; innerStart: number; innerEnd: number; lang?: string }> {

@@ -214,9 +214,9 @@ describe('MarkdownFormatterAdapter', () => {
       expect(result.toString()).toEqual('First line\nSecond line\n');
     });
 
-    it('should handle text with multiline bullet points', () => {
+    it('should set proper indentation for multiline bullet points', () => {
       // Arrange
-      const input = Buffer.from('- Bullet 1\n  Second line of bullet 1\n- Bullet 2');
+      const input = Buffer.from('- Bullet 1\nSecond line of bullet 1\nThird line of bullet 1\n- Bullet 2');
 
       // Act
       const result = adapter.paragraph(input);
@@ -224,6 +224,7 @@ describe('MarkdownFormatterAdapter', () => {
       // Assert
       expect(result.toString()).toEqual(`- Bullet 1
   Second line of bullet 1
+  Third line of bullet 1
 - Bullet 2
 `);
     });

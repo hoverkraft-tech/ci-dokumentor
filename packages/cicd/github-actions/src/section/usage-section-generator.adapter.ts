@@ -80,7 +80,6 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     return formatterAdapter.code(
       Buffer.from(
         usageContent.toString({
-          singleQuote: true,
           commentString: (comment: string) =>
             comment
               .trim()

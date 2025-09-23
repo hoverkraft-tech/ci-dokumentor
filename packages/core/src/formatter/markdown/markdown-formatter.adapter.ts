@@ -117,9 +117,12 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
   paragraph(content: ReadableContent): ReadableContent {
     const linkFormat = this.options.linkFormat;
-    const processedInput = linkFormat && linkFormat !== LinkFormat.None
+    let processedInput = linkFormat && linkFormat !== LinkFormat.None
       ? this.transformUrls(content, linkFormat === LinkFormat.Full)
       : content;
+
+    processedInput = this.transformList(processedInput);
+
     return this.appendContent(processedInput, this.lineBreak());
   }
 
@@ -153,7 +156,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   inlineCode(content: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('`'),
-      this.escape(this.escape(content, '`'), '*'),
+      this.escape(content, ['`', '*']),
       Buffer.from('`')
     );
   }
@@ -161,10 +164,10 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   link(text: ReadableContent, url: ReadableContent): ReadableContent {
     // If the text is already a single inline markdown link or image (e.g. "![...](...)" or "[...]()"),
     // don't escape it - callers sometimes pass pre-formatted markdown (badges) as the link text.
-    const isInlineMarkdown = this.bufferLooksLikeInlineMarkdown(text);
+    const isInlineMarkdown = this.contentLooksLikeInlineMarkdown(text);
     return this.appendContent(
       Buffer.from('['),
-      isInlineMarkdown ? text : this.escape(this.escape(text, '['), ']'),
+      isInlineMarkdown ? text : this.escape(text, ['[', ']']),
       Buffer.from(']('),
       this.escape(url, ')'),
       Buffer.from(')')
@@ -193,7 +196,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
       parts.push(
         Buffer.from(` alt="`),
-        this.escape(this.escape(altText, '['), ']'),
+        this.escape(altText, ['[', ']']),
         Buffer.from(`" />`)
       );
       return this.appendContent(...parts);
@@ -201,7 +204,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
     return this.appendContent(
       Buffer.from('!['),
-      this.escape(this.escape(altText, '['), ']'),
+      this.escape(altText, ['[', ']']),
       Buffer.from(']('),
       this.escape(url, ')'),
       Buffer.from(')')
@@ -265,12 +268,20 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   /**
    * Escape special characters in the input buffer for markdown.
    */
-  private escape(input: ReadableContent, search: string): ReadableContent {
+  private escape(input: ReadableContent, search: string | string[]): ReadableContent {
     if (!input || input.length === 0) {
       return Buffer.alloc(0);
     }
     if (!search || search.length === 0) {
       return input;
+    }
+
+    if (Array.isArray(search)) {
+      let result = input;
+      for (const s of search) {
+        result = this.escape(result, s);
+      }
+      return result;
     }
 
     const searchBuf = Buffer.from(search);
@@ -302,7 +313,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * Quick heuristic to check if a buffer looks like a single inline markdown link/image
    * (e.g. "[text](url)" or "![alt](url)"), ignoring surrounding whitespace.
    */
-  private bufferLooksLikeInlineMarkdown(input: ReadableContent): boolean {
+  private contentLooksLikeInlineMarkdown(input: ReadableContent): boolean {
     if (!input || input.length === 0) {
       return false;
     }
@@ -425,6 +436,56 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     }
 
     return Buffer.from(result);
+  }
+
+  private transformList(input: ReadableContent): ReadableContent {
+    if (!input || input.length === 0) return input;
+
+    const lines = input.toString().split(/\r?\n/);
+    const transformedLines: string[] = [];
+    let inList = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmedLine = line.trimStart();
+
+      // Check for unordered list item
+      const isUnordered = /^[-*+]\s+/.test(trimmedLine);
+      // Check for ordered list item
+      const isOrdered = /^\d+\.\s+/.test(trimmedLine);
+
+      if (isUnordered || isOrdered) {
+        // Start/continue a list
+        inList = true;
+        transformedLines.push(line); // Keep original indentation
+        continue;
+      }
+
+      if (inList) {
+        // Empty line ends the list
+        if (line.trim() === '') {
+          inList = false;
+          transformedLines.push(line);
+          continue;
+        }
+
+        // Already-indented continuation: keep as-is
+        if (line.startsWith(' ') || line.startsWith('\t')) {
+          transformedLines.push(line);
+          continue;
+        }
+
+        // Non-indented, non-empty line after a list item: treat as continuation and indent by two spaces
+        transformedLines.push('  ' + line);
+        // remain inList so multiple consecutive continuation lines get indented
+        continue;
+      }
+
+      // Not in a list
+      transformedLines.push(line);
+    }
+
+    return Buffer.from(transformedLines.join('\n'));
   }
 
   /**
