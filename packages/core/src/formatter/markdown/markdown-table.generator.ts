@@ -1,9 +1,11 @@
+import { injectable } from 'inversify';
 import { ReadableContent } from '../../reader/reader.adapter.js';
 
 /**
  * Class responsible for generating markdown tables from headers and rows.
  * Self-contained: implements the small set of helpers needed to render tables.
  */
+@injectable()
 export class MarkdownTableGenerator {
     table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent {
         const isEmptyTable = (!headers || headers.length === 0) && (!rows || rows.length === 0);

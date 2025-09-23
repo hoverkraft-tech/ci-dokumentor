@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 import { FormatterLanguage } from '../formatter-language.js';
 import { FormatterAdapter, FormatterOptions, LinkFormat } from '../formatter.adapter.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
+import { MarkdownLinkGenerator } from './markdown-link.generator.js';
 import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
 import { ReadableContent } from '../../reader/reader.adapter.js';
 
@@ -12,7 +13,8 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   };
 
   constructor(
-    @inject(MarkdownTableGenerator) private readonly markdownTableGenerator: MarkdownTableGenerator
+    @inject(MarkdownTableGenerator) private readonly markdownTableGenerator: MarkdownTableGenerator,
+    @inject(MarkdownLinkGenerator) private readonly markdownLinkGenerator: MarkdownLinkGenerator
   ) { }
 
   setOptions(options: FormatterOptions): void {
@@ -118,7 +120,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   paragraph(content: ReadableContent): ReadableContent {
     const linkFormat = this.options.linkFormat;
     let processedInput = linkFormat && linkFormat !== LinkFormat.None
-      ? this.transformUrls(content, linkFormat === LinkFormat.Full)
+      ? this.markdownLinkGenerator.transformUrls(content, linkFormat === LinkFormat.Full)
       : content;
 
     processedInput = this.transformList(processedInput);
@@ -308,135 +310,18 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     }
     return this.appendContent(...parts);
   }
-
   /**
    * Quick heuristic to check if a buffer looks like a single inline markdown link/image
    * (e.g. "[text](url)" or "![alt](url)"), ignoring surrounding whitespace.
    */
-  private contentLooksLikeInlineMarkdown(input: ReadableContent): boolean {
-    if (!input || input.length === 0) {
+  private contentLooksLikeInlineMarkdown(content: ReadableContent): boolean {
+    if (!content || content.length === 0) {
       return false;
     }
 
-    return /^\s*!?\[[^\]]*\]\([^)]*\)\s*$/.test(input.toString());
+    return /^\s*!?\[[^\]]*\]\([^)]*\)\s*$/.test(content.toString());
   }
 
-  /**
-   * Transform URLs in text to markdown links.
-   * By default creates autolinks (<url>), or full links if fullLinkFormat is true.
-   */
-  private transformUrls(input: ReadableContent, fullLinkFormat = false): ReadableContent {
-    if (!input || input.length === 0) return input;
-
-    const text = input.toString();
-
-    // URL regex pattern - matches http/https URLs, excluding common trailing punctuation
-    // Use negative lookbehind/lookahead to avoid matching URLs already wrapped in '<' '>' (autolinks)
-    const urlRegex = /(?<!<)https?:\/\/[^\s)\]>]{1,500}(?!>)/g;
-
-    // Check if there are already markdown links in the text to avoid double-processing
-    const linkRegex = /\[([^\]]{0,200})\]\(([^)]{0,500})\)/g;
-    const hasExistingLinks = linkRegex.test(text);
-
-    let result = text;
-
-    if (!hasExistingLinks) {
-      // Simple case: no existing markdown links, just transform all URLs
-      // But skip URLs that are already in autolink format like <https://...>
-      result = text.replace(urlRegex, (url, offset) => {
-        // If the URL is already wrapped in '<' '>' then leave it untouched
-        const beforeChar = offset > 0 ? text[offset - 1] : undefined;
-        const afterChar = text[offset + url.length];
-        if (beforeChar === '<' && afterChar === '>') {
-          return url;
-        }
-
-        // Remove trailing punctuation from URL
-        const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
-        const trailingPunct = url.slice(cleanUrl.length);
-
-        if (fullLinkFormat) {
-          return `[${cleanUrl}](${cleanUrl})${trailingPunct}`;
-        } else {
-          return `<${cleanUrl}>${trailingPunct}`;
-        }
-      });
-    } else {
-      // More careful processing when existing links are present
-      // Find all existing links and their positions
-      linkRegex.lastIndex = 0; // Reset regex
-      const links = [];
-      let match;
-      let loopCount = 0;
-      const maxLoops = 1000; // Prevent infinite loops
-      while ((match = linkRegex.exec(text)) !== null && loopCount < maxLoops) {
-        links.push({
-          start: match.index,
-          end: match.index + match[0].length,
-          fullMatch: match[0]
-        });
-        loopCount++;
-      }
-
-      // Process text in chunks, avoiding existing links
-      let processedResult = '';
-      let lastIndex = 0;
-
-      for (const linkInfo of links) {
-        // Process text before this link
-        const beforeLink = text.substring(lastIndex, linkInfo.start);
-        processedResult += beforeLink.replace(urlRegex, (url, offsetInBefore) => {
-          // offsetInBefore is relative to beforeLink; compute absolute offset in original text
-          const absoluteOffset = lastIndex + (offsetInBefore || 0);
-          // If the URL is already wrapped in '<' '>' then leave it untouched
-          const beforeChar = absoluteOffset > 0 ? text[absoluteOffset - 1] : undefined;
-          const afterChar = text[absoluteOffset + url.length];
-          if (beforeChar === '<' && afterChar === '>') {
-            return url;
-          }
-
-          // Remove trailing punctuation from URL
-          const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
-          const trailingPunct = url.slice(cleanUrl.length);
-
-          if (fullLinkFormat) {
-            return `[${cleanUrl}](${cleanUrl})${trailingPunct}`;
-          } else {
-            return `<${cleanUrl}>${trailingPunct}`;
-          }
-        });
-
-        // Add the existing link unchanged
-        processedResult += linkInfo.fullMatch;
-        lastIndex = linkInfo.end;
-      }
-
-      // Process remaining text after the last link
-      const afterLastLink = text.substring(lastIndex);
-      processedResult += afterLastLink.replace(urlRegex, (url, offsetInAfter) => {
-        const absoluteOffset = lastIndex + (offsetInAfter || 0);
-        const beforeChar = absoluteOffset > 0 ? text[absoluteOffset - 1] : undefined;
-        const afterChar = text[absoluteOffset + url.length];
-        if (beforeChar === '<' && afterChar === '>') {
-          return url;
-        }
-
-        // Remove trailing punctuation from URL
-        const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
-        const trailingPunct = url.slice(cleanUrl.length);
-
-        if (fullLinkFormat) {
-          return `[${cleanUrl}](${cleanUrl})${trailingPunct}`;
-        } else {
-          return `<${cleanUrl}>${trailingPunct}`;
-        }
-      });
-
-      result = processedResult;
-    }
-
-    return Buffer.from(result);
-  }
 
   private transformList(input: ReadableContent): ReadableContent {
     if (!input || input.length === 0) return input;
