@@ -1,4 +1,4 @@
-export type ReadableContent = Buffer;
+import { ReadableContent } from "./readable-content.js";
 
 export interface ReaderAdapter {
     /**

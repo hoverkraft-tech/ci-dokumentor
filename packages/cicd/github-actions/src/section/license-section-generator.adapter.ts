@@ -1,8 +1,8 @@
-import { SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionIdentifier } from '@ci-dokumentor/core';
+import type { SectionGenerationPayload } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { SectionIdentifier } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
 
 @injectable()
 export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
@@ -10,7 +10,7 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return SectionIdentifier.License;
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<Buffer> {
+  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     const currentYear = new Date().getFullYear();
 
     const [repositoryInfo, licenseInfo] = await Promise.all([
@@ -25,7 +25,7 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
     // Only generate license section if license information is available
     if (!licenseInfo) {
-      return Buffer.alloc(0); // Return empty buffer if no license info
+      return ReadableContent.empty(); // Return empty buffer if no license info
     }
 
     // Generate license section
@@ -39,33 +39,32 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       ? `For more details, see the [license](${licenseInfo.url}).`
       : '';
 
-    const elements = [
-      formatterAdapter.heading(Buffer.from('License'), 2),
+    let licenceContent = formatterAdapter.heading(new ReadableContent('License'), 2).append(
       formatterAdapter.lineBreak(),
-      formatterAdapter.paragraph(Buffer.from(licenseText)),
-    ];
+      formatterAdapter.paragraph(new ReadableContent(licenseText)),
+    );
 
     if (spdxText) {
-      elements.push(
+      licenceContent = licenceContent.append(
         formatterAdapter.lineBreak(),
-        formatterAdapter.paragraph(Buffer.from(spdxText)),
+        formatterAdapter.paragraph(new ReadableContent(spdxText)),
       );
     }
 
-    elements.push(
+    licenceContent = licenceContent.append(
       formatterAdapter.lineBreak(),
       formatterAdapter.paragraph(
-        Buffer.from(`Copyright © ${currentYear} ${authorName}`)
+        new ReadableContent(`Copyright © ${currentYear} ${authorName}`)
       ),
     );
 
     if (licenseLink) {
-      elements.push(
+      licenceContent = licenceContent.append(
         formatterAdapter.lineBreak(),
-        formatterAdapter.paragraph(Buffer.from(licenseLink))
+        formatterAdapter.paragraph(new ReadableContent(licenseLink))
       );
     }
 
-    return formatterAdapter.appendContent(...elements);
+    return licenceContent;
   }
 }

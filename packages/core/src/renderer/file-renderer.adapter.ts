@@ -5,11 +5,11 @@ import {
 } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { injectable, inject } from 'inversify';
-import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import type { ReaderAdapter } from '../reader/reader.adapter.js';
-import { ReadableContent } from '../reader/reader.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
+import { ReadableContent } from '../reader/readable-content.js';
+import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
 
 
 @injectable()
@@ -48,7 +48,7 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
         const destination = this.getDestination();
 
         return new Promise((resolve, reject) => {
-            writeFile(destination, content, (err) => {
+            writeFile(destination, content.toString(), (err) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -67,8 +67,8 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
             content
         );
 
-        const sectionStart = formatterAdapter.sectionStart(sectionIdentifier).toString();
-        const sectionEnd = formatterAdapter.sectionEnd(sectionIdentifier).toString();
+        const sectionStart = formatterAdapter.sectionStart(sectionIdentifier);
+        const sectionEnd = formatterAdapter.sectionEnd(sectionIdentifier);
 
 
         // Look for the section in the file, replace content if it exists, or append if it doesn't.
@@ -93,18 +93,18 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
 
                 let sectionFound = false;
                 let inSection = false;
-                let output: ReadableContent = Buffer.alloc(0);
+                let output = ReadableContent.empty();
 
                 readLine.on('line', (line) => {
-                    const isSectionStart = line.trim() === sectionStart;
+                    const isSectionStart = sectionStart.equals(line.trim());
                     if (isSectionStart) {
                         sectionFound = true;
                         inSection = true;
-                        output = formatterAdapter.appendContent(output, sectionContent);
+                        output = output.append(sectionContent);
                         return;
                     }
 
-                    const isSectionEnd = line.trim() === sectionEnd;
+                    const isSectionEnd = sectionEnd.equals(line.trim());
                     if (isSectionEnd && inSection) {
                         inSection = false;
                         // Skip the end marker as it's already included above
@@ -112,16 +112,16 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
                     }
 
                     if (!inSection) {
-                        output = formatterAdapter.appendContent(output, Buffer.from(line), formatterAdapter.lineBreak());
+                        output = output.append(line, formatterAdapter.lineBreak());
                     }
                     // Skip lines inside the section (they get replaced)
                 });
 
                 readLine.on('close', () => {
                     if (!sectionFound) {
-                        output = formatterAdapter.appendContent(output, sectionContent);
+                        output = output.append(sectionContent);
                     }
-                    writeFile(destination, output, (err) => {
+                    writeFile(destination, output.toString(), (err) => {
                         if (err) {
                             reject(err);
                         } else {

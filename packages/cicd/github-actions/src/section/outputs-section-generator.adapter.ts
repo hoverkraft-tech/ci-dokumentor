@@ -1,4 +1,5 @@
-import { ReadableContent, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload , FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 import {
   GitHubAction,
   GitHubActionOutput,
@@ -7,8 +8,6 @@ import {
   GitHubWorkflowOutput,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
 
 @injectable()
 export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
@@ -26,12 +25,11 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       throw new Error('Unsupported manifest type for OutputsSectionGenerator');
     }
 
-    if (!manifestOutputsContent || manifestOutputsContent.length === 0) {
-      return Buffer.alloc(0);
+    if (manifestOutputsContent.isEmpty()) {
+      return ReadableContent.empty();
     }
 
-    return formatterAdapter.appendContent(
-      formatterAdapter.heading(Buffer.from('Outputs'), 2),
+    return formatterAdapter.heading(new ReadableContent('Outputs'), 2).append(
       formatterAdapter.lineBreak(),
       manifestOutputsContent,
     );
@@ -62,7 +60,7 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     outputs: [string, GitHubActionOutput | GitHubWorkflowOutput][]
   ): ReadableContent {
     if (outputs.length === 0) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
     const headers = this.getHeaders(formatterAdapter);
@@ -81,8 +79,8 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
   private getHeaders(formatterAdapter: FormatterAdapter): ReadableContent[] {
     return [
-      formatterAdapter.bold(Buffer.from('Output')),
-      formatterAdapter.bold(Buffer.from('Description')),
+      formatterAdapter.bold(new ReadableContent('Output')),
+      formatterAdapter.bold(new ReadableContent('Description')),
     ];
   }
 
@@ -91,11 +89,11 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
     return formatterAdapter.bold(
-      formatterAdapter.inlineCode(Buffer.from(name))
+      formatterAdapter.inlineCode(new ReadableContent(name))
     );
   }
 
   private getOutputDescription(output: GitHubActionOutput | GitHubWorkflowOutput, formatterAdapter: FormatterAdapter): ReadableContent {
-    return formatterAdapter.paragraph(Buffer.from((output.description || '').trim()));
+    return formatterAdapter.paragraph(new ReadableContent((output.description || '').trim()));
   }
 }

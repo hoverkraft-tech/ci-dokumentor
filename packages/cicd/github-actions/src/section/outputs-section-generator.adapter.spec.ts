@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, Mocked } from 'vitest';
-import { OutputsSectionGenerator } from './outputs-section-generator.adapter.js';
+import {
+  FormatterAdapter,
+  SectionIdentifier,
+  MarkdownFormatterAdapter,
+  RepositoryProvider,
+} from '@ci-dokumentor/core';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 import {
   GitHubAction,
   GitHubWorkflow,
@@ -7,15 +13,9 @@ import {
   GitHubActionsManifest,
 } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import {
-  FormatterAdapter,
-  SectionIdentifier,
-  MarkdownFormatterAdapter,
-  RepositoryProvider,
-} from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { OutputsSectionGenerator } from './outputs-section-generator.adapter.js';
 
 describe('OutputsSectionGenerator', () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;

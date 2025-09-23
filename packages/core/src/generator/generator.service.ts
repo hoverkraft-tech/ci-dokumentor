@@ -1,14 +1,14 @@
 import { inject, injectable, multiInject } from 'inversify';
-import {
-  GenerateSectionsOptions,
-  GENERATOR_ADAPTER_IDENTIFIER,
-  GeneratorAdapter,
-} from './generator.adapter.js';
 import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
 import { FormatterService } from '../formatter/formatter.service.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
 import { FormatterOptions } from '../formatter/formatter.adapter.js';
+import {
+  GenerateSectionsOptions,
+  GENERATOR_ADAPTER_IDENTIFIER,
+  GeneratorAdapter,
+} from './generator.adapter.js';
 
 @injectable()
 export class GeneratorService {

@@ -1,6 +1,6 @@
-import { RendererAdapter } from "./renderer.adapter.js";
 import { FormatterAdapter } from "../formatter/formatter.adapter.js";
-import { ReadableContent } from "../reader/reader.adapter.js";
+import { ReadableContent } from "../reader/readable-content.js";
+import { RendererAdapter } from "./renderer.adapter.js";
 
 export abstract class AbstractRendererAdapter implements RendererAdapter {
     private destination?: string;

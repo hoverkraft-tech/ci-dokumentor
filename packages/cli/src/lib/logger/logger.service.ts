@@ -1,5 +1,6 @@
 import { injectable, multiInject } from 'inversify';
-import { LOGGER_ADAPTER_IDENTIFIER, type LoggerAdapter } from './adapters/logger.adapter.js';
+import { LOGGER_ADAPTER_IDENTIFIER  } from './adapters/logger.adapter.js';
+import type {LoggerAdapter} from './adapters/logger.adapter.js';
 /**
  * Logger service that manages different logger adapters based on output format
  */

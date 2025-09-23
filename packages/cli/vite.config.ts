@@ -1,6 +1,5 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import { createSharedConfig } from '../../vite.shared';
 
 export default defineConfig(() => {
@@ -28,7 +27,7 @@ export default defineConfig(() => {
         // Bundle workspace dependencies for npm publishing
         external: [
           "commander",
-          "inversify", 
+          "inversify",
           "reflect-metadata"
           // All @ci-dokumentor/* workspace dependencies are bundled (not external)
         ],

@@ -1,15 +1,15 @@
-import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
-import { createPatch } from 'diff';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
-import { injectable, inject } from 'inversify';
-import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { unlinkSync } from 'node:fs';
+import { injectable, inject } from 'inversify';
+import { createPatch } from 'diff';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import type { ReaderAdapter } from '../reader/reader.adapter.js';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
-import { ReadableContent } from '../reader/reader.adapter.js';
+import { ReadableContent } from '../reader/readable-content.js';
+import { FileRendererAdapter } from './file-renderer.adapter.js';
+import { AbstractRendererAdapter } from './abstract-renderer.adapter.js';
 
 @injectable()
 export class DiffRendererAdapter extends AbstractRendererAdapter {
@@ -52,8 +52,8 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
 
         const diff = createPatch(
             destination,
-            destinationContent ? destinationContent.toString('utf-8') : '',
-            tempContent.toString('utf-8'),
+            destinationContent ? destinationContent.toString() : '',
+            tempContent.toString(),
         );
 
         // Reset initialized parameters

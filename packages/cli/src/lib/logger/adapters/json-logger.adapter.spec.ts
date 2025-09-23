@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { JsonLoggerAdapter } from './json-logger.adapter.js';
 import { ConsoleMockFactory, MockedConsole } from '../../../../__tests__/console-mock.factory.js';
+import { JsonLoggerAdapter } from './json-logger.adapter.js';
 
 describe('JsonLoggerAdapter', () => {
   let jsonLoggerAdapter: JsonLoggerAdapter;

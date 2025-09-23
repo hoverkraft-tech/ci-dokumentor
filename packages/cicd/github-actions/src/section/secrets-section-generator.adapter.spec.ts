@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SecretsSectionGenerator } from './secrets-section-generator.adapter.js';
-import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { MarkdownFormatterAdapter, RepositoryProvider, SectionIdentifier } from '@ci-dokumentor/core';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
+import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
 import { GitHubWorkflowSecret } from '../github-actions-parser.js';
+import { SecretsSectionGenerator } from './secrets-section-generator.adapter.js';
 
 describe('SecretsSectionGenerator', () => {
     let generator: SecretsSectionGenerator;

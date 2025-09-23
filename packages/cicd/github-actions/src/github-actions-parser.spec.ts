@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, Mocked, vi } from 'vitest';
+import { ReadableContent, ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
+import { ReaderAdapterMockFactory, RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
 import {
   GitHubActionsParser,
   GitHubAction,
@@ -6,8 +8,6 @@ import {
   GitHubActionInput,
   GitHubActionOutput,
 } from './github-actions-parser.js';
-import { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
-import { ReaderAdapterMockFactory, RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
 
 describe('GitHubActionsParser', () => {
   let mockReaderAdapter: Mocked<ReaderAdapter>;
@@ -67,7 +67,7 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubAction;
@@ -140,7 +140,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -171,7 +171,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -196,7 +196,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -224,7 +224,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -254,7 +254,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -283,7 +283,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -305,7 +305,7 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubAction;
@@ -331,7 +331,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -357,7 +357,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubWorkflow;
@@ -375,7 +375,7 @@ jobs:
         const fileContent = `invalid: yaml: content`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act & Assert
         await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
@@ -386,7 +386,7 @@ jobs:
         const filePath = '/test/.github/workflows/empty.yml';
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(''));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(''));
 
         // Act & Assert
         await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
@@ -398,7 +398,7 @@ jobs:
         const fileContent = `This is not a YAML file`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act & Assert
         await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
@@ -412,7 +412,7 @@ anotherField: 123
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act & Assert
         await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
@@ -430,7 +430,7 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -456,7 +456,7 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);

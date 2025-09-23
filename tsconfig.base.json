@@ -22,7 +22,15 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@ci-dokumentor/core/tests": ["packages/core/__tests__/index.ts"]
+      "@ci-dokumentor/cicd-github-actions": [
+        "packages/cicd/github-actions/src/index.ts"
+      ],
+      "@ci-dokumentor/core": ["packages/core/src/index.ts"],
+      "@ci-dokumentor/core/tests": ["packages/core/__tests__/index.ts"],
+      "@ci-dokumentor/repository-git": ["packages/repository/git/src/index.ts"],
+      "@ci-dokumentor/repository-github": [
+        "packages/repository/github/src/index.ts"
+      ]
     }
   }
 }

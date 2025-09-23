@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { MarkdownFormatterAdapter } from './markdown-formatter.adapter.js';
-import { MarkdownTableGenerator } from './markdown-table.generator.js';
-import { MarkdownLinkGenerator } from './markdown-link.generator.js';
 import { FormatterLanguage } from '../formatter-language.js';
 import { LinkFormat } from '../formatter.adapter.js';
 import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
+import { ReadableContent } from '../../reader/readable-content.js';
+import { MarkdownLinkGenerator } from './markdown-link.generator.js';
+import { MarkdownTableGenerator } from './markdown-table.generator.js';
+import { MarkdownFormatterAdapter } from './markdown-formatter.adapter.js';
 
 describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
@@ -34,25 +35,10 @@ describe('MarkdownFormatterAdapter', () => {
     });
   });
 
-  describe('appendContent', () => {
-    it('should concatenate multiple contents into one', () => {
-      // Arrange
-      const buffer1 = Buffer.from('Hello');
-      const buffer2 = Buffer.from('World');
-      const buffer3 = Buffer.from('!');
-
-      // Act
-      const result = adapter.appendContent(buffer1, buffer2, buffer3);
-
-      // Assert
-      expect(result.toString()).toEqual('HelloWorld!');
-    });
-  });
-
   describe('heading', () => {
     it('should format text as markdown heading with # prefix', () => {
       // Arrange
-      const content = Buffer.from('Test Heading');
+      const content = new ReadableContent('Test Heading');
 
       // Act
       const result = adapter.heading(content);
@@ -63,7 +49,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle empty string input', () => {
       // Arrange
-      const content = Buffer.alloc(0);
+      const content = ReadableContent.empty();
 
       // Act
       const result = adapter.heading(content);
@@ -74,7 +60,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle multi-word headings', () => {
       // Arrange
-      const content = Buffer.from('This is a Long Heading with Multiple Words');
+      const content = new ReadableContent('This is a Long Heading with Multiple Words');
 
       // Act
       const result = adapter.heading(content);
@@ -87,7 +73,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle headings with special characters', () => {
       // Arrange
-      const content = Buffer.from('Heading with "quotes" & symbols!');
+      const content = new ReadableContent('Heading with "quotes" & symbols!');
 
       // Act
       const result = adapter.heading(content);
@@ -98,7 +84,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle headings with numbers', () => {
       // Arrange
-      const content = Buffer.from('Version 1.0.0 Release Notes');
+      const content = new ReadableContent('Version 1.0.0 Release Notes');
 
       // Act
       const result = adapter.heading(content);
@@ -109,7 +95,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle different heading levels', () => {
       // Arrange
-      const content = Buffer.from('Test Heading');
+      const content = new ReadableContent('Test Heading');
 
       // Act & Assert
       expect(adapter.heading(content, 1).toString()).toEqual('# Test Heading\n');
@@ -122,7 +108,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should clamp heading levels to valid range (1-6)', () => {
       // Arrange
-      const content = Buffer.from('Test Heading');
+      const content = new ReadableContent('Test Heading');
 
       // Act & Assert
       expect(adapter.heading(content, 0).toString()).toEqual('# Test Heading\n'); // Should be clamped to 1
@@ -135,7 +121,7 @@ describe('MarkdownFormatterAdapter', () => {
   describe('center', () => {
     it('should format text with center alignment', () => {
       // Arrange
-      const content = Buffer.from('Centered Text');
+      const content = new ReadableContent('Centered Text');
 
       // Act
       const result = adapter.center(content);
@@ -151,7 +137,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle empty string input', () => {
       // Arrange
-      const content = Buffer.alloc(0);
+      const content = ReadableContent.empty();
 
       // Act
       const result = adapter.center(content);
@@ -165,7 +151,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle multi-line text', () => {
       // Arrange
-      const content = Buffer.from('Line 1\nLine 2');
+      const content = new ReadableContent('Line 1\nLine 2');
 
       // Act
       const result = adapter.center(content);
@@ -184,7 +170,7 @@ describe('MarkdownFormatterAdapter', () => {
   describe('paragraph', () => {
     it('should format text as paragraph with newline', () => {
       // Arrange
-      const content = Buffer.from('This is a paragraph');
+      const content = new ReadableContent('This is a paragraph');
 
       // Act
       const result = adapter.paragraph(content);
@@ -195,7 +181,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle empty string input', () => {
       // Arrange
-      const content = Buffer.alloc(0);
+      const content = ReadableContent.empty();
 
       // Act
       const result = adapter.paragraph(content);
@@ -206,7 +192,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle multi-line text', () => {
       // Arrange
-      const content = Buffer.from('First line\nSecond line');
+      const content = new ReadableContent('First line\nSecond line');
 
       // Act
       const result = adapter.paragraph(content);
@@ -217,7 +203,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should set proper indentation for multiline bullet points', () => {
       // Arrange
-      const content = Buffer.from('- Bullet 1\nSecond line of bullet 1\nThird line of bullet 1\n- Bullet 2');
+      const content = new ReadableContent('- Bullet 1\nSecond line of bullet 1\nThird line of bullet 1\n- Bullet 2');
 
       // Act
       const result = adapter.paragraph(content);
@@ -234,7 +220,7 @@ describe('MarkdownFormatterAdapter', () => {
       describe('autolink format (default)', () => {
         it('should transform URLs to autolinks by default', () => {
           // Arrange
-          const content = Buffer.from('Visit https://example.com for more information');
+          const content = new ReadableContent('Visit https://example.com for more information');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -246,7 +232,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should not transform URLs that are already in autolink format', () => {
           // Arrange
-          const content = Buffer.from('Visit <https://example.com> for more');
+          const content = new ReadableContent('Visit <https://example.com> for more');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -258,7 +244,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should transform multiple URLs to autolinks', () => {
           // Arrange
-          const content = Buffer.from('Check https://github.com and https://stackoverflow.com');
+          const content = new ReadableContent('Check https://github.com and https://stackoverflow.com');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -270,7 +256,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should handle URLs with query parameters and fragments', () => {
           // Arrange
-          const content = Buffer.from('Search https://google.com/search?q=test#results');
+          const content = new ReadableContent('Search https://google.com/search?q=test#results');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -282,7 +268,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should not transform URLs that are already in markdown links', () => {
           // Arrange
-          const content = Buffer.from('Visit [Example](https://example.com) for more');
+          const content = new ReadableContent('Visit [Example](https://example.com) for more');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -294,7 +280,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should transform standalone URLs but preserve existing markdown links', () => {
           // Arrange
-          const content = Buffer.from('Visit [Example](https://example.com) or https://github.com');
+          const content = new ReadableContent('Visit [Example](https://example.com) or https://github.com');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -306,7 +292,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should not transform URLs within inline code', () => {
           // Arrange
-          const content = Buffer.from('Here is some code: `const url = "https://example.com";` and a link https://test.com');
+          const content = new ReadableContent('Here is some code: `const url = "https://example.com";` and a link https://test.com');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -318,7 +304,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should not transform URLs within code block', () => {
           // Arrange
-          const content = Buffer.from('Here is some code block:\n```\nconst url = "https://example.com";\n```\n and a link https://test.com');
+          const content = new ReadableContent('Here is some code block:\n```\nconst url = "https://example.com";\n```\n and a link https://test.com');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -332,7 +318,7 @@ describe('MarkdownFormatterAdapter', () => {
       describe('full link format', () => {
         it('should transform URLs to full links when linkFormat is Full', () => {
           // Arrange
-          const content = Buffer.from('Visit https://example.com for more information');
+          const content = new ReadableContent('Visit https://example.com for more information');
           adapter.setOptions({ linkFormat: LinkFormat.Full });
 
           // Act
@@ -344,7 +330,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should transform multiple URLs to full links', () => {
           // Arrange
-          const content = Buffer.from('Check https://github.com and https://stackoverflow.com');
+          const content = new ReadableContent('Check https://github.com and https://stackoverflow.com');
           adapter.setOptions({ linkFormat: LinkFormat.Full });
 
           // Act
@@ -356,7 +342,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should handle URLs with complex paths in full link format', () => {
           // Arrange
-          const content = Buffer.from('API docs at https://api.example.com/v1/docs?format=json');
+          const content = new ReadableContent('API docs at https://api.example.com/v1/docs?format=json');
           adapter.setOptions({ linkFormat: LinkFormat.Full });
 
           // Act
@@ -370,7 +356,7 @@ describe('MarkdownFormatterAdapter', () => {
       describe('no URL transformation', () => {
         it('should not transform URLs when linkFormat is None', () => {
           // Arrange
-          const content = Buffer.from('Visit https://example.com for more information');
+          const content = new ReadableContent('Visit https://example.com for more information');
           adapter.setOptions({ linkFormat: LinkFormat.None });
 
           // Act
@@ -384,7 +370,7 @@ describe('MarkdownFormatterAdapter', () => {
       describe('edge cases', () => {
         it('should handle empty input with URL transformation enabled', () => {
           // Arrange
-          const content = Buffer.alloc(0);
+          const content = ReadableContent.empty();
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -396,7 +382,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should handle text with no URLs', () => {
           // Arrange
-          const content = Buffer.from('This is just regular text without any URLs');
+          const content = new ReadableContent('This is just regular text without any URLs');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -408,7 +394,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should handle URLs at the beginning and end of text', () => {
           // Arrange
-          const content = Buffer.from('https://start.com middle text https://end.com');
+          const content = new ReadableContent('https://start.com middle text https://end.com');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -420,7 +406,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should only transform http and https URLs', () => {
           // Arrange
-          const content = Buffer.from('Visit https://example.com and ftp://files.com and mailto:test@example.com');
+          const content = new ReadableContent('Visit https://example.com and ftp://files.com and mailto:test@example.com');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -432,7 +418,7 @@ describe('MarkdownFormatterAdapter', () => {
 
         it('should handle URLs with trailing punctuation', () => {
           // Arrange
-          const content = Buffer.from('Check https://example.com, https://github.com. Also https://stackoverflow.com!');
+          const content = new ReadableContent('Check https://example.com, https://github.com. Also https://stackoverflow.com!');
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
@@ -448,7 +434,7 @@ describe('MarkdownFormatterAdapter', () => {
   describe('bold', () => {
     it('should format text as bold with ** markers', () => {
       // Arrange
-      const content = Buffer.from('Bold Text');
+      const content = new ReadableContent('Bold Text');
 
       // Act
       const result = adapter.bold(content);
@@ -458,14 +444,14 @@ describe('MarkdownFormatterAdapter', () => {
     });
 
     it('should escape asterisks inside bold', () => {
-      const content = Buffer.from('test ** test');
+      const content = new ReadableContent('test ** test');
       const result = adapter.bold(content);
       expect(result.toString()).toEqual('**test \\*\\* test**');
     });
 
     it('should handle empty string input', () => {
       // Arrange
-      const content = Buffer.alloc(0);
+      const content = ReadableContent.empty();
 
       // Act
       const result = adapter.bold(content);
@@ -476,7 +462,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle text with special characters', () => {
       // Arrange
-      const content = Buffer.from('Text with "quotes" & symbols!');
+      const content = new ReadableContent('Text with "quotes" & symbols!');
 
       // Act
       const result = adapter.bold(content);
@@ -486,8 +472,8 @@ describe('MarkdownFormatterAdapter', () => {
     });
 
     it('should escape link text brackets and url parentheses', () => {
-      const text = Buffer.from('Click [here]');
-      const url = Buffer.from('https://example.com/foo)bar');
+      const text = new ReadableContent('Click [here]');
+      const url = new ReadableContent('https://example.com/foo)bar');
       const result = adapter.link(text, url);
       expect(result.toString()).toEqual('[Click \\[here\\]](https://example.com/foo\\)bar)');
     });
@@ -498,7 +484,7 @@ describe('MarkdownFormatterAdapter', () => {
   describe('italic', () => {
     it('should format text as italic with * markers', () => {
       // Arrange
-      const content = Buffer.from('Italic Text');
+      const content = new ReadableContent('Italic Text');
 
       // Act
       const result = adapter.italic(content);
@@ -508,14 +494,14 @@ describe('MarkdownFormatterAdapter', () => {
     });
 
     it('should escape asterisks inside italic', () => {
-      const content = Buffer.from('test * test');
+      const content = new ReadableContent('test * test');
       const result = adapter.italic(content);
       expect(result.toString()).toEqual('*test \\* test*');
     });
 
     it('should handle empty string input', () => {
       // Arrange
-      const content = Buffer.alloc(0);
+      const content = ReadableContent.empty();
 
       // Act
       const result = adapter.italic(content);
@@ -526,7 +512,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle text with special characters', () => {
       // Arrange
-      const content = Buffer.from('Text with "quotes" & symbols!');
+      const content = new ReadableContent('Text with "quotes" & symbols!');
 
       // Act
       const result = adapter.italic(content);
@@ -539,7 +525,7 @@ describe('MarkdownFormatterAdapter', () => {
   describe('code', () => {
     it('should format text as code block without language', () => {
       // Arrange
-      const content = Buffer.from('console.log("Hello World");');
+      const content = new ReadableContent('console.log("Hello World");');
 
       // Act
       const result = adapter.code(content);
@@ -550,8 +536,8 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should format text as code block with language', () => {
       // Arrange
-      const content = Buffer.from('console.log("Hello World");');
-      const language = Buffer.from('javascript');
+      const content = new ReadableContent('console.log("Hello World");');
+      const language = new ReadableContent('javascript');
 
       // Act
       const result = adapter.code(content, language);
@@ -564,7 +550,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle empty string input', () => {
       // Arrange
-      const content = Buffer.alloc(0);
+      const content = ReadableContent.empty();
 
       // Act
       const result = adapter.code(content);
@@ -575,8 +561,8 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle multi-line code', () => {
       // Arrange
-      const content = Buffer.from('function test() {\n  return true;\n}');
-      const language = Buffer.from('typescript');
+      const content = new ReadableContent('function test() {\n  return true;\n}');
+      const language = new ReadableContent('typescript');
 
       // Act
       const result = adapter.code(content, language);
@@ -589,8 +575,8 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should handle empty ending line code', () => {
       // Arrange
-      const content = Buffer.from('function test() {\n  return true;\n}\n\n');
-      const language = Buffer.from('typescript');
+      const content = new ReadableContent('function test() {\n  return true;\n}\n\n');
+      const language = new ReadableContent('typescript');
 
       // Act
       const result = adapter.code(content, language);
@@ -603,7 +589,7 @@ describe('MarkdownFormatterAdapter', () => {
 
     it('should use a longer fence when content contains backtick runs', () => {
       // Arrange: content contains a triple-backtick sequence inside
-      const content = Buffer.from(`
+      const content = new ReadableContent(`
 const example = \`inline\`;
 // code fence inside:
 \`\`\`
@@ -632,7 +618,7 @@ end
   describe('inlineCode', () => {
     it('should format text as inline code with backticks', () => {
       // Arrange
-      const content = Buffer.from('console.log()');
+      const content = new ReadableContent('console.log()');
 
       // Act
       const result = adapter.inlineCode(content);
@@ -643,7 +629,7 @@ end
 
     it('should handle empty string input', () => {
       // Arrange
-      const content = Buffer.alloc(0);
+      const content = ReadableContent.empty();
 
       // Act
       const result = adapter.inlineCode(content);
@@ -654,7 +640,7 @@ end
 
     it('should handle text with special characters', () => {
       // Arrange
-      const content = Buffer.from('getValue("key")');
+      const content = new ReadableContent('getValue("key")');
 
       // Act
       const result = adapter.inlineCode(content);
@@ -664,13 +650,13 @@ end
     });
 
     it('should escape backticks in inlineCode', () => {
-      const content = Buffer.from('a ` b');
+      const content = new ReadableContent('a ` b');
       const result = adapter.inlineCode(content);
       expect(result.toString()).toEqual('`a \\` b`');
     });
 
     it('should escape bold/italic markers in inlineCode', () => {
-      const content = Buffer.from('a ** b * c');
+      const content = new ReadableContent('a ** b * c');
       const result = adapter.inlineCode(content);
       expect(result.toString()).toEqual('`a \\*\\* b \\* c`');
     });
@@ -679,8 +665,8 @@ end
   describe('link', () => {
     it('should format text as markdown link', () => {
       // Arrange
-      const text = Buffer.from('GitHub');
-      const url = Buffer.from('https://github.com');
+      const text = new ReadableContent('GitHub');
+      const url = new ReadableContent('https://github.com');
 
 
       // Act
@@ -692,8 +678,8 @@ end
 
     it('should handle empty text', () => {
       // Arrange
-      const text = Buffer.alloc(0);
-      const url = Buffer.from('https://example.com');
+      const text = ReadableContent.empty();
+      const url = new ReadableContent('https://example.com');
 
       // Act
       const result = adapter.link(text, url);
@@ -704,8 +690,8 @@ end
 
     it('should handle text with special characters', () => {
       // Arrange
-      const text = Buffer.from('Link with "quotes" & symbols!');
-      const url = Buffer.from('https://example.com/path?query=value');
+      const text = new ReadableContent('Link with "quotes" & symbols!');
+      const url = new ReadableContent('https://example.com/path?query=value');
 
       // Act
       const result = adapter.link(text, url);
@@ -720,8 +706,8 @@ end
   describe('image', () => {
     it('should format as markdown image without options', () => {
       // Arrange
-      const altText = Buffer.from('Alternative Text');
-      const url = Buffer.from('https://example.com/image.png');
+      const altText = new ReadableContent('Alternative Text');
+      const url = new ReadableContent('https://example.com/image.png');
 
       // Act
       const result = adapter.image(url, altText);
@@ -734,8 +720,8 @@ end
 
     it('should format as HTML img tag with width option', () => {
       // Arrange
-      const altText = Buffer.from('Alternative Text');
-      const url = Buffer.from('https://example.com/image.png');
+      const altText = new ReadableContent('Alternative Text');
+      const url = new ReadableContent('https://example.com/image.png');
       const options = { width: '300px' };
 
       // Act
@@ -749,8 +735,8 @@ end
 
     it('should format as HTML img tag with align option', () => {
       // Arrange
-      const altText = Buffer.from('Alternative Text');
-      const url = Buffer.from('https://example.com/image.png');
+      const altText = new ReadableContent('Alternative Text');
+      const url = new ReadableContent('https://example.com/image.png');
       const options = { align: 'center' };
 
       // Act
@@ -764,8 +750,8 @@ end
 
     it('should format as HTML img tag with both width and align options', () => {
       // Arrange
-      const altText = Buffer.from('Alternative Text');
-      const url = Buffer.from('https://example.com/image.png');
+      const altText = new ReadableContent('Alternative Text');
+      const url = new ReadableContent('https://example.com/image.png');
       const options = { width: '300px', align: 'center' };
 
       // Act
@@ -779,8 +765,8 @@ end
 
     it('should handle empty alt text', () => {
       // Arrange
-      const altText = Buffer.alloc(0);
-      const url = Buffer.from('https://example.com/image.png');
+      const altText = ReadableContent.empty();
+      const url = new ReadableContent('https://example.com/image.png');
 
       // Act
       const result = adapter.image(url, altText);
@@ -790,8 +776,8 @@ end
     });
 
     it('should escape image alt text brackets', () => {
-      const alt = Buffer.from('Alt [text]');
-      const url = Buffer.from('https://example.com/img.png');
+      const alt = new ReadableContent('Alt [text]');
+      const url = new ReadableContent('https://example.com/img.png');
       const result = adapter.image(url, alt);
       expect(result.toString()).toEqual('![Alt \\[text\\]](https://example.com/img.png)');
     });
@@ -801,13 +787,13 @@ end
     it('should format basic table with headers and rows', () => {
       // Arrange
       const headers = [
-        Buffer.from('Name'),
-        Buffer.from('Age'),
-        Buffer.from('City'),
+        new ReadableContent('Name'),
+        new ReadableContent('Age'),
+        new ReadableContent('City'),
       ];
       const rows = [
-        [Buffer.from('John'), Buffer.from('25'), Buffer.from('New York')],
-        [Buffer.from('Jane'), Buffer.from('30'), Buffer.from('Paris')],
+        [new ReadableContent('John'), new ReadableContent('25'), new ReadableContent('New York')],
+        [new ReadableContent('Jane'), new ReadableContent('30'), new ReadableContent('Paris')],
       ];
 
       // Act
@@ -826,8 +812,8 @@ end
   describe('badge', () => {
     it('should format as badge image', () => {
       // Arrange
-      const label = Buffer.from('build');
-      const url = Buffer.from('https://img.shields.io/badge/build-passing-brightgreen');
+      const label = new ReadableContent('build');
+      const url = new ReadableContent('https://img.shields.io/badge/build-passing-brightgreen');
 
       // Act
       const result = adapter.badge(label, url);
@@ -840,8 +826,8 @@ end
 
     it('should handle empty label', () => {
       // Arrange
-      const label = Buffer.alloc(0);
-      const url = Buffer.from('https://example.com/badge.svg');
+      const label = ReadableContent.empty();
+      const url = new ReadableContent('https://example.com/badge.svg');
 
       // Act
       const result = adapter.badge(label, url);
@@ -852,8 +838,8 @@ end
 
     it('should handle label with special characters', () => {
       // Arrange
-      const label = Buffer.from('coverage-90%');
-      const url = Buffer.from('https://example.com/coverage.svg');
+      const label = new ReadableContent('coverage-90%');
+      const url = new ReadableContent('https://example.com/coverage.svg');
 
       // Act
       const result = adapter.badge(label, url);
@@ -865,8 +851,8 @@ end
     });
 
     it('should escape badge label and url', () => {
-      const label = Buffer.from('cov*er');
-      const url = Buffer.from('https://example.com/ba)dge.svg');
+      const label = new ReadableContent('cov*er');
+      const url = new ReadableContent('https://example.com/ba)dge.svg');
       const result = adapter.badge(label, url);
       // badge uses label and url raw - after escapeForContext it should escape url paren and label asterisk
       expect(result.toString()).toEqual('![cov\\*er](https://example.com/ba\\)dge.svg)');
@@ -896,7 +882,7 @@ end
   describe('section', () => {
     it('should return input wrapped in section markers', () => {
       // Act
-      const result = adapter.section(SectionIdentifier.Examples, Buffer.from('Section Content'));
+      const result = adapter.section(SectionIdentifier.Examples, new ReadableContent('Section Content'));
 
       // Assert
       expect(result.toString()).toEqual(`<!-- examples:start -->
@@ -909,7 +895,7 @@ Section Content
 
     it('should handle empty content', () => {
       // Act
-      const result = adapter.section(SectionIdentifier.Examples, Buffer.alloc(0));
+      const result = adapter.section(SectionIdentifier.Examples, ReadableContent.empty());
 
       // Assert
       expect(result.toString()).toEqual(`<!-- examples:start -->

@@ -1,4 +1,7 @@
-import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, ReadableContent } from '@ci-dokumentor/core';
+import { basename } from 'node:path';
+import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, ReadableContent , FormatterAdapter, SectionIdentifier, SectionGeneratorAdapter } from '@ci-dokumentor/core';
+import { Document, isScalar } from 'yaml';
+import { inject, injectable } from 'inversify';
 import {
   GitHubAction,
   GitHubActionInput,
@@ -9,10 +12,6 @@ import {
   GitHubWorkflowSecret,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier, SectionGeneratorAdapter } from '@ci-dokumentor/core';
-import { Document, isScalar } from 'yaml';
-import { basename } from 'node:path';
-import { inject, injectable } from 'inversify';
 
 export interface UsageSectionOptions extends SectionOptions {
   version?: string;
@@ -60,8 +59,8 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       manifest,
       version
     );
-    return formatterAdapter.appendContent(
-      formatterAdapter.heading(Buffer.from('Usage'), 2),
+
+    return formatterAdapter.heading(new ReadableContent('Usage'), 2).append(
       formatterAdapter.lineBreak(),
       usageExample,
     );
@@ -77,7 +76,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
       : this.generateWorkflowUsage(manifest, version);
 
     return formatterAdapter.code(
-      Buffer.from(
+      new ReadableContent(
         usageContent.toString({
           commentString: (comment: string) =>
             comment
@@ -93,7 +92,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
               .join('\n'),
         })
       ),
-      Buffer.from('yaml')
+      new ReadableContent('yaml')
     );
   }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import mockFs from 'mock-fs';
+import mockFs, { directory, file, restore } from 'mock-fs';
 import { FileReaderAdapter } from './file-reader.adapter.js';
 
 describe('FileReaderAdapter', () => {
@@ -20,7 +20,7 @@ describe('FileReaderAdapter', () => {
   });
 
   afterEach(() => {
-    mockFs.restore();
+    restore();
   });
 
   describe('resourceExists', () => {
@@ -63,7 +63,6 @@ describe('FileReaderAdapter', () => {
       const result = await fileReaderAdapter.readResource(testFilePath);
 
       // Assert
-
       expect(result.toString()).toBe(testContent);
     });
 
@@ -72,8 +71,7 @@ describe('FileReaderAdapter', () => {
       const result = await fileReaderAdapter.readResource('/test/nonexistent.md');
 
       // Assert
-
-      expect(result.length).toBe(0);
+      expect(result.getSize()).toBe(0);
     });
 
     it('should handle empty files', async () => {
@@ -81,16 +79,14 @@ describe('FileReaderAdapter', () => {
       const result = await fileReaderAdapter.readResource('/test/empty.md');
 
       // Assert
-
-      expect(result.length).toBe(0);
+      expect(result.getSize()).toBe(0);
     });
 
     it('should handle file read errors', async () => {
       // Arrange - Create a mock fs with a directory instead of a file
-      mockFs.restore();
       mockFs({
         '/test': {
-          'document.md': mockFs.file({
+          'document.md': file({
             mode: 0o000, // No permissions
           }),
         },
@@ -203,7 +199,7 @@ describe('FileReaderAdapter', () => {
     it('should handle read errors gracefully', async () => {
       // Arrange - Create a mock fs with a directory that cannot be read
       mockFs({
-        '/restricted': mockFs.directory({
+        '/restricted': directory({
           mode: 0o000, // No permissions
         }),
       });

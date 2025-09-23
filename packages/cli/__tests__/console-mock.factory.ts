@@ -1,4 +1,5 @@
-import { vi, type Mocked } from "vitest";
+import { vi  } from "vitest";
+import type {Mocked} from "vitest";
 
 export type MockedConsole = Mocked<Pick<Console, 'info' | 'debug' | 'error' | 'log' | 'warn'>>;
 

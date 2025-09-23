@@ -1,10 +1,10 @@
 import { describe, vi, beforeEach, afterEach, Mocked } from 'vitest';
 
-import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
 import { GeneratorService, LinkFormat, RepositoryService, ReaderAdapter } from '@ci-dokumentor/core';
 import { GeneratorServiceMockFactory, RepositoryServiceMockFactory, RepositoryProviderMockFactory, GeneratorAdapterMockFactory, ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
+import { GenerateDocumentationUseCase } from './generate-documentation.usecase.js';
 
 describe('GenerateDocumentationUseCase', () => {
   let generateDocumentationUseCase: GenerateDocumentationUseCase;

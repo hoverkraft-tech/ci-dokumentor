@@ -1,6 +1,4 @@
 import { describe, beforeEach, it, expect, vi, Mocked } from 'vitest';
-import { MigrationService } from './migration.service.js';
-import { MigrationAdapter } from './migration.adapter.js';
 import { FormatterService } from '../formatter/formatter.service.js';
 import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
@@ -9,6 +7,8 @@ import {
   MigrationAdapterMockFactory,
   RendererAdapterMockFactory,
 } from '../../__tests__/index.js';
+import { MigrationAdapter } from './migration.adapter.js';
+import { MigrationService } from './migration.service.js';
 
 describe('MigrationService', () => {
   let service: MigrationService;

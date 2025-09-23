@@ -33,8 +33,34 @@ The core package uses the ReaderAdapter pattern to abstract file system operatio
 
 - **ReaderAdapter Interface**: Defines methods for reading operations on resources and resource containers (files, directories...)
 - **FileReaderAdapter**: Concrete implementation for file system reading with graceful error handling
+- **ReadableContent Wrapper**: Encapsulates Buffer operations behind a clean API for content manipulation
 
 This pattern separates reading concerns from rendering logic and enables easy mocking in tests.
+
+#### ReadableContent Class
+
+The `ReadableContent` class is a wrapper around Node.js Buffer that provides:
+
+- **Constructor-based creation**: `new ReadableContent(string | Buffer | ReadableContent)`
+- **Instance-based operations**: Non-static methods for fluent API patterns
+- **Generic method names**: Content-focused methods like `slice()`, `search()`, `trim()`
+- **Buffer abstraction**: Hides Buffer implementation details from consumers
+
+**Key Benefits:**
+
+- Complete encapsulation of Buffer operations
+- Method chaining with instance-based `append()`
+- Performance-optimized with single-allocation concatenation
+- Type-safe content manipulation
+
+**Example Usage:**
+
+```typescript
+const content = new ReadableContent('Hello')
+  .append(' ', 'World')
+  .append('!')
+  .trim();
+```
 
 ## Repository Platforms
 

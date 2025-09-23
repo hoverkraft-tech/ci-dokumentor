@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, Mocked, MockInstance } from 'vitest';
-import { GitRepositoryProvider } from './git-repository-provider.js';
 import { simpleGit, TagResult, Response, FetchResult } from 'simple-git';
 import gitUrlParse from 'git-url-parse';
+import { GitRepositoryProvider } from './git-repository-provider.js';
 
 // Mock the dependencies
 vi.mock('simple-git');

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { ReadableContent } from '../../reader/readable-content.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
-import { ReadableContent } from '../../reader/reader.adapter.js';
 
 describe('MarkdownTableGenerator', () => {
   let markdownTableGenerator: MarkdownTableGenerator;
@@ -13,13 +13,13 @@ describe('MarkdownTableGenerator', () => {
     it('should format basic table with headers and rows', () => {
       // Arrange
       const headers = [
-        Buffer.from('Name'),
-        Buffer.from('Age'),
-        Buffer.from('City'),
+        new ReadableContent('Name'),
+        new ReadableContent('Age'),
+        new ReadableContent('City'),
       ];
       const rows = [
-        [Buffer.from('John'), Buffer.from('25'), Buffer.from('New York')],
-        [Buffer.from('Jane'), Buffer.from('30'), Buffer.from('Paris')],
+        [new ReadableContent('John'), new ReadableContent('25'), new ReadableContent('New York')],
+        [new ReadableContent('Jane'), new ReadableContent('30'), new ReadableContent('Paris')],
       ];
 
       // Act
@@ -48,7 +48,7 @@ describe('MarkdownTableGenerator', () => {
 
     it('should handle table with only headers', () => {
       // Arrange
-      const headers = [Buffer.from('Column 1'), Buffer.from('Column 2')];
+      const headers = [new ReadableContent('Column 1'), new ReadableContent('Column 2')];
       const rows: ReadableContent[][] = [];
 
       // Act
@@ -64,9 +64,9 @@ describe('MarkdownTableGenerator', () => {
 
     it('should handle table with special characters', () => {
       // Arrange
-      const headers = [Buffer.from('Name'), Buffer.from('Description')];
+      const headers = [new ReadableContent('Name'), new ReadableContent('Description')];
       const rows = [
-        [Buffer.from('Item "A"'), Buffer.from('Description with & symbols!')],
+        [new ReadableContent('Item "A"'), new ReadableContent('Description with & symbols!')],
       ];
 
       // Act
@@ -84,8 +84,8 @@ describe('MarkdownTableGenerator', () => {
 
     it('should treat inline code as single block in table cells', () => {
       // Arrange
-      const headers = [Buffer.from('Example')];
-      const rows = [[Buffer.from('`code`')]];
+      const headers = [new ReadableContent('Example')];
+      const rows = [[new ReadableContent('`code`')]];
 
       // Act
       const result = markdownTableGenerator.table(headers, rows);
@@ -102,8 +102,8 @@ describe('MarkdownTableGenerator', () => {
 
     it('should treat inline backtick spans as single blocks in table cells', () => {
       // Arrange
-      const headers = [Buffer.from('Example')];
-      const rows = [[Buffer.from('This is inline `code` span')]];
+      const headers = [new ReadableContent('Example')];
+      const rows = [[new ReadableContent('This is inline `code` span')]];
 
       // Act
       const result = markdownTableGenerator.table(headers, rows);
@@ -120,9 +120,9 @@ describe('MarkdownTableGenerator', () => {
 
     it('should treat inline backtick spans with newlines as single blocks in table cells', () => {
       // Arrange
-      const headers = [Buffer.from('Example')];
+      const headers = [new ReadableContent('Example')];
       // inline backtick span using single backticks but containing a newline
-      const rows = [[Buffer.from('This is inline `a\nb` span')]];
+      const rows = [[new ReadableContent('This is inline `a\nb` span')]];
 
       // Act
       const result = markdownTableGenerator.table(headers, rows);
@@ -140,11 +140,11 @@ describe('MarkdownTableGenerator', () => {
 
     it('should handle multiline content in table cells', () => {
       // Arrange
-      const headers = [Buffer.from('Name'), Buffer.from('Description')];
+      const headers = [new ReadableContent('Name'), new ReadableContent('Description')];
       const rows = [
         [
-          Buffer.from('John\nDoe'),
-          Buffer.from('A person with\nmultiple lines\nof description'),
+          new ReadableContent('John\nDoe'),
+          new ReadableContent('A person with\nmultiple lines\nof description'),
         ],
       ];
 
@@ -164,9 +164,9 @@ describe('MarkdownTableGenerator', () => {
 
     it('should escape pipe characters in table cells', () => {
       // Arrange
-      const headers = [Buffer.from('Code'), Buffer.from('Output')];
+      const headers = [new ReadableContent('Code'), new ReadableContent('Output')];
       const rows = [
-        [Buffer.from('if (a | b)'), Buffer.from('result: true | false')],
+        [new ReadableContent('if (a | b)'), new ReadableContent('result: true | false')],
       ];
 
       // Act
@@ -184,10 +184,10 @@ describe('MarkdownTableGenerator', () => {
     it('should use Markdown table format when headers contain multiline content', () => {
       // Arrange
       const headers = [
-        Buffer.from('Multi\nLine\nHeader'),
-        Buffer.from('Description'),
+        new ReadableContent('Multi\nLine\nHeader'),
+        new ReadableContent('Description'),
       ];
-      const rows = [[Buffer.from('Value'), Buffer.from('Single line content')]];
+      const rows = [[new ReadableContent('Value'), new ReadableContent('Single line content')]];
 
       // Act
       const result = markdownTableGenerator.table(headers, rows);
@@ -206,20 +206,20 @@ describe('MarkdownTableGenerator', () => {
     it('should handle mixed single-line and multiline content', () => {
       // Arrange
       const headers = [
-        Buffer.from('Name'),
-        Buffer.from('Status'),
-        Buffer.from('Notes'),
+        new ReadableContent('Name'),
+        new ReadableContent('Status'),
+        new ReadableContent('Notes'),
       ];
       const rows = [
         [
-          Buffer.from('John'),
-          Buffer.from('Active'),
-          Buffer.from('Single line note'),
+          new ReadableContent('John'),
+          new ReadableContent('Active'),
+          new ReadableContent('Single line note'),
         ],
         [
-          Buffer.from('Jane\nSmith'),
-          Buffer.from('Pending\nReview'),
-          Buffer.from('This is a\nmultiline note\nwith details'),
+          new ReadableContent('Jane\nSmith'),
+          new ReadableContent('Pending\nReview'),
+          new ReadableContent('This is a\nmultiline note\nwith details'),
         ],
       ];
 
@@ -240,15 +240,15 @@ describe('MarkdownTableGenerator', () => {
 
     it('should treat code blocks as single lines in table cells', () => {
       // Arrange
-      const headers = [Buffer.from('Language'), Buffer.from('Example Code')];
+      const headers = [new ReadableContent('Language'), new ReadableContent('Example Code')];
       const rows = [
         [
-          Buffer.from('JavaScript'),
-          Buffer.from('Example:\n```js\nfunction hello() {\n  return "Hello World";\n}\n```'),
+          new ReadableContent('JavaScript'),
+          new ReadableContent('Example:\n```js\nfunction hello() {\n  return "Hello World";\n}\n```'),
         ],
         [
-          Buffer.from('Python'),
-          Buffer.from('Example:\n```python\ndef hello():\n    return "Hello World"\n```'),
+          new ReadableContent('Python'),
+          new ReadableContent('Example:\n```python\ndef hello():\n    return "Hello World"\n```'),
         ],
       ];
 
@@ -269,15 +269,15 @@ describe('MarkdownTableGenerator', () => {
 
     it('should handle mixed code blocks and regular multiline content', () => {
       // Arrange
-      const headers = [Buffer.from('Type'), Buffer.from('Content')];
+      const headers = [new ReadableContent('Type'), new ReadableContent('Content')];
       const rows = [
         [
-          Buffer.from('Code'),
-          Buffer.from('```js\nconst x = 1;\nconsole.log(x);\n```'),
+          new ReadableContent('Code'),
+          new ReadableContent('```js\nconst x = 1;\nconsole.log(x);\n```'),
         ],
         [
-          Buffer.from('Text'),
-          Buffer.from('Line 1\nLine 2\nLine 3'),
+          new ReadableContent('Text'),
+          new ReadableContent('Line 1\nLine 2\nLine 3'),
         ],
       ];
 
@@ -298,11 +298,11 @@ describe('MarkdownTableGenerator', () => {
 
     it('should preserve ~~~ fenced code blocks as single lines in table cells', () => {
       // Arrange
-      const headers = [Buffer.from('Lang'), Buffer.from('Example')];
+      const headers = [new ReadableContent('Lang'), new ReadableContent('Example')];
       const rows = [
         [
-          Buffer.from('Custom'),
-          Buffer.from('~~~text\nline a\nline b\n~~~'),
+          new ReadableContent('Custom'),
+          new ReadableContent('~~~text\nline a\nline b\n~~~'),
         ],
       ];
 
@@ -320,12 +320,12 @@ describe('MarkdownTableGenerator', () => {
 
     it('renders fenced code in a single cell and plain text in another cell', () => {
       // Arrange
-      const headers = [Buffer.from('H1'), Buffer.from('H2'), Buffer.from('H3')];
+      const headers = [new ReadableContent('H1'), new ReadableContent('H2'), new ReadableContent('H3')];
 
       // first row: first cell has a fenced block with a newline inside; second is plain
-      const fenced = Buffer.from('pre:\n```js\nconsole.log(1)\n```');
-      const plain = Buffer.from('normal text');
-      const inline = Buffer.from('`inline code`');
+      const fenced = new ReadableContent('pre:\n```js\nconsole.log(1)\n```');
+      const plain = new ReadableContent('normal text');
+      const inline = new ReadableContent('`inline code`');
 
       const rows = [[fenced, plain, inline]];
 

@@ -1,11 +1,18 @@
-import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, ReadableContent } from '@ci-dokumentor/core';
+import { join, extname } from 'node:path';
+import { inject, injectable } from 'inversify';
+import {
+  FileReaderAdapter,
+  SectionIdentifier,
+  SectionGeneratorAdapter,
+  VersionService,
+  ManifestVersion,
+  SectionGenerationPayload,
+  SectionOptions,
+  ReadableContent
+} from '@ci-dokumentor/core';
+import type { FormatterAdapter, ReaderAdapter } from '@ci-dokumentor/core';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { SectionIdentifier, SectionGeneratorAdapter } from '@ci-dokumentor/core';
-import { inject, injectable } from 'inversify';
-import { FileReaderAdapter } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
-import { join, extname } from 'node:path';
 
 export type ExamplesSectionOptions = SectionOptions & {
   version?: string;
@@ -20,7 +27,7 @@ export enum ExampleType {
 type Example = {
   type: ExampleType;
   content: ReadableContent;
-  language?: string;
+  language?: ReadableContent;
   level?: number;
 }
 
@@ -71,63 +78,66 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     const version = await this.versionService.getVersion(this.version, repositoryProvider);
     const repositoryInfo = await repositoryProvider.getRepositoryInfo();
 
-    const examples = await this.findExamples(repositoryInfo.rootDir, destination);
+    const examples = await this.findExamples(
+      repositoryInfo.rootDir,
+      destination,
+      formatterAdapter
+    );
 
     if (examples.length === 0) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
-    const examplesContent = [
-      formatterAdapter.heading(Buffer.from('Examples'), 2),
+    let examplesContent = formatterAdapter.heading(new ReadableContent('Examples'), 2).append(
       formatterAdapter.lineBreak(),
-    ];
+    );
 
     for (const example of examples) {
       if (example.type === ExampleType.Heading) {
-        examplesContent.push(
-          formatterAdapter.heading(Buffer.from(example.content), example.level || 3),
+        examplesContent = examplesContent.append(
+          formatterAdapter.heading(example.content, example.level || 3),
           formatterAdapter.lineBreak()
         );
       } else if (example.type === ExampleType.Text) {
-        examplesContent.push(
-          formatterAdapter.paragraph(Buffer.from(example.content)),
+        examplesContent = examplesContent.append(
+          formatterAdapter.paragraph(example.content),
           formatterAdapter.lineBreak()
         );
       } else if (example.type === ExampleType.Code) {
-        const processedCode = this.processCodeSnippet(example.content, manifest.usesName, version);
-        examplesContent.push(
-          formatterAdapter.code(Buffer.from(processedCode), Buffer.from(example.language || 'yaml')),
+        const processedCode = this.processCodeSnippet(formatterAdapter, example.content, manifest.usesName, version);
+        examplesContent = examplesContent.append(
+          formatterAdapter.code(processedCode, example.language ?? new ReadableContent('yaml')),
           formatterAdapter.lineBreak()
         );
       }
     }
 
-    return formatterAdapter.appendContent(...examplesContent);
+    return examplesContent;
   }
 
   /**
    * Find examples from various sources
    */
-  private async findExamples(rootDir: string, destination?: string): Promise<Example[]> {
+  private async findExamples(rootDir: string, destination: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
     const examples: Example[] = [];
 
     // Strategy 1: Look for examples/ directory
     const examplesDir = join(rootDir, 'examples');
     const examplesDirExists = this.readerAdapter.containerExists(examplesDir);
     if (examplesDirExists) {
-      examples.push(...await this.findExamplesFromDirectory(examplesDir));
+      examples.push(...await this.findExamplesFromDirectory(examplesDir, formatterAdapter));
     }
 
     // Strategy 2: Look for .github/examples/ directory
     const githubExamplesDir = join(rootDir, '.github', 'examples');
     const githubExamplesDirExists = this.readerAdapter.containerExists(githubExamplesDir);
     if (githubExamplesDirExists) {
-      examples.push(...await this.findExamplesFromDirectory(githubExamplesDir));
+      examples.push(...await this.findExamplesFromDirectory(githubExamplesDir, formatterAdapter));
     }
 
     // Strategy 3: Look for examples in destination file (if it exists)
     if (destination && this.readerAdapter.resourceExists(destination)) {
-      examples.push(...await this.findExamplesFromDestination(destination));
+      examples.push(...await this.findExamplesFromDestination(destination, formatterAdapter));
     }
 
     return examples;
@@ -136,7 +146,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   /**
    * Find examples from a directory containing example files
    */
-  private async findExamplesFromDirectory(dirPath: string): Promise<Example[]> {
+  private async findExamplesFromDirectory(dirPath: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
     const examples: Example[] = [];
 
     const files = await this.readerAdapter.readContainer(dirPath);
@@ -149,20 +159,20 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
 
       const ext = extname(file).toLowerCase();
       if (['.yml', '.yaml'].includes(ext)) {
-        const contentBuf = await this.readerAdapter.readResource(filePath);
-        const content = contentBuf.toString('utf8');
         examples.push({
           type: ExampleType.Heading,
-          content: Buffer.from(file.replace(/\.(yml|yaml)$/, '')),
+          content: new ReadableContent(file.replace(/\.(yml|yaml)$/, '')),
           level: 3
         });
+
+        const content = await this.readerAdapter.readResource(filePath);
         examples.push({
           type: ExampleType.Code,
-          content: Buffer.from(content),
-          language: 'yaml'
+          content: content,
+          language: new ReadableContent('yaml')
         });
       } else if (ext === '.md') {
-        examples.push(...await this.parseMarkdownExamples(filePath));
+        examples.push(...await this.parseMarkdownExamples(filePath, formatterAdapter));
       }
     }
 
@@ -172,27 +182,27 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   /**
    * Extract examples from README.md or destination file
    */
-  private async findExamplesFromDestination(destination: string): Promise<Example[]> {
+  private async findExamplesFromDestination(destination: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
     const examples: Example[] = [];
     const content = await this.readerAdapter.readResource(destination);
-    const lines = content.toString('utf8').split('\n');
+    const lines = content.splitLines();
 
     let inExamplesSection = false;
     let inCodeBlock = false;
-    let codeBlockLanguage = '';
-    let codeBlockContent = '';
+    let codeBlockLanguage = ReadableContent.empty();
+    let codeBlockContent = ReadableContent.empty();
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
       // Check if we've entered an examples section
-      if (line.match(/^#+\s*examples?/i)) {
+      if (line.test(/^#+\s*examples?/i)) {
         inExamplesSection = true;
         continue;
       }
 
       // Check if we've left the examples section (next major heading)
-      if (inExamplesSection && line.match(/^#[^#]/)) {
+      if (inExamplesSection && line.test(/^#[^#]/)) {
         break;
       }
 
@@ -201,34 +211,34 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
         if (line.startsWith('```')) {
           if (!inCodeBlock) {
             inCodeBlock = true;
-            codeBlockLanguage = line.slice(3).trim() || 'yaml';
-            codeBlockContent = '';
+            codeBlockLanguage = line.slice(3).trim() || new ReadableContent('yaml');
+            codeBlockContent = ReadableContent.empty();
           } else {
             inCodeBlock = false;
             if (codeBlockContent.trim()) {
               examples.push({
                 type: ExampleType.Code,
-                content: Buffer.from(codeBlockContent.trim()),
+                content: codeBlockContent.trim(),
                 language: codeBlockLanguage
               });
             }
           }
         } else if (inCodeBlock) {
-          codeBlockContent += line + '\n';
-        } else if (line.match(/^#+/)) {
+          codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
+        } else if (line.test(/^#+/)) {
           // Sub-heading within examples section
           const level = (line.match(/^#+/) || [''])[0].length;
           const heading = line.replace(/^#+\s*/, '');
           examples.push({
             type: ExampleType.Heading,
-            content: Buffer.from(heading),
+            content: heading,
             level: level + 2 // Offset since examples is already h2
           });
         } else if (line.trim()) {
           // Regular text content
           examples.push({
             type: ExampleType.Text,
-            content: Buffer.from(line)
+            content: line
           });
         }
       }
@@ -240,45 +250,45 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   /**
    * Parse markdown files for examples
    */
-  private async parseMarkdownExamples(filePath: string): Promise<Example[]> {
+  private async parseMarkdownExamples(filePath: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
     const examples: Example[] = [];
     const content = await this.readerAdapter.readResource(filePath);
-    const lines = content.toString('utf8').split('\n');
+    const lines = content.splitLines();
 
     let inCodeBlock = false;
-    let codeBlockLanguage = '';
-    let codeBlockContent = '';
+    let codeBlockLanguage = ReadableContent.empty();
+    let codeBlockContent = ReadableContent.empty();
 
     for (const line of lines) {
       if (line.startsWith('```')) {
         if (!inCodeBlock) {
           inCodeBlock = true;
-          codeBlockLanguage = line.slice(3).trim() || 'yaml';
-          codeBlockContent = '';
+          codeBlockLanguage = line.slice(3).trim() || new ReadableContent('yaml');
+          codeBlockContent = ReadableContent.empty();
         } else {
           inCodeBlock = false;
           if (codeBlockContent.trim()) {
             examples.push({
               type: ExampleType.Code,
-              content: Buffer.from(codeBlockContent.trim()),
+              content: codeBlockContent.trim(),
               language: codeBlockLanguage
             });
           }
         }
       } else if (inCodeBlock) {
-        codeBlockContent += line + '\n';
-      } else if (line.match(/^#+/)) {
+        codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
+      } else if (line.test(/^#+/)) {
         const level = (line.match(/^#+/) || [''])[0].length;
         const heading = line.replace(/^#+\s*/, '');
         examples.push({
           type: ExampleType.Heading,
-          content: Buffer.from(heading),
+          content: heading,
           level: level + 2
         });
       } else if (line.trim()) {
         examples.push({
           type: ExampleType.Text,
-          content: Buffer.from(line)
+          content: line
         });
       }
     }
@@ -289,13 +299,14 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   /**
    * Process code snippets to replace or add version information for action calls
    */
-  private processCodeSnippet(code: ReadableContent, usesName: string, version?: ManifestVersion): ReadableContent {
+  private processCodeSnippet(formatterAdapter: FormatterAdapter, code: ReadableContent, usesName: string, version?: ManifestVersion): ReadableContent {
     if (!version || !version.sha) {
       return code;
     }
 
-    const lines = code.toString('utf8').split('\n');
-    const processedLines = lines.map(line => {
+    let codeSnippetContent = ReadableContent.empty();
+    const lines = code.splitLines();
+    lines.forEach(line => {
       // Look for uses: lines that reference the current action (both YAML list syntax and regular uses)
       const usesMatch = line.match(/^(\s*-?\s*uses:\s*)(.+)$/);
       if (usesMatch) {
@@ -306,13 +317,17 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
           // Replace or add version information
           const baseActionRef = actionRef.split('@')[0];
           const versionComment = version.ref ? ` # ${version.ref}` : '';
-          return `${prefix}${baseActionRef}@${version.sha}${versionComment}`;
+          codeSnippetContent = codeSnippetContent.append(
+            `${prefix}${baseActionRef}@${version.sha}${versionComment}`,
+            formatterAdapter.lineBreak()
+          );
+          return;
         }
       }
 
-      return line;
+      codeSnippetContent = codeSnippetContent.append(line.trimTrailingLineBreaks());
     });
 
-    return Buffer.from(processedLines.join('\n'));
+    return codeSnippetContent.trimTrailingLineBreaks().append(formatterAdapter.lineBreak());
   }
 }

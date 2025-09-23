@@ -1,5 +1,6 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 import {
   FileRendererAdapter,
   RepositoryProvider,
@@ -7,12 +8,11 @@ import {
   MarkdownFormatterAdapter,
   FormatterAdapter,
 } from '@ci-dokumentor/core';
-import { initTestContainer } from './container.js';
-import mockFs from 'mock-fs';
-import { existsSync, readFileSync } from 'node:fs';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
-import { join } from 'node:path';
+import mockFs, { restore } from 'mock-fs';
+import { initTestContainer } from './container.js';
+import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 
 const rootPath = join(__dirname, '../../../..');
 
@@ -37,7 +37,7 @@ describe('GitHubActionsGeneratorAdapter - Integration Tests', () => {
 
   afterEach(() => {
     // Restore real file system
-    mockFs.restore();
+    restore();
     // Restore all mocks
     vi.restoreAllMocks();
   });

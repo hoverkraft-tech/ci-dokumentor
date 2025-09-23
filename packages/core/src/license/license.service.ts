@@ -1,6 +1,7 @@
 import { injectable, inject } from 'inversify';
-import type { ReaderAdapter, ReadableContent } from '../reader/reader.adapter.js';
+import type { ReaderAdapter } from '../reader/reader.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
+import { ReadableContent } from '../reader/readable-content.js';
 
 export type LicenseInfo = {
   name: string;
@@ -35,7 +36,7 @@ export class LicenseService {
       const licenseContent = await this.readerAdapter.readResource(licensePath);
 
       // If file exists and has content
-      if (licenseContent.length > 0) {
+      if (!licenseContent.isEmpty()) {
         // Try to detect license type from content
         const licenseName = this.detectLicenseType(licenseContent);
 
@@ -51,7 +52,7 @@ export class LicenseService {
   }
 
   private detectLicenseType(content: ReadableContent): string {
-    const upperContent = content.toString('utf-8').toUpperCase();
+    const upperContent = content.toUpperCase();
 
     if (
       upperContent.includes('MIT LICENSE') ||

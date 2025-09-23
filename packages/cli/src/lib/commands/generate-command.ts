@@ -1,11 +1,11 @@
 import { inject, injectable, injectFromBase } from 'inversify';
 import { Command, Option } from 'commander';
-import { BaseCommand } from './base-command.js';
+import { GenerateSectionsOptions, RepositoryOptions, SectionOptions, LinkFormat, FormatterOptions } from '@ci-dokumentor/core';
 import {
   GenerateDocumentationUseCase,
   GenerateDocumentationUseCaseInput,
 } from '../usecases/generate-documentation.usecase.js';
-import { GenerateSectionsOptions, RepositoryOptions, SectionOptions, LinkFormat, FormatterOptions } from '@ci-dokumentor/core';
+import { BaseCommand } from './base-command.js';
 
 export type GenerateCommandOptions = {
   outputFormat: string;

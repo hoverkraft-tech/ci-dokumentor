@@ -1,16 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import mockFs from 'mock-fs';
 import { existsSync, readFileSync } from 'node:fs';
+import mockFs, { file, restore } from 'mock-fs';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
-import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import { initContainer, resetContainer } from '../container.js';
+import { ReadableContent } from '../reader/readable-content.js';
+import { FileRendererAdapter } from './file-renderer.adapter.js';
 
 describe('FileRendererAdapter', () => {
   const testFilePath = '/test/document.md';
   const testSectionIdentifier = SectionIdentifier.Examples;
-  const testData = Buffer.from('New section content\n');
+  const testData = new ReadableContent('New section content\n');
 
   let formatterAdapter: MarkdownFormatterAdapter;
 
@@ -64,7 +65,7 @@ License content
     resetContainer();
 
     // Restore real filesystem
-    mockFs.restore();
+    restore();
 
     vi.resetAllMocks();
   });
@@ -129,13 +130,13 @@ New section content
     it('should handle multiple sections without affecting other sections', async () => {
       // Arrange
       const multipleSectionsAdapter = new FileRendererAdapter(new FileReaderAdapter());
-      const newUsageContent = Buffer.from('Updated usage section\n');
-      const newLicenseContent = Buffer.from('Updated license section\n');
+      const newUsageContent = new ReadableContent('Updated usage section\n');
+      const newLicenseContent = new ReadableContent('Updated license section\n');
 
       // Act
       await multipleSectionsAdapter.initialize('/test/multiple-sections.md', formatterAdapter);
       await multipleSectionsAdapter.writeSection(SectionIdentifier.Usage, newUsageContent);
-      await multipleSectionsAdapter.writeSection(SectionIdentifier.Security, Buffer.alloc(0)); // Empty content for security section
+      await multipleSectionsAdapter.writeSection(SectionIdentifier.Security, ReadableContent.empty()); // Empty content for security section
       await multipleSectionsAdapter.writeSection(SectionIdentifier.License, newLicenseContent);
 
       // Assert
@@ -166,7 +167,7 @@ Updated license section
 
     it('should handle sections with complex content including line breaks', async () => {
       // Arrange
-      const complexData = Buffer.from(
+      const complexData = new ReadableContent(
         'Line 1\nLine 2\n\nLine 4 with spaces   \n<!-- embedded comment -->'
       );
 
@@ -183,7 +184,7 @@ Updated license section
 
     it('should handle empty section content', async () => {
       // Arrange
-      const emptyData = Buffer.alloc(0);
+      const emptyData = ReadableContent.empty();
 
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
@@ -269,10 +270,9 @@ Updated license section
   describe('error handling', () => {
     it('should handle file system errors gracefully', async () => {
       // Arrange - Create a read-only file system
-      mockFs.restore();
       mockFs({
         '/readonly': {
-          'document.md': mockFs.file({
+          'document.md': file({
             content: 'Initial content',
             mode: 0o444, // Read-only
           }),
@@ -303,9 +303,9 @@ Updated license section
   describe('integration scenarios', () => {
     it('should handle multiple consecutive writes to the same section', async () => {
       // Arrange
-      const firstData = Buffer.from('First content');
-      const secondData = Buffer.from('Second content');
-      const thirdData = Buffer.from('Third content');
+      const firstData = new ReadableContent('First content');
+      const secondData = new ReadableContent('Second content');
+      const thirdData = new ReadableContent('Third content');
 
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
@@ -336,8 +336,8 @@ Updated license section
 
     it('should handle concurrent section updates', async () => {
       // Arrange
-      const section1Data = Buffer.from('Section 1 content');
-      const section2Data = Buffer.from('Section 2 content');
+      const section1Data = new ReadableContent('Section 1 content');
+      const section2Data = new ReadableContent('Section 2 content');
 
       // Act - Simulate concurrent writes to different sections
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);

@@ -31,6 +31,13 @@ These coding standards are the canonical rules contributors and automated agents
 - Error handling: use typed error classes and consider Result/Option types for operations that may fail; provide meaningful error messages and contexts.
 - Comments & docs: limit inline comments, explain the "why" not just the "what", and use JSDoc for public APIs.
 
+### Content Handling
+
+- **Use ReadableContent wrapper**: Never use Buffer directly; use `ReadableContent` class for all content operations.
+- **Prefer constructor pattern**: Use `new ReadableContent(string)` instead of static factory methods.
+- **Chain operations**: Utilize instance methods for fluent API patterns: `content.append().trim()`.
+- **Avoid string conversion**: Methods marked `@deprecated` that call `toString()` should be avoided in performance-critical paths.
+
 ## Documentation & package readmes
 
 - Each package MUST include a concise `README.md` at the package root. The readme should contain a one-line description, basic usage, and a link to the canonical developer documentation page under `packages/docs/content/` for deeper guidance.
