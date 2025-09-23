@@ -600,6 +600,33 @@ describe('MarkdownFormatterAdapter', () => {
         '```typescript\nfunction test() {\n  return true;\n}\n```\n'
       );
     });
+
+    it('should use a longer fence when content contains backtick runs', () => {
+      // Arrange: content contains a triple-backtick sequence inside
+      const content = Buffer.from(`
+const example = \`inline\`;
+// code fence inside:
+\`\`\`
+some inner code
+\`\`\`
+end
+`);
+
+      // Act
+      const result = adapter.code(content);
+
+      // Assert: fence should be at least 4 backticks so inner ``` does not close it
+      expect(result.toString()).toEqual(`\`\`\`\`
+
+const example = \`inline\`;
+// code fence inside:
+\`\`\`
+some inner code
+\`\`\`
+end
+\`\`\`\`
+`);
+    });
   });
 
   describe('inlineCode', () => {

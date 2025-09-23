@@ -145,12 +145,13 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   code(content: ReadableContent, language?: ReadableContent): ReadableContent {
+    const fence = this.backtickFenceFor(content);
     return this.appendContent(
-      Buffer.from('```'),
+      fence,
       language || Buffer.alloc(0),
       this.lineBreak(),
       this.trimTrailingLineBreaks(content),
-      Buffer.from('```'),
+      fence,
       this.lineBreak(),
     );
   }
@@ -378,13 +379,13 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
    * Returns a buffer that ends with exactly one LF ("\n").
    * If the input is empty or contains only newlines, returns a buffer with a single "\n".
    */
-  private trimTrailingLineBreaks(input: ReadableContent): ReadableContent {
-    if (!input || input.length === 0) {
+  private trimTrailingLineBreaks(content: ReadableContent): ReadableContent {
+    if (!content || content.length === 0) {
       return this.lineBreak();
     }
 
-    let end = input.length - 1;
-    while (end >= 0 && (input[end] === 0x0A /* \n */ || input[end] === 0x0D /* \r */)) {
+    let end = content.length - 1;
+    while (end >= 0 && (content[end] === 0x0A /* \n */ || content[end] === 0x0D /* \r */)) {
       end--;
     }
 
@@ -392,7 +393,35 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       return this.lineBreak();
     }
 
-    const contentPart = input.subarray(0, end + 1);
+    const contentPart = content.subarray(0, end + 1);
     return this.appendContent(contentPart, this.lineBreak());
+  }
+
+  /**
+   * Compute a backtick fence buffer that is longer than any run of backticks inside the content.
+   * This avoids closing the fenced code block prematurely when the content itself contains
+   * triple-backtick sequences. Minimum fence length is 3 (```), longer if needed.
+   */
+  private backtickFenceFor(content: ReadableContent): Buffer {
+    if (!content || content.length === 0) {
+      return Buffer.from('```');
+    }
+
+    let maxRun = 0;
+    let current = 0;
+    const tick = 0x60; // `
+    for (let i = 0; i < content.length; i++) {
+      if (content[i] === tick) {
+        current++;
+        if (current > maxRun) {
+          maxRun = current;
+        }
+      } else {
+        current = 0;
+      }
+    }
+
+    const fenceLen = Math.max(3, maxRun + 1);
+    return Buffer.from('`'.repeat(fenceLen));
   }
 }

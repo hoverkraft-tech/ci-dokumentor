@@ -109,7 +109,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   ): Promise<LinkedBadge[]> {
     const repositoryInfo = await repositoryProvider.getRepositoryInfo();
 
-    const actionName = manifest.name.toLowerCase().replace(/\s+/g, '-');
+    const actionName = manifest.name.toLowerCase().replace(/[\s()]+/g, '-');
     const badges = [
       {
         url: `${repositoryInfo.url}/releases`,
