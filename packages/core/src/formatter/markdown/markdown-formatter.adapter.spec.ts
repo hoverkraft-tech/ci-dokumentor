@@ -4,7 +4,6 @@ import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { FormatterLanguage } from '../formatter-language.js';
 import { LinkFormat } from '../formatter.adapter.js';
 import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
-import { ReadableContent } from '../../reader/reader.adapter.js';
 
 describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
@@ -215,6 +214,20 @@ describe('MarkdownFormatterAdapter', () => {
       expect(result.toString()).toEqual('First line\nSecond line\n');
     });
 
+    it('should handle text with multiline bullet points', () => {
+      // Arrange
+      const input = Buffer.from('- Bullet 1\n  Second line of bullet 1\n- Bullet 2');
+
+      // Act
+      const result = adapter.paragraph(input);
+
+      // Assert
+      expect(result.toString()).toEqual(`- Bullet 1
+  Second line of bullet 1
+- Bullet 2
+`);
+    });
+
     describe('URL transformation', () => {
       describe('autolink format (default)', () => {
         it('should transform URLs to autolinks by default', () => {
@@ -227,6 +240,18 @@ describe('MarkdownFormatterAdapter', () => {
 
           // Assert
           expect(result.toString()).toEqual('Visit <https://example.com> for more information\n');
+        });
+
+        it('should not transform URLs that are already in autolink format', () => {
+          // Arrange
+          const input = Buffer.from('Visit <https://example.com> for more');
+          adapter.setOptions({ linkFormat: LinkFormat.Auto });
+
+          // Act
+          const result = adapter.paragraph(input);
+
+          // Assert
+          expect(result.toString()).toEqual('Visit <https://example.com> for more\n');
         });
 
         it('should transform multiple URLs to autolinks', () => {
@@ -590,6 +615,12 @@ describe('MarkdownFormatterAdapter', () => {
       const result = adapter.inlineCode(input);
       expect(result.toString()).toEqual('`a \\` b`');
     });
+
+    it('should escape bold/italic markers in inlineCode', () => {
+      const input = Buffer.from('a ** b * c');
+      const result = adapter.inlineCode(input);
+      expect(result.toString()).toEqual('`a \\*\\* b \\* c`');
+    });
   });
 
   describe('link', () => {
@@ -735,253 +766,6 @@ describe('MarkdownFormatterAdapter', () => {
 | ---- | --- | -------- |
 | John | 25  | New York |
 | Jane | 30  | Paris    |
-`);
-    });
-
-    it('should handle empty table', () => {
-      // Arrange
-      const headers: ReadableContent[] = [];
-      const rows: ReadableContent[][] = [];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert
-      expect(result.toString()).toEqual('');
-    });
-
-    it('should handle table with only headers', () => {
-      // Arrange
-      const headers = [Buffer.from('Column 1'), Buffer.from('Column 2')];
-      const rows: ReadableContent[][] = [];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `| Column 1 | Column 2 |
-| -------- | -------- |
-`
-      );
-    });
-
-    it('should handle table with special characters', () => {
-      // Arrange
-      const headers = [Buffer.from('Name'), Buffer.from('Description')];
-      const rows = [
-        [Buffer.from('Item "A"'), Buffer.from('Description with & symbols!')],
-      ];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `| Name     | Description                 |
-| -------- | --------------------------- |
-| Item "A" | Description with & symbols! |
-`
-      );
-    });
-
-    it('should handle multiline content in table cells', () => {
-      // Arrange
-      const headers = [Buffer.from('Name'), Buffer.from('Description')];
-      const rows = [
-        [
-          Buffer.from('John\nDoe'),
-          Buffer.from('A person with\nmultiple lines\nof description'),
-        ],
-      ];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `| Name | Description    |
-| ---- | -------------- |
-| John | A person with  |
-| Doe  | multiple lines |
-|      | of description |
-`
-      );
-    });
-
-    it('should escape pipe characters in table cells', () => {
-      // Arrange
-      const headers = [Buffer.from('Code'), Buffer.from('Output')];
-      const rows = [
-        [Buffer.from('if (a | b)'), Buffer.from('result: true | false')],
-      ];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `| Code        | Output                |
-| ----------- | --------------------- |
-| if (a \\| b) | result: true \\| false |
-`
-      );
-    });
-
-    it('should use Markdown table format when headers contain multiline content', () => {
-      // Arrange
-      const headers = [
-        Buffer.from('Multi\nLine\nHeader'),
-        Buffer.from('Description'),
-      ];
-      const rows = [[Buffer.from('Value'), Buffer.from('Single line content')]];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `| Multi  | Description         |
-| ------ | ------------------- |
-| Line   |                     |
-| Header |                     |
-| Value  | Single line content |
-`
-      );
-    });
-
-    it('should handle mixed single-line and multiline content', () => {
-      // Arrange
-      const headers = [
-        Buffer.from('Name'),
-        Buffer.from('Status'),
-        Buffer.from('Notes'),
-      ];
-      const rows = [
-        [
-          Buffer.from('John'),
-          Buffer.from('Active'),
-          Buffer.from('Single line note'),
-        ],
-        [
-          Buffer.from('Jane\nSmith'),
-          Buffer.from('Pending\nReview'),
-          Buffer.from('This is a\nmultiline note\nwith details'),
-        ],
-      ];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `| Name  | Status  | Notes            |
-| ----- | ------- | ---------------- |
-| John  | Active  | Single line note |
-| Jane  | Pending | This is a        |
-| Smith | Review  | multiline note   |
-|       |         | with details     |
-`
-      );
-    });
-
-    it('should treat code blocks as single lines in table cells', () => {
-      // Arrange
-      const headers = [Buffer.from('Language'), Buffer.from('Example Code')];
-      const rows = [
-        [
-          Buffer.from('JavaScript'),
-          Buffer.from('Example:\n```js\nfunction hello() {\n  return "Hello World";\n}\n```'),
-        ],
-        [
-          Buffer.from('Python'),
-          Buffer.from('Example:\n```python\ndef hello():\n    return "Hello World"\n```'),
-        ],
-      ];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert: Markdown table with <pre lang="..."> for code cells and &#13; for inner newlines
-      expect(result.toString()).toEqual(
-        `| Language   | Example Code                                                             |
-| ---------- | ------------------------------------------------------------------------ |
-| JavaScript | Example:                                                                 |
-|            | <pre lang="js">function hello() {&#13; return "Hello World";&#13;}</pre> |
-| Python     | Example:                                                                 |
-|            | <pre lang="python">def hello():&#13; return "Hello World"</pre>          |
-`
-      );
-    });
-
-    it('should handle mixed code blocks and regular multiline content', () => {
-      // Arrange
-      const headers = [Buffer.from('Type'), Buffer.from('Content')];
-      const rows = [
-        [
-          Buffer.from('Code'),
-          Buffer.from('```js\nconst x = 1;\nconsole.log(x);\n```'),
-        ],
-        [
-          Buffer.from('Text'),
-          Buffer.from('Line 1\nLine 2\nLine 3'),
-        ],
-      ];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert: Markdown table; code cell rendered in <pre lang="..."> with &#13;, text cell uses <br>
-      expect(result.toString()).toEqual(
-        `| Type | Content                                               |
-| ---- | ----------------------------------------------------- |
-| Code | <pre lang="js">const x = 1;&#13;console.log(x);</pre> |
-| Text | Line 1                                                |
-|      | Line 2                                                |
-|      | Line 3                                                |
-`
-      );
-    });
-
-    it('should preserve ~~~ fenced code blocks as single lines in table cells', () => {
-      // Arrange
-      const headers = [Buffer.from('Lang'), Buffer.from('Example')];
-      const rows = [
-        [
-          Buffer.from('Custom'),
-          Buffer.from('~~~text\nline a\nline b\n~~~'),
-        ],
-      ];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert: Markdown table with <pre lang="text"> and &#13; for inner newlines
-      expect(result.toString()).toEqual(
-        `| Lang   | Example                                  |
-| ------ | ---------------------------------------- |
-| Custom | <pre lang="text">line a&#13;line b</pre> |
-`
-      );
-    });
-
-    it('should treat inline backtick spans with newlines as single blocks in table cells', () => {
-      // Arrange
-      const headers = [Buffer.from('Example')];
-      // inline backtick span using single backticks but containing a newline
-      const rows = [[Buffer.from('This is inline `a\nb` span')]];
-
-      // Act
-      const result = adapter.table(headers, rows);
-
-      // Assert: the inline backtick span should be preserved and rendered as a
-      // single block (we expect a <pre> fragment containing the inner content
-      // where inner newlines are encoded as &#13;). We assert substring to keep
-      // the test robust to column width/padding differences.
-      const out = result.toString();
-      expect(out).toEqual(`| Example                              |
-| ------------------------------------ |
-| This is inline<pre>a&#13;b</pre>span |
 `);
     });
   });

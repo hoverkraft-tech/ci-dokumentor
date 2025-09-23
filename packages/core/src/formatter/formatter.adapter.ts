@@ -25,21 +25,21 @@ export interface FormatterAdapter {
    */
   setOptions(options: FormatterOptions): void;
 
-  appendContent(...inputs: ReadableContent[]): ReadableContent;
+  appendContent(...content: ReadableContent[]): ReadableContent;
 
-  heading(input: ReadableContent, level?: number): ReadableContent;
+  heading(content: ReadableContent, level?: number): ReadableContent;
 
-  center(input: ReadableContent): ReadableContent;
+  center(content: ReadableContent): ReadableContent;
 
-  paragraph(input: ReadableContent): ReadableContent;
+  paragraph(content: ReadableContent): ReadableContent;
 
-  bold(input: ReadableContent): ReadableContent;
+  bold(content: ReadableContent): ReadableContent;
 
-  italic(input: ReadableContent): ReadableContent;
+  italic(content: ReadableContent): ReadableContent;
 
-  code(input: ReadableContent, language?: ReadableContent): ReadableContent;
+  code(content: ReadableContent, language?: ReadableContent): ReadableContent;
 
-  inlineCode(input: ReadableContent): ReadableContent;
+  inlineCode(content: ReadableContent): ReadableContent;
 
   link(text: ReadableContent, url: ReadableContent): ReadableContent;
 
@@ -60,7 +60,7 @@ export interface FormatterAdapter {
   /**
    * Wrap content in section markers
    */
-  section(section: SectionIdentifier, input: ReadableContent): ReadableContent;
+  section(section: SectionIdentifier, content: ReadableContent): ReadableContent;
 
   sectionStart(section: SectionIdentifier): ReadableContent;
 

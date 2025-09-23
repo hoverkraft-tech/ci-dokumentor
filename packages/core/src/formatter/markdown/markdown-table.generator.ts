@@ -12,13 +12,8 @@ export class MarkdownTableGenerator {
         const headerLines = headers.map((h) => this.splitMultilineCell(h));
         const maxHeaderLines = Math.max(...headerLines.map((lines) => lines.length));
 
-        const fenceMode = this.hasFence(headers, rows);
-
-        const colWidths = this.computeColWidths(headers, rows, headerLines, fenceMode);
-
-        return fenceMode
-            ? this.renderFenceMode(headers, rows, headerLines, colWidths, maxHeaderLines)
-            : this.renderSimpleMode(headers, rows, headerLines, colWidths, maxHeaderLines);
+        const colWidths = this.computeColWidths(headers, rows, headerLines);
+        return this.renderTable(headers, rows, headerLines, colWidths, maxHeaderLines);
     }
 
     /**
@@ -28,68 +23,39 @@ export class MarkdownTableGenerator {
         return this.escape(this.trimContent(cell), '|');
     }
 
-    private hasFence(headers: ReadableContent[], rows: ReadableContent[][]): boolean {
-        const numCols = headers.length;
-        for (let c = 0; c < numCols; c++) if (this.containsFence(headers[c] || Buffer.alloc(0))) return true;
-        for (const row of rows) {
-            for (let c = 0; c < numCols; c++) if (this.containsFence(row[c] || Buffer.alloc(0))) return true;
-        }
-        return false;
-    }
-
     private computeColWidths(
         headers: ReadableContent[],
         rows: ReadableContent[][],
-        headerLines: ReadableContent[][],
-        fenceMode: boolean
+        headerLines: ReadableContent[][]
     ): number[] {
         const numCols = headers.length;
         const colWidths: number[] = Array.from({ length: numCols }, () => 0);
+        for (let c = 0; c < numCols; c++) {
+            const hLines = headerLines[c] || [Buffer.alloc(0)];
+            for (const hl of hLines) {
+                const line = hl || Buffer.alloc(0);
+                const tb = this.containsFence(line) ? this.transformLineForFence(line) : line;
+                const norm = this.normalizeCell(tb || Buffer.alloc(0));
+                colWidths[c] = Math.max(colWidths[c], norm.length);
+            }
+        }
 
-        if (fenceMode) {
+        for (const row of rows) {
             for (let c = 0; c < numCols; c++) {
-                const hLines = headerLines[c] || [Buffer.alloc(0)];
-                for (const hl of hLines) {
-                    const tb = this.transformLineForFence(hl || Buffer.alloc(0));
+                const clines = this.splitMultilineCell(row[c] || Buffer.alloc(0));
+                for (const ln of clines) {
+                    const line = ln || Buffer.alloc(0);
+                    const tb = this.containsFence(line) ? this.transformLineForFence(line) : line;
                     const norm = this.normalizeCell(tb || Buffer.alloc(0));
                     colWidths[c] = Math.max(colWidths[c], norm.length);
                 }
             }
-            for (const row of rows) {
-                for (let c = 0; c < numCols; c++) {
-                    const clines = this.splitMultilineCell(row[c] || Buffer.alloc(0));
-                    for (const ln of clines) {
-                        const tb = this.transformLineForFence(ln || Buffer.alloc(0));
-                        const norm = this.normalizeCell(tb || Buffer.alloc(0));
-                        colWidths[c] = Math.max(colWidths[c], norm.length);
-                    }
-                }
-            }
-            return colWidths;
         }
-
-        // simple mode
-        for (let c = 0; c < numCols; c++) {
-            (headerLines[c] || ['']).forEach((headerLine) => {
-                const cellContent = this.normalizeCell(Buffer.from(headerLine || ''));
-                colWidths[c] = Math.max(colWidths[c], cellContent.length);
-            });
-        }
-
-        rows.forEach((row) => {
-            for (let c = 0; c < numCols; c++) {
-                const cell = row[c] || Buffer.alloc(0);
-                this.splitMultilineCell(cell).forEach((ln) => {
-                    const s = this.normalizeCell(Buffer.from(ln || ''));
-                    colWidths[c] = Math.max(colWidths[c], s.length);
-                });
-            }
-        });
 
         return colWidths;
     }
 
-    private renderFenceMode(
+    private renderTable(
         headers: ReadableContent[],
         rows: ReadableContent[][],
         headerLines: ReadableContent[][],
@@ -98,13 +64,13 @@ export class MarkdownTableGenerator {
     ): ReadableContent {
         const numCols = headers.length;
         const parts: ReadableContent[] = [];
-        const padCell = (content: ReadableContent, width: number) => this.bufferToPaddedString(this.normalizeCell(content || Buffer.alloc(0)), width);
 
+        // main header (first header line)
         const mainHeaderCells: string[] = [];
         for (let c = 0; c < numCols; c++) {
             const first = (headerLines[c] && headerLines[c][0]) || Buffer.alloc(0);
-            const tb = this.transformLineForFence(first);
-            mainHeaderCells.push(padCell(tb, colWidths[c]));
+            const tb = this.containsFence(first) ? this.transformLineForFence(first) : first;
+            mainHeaderCells.push(this.padCell(tb, colWidths[c]));
         }
         parts.push(Buffer.from(`| ${mainHeaderCells.join(' | ')} |`));
         parts.push(this.lineBreak());
@@ -112,80 +78,53 @@ export class MarkdownTableGenerator {
         parts.push(Buffer.from(`| ${colWidths.map((w) => '-'.repeat(Math.max(3, w))).join(' | ')} |`));
         parts.push(this.lineBreak());
 
+        // additional header lines
         for (let lineIndex = 1; lineIndex < maxHeaderLines; lineIndex++) {
             const lineCells: string[] = [];
             for (let c = 0; c < numCols; c++) {
                 const hl = (headerLines[c] && headerLines[c][lineIndex]) || Buffer.alloc(0);
-                const tb = this.transformLineForFence(hl);
-                lineCells.push(padCell(tb, colWidths[c]));
+                const tb = this.containsFence(hl) ? this.transformLineForFence(hl) : hl;
+                lineCells.push(this.padCell(tb, colWidths[c]));
             }
             parts.push(Buffer.from(`| ${lineCells.join(' | ')} |`));
             parts.push(this.lineBreak());
         }
 
+        // rows
         for (const row of rows) {
-            const cellLines = [] as ReadableContent[][];
-            for (let c = 0; c < numCols; c++) {
-                const lines = this.splitMultilineCell(row[c] || Buffer.alloc(0));
-                const tlines = lines.map((l) => this.transformLineForFence(l || Buffer.alloc(0)));
-                cellLines.push(tlines as ReadableContent[]);
-            }
-            const maxLines = Math.max(...cellLines.map((l) => l.length));
-            for (let li = 0; li < maxLines; li++) {
-                const outCells: string[] = [];
-                for (let c = 0; c < numCols; c++) {
-                    const lines = cellLines[c];
-                    const tb = (lines && lines[li]) || Buffer.alloc(0);
-                    outCells.push(padCell(tb, colWidths[c]));
-                }
-                parts.push(Buffer.from(`| ${outCells.join(' | ')} |`));
-                parts.push(this.lineBreak());
-            }
+            this.renderRow(numCols, row, colWidths, parts);
         }
 
         return this.appendContent(...parts);
     }
 
-    private renderSimpleMode(
-        headers: ReadableContent[],
-        rows: ReadableContent[][],
-        headerLines: ReadableContent[][],
+    private renderRow(
+        numCols: number,
+        row: ReadableContent[],
         colWidths: number[],
-        maxHeaderLines: number
-    ): ReadableContent {
-        const numCols = headers.length;
-        let result = '';
-        const mainHeaderRow = `| ${headers
-            .map((h, c) => this.bufferToPaddedString(this.normalizeCell(this.splitMultilineCell(h)[0]), colWidths[c]))
-            .join(' | ')} |`;
-
-        const separatorRow = `| ${colWidths.map((w) => '-'.repeat(Math.max(3, w))).join(' | ')} |`;
-        result += `${mainHeaderRow}\n${separatorRow}\n`;
-
-        for (let lineIndex = 1; lineIndex < maxHeaderLines; lineIndex++) {
-            const additionalHeaderCells = headerLines.map((lines, c) => this.bufferToPaddedString(this.normalizeCell(lines[lineIndex]), colWidths[c]));
-            result += `| ${additionalHeaderCells.join(' | ')} |\n`;
+        parts: ReadableContent[]
+    ) {
+        const cellLines = [] as ReadableContent[][];
+        for (let c = 0; c < numCols; c++) {
+            const lines = this.splitMultilineCell(row[c] || Buffer.alloc(0));
+            const tlines = lines.map((l) => (this.containsFence(l || Buffer.alloc(0)) ? this.transformLineForFence(l || Buffer.alloc(0)) : (l || Buffer.alloc(0))));
+            cellLines.push(tlines as ReadableContent[]);
         }
-
-        rows.forEach((row) => {
-            const normalizedRow: ReadableContent[] = [];
-            for (let c = 0; c < numCols; c++) normalizedRow.push(row[c] || Buffer.alloc(0));
-
-            const cellLines = normalizedRow.map((r) => this.splitMultilineCell(r));
-            const maxLines = Math.max(...cellLines.map((lines) => lines.length));
-
-            for (let lineIndex = 0; lineIndex < maxLines; lineIndex++) {
-                const outCells: string[] = [];
-                for (let c = 0; c < numCols; c++) {
-                    const lines = cellLines[c] || [Buffer.alloc(0)];
-                    const raw = lines[lineIndex] || Buffer.alloc(0);
-                    outCells.push(this.bufferToPaddedString(this.normalizeCell(raw), colWidths[c]));
-                }
-                result += `| ${outCells.join(' | ')} |\n`;
+        const maxLines = Math.max(...cellLines.map((l) => l.length));
+        for (let li = 0; li < maxLines; li++) {
+            const outCells: string[] = [];
+            for (let c = 0; c < numCols; c++) {
+                const lines = cellLines[c];
+                const tb = (lines && lines[li]) || Buffer.alloc(0);
+                outCells.push(this.padCell(tb, colWidths[c]));
             }
-        });
+            parts.push(Buffer.from(`| ${outCells.join(' | ')} |`));
+            parts.push(this.lineBreak());
+        }
+    }
 
-        return this.trimTrailingNewlines(Buffer.from(result));
+    private padCell(content: ReadableContent, width: number) {
+        return this.bufferToPaddedString(this.normalizeCell(content || Buffer.alloc(0)), width);
     }
 
     private transformLineForFence(lineBuf: ReadableContent): ReadableContent {
@@ -276,14 +215,7 @@ export class MarkdownTableGenerator {
         return this.appendContent(...parts);
     }
 
-    private trimTrailingNewlines(buf: ReadableContent): ReadableContent {
-        if (!buf || buf.length === 0) return this.lineBreak();
-        let end = buf.length - 1;
-        while (end >= 0 && (buf[end] === 0x0A || buf[end] === 0x0D)) end--;
-        if (end < 0) return this.lineBreak();
-        const contentPart = buf.subarray(0, end + 1);
-        return this.appendContent(contentPart, this.lineBreak());
-    }
+
 
     private trimContent(input: ReadableContent): ReadableContent {
         if (!input || input.length === 0) return Buffer.alloc(0);

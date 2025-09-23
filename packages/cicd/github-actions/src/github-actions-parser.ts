@@ -80,7 +80,7 @@ export type GitHubWorkflowCallEvent = {
 type GitHubWorkflowInput = {
   description: string;
   required?: boolean;
-  type: string;
+  type?: string;
   default?: string;
 };
 
@@ -187,25 +187,25 @@ export class GitHubActionsParser {
   private extractDescriptionFromComments(content: string): string | undefined {
     const lines = content.split('\n');
     const commentLines: string[] = [];
-    
+
     for (const line of lines) {
       const trimmedLine = line.trim();
-      
+
       // Stop if we encounter the YAML document separator
       if (trimmedLine === '---') {
         break;
       }
-      
+
       // Skip empty lines at the beginning
       if (trimmedLine === '' && commentLines.length === 0) {
         continue;
       }
-      
+
       // If we encounter a non-comment line after starting to collect comments, stop
       if (trimmedLine !== '' && !trimmedLine.startsWith('#')) {
         break;
       }
-      
+
       // Extract comment content
       if (trimmedLine.startsWith('#')) {
         const commentContent = trimmedLine.substring(1).trim();
@@ -215,11 +215,11 @@ export class GitHubActionsParser {
         commentLines.push('');
       }
     }
-    
+
     if (commentLines.length === 0) {
       return undefined;
     }
-    
+
     // Join the comment lines and clean up extra whitespace
     const description = commentLines.join('\n').trim();
     return description || undefined;
