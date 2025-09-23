@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, Mocked } from 'vitest';
-import { ContributingSectionGenerator } from './contributing-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, RepositoryProvider, SectionIdentifier } from '@ci-dokumentor/core';
-import { GitHubAction } from '../github-actions-parser.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { GitHubAction } from '../github-actions-parser.js';
+import { ContributingSectionGenerator } from './contributing-section-generator.adapter.js';
 
 describe('ContributingSectionGenerator', () => {
     let formatterAdapter: FormatterAdapter;

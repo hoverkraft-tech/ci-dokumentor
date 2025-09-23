@@ -1,5 +1,5 @@
-import { RepositoryService } from "../src/repository/repository.service.js";
 import type { Mocked } from "vitest";
+import { RepositoryService } from "../src/repository/repository.service.js";
 
 type RepositoryServiceDefaults = Partial<{
     autoDetectRepositoryProvider: Awaited<ReturnType<RepositoryService['autoDetectRepositoryProvider']>>;

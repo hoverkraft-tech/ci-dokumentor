@@ -1,6 +1,5 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import { createSharedConfig } from '../../../vite.shared';
 
 export default defineConfig(() => {

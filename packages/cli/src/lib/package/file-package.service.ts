@@ -1,12 +1,12 @@
-import { injectable, inject } from 'inversify';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
+import { injectable, inject } from 'inversify';
+import { FileReaderAdapter } from '@ci-dokumentor/core';
+import type { ReaderAdapter } from '@ci-dokumentor/core';
 import type {
   PackageInfo,
   PackageService,
 } from './package-service.js';
-import { FileReaderAdapter } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
 
 /**
  * Package service implementation that reads package.json
@@ -33,7 +33,7 @@ export class FilePackageService implements PackageService {
     // Navigate up to the package root
     const packageJsonPath = this.getPackageJsonPath();
     const packageJsonContent = await this.readerAdapter.readResource(packageJsonPath);
-    const packageJson = JSON.parse(packageJsonContent.toString('utf8'));
+    const packageJson = JSON.parse(packageJsonContent.toString());
 
     if (!packageJson.name || !packageJson.version || !packageJson.description) {
       throw new Error(

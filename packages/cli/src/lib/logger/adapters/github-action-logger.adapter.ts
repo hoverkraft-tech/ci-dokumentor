@@ -1,6 +1,6 @@
 import { appendFileSync } from 'node:fs';
-import type { LoggerAdapter } from './logger.adapter.js';
 import { inject, injectable } from 'inversify';
+import type { LoggerAdapter } from './logger.adapter.js';
 
 
 // Identifier for injecting the GitHub Actions output file path

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { RepositoryService } from './repository.service.js';
 import { RepositoryProviderMockFactory } from '../../__tests__/repository-provider-mock.factory.js';
+import { RepositoryService } from './repository.service.js';
 
 describe('RepositoryService', () => {
   let repositoryService: RepositoryService;

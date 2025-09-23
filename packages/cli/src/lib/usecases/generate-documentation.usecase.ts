@@ -11,8 +11,8 @@ import {
   FormatterOptions,
   FileReaderAdapter
 } from '@ci-dokumentor/core';
-import { LoggerService } from '../logger/logger.service.js';
 import type { ReaderAdapter } from '@ci-dokumentor/core';
+import { LoggerService } from '../logger/logger.service.js';
 
 export interface GenerateDocumentationUseCaseInput {
   /**

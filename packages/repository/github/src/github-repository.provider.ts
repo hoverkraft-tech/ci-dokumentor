@@ -14,7 +14,7 @@ import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { graphql } from "@octokit/graphql";
 import { injectable, inject } from 'inversify';
 import { createTokenAuth, } from '@octokit/auth-token';
-import { RequestParameters } from 'node_modules/@octokit/auth-token/dist-types/types.js';
+import { RequestParameters } from '@octokit/graphql/types';
 
 type GraphQLClient = typeof graphql;
 

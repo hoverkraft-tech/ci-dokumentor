@@ -1,7 +1,8 @@
-import { injectable } from 'inversify';
-import { ReaderAdapter, ReadableContent } from './reader.adapter.js';
 import { createReadStream, existsSync, statSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { injectable } from 'inversify';
+import { ReaderAdapter } from './reader.adapter.js';
+import { ReadableContent } from './readable-content.js';
 
 @injectable()
 export class FileReaderAdapter implements ReaderAdapter {
@@ -12,19 +13,19 @@ export class FileReaderAdapter implements ReaderAdapter {
 
     async readResource(path: string): Promise<ReadableContent> {
         if (!this.resourceExists(path)) {
-            return Buffer.alloc(0);
+            return ReadableContent.empty();
         }
 
         return new Promise((resolve, reject) => {
             const fileStream = createReadStream(path);
-            const chunks: ReadableContent[] = [];
+            let chunks = ReadableContent.empty();
 
-            fileStream.on('data', (chunk: string | ReadableContent) => {
-                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+            fileStream.on('data', (chunk) => {
+                chunks = chunks.append(new ReadableContent(chunk));
             });
 
             fileStream.on('end', () => {
-                resolve(Buffer.concat(chunks));
+                resolve(chunks);
             });
 
             fileStream.on('error', (err) => {

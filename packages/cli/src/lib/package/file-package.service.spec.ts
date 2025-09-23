@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, Mocked } from 'vitest';
-import { FilePackageService } from './file-package.service.js';
 import { ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
-import { ReaderAdapter } from '@ci-dokumentor/core';
+import { ReadableContent, ReaderAdapter } from '@ci-dokumentor/core';
+import { FilePackageService } from './file-package.service.js';
 
 describe('FilePackageService', () => {
   let mockReaderAdapter: Mocked<ReaderAdapter>;
@@ -29,7 +29,7 @@ describe('FilePackageService', () => {
         description: 'CLI for generating documentation',
       };
 
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify(packageJson, null, 2)));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act
@@ -52,7 +52,7 @@ describe('FilePackageService', () => {
         description: 'CLI for generating documentation',
       };
 
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify(packageJson, null, 2)));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act
@@ -61,7 +61,7 @@ describe('FilePackageService', () => {
 
       // Change the file system but should return cached result
       // Simulate file changed on disk but service should return cached value
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify({
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify({
         name: 'different-name',
         version: '2.0.0',
         description: 'Different description',
@@ -87,7 +87,7 @@ describe('FilePackageService', () => {
         description: 'CLI for generating documentation',
       };
 
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify(packageJson, null, 2)));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act & Assert
@@ -103,7 +103,7 @@ describe('FilePackageService', () => {
         description: 'CLI for generating documentation',
       };
 
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify(packageJson, null, 2)));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act & Assert
@@ -119,7 +119,7 @@ describe('FilePackageService', () => {
         version: '1.0.0',
       };
 
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify(packageJson, null, 2)));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act & Assert
@@ -130,7 +130,7 @@ describe('FilePackageService', () => {
 
     it('should throw error when package.json contains invalid JSON', async () => {
       // Arrange
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from('invalid json content'));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent('invalid json content'));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act & Assert
@@ -153,7 +153,7 @@ describe('FilePackageService', () => {
         },
       };
 
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify(packageJson, null, 2)));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act
@@ -175,7 +175,7 @@ describe('FilePackageService', () => {
         description: '',
       };
 
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(JSON.stringify(packageJson, null, 2)));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(JSON.stringify(packageJson, null, 2)));
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act & Assert

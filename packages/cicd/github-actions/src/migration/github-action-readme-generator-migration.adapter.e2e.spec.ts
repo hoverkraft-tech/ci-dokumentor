@@ -1,11 +1,9 @@
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { GitHubActionReadmeGeneratorMigrationAdapter } from './github-action-readme-generator-migration.adapter.js';
-import { FileRendererAdapter, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import mockFs from 'mock-fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { FileRendererAdapter, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
+import mockFs, { restore } from 'mock-fs';
+import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { initTestContainer } from '../container.js';
+import { GitHubActionReadmeGeneratorMigrationAdapter } from './github-action-readme-generator-migration.adapter.js';
 
 describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   let adapter: GitHubActionReadmeGeneratorMigrationAdapter;
@@ -25,7 +23,7 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
 
   afterEach(() => {
     // Restore the real file system after each test
-    mockFs.restore();
+    restore();
 
     vi.resetAllMocks();
   });
@@ -43,7 +41,7 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
   describe('supportsDestination', () => {
     it('detects start/end markers in files', async () => {
       // Arrange
-      const tmpPath = join(tmpdir(), `gharg-support-${Date.now()}.md`);
+      const tmpPath = `/tmp/gharg-support-${Date.now()}.md`;
       mockFs({ [tmpPath]: '<!-- start inputs -->' });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
@@ -92,7 +90,7 @@ ExampleX
 <!-- end [.github/ghadocs/examples/] -->
 `;
 
-      const tmpPath = join(tmpdir(), `gharg-e2e-${Date.now()}.md`);
+      const tmpPath = `/tmp/gharg-e2e-${Date.now()}.md`;
 
       // Mock the file system with the source content
       mockFs({ [tmpPath]: source });

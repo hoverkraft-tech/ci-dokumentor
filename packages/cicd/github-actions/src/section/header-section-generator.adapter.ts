@@ -1,9 +1,9 @@
+import { relative, dirname } from 'node:path';
 import { FormatterAdapter, SectionIdentifier, ReadableContent, RepositoryInfo, SectionGenerationPayload } from '@ci-dokumentor/core';
-import { GitHubActionsManifest } from '../github-actions-parser.js';
-import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 import { icons } from 'feather-icons';
 import { injectable } from 'inversify';
-import { relative, dirname } from 'node:path';
+import { GitHubActionsManifest } from '../github-actions-parser.js';
+import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
 @injectable()
 export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
@@ -31,9 +31,8 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       destination
     );
 
-    if (logoContent.length > 0) {
-      sectionContent = formatterAdapter.appendContent(
-        logoContent,
+    if (!logoContent.isEmpty()) {
+      sectionContent = logoContent.append(
         formatterAdapter.lineBreak(),
         sectionContent,
       );
@@ -49,7 +48,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     destination: string
   ): ReadableContent {
     if (!logoPath) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
     // Calculate relative path for file:// URLs
@@ -61,7 +60,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     }
 
     const logoAltText = this.getDisplayName(manifest);
-    const logoImage = formatterAdapter.image(Buffer.from(resolvedLogoPath), logoAltText, {
+    const logoImage = formatterAdapter.image(new ReadableContent(resolvedLogoPath), logoAltText, {
       width: '60px',
       align: 'center',
     });
@@ -75,7 +74,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   ): ReadableContent {
     const name = manifest.name || repositoryInfo?.name || 'Unknown';
     // Convert to pascal case
-    return Buffer.from(name.replace(/(?:^|_)(\w)/g, (_, c) => c.toUpperCase()));
+    return new ReadableContent(name.replace(/(?:^|_)(\w)/g, (_, c) => c.toUpperCase()));
   }
 
   private generateTitle(
@@ -83,20 +82,18 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     manifest: GitHubActionsManifest,
     repositoryInfo: RepositoryInfo
   ): ReadableContent {
-    const title = Buffer.from(
-      this.getTitlePrefix(manifest) + this.getDisplayName(manifest, repositoryInfo)
-    );
+    const title = this.getTitlePrefix(manifest).append(this.getDisplayName(manifest, repositoryInfo));
     const branchingIcon = this.generateBrandingIcon(formatterAdapter, manifest);
 
-    const headingContent = branchingIcon.length > 0
-      ? formatterAdapter.appendContent(branchingIcon, Buffer.from(' '), title)
-      : title;
+    const headingContent = branchingIcon.isEmpty()
+      ? title
+      : branchingIcon.append(' ', title);
 
     return formatterAdapter.heading(headingContent, 1);
   }
 
-  private getTitlePrefix(manifest: GitHubActionsManifest): string {
-    return 'runs' in manifest ? 'GitHub Action: ' : 'GitHub Workflow: ';
+  private getTitlePrefix(manifest: GitHubActionsManifest): ReadableContent {
+    return new ReadableContent('runs' in manifest ? 'GitHub Action: ' : 'GitHub Workflow: ');
   }
 
   private generateBrandingIcon(
@@ -104,7 +101,7 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     manifest: GitHubActionsManifest
   ): ReadableContent {
     if (!('branding' in manifest) || !manifest.branding?.icon) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
     const icon = manifest.branding.icon as keyof typeof icons;
@@ -113,14 +110,14 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       color: manifest.branding.color || 'gray-dark',
     });
     if (!featherIcon) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
     // Get data URI for the icon
-    const data = Buffer.from(`data:image/svg+xml;base64,${Buffer.from(featherIcon).toString(
+    const data = new ReadableContent(`data:image/svg+xml;base64,${Buffer.from(featherIcon).toString(
       'base64'
     )}`);
 
-    return formatterAdapter.image(data, Buffer.from('Icon'));
+    return formatterAdapter.image(data, new ReadableContent('Icon'));
   }
 }

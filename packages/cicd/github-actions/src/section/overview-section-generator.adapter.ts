@@ -1,8 +1,7 @@
-import { ReadableContent, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload, SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { SectionIdentifier } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
 
 @injectable()
 export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
@@ -14,31 +13,31 @@ export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     const description =
       'description' in manifest ? manifest.description : undefined;
     if (!description) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
-    const overviewContent = [
-      formatterAdapter.heading(Buffer.from('Overview'), 2),
+    let overviewContent = formatterAdapter.heading(new ReadableContent('Overview'), 2).append(
       formatterAdapter.lineBreak(),
-      formatterAdapter.paragraph(Buffer.from(description)),
-    ];
+      formatterAdapter.paragraph(new ReadableContent(description)),
+    );
 
     if (this.isGitHubWorkflow(manifest)) {
-      const permissions = manifest.permissions || {};
-      const permissionsContent = Object.entries(permissions).map(
-        ([permission, level]) =>
-          formatterAdapter.paragraph(
-            Buffer.from(`- **${permission}**: ${level}`)
-          )
+      overviewContent = overviewContent.append(
+        formatterAdapter.lineBreak(),
+        formatterAdapter.heading(new ReadableContent('Permissions'), 3),
+        formatterAdapter.lineBreak(),
       );
-      overviewContent.push(
-        formatterAdapter.lineBreak(),
-        formatterAdapter.heading(Buffer.from('Permissions'), 3),
-        formatterAdapter.lineBreak(),
-        ...permissionsContent
+
+      const permissions = manifest.permissions || {};
+      Object.entries(permissions).forEach(
+        ([permission, level]) => {
+          overviewContent = overviewContent.append(formatterAdapter.paragraph(
+            new ReadableContent(`- **${permission}**: ${level}`)
+          ));
+        }
       );
     }
 
-    return formatterAdapter.appendContent(...overviewContent);
+    return overviewContent;
   }
 }

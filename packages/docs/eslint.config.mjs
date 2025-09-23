@@ -21,6 +21,19 @@ export default [
     },
   },
   {
+    // Disable some import-x rules in this package because Docusaurus provides
+    // virtual path aliases like @theme, @docusaurus and @site that aren't
+    // resolvable by the eslint import resolver in the monorepo environment.
+    // We keep these rules enabled elsewhere but turn them off for source files
+    // inside the docs package.
+    files: ['**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      'import-x/no-unresolved': 'off',
+      'import-x/no-named-as-default': 'off',
+      'import-x/no-named-as-default-member': 'off',
+    },
+  },
+  {
     ignores: ['**/build', '**/.docusaurus'],
   },
 ];

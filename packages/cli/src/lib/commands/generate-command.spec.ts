@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
-import { GenerateCommand } from './generate-command.js';
+import { LinkFormat } from '@ci-dokumentor/core';
 import { GenerateDocumentationUseCase } from '../usecases/generate-documentation.usecase.js';
 import { CommandTester } from '../../../__tests__/command-tester.js';
-import { LinkFormat } from '@ci-dokumentor/core';
+import { GenerateCommand } from './generate-command.js';
 
 describe('GenerateCommand', () => {
   let generateCommand: GenerateCommand;

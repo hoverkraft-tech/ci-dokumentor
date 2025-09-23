@@ -1,12 +1,11 @@
-import { ReadableContent, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload , FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 import {
   GitHubActionsManifest,
   GitHubWorkflow,
   GitHubWorkflowSecret,
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
 
 @injectable()
 export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
@@ -16,7 +15,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
   async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     if (this.isGitHubAction(manifest)) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
     if (!this.isGitHubWorkflow(manifest)) {
@@ -24,12 +23,11 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     }
 
     const manifestSecretsContent = this.generateWorkflowSecretsTable(formatterAdapter, manifest);
-    if (!manifestSecretsContent || manifestSecretsContent.length === 0) {
-      return Buffer.alloc(0);
+    if (manifestSecretsContent.isEmpty()) {
+      return ReadableContent.empty();
     }
 
-    return formatterAdapter.appendContent(
-      formatterAdapter.heading(Buffer.from('Secrets'), 2),
+    return formatterAdapter.heading(new ReadableContent('Secrets'), 2).append(
       formatterAdapter.lineBreak(),
       manifestSecretsContent,
     );
@@ -42,13 +40,13 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     const secrets = Object.entries(manifest.on?.workflow_call?.secrets || {});
 
     if (secrets.length === 0) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
     const headers = [
-      formatterAdapter.bold(Buffer.from('Secret')),
-      formatterAdapter.bold(Buffer.from('Description')),
-      formatterAdapter.bold(Buffer.from('Required')),
+      formatterAdapter.bold(new ReadableContent('Secret')),
+      formatterAdapter.bold(new ReadableContent('Description')),
+      formatterAdapter.bold(new ReadableContent('Required')),
     ];
 
 
@@ -68,12 +66,12 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
     return formatterAdapter.bold(
-      formatterAdapter.inlineCode(Buffer.from(name))
+      formatterAdapter.inlineCode(new ReadableContent(name))
     );
   }
 
   private getSecretDescription(secret: GitHubWorkflowSecret): ReadableContent {
-    return Buffer.from((secret.description || '').trim());
+    return new ReadableContent((secret.description || '').trim());
   }
 
   private getSecretRequired(
@@ -81,7 +79,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
     return formatterAdapter.bold(
-      Buffer.from(secret.required ? 'true' : 'false')
+      new ReadableContent(secret.required ? 'true' : 'false')
     );
   }
 }

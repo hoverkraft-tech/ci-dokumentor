@@ -1,6 +1,6 @@
 import { injectable, injectFromBase } from 'inversify';
-import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
+import { SectionIdentifier, ReadableContent } from '@ci-dokumentor/core';
+import type { FormatterAdapter } from '@ci-dokumentor/core';
 import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
 
 /**
@@ -42,20 +42,14 @@ export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrati
   };
 
   protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
-    // The adapter needs some special normalization for example paths; we
-    // perform normalization first by mapping any examples-like identifiers to
-    // a canonical 'examples' key inside the fragment before handing it to the
-    // shared `processMarkerMappings` helper.
-    let working = content.toString('utf-8');
-
     // Normalize example paths inside the fragment to the 'examples' token
-    working = working.replace(/(<!--\s*(?:start|end)\s+)([\w[\]/.]+)(\s*-->)/gi, (m, p1, p2, p3) => {
+    const working = content.replace(/(<!--\s*(?:start|end)\s+)([\w[\]/.]+)(\s*-->)/gi, (m, p1, p2, p3) => {
       const normalized = p2.toLowerCase().includes('.github/ghadocs/examples') ? 'examples' : p2;
       return `${p1}${normalized}${p3}`;
     });
 
     // Process marker mappings first
-    return this.processMarkerMappings(Buffer.from(working, 'utf-8'), formatterAdapter);
+    return this.processMarkerMappings(working, formatterAdapter);
   }
 
 }

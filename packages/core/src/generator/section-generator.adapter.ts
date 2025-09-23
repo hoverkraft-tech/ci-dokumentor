@@ -1,7 +1,7 @@
-import { FormatterAdapter } from 'src/formatter/formatter.adapter.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
 import { OptionDescriptor } from '../options/options.js';
-import { ReadableContent } from '../reader/reader.adapter.js';
+import { ReadableContent } from '../reader/readable-content.js';
+import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 
 export const SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
   'SectionGeneratorAdapter'

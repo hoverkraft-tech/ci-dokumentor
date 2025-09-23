@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, basename } from 'node:path';
-import mockFs from 'mock-fs';
+import { basename } from 'node:path';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import mockFs, { restore } from 'mock-fs';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
-import { FileRendererAdapter } from './file-renderer.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
-import { DiffRendererAdapter } from './diff-renderer.adapter.js';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import { initContainer, resetContainer } from '../container.js';
+import { ReadableContent } from '../reader/readable-content.js';
+import { DiffRendererAdapter } from './diff-renderer.adapter.js';
+import { FileRendererAdapter } from './file-renderer.adapter.js';
 
 describe('DiffRendererAdapter', () => {
     const fixedNow = 1234567890;
@@ -23,7 +23,7 @@ describe('DiffRendererAdapter', () => {
 
         // Provide a deterministic tmpdir and test file structure
         mockFs({
-            [tmpdir()]: {},
+            '/tmp': {},
             '/test': {
                 'document.md': 'Original content\n',
             },
@@ -41,7 +41,7 @@ describe('DiffRendererAdapter', () => {
     afterEach(() => {
         resetContainer();
 
-        mockFs.restore();
+        restore();
 
         vi.resetAllMocks();
     });
@@ -54,10 +54,10 @@ describe('DiffRendererAdapter', () => {
             await adapter.initialize('/test/document.md', formatter);
 
             // Act
-            await adapter.writeSection(SectionIdentifier.Examples, Buffer.from('New section content'));
+            await adapter.writeSection(SectionIdentifier.Examples, new ReadableContent('New section content'));
 
             // Assert
-            const tmpPath = join(tmpdir(), `${basename('/test/document.md')}.${fixedNow}.tmp`);
+            const tmpPath = `/tmp/${basename('/test/document.md')}.${fixedNow}.tmp`;
             expect(existsSync(tmpPath)).toBe(true);
             const content = readFileSync(tmpPath, 'utf-8');
             expect(content).toEqual(`<!-- examples:start -->
@@ -74,7 +74,7 @@ New section content
             // Arrange
             // Prepare original and temp files
             const dest = '/test/document.md';
-            const tmpPath = join(tmpdir(), `${basename(dest)}.${fixedNow}.tmp`);
+            const tmpPath = `/tmp/${basename(dest)}.${fixedNow}.tmp`;
             writeFileSync(dest, 'original line\n');
             writeFileSync(tmpPath, 'modified line\n');
 
@@ -99,7 +99,7 @@ New section content
         it('should get patch for non existing destination file', async () => {
             // Arrange
             const dest = '/test/new-document.md';
-            const tmpPath = join(tmpdir(), `${basename(dest)}.${fixedNow}.tmp`);
+            const tmpPath = `/tmp/${basename(dest)}.${fixedNow}.tmp`;
             writeFileSync(tmpPath, 'new file content\n');
 
             // initialize adapter so it knows destination/temp

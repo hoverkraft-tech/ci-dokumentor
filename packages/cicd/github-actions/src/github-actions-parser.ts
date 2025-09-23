@@ -1,7 +1,7 @@
-import { FileReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
-import { inject, injectable } from 'inversify';
 import { basename, dirname, extname, join, relative } from 'node:path';
+import type { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
+import { FileReaderAdapter, ReadableContent } from '@ci-dokumentor/core';
+import { inject, injectable } from 'inversify';
 import { parse } from 'yaml';
 
 // See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-action.json
@@ -126,7 +126,7 @@ export class GitHubActionsParser {
     }
 
     const content = await this.readerAdapter.readResource(source);
-    const parsed = parse(content.toString('utf8'));
+    const parsed = parse(content.toString());
     if (!parsed) {
       throw new Error(`Unsupported source file: ${source}`);
     }
@@ -151,7 +151,7 @@ export class GitHubActionsParser {
 
     // Extract description from comments for workflows
     if (this.isGitHubWorkflowFile(source) && this.isGitHubWorkflow(parsed)) {
-      const description = this.extractDescriptionFromComments(content.toString('utf8'));
+      const description = this.extractDescriptionFromComments(content);
       if (description) {
         (parsed as GitHubWorkflow).description = description;
       }
@@ -184,35 +184,36 @@ export class GitHubActionsParser {
     throw new Error(`Unsupported source file: ${source}`);
   }
 
-  private extractDescriptionFromComments(content: string): string | undefined {
-    const lines = content.split('\n');
-    const commentLines: string[] = [];
+  private extractDescriptionFromComments(content: ReadableContent): string | undefined {
+    const lines = content.splitLines();
+    const commentLines: ReadableContent[] = [];
 
     for (const line of lines) {
       const trimmedLine = line.trim();
+      const trimmedLineIsEmpty = trimmedLine.isEmpty();
 
       // Stop if we encounter the YAML document separator
-      if (trimmedLine === '---') {
+      if (trimmedLine.equals('---')) {
         break;
       }
 
       // Skip empty lines at the beginning
-      if (trimmedLine === '' && commentLines.length === 0) {
+      if (trimmedLineIsEmpty && commentLines.length === 0) {
         continue;
       }
 
       // If we encounter a non-comment line after starting to collect comments, stop
-      if (trimmedLine !== '' && !trimmedLine.startsWith('#')) {
+      if (!trimmedLineIsEmpty && !trimmedLine.startsWith('#')) {
         break;
       }
 
       // Extract comment content
       if (trimmedLine.startsWith('#')) {
-        const commentContent = trimmedLine.substring(1).trim();
+        const commentContent = trimmedLine.slice(1).trim();
         commentLines.push(commentContent);
-      } else if (trimmedLine === '' && commentLines.length > 0) {
+      } else if (trimmedLineIsEmpty && commentLines.length > 0) {
         // Allow empty lines within comment blocks
-        commentLines.push('');
+        commentLines.push(ReadableContent.empty());
       }
     }
 

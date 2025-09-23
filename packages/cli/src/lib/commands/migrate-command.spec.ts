@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, Mocked } from 'vitest';
-import { MigrateCommand } from './migrate-command.js';
-import { MigrateDocumentationUseCase } from '../usecases/migrate-documentation.usecase.js';
 import { MigrationService } from '@ci-dokumentor/core';
+import { MigrateDocumentationUseCase } from '../usecases/migrate-documentation.usecase.js';
+import { MigrateCommand } from './migrate-command.js';
 
 describe('MigrateCommand', () => {
   let command: MigrateCommand;

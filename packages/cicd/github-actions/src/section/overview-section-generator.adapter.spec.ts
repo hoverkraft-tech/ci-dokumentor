@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, Mocked } from 'vitest';
-import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, RepositoryProvider, SectionIdentifier } from '@ci-dokumentor/core';
+import { initTestContainer } from '@ci-dokumentor/repository-github';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import { initTestContainer } from '@ci-dokumentor/repository-github';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
 
 describe('OverviewSectionGenerator', () => {
     let mockRepositoryProvider: Mocked<RepositoryProvider>;

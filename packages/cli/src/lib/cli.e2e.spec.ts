@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import {
   describe,
   it,
@@ -7,11 +8,10 @@ import {
   afterEach,
   MockInstance,
 } from 'vitest';
+import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
+import { ConsoleMockFactory, MockedConsole } from '../../__tests__/console-mock.factory.js';
 import { cli } from './cli.js';
 import { resetGlobalContainer } from './global-container.js';
-import { ConsoleMockFactory, MockedConsole } from '../../__tests__/console-mock.factory.js';
-import { join } from 'node:path';
-import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
 
 describe('CLI', () => {
   const originalArgv = process.argv.slice();

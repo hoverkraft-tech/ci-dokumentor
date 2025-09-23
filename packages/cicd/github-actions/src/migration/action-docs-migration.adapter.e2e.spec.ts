@@ -1,11 +1,9 @@
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { ActionDocsMigrationAdapter } from './action-docs-migration.adapter.js';
-import mockFs from 'mock-fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import mockFs, { restore } from 'mock-fs';
+import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
 import { initTestContainer } from '../container.js';
+import { ActionDocsMigrationAdapter } from './action-docs-migration.adapter.js';
 
 describe('ActionDocsMigrationAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
@@ -23,7 +21,7 @@ describe('ActionDocsMigrationAdapter', () => {
 
   afterEach(() => {
     // Restore the real file system after each test
-    mockFs.restore();
+    restore();
   });
 
   describe('getName', () => {
@@ -39,7 +37,7 @@ describe('ActionDocsMigrationAdapter', () => {
   describe('supportsDestination', () => {
     it('detects markers in files', async () => {
       // Arrange
-      const tmpPath = join(tmpdir(), `actiondocs-support-${Date.now()}.md`);
+      const tmpPath = `/tmp/actiondocs-support-${Date.now()}.md`;
       mockFs({ [tmpPath]: '<!-- action-docs-inputs source="action.yml" -->' });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
@@ -76,7 +74,7 @@ Usage details here
 <!-- action-docs-runs source="action.yml" -->
 `;
 
-      const tmpPath = join(tmpdir(), `actiondocs-e2e-${Date.now()}.md`);
+      const tmpPath = `/tmp/actiondocs-e2e-${Date.now()}.md`;
 
       // Mock the file system with the source content
       mockFs({ [tmpPath]: source });

@@ -1,11 +1,11 @@
 import { inject, injectable, injectFromBase } from 'inversify';
 import { Command } from 'commander';
-import { BaseCommand } from './base-command.js';
+import { MigrationService } from '@ci-dokumentor/core';
 import {
   MigrateDocumentationUseCase,
   MigrateDocumentationUseCaseInput,
 } from '../usecases/migrate-documentation.usecase.js';
-import { MigrationService } from '@ci-dokumentor/core';
+import { BaseCommand } from './base-command.js';
 
 export type MigrateCommandOptions = {
   outputFormat: string;

@@ -7,10 +7,10 @@ import {
     afterEach,
     MockInstance,
 } from 'vitest';
-import { CliApplication } from './cli-application.js';
-import { initGlobalContainer, resetGlobalContainer } from '../global-container.js';
 import type { Container } from '@ci-dokumentor/core';
+import { initGlobalContainer, resetGlobalContainer } from '../global-container.js';
 import { ConsoleMockFactory, MockedConsole } from '../../../__tests__/console-mock.factory.js';
+import { CliApplication } from './cli-application.js';
 
 describe('CliApplication Integration Tests', () => {
     let container: Container;

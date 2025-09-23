@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
-import { ExamplesSectionGenerator } from './examples-section-generator.adapter.js';
-import { VersionService, SectionIdentifier, ManifestVersion, ReadableContent, FormatterAdapter, RepositoryProvider, ReaderAdapter } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { VersionService, SectionIdentifier, ManifestVersion, ReadableContent, FormatterAdapter, RepositoryProvider, ReaderAdapter, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
 import { ReaderAdapterMockFactory, RepositoryInfoMockFactory, RepositoryProviderMockFactory, VersionServiceMockFactory } from '@ci-dokumentor/core/tests';
+import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { initTestContainer } from '../container.js';
+import { ExamplesSectionGenerator } from './examples-section-generator.adapter.js';
 
 describe('ExamplesSectionGenerator', () => {
-  let mockFormatterAdapter: Mocked<FormatterAdapter>;
+  let formatterAdapter: FormatterAdapter;
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let mockVersionService: Mocked<VersionService>;
   let mockReaderAdapter: Mocked<ReaderAdapter>;
@@ -31,20 +32,14 @@ describe('ExamplesSectionGenerator', () => {
   beforeEach(() => {
     vi.resetAllMocks();
 
-    mockFormatterAdapter = {
-      heading: vi.fn(),
-      lineBreak: vi.fn(),
-      paragraph: vi.fn(),
-      code: vi.fn(),
-      appendContent: vi.fn()
-    } as unknown as Mocked<FormatterAdapter>;
+    mockRepositoryProvider = RepositoryProviderMockFactory.create({
+      getRepositoryInfo: RepositoryInfoMockFactory.create({
+        rootDir: '/test/repo',
+      }),
+    });
 
-    mockRepositoryProvider = RepositoryProviderMockFactory.create();
-
-    mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(RepositoryInfoMockFactory.create({
-      rootDir: '/test/repo',
-    }));
-
+    const container = initTestContainer();
+    formatterAdapter = container.get(MarkdownFormatterAdapter);
 
     mockVersionService = VersionServiceMockFactory.create();
     mockVersionService.getVersion.mockResolvedValue(mockVersion);
@@ -88,7 +83,7 @@ describe('ExamplesSectionGenerator', () => {
 
       // Act
       const result = await generator.generateSection({
-        formatterAdapter: mockFormatterAdapter,
+        formatterAdapter: formatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
@@ -115,16 +110,11 @@ jobs:
           input: value`;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(exampleContent));
-
-      mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# Examples'));
-      mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
-      mockFormatterAdapter.code.mockReturnValue(Buffer.from('```yaml\ncode\n```'));
-      mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('# Examples\ncode'));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(exampleContent));
 
       // Act
       const result = await generator.generateSection({
-        formatterAdapter: mockFormatterAdapter,
+        formatterAdapter: formatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
@@ -132,7 +122,6 @@ jobs:
 
       // Assert
       expect(result.toString()).not.toEqual("");
-      expect(mockFormatterAdapter.heading).toHaveBeenCalledWith(Buffer.from('Examples'), 2);
     });
 
     it('should process code snippets and replace version information', async () => {
@@ -155,22 +144,11 @@ jobs:
           local: true`;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(exampleContent));
-
-      mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# Examples'));
-      mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
-
-      let capturedCode = '';
-      mockFormatterAdapter.code.mockImplementation((content: ReadableContent) => {
-        // Capture the processed code for verification
-        capturedCode = content.toString();
-        return Buffer.from('```yaml\nprocessed code\n```');
-      });
-      mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('# Examples\ncode'));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(exampleContent));
 
       // Act
-      await generator.generateSection({
-        formatterAdapter: mockFormatterAdapter,
+      const result = await generator.generateSection({
+        formatterAdapter: formatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
@@ -178,9 +156,43 @@ jobs:
 
       // Assert
       // Verify the code content has been processed for version replacement
-      expect(capturedCode).toContain('owner/test-action@abc123456789 # v1.0.0');
-      expect(capturedCode).toContain('./@abc123456789 # v1.0.0');
-      expect(mockFormatterAdapter.code).toHaveBeenCalled();
+      expect(result.toString()).toEqual(`## Examples
+
+### /test/examples/example1
+
+\`\`\`yaml
+name: Example Workflow
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: owner/test-action@abc123456789 # v1.0.0
+        with:
+          input: value
+      - uses: ./@abc123456789 # v1.0.0
+        with:
+          local: true
+\`\`\`
+
+### /test/examples/example1
+
+\`\`\`yaml
+name: Example Workflow
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: owner/test-action@abc123456789 # v1.0.0
+        with:
+          input: value
+      - uses: ./@abc123456789 # v1.0.0
+        with:
+          local: true
+\`\`\`
+
+`);
     });
 
     it('should find examples from destination file', async () => {
@@ -210,27 +222,50 @@ with:
 `;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(destinationContent));
-
-      mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# heading'));
-      mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
-      mockFormatterAdapter.paragraph.mockReturnValue(Buffer.from('paragraph'));
-      mockFormatterAdapter.code.mockReturnValue(Buffer.from('```yaml\ncode\n```'));
-      mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('content'));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(destinationContent));
 
       // Act
       const result = await generator.generateSection({
-        formatterAdapter: mockFormatterAdapter,
+        formatterAdapter: formatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
       });
 
       // Assert
-      expect(result).not.toEqual(Buffer.alloc(0));
-      expect(mockFormatterAdapter.heading).toHaveBeenCalledWith(Buffer.from('Basic Usage'), 5);
-      expect(mockFormatterAdapter.paragraph).toHaveBeenCalledWith(Buffer.from('This is an advanced example.'));
-      expect(mockFormatterAdapter.code).toHaveBeenCalled();
+      expect(result.toString()).toEqual(`## Examples
+
+
+
+##### Basic Usage
+
+
+
+\`\`\`yaml
+uses: owner/test-action@abc123456789 # v1.0.0
+with:
+  input: value
+\`\`\`
+
+
+
+##### Advanced Usage
+
+
+
+This is an advanced example.
+
+
+
+\`\`\`yaml
+uses: owner/test-action@abc123456789 # v1.0.0
+with:
+  input: advanced
+\`\`\`
+
+
+
+`);
     });
 
     it('should throws on file system errors', async () => {
@@ -240,7 +275,7 @@ with:
 
       // Act & Assert
       await expect(generator.generateSection({
-        formatterAdapter: mockFormatterAdapter,
+        formatterAdapter: formatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
@@ -265,14 +300,14 @@ with:
 
       // Act
       const result = await generator.generateSection({
-        formatterAdapter: mockFormatterAdapter,
+        formatterAdapter: formatterAdapter,
         manifest: mockWorkflow,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
       });
 
       // Assert
-      expect(result).toEqual(Buffer.alloc(0));
+      expect(result).toEqual(ReadableContent.empty());
     });
 
     it('should handle version information without SHA', async () => {
@@ -288,27 +323,28 @@ with:
         '```yaml\n' +
         'uses: owner/test-action@v1.0.0\n' +
         '```\n';
-      mockReaderAdapter.readResource.mockResolvedValue(Buffer.from(destinationWithExamples));
-      mockFormatterAdapter.heading.mockReturnValue(Buffer.from('# heading'));
-      mockFormatterAdapter.lineBreak.mockReturnValue(Buffer.from('\n'));
-      mockFormatterAdapter.code.mockImplementation((content: Buffer) => {
-        // Without SHA, version replacement shouldn't happen
-        const codeStr = content.toString();
-        expect(codeStr).toContain('uses: owner/test-action@v1.0.0');
-        return Buffer.from('```yaml\ncode\n```');
-      });
-      mockFormatterAdapter.appendContent.mockReturnValue(Buffer.from('content'));
+      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(destinationWithExamples));
 
       // Act
-      await generator.generateSection({
-        formatterAdapter: mockFormatterAdapter,
+      const result = await generator.generateSection({
+        formatterAdapter: formatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
         destination: '/test/destination'
       });
 
       // Assert
-      expect(mockFormatterAdapter.code).toHaveBeenCalled();
+      expect(result.toString()).toEqual(`## Examples
+
+
+
+\`\`\`yaml
+uses: owner/test-action@v1.0.0
+\`\`\`
+
+
+
+`);
     });
   });
 });

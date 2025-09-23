@@ -1,18 +1,21 @@
 import { inject, injectable, multiInject } from 'inversify';
 import { Option } from 'commander';
 import {
-  COMMAND_IDENTIFIER,
-  type Command,
+  COMMAND_IDENTIFIER
+  
 } from '../commands/command.js';
+import type {Command} from '../commands/command.js';
 import {
-  PACKAGE_SERVICE_IDENTIFIER,
-  type PackageService,
+  PACKAGE_SERVICE_IDENTIFIER
+  
 } from '../package/package-service.js';
-import {
-  PROGRAM_IDENTIFIER,
-  type Program,
-} from './program.js';
+import type {PackageService} from '../package/package-service.js';
 import { LoggerService } from '../logger/logger.service.js';
+import {
+  PROGRAM_IDENTIFIER
+  
+} from './program.js';
+import type {Program} from './program.js';
 import { ProgramConfiguratorService } from './program-configurator.service.js';
 
 /**

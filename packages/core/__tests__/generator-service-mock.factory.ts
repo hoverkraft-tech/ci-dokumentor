@@ -1,5 +1,5 @@
-import { GeneratorService } from "../src/generator/generator.service.js";
 import type { Mocked } from "vitest";
+import { GeneratorService } from "../src/generator/generator.service.js";
 
 type GeneratorServiceDefaults = Partial<{
     getSupportedCicdPlatforms: ReturnType<GeneratorService['getSupportedCicdPlatforms']>;

@@ -1,6 +1,6 @@
+import { ReadableContent } from '../reader/readable-content.js';
 import { SectionIdentifier } from '../generator/section-generator.adapter.js';
 import { FormatterLanguage } from './formatter-language.js';
-import { ReadableContent } from '../reader/reader.adapter.js';
 
 export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');
 
@@ -24,8 +24,6 @@ export interface FormatterAdapter {
    * Set formatter options that affect formatting behavior
    */
   setOptions(options: FormatterOptions): void;
-
-  appendContent(...content: ReadableContent[]): ReadableContent;
 
   heading(content: ReadableContent, level?: number): ReadableContent;
 

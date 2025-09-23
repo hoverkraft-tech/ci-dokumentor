@@ -1,8 +1,8 @@
 import { inject, injectable, multiInject, optional } from 'inversify';
-import { MigrationAdapter, MIGRATION_ADAPTER_IDENTIFIER } from './migration.adapter.js';
 import { FormatterService } from '../formatter/formatter.service.js';
 import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
+import { MigrationAdapter, MIGRATION_ADAPTER_IDENTIFIER } from './migration.adapter.js';
 
 /**
  * Service for migrating documentation from various tools to ci-dokumentor format

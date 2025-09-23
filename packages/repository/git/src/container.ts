@@ -1,6 +1,5 @@
-import { Container } from '@ci-dokumentor/core';
+import { Container , REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
-import { REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
 import { GitRepositoryProvider } from './git-repository-provider.js';
 
 let container: Container | null = null;

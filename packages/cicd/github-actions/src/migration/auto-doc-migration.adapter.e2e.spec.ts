@@ -1,11 +1,9 @@
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { AutoDocMigrationAdapter } from './auto-doc-migration.adapter.js';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
-import mockFs from 'mock-fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import mockFs, { restore } from 'mock-fs';
+import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
+import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { initTestContainer } from '../container.js';
+import { AutoDocMigrationAdapter } from './auto-doc-migration.adapter.js';
 
 describe('AutoDocMigrationAdapter', () => {
   let adapter: AutoDocMigrationAdapter;
@@ -25,7 +23,7 @@ describe('AutoDocMigrationAdapter', () => {
 
   afterEach(() => {
     // Restore the real file system after each test
-    mockFs.restore();
+    restore();
 
     vi.resetAllMocks();
   });
@@ -42,7 +40,7 @@ describe('AutoDocMigrationAdapter', () => {
   describe('supportsDestination', () => {
     it('detects headers in files', async () => {
       // Arrange
-      const tmpPath = join(tmpdir(), `autodoc-support-${Date.now()}.md`);
+      const tmpPath = `/tmp/autodoc-support-${Date.now()}.md`;
       mockFs({ [tmpPath]: '## Inputs' });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
@@ -82,7 +80,7 @@ Some description here
 - SECRET_X
 `;
 
-      const tmpPath = join(tmpdir(), `autodoc-e2e - ${Date.now()}.md`);
+      const tmpPath = `/tmp/autodoc-e2e-${Date.now()}.md`;
 
       // Mock the file system with the source content
       mockFs({ [tmpPath]: source });

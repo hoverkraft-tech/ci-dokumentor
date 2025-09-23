@@ -1,10 +1,10 @@
 import { describe, it, expect, Mocked } from 'vitest';
-import { LicenseSectionGenerator } from './license-section-generator.adapter.js';
 import { FormatterAdapter, MarkdownFormatterAdapter, SectionIdentifier, SectionGenerationPayload, RepositoryProvider } from '@ci-dokumentor/core';
-import { GitHubAction } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '@ci-dokumentor/repository-github';
 import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { GitHubAction } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
+import { LicenseSectionGenerator } from './license-section-generator.adapter.js';
 
 describe('LicenseSectionGenerator - Enhanced License Support', () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;

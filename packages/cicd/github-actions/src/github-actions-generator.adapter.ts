@@ -1,3 +1,4 @@
+import { dirname, join } from 'node:path';
 import {
   GeneratorAdapter,
   SECTION_GENERATOR_ADAPTER_IDENTIFIER,
@@ -13,7 +14,6 @@ import {
   GitHubActionsManifest,
   GitHubActionsParser,
 } from './github-actions-parser.js';
-import { dirname, join } from 'node:path';
 
 /**
  * GitHub Actions generator adapter.

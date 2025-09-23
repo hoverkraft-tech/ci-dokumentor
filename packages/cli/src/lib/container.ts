@@ -1,21 +1,26 @@
 import { Container } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
+import { Command as CommanderCommand } from 'commander';
 import {
-  COMMAND_IDENTIFIER,
-  type Command,
+  COMMAND_IDENTIFIER
+  
 } from './commands/command.js';
+import type {Command} from './commands/command.js';
 import {
-  LOGGER_ADAPTER_IDENTIFIER,
-  type LoggerAdapter,
+  LOGGER_ADAPTER_IDENTIFIER
+  
 } from './logger/adapters/logger.adapter.js';
+import type {LoggerAdapter} from './logger/adapters/logger.adapter.js';
 import {
-  PACKAGE_SERVICE_IDENTIFIER,
-  type PackageService,
+  PACKAGE_SERVICE_IDENTIFIER
+  
 } from './package/package-service.js';
+import type {PackageService} from './package/package-service.js';
 import {
-  PROGRAM_IDENTIFIER,
-  type Program,
+  PROGRAM_IDENTIFIER
+  
 } from './application/program.js';
+import type {Program} from './application/program.js';
 import { CliApplication } from './application/cli-application.js';
 import { GenerateCommand } from './commands/generate-command.js';
 import { MigrateCommand } from './commands/migrate-command.js';
@@ -23,7 +28,6 @@ import { GenerateDocumentationUseCase } from './usecases/generate-documentation.
 import { MigrateDocumentationUseCase } from './usecases/migrate-documentation.usecase.js';
 import { LoggerService } from './logger/logger.service.js';
 import { FilePackageService } from './package/file-package.service.js';
-import { Command as CommanderCommand } from 'commander';
 import { TextLoggerAdapter } from './logger/adapters/text-logger.adapter.js';
 import { JsonLoggerAdapter } from './logger/adapters/json-logger.adapter.js';
 import { GITHUB_OUTPUT_IDENTIFIER, GitHubActionLoggerAdapter } from './logger/adapters/github-action-logger.adapter.js';

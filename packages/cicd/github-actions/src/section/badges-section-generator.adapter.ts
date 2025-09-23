@@ -1,8 +1,7 @@
-import { ReadableContent, RepositoryProvider, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions } from '@ci-dokumentor/core';
+import { ReadableContent, RepositoryProvider, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions, FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { injectable } from 'inversify';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
-import { FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
 
 type Badge = { label: string; url: string };
 type LinkedBadge = { url?: string; badge: Badge };
@@ -190,20 +189,22 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
     if (linkedBadges.length === 0) {
-      return Buffer.alloc(0);
+      return ReadableContent.empty();
     }
 
-    const badgeCollectionContent = linkedBadges.map((linkedBadge) => {
-      let badgeContent = formatterAdapter.badge(Buffer.from(linkedBadge.badge.label), Buffer.from(linkedBadge.badge.url));
+    let badgesCollectionContent = ReadableContent.empty();
+
+    linkedBadges.forEach((linkedBadge) => {
+      let badgeContent = formatterAdapter.badge(new ReadableContent(linkedBadge.badge.label), new ReadableContent(linkedBadge.badge.url));
       if (linkedBadge.url) {
         badgeContent = formatterAdapter.link(
           badgeContent,
-          Buffer.from(linkedBadge.url)
+          new ReadableContent(linkedBadge.url)
         );
       }
-      return [badgeContent, formatterAdapter.lineBreak()];
-    }).flat();
+      badgesCollectionContent = badgesCollectionContent.append(badgeContent, formatterAdapter.lineBreak());
+    });
 
-    return formatterAdapter.appendContent(...badgeCollectionContent);
+    return badgesCollectionContent;
   }
 }

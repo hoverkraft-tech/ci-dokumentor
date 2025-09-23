@@ -12,6 +12,7 @@
       "!{projectRoot}/__tests__/**/*"
     ],
     "sharedGlobals": ["{workspaceRoot}/vite.shared.ts"],
+    "lint": ["{projectRoot}/**/eslint.config.mjs"],
     "tests": [
       "{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "{projectRoot}/__tests__/**/*",
@@ -55,6 +56,11 @@
     }
   ],
   "targetDefaults": {
+    "lint": {
+      "inputs": ["default", "lint", "^default"],
+      "outputs": [],
+      "cache": true
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "inputs": ["default", "^default"],
@@ -66,7 +72,8 @@
     },
     "test": {
       "dependsOn": ["build", "^build"],
-      "inputs": ["default", "tests", "^default"]
+      "inputs": ["default", "tests", "^default"],
+      "outputs": ["{projectRoot}/coverage/**"]
     }
   }
 }

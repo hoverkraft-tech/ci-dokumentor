@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
-import { LicenseService } from './license.service.js';
 import { ReaderAdapterMockFactory } from '../../__tests__/reader-adapter-mock.factory.js';
 import { ReaderAdapter } from '../reader/reader.adapter.js';
+import { ReadableContent } from '../reader/readable-content.js';
+import { LicenseService } from './license.service.js';
 
 describe('LicenseService', () => {
   let licenseService: LicenseService;
@@ -43,9 +44,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('MIT License\n\nCopyright (c) 2023'));
+          return Promise.resolve(new ReadableContent('MIT License\n\nCopyright (c) 2023'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -64,9 +65,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE.txt') {
-          return Promise.resolve(Buffer.from('Apache License\nVersion 2.0, January 2004'));
+          return Promise.resolve(new ReadableContent('Apache License\nVersion 2.0, January 2004'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -85,9 +86,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE.md') {
-          return Promise.resolve(Buffer.from('GNU GENERAL PUBLIC LICENSE\nVersion 3, 29 June 2007'));
+          return Promise.resolve(new ReadableContent('GNU GENERAL PUBLIC LICENSE\nVersion 3, 29 June 2007'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -106,9 +107,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('GNU GENERAL PUBLIC LICENSE\nVersion 2, June 1991'));
+          return Promise.resolve(new ReadableContent('GNU GENERAL PUBLIC LICENSE\nVersion 2, June 1991'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -127,9 +128,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('BSD 3-Clause License'));
+          return Promise.resolve(new ReadableContent('BSD 3-Clause License'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -148,9 +149,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('BSD 2-Clause License'));
+          return Promise.resolve(new ReadableContent('BSD 2-Clause License'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -169,9 +170,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('ISC License'));
+          return Promise.resolve(new ReadableContent('ISC License'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -190,9 +191,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('Custom proprietary license'));
+          return Promise.resolve(new ReadableContent('Custom proprietary license'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -220,9 +221,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'license.txt') {
-          return Promise.resolve(Buffer.from('MIT License'));
+          return Promise.resolve(new ReadableContent('MIT License'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -246,12 +247,12 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('MIT License'));
+          return Promise.resolve(new ReadableContent('MIT License'));
         }
         if (path === 'LICENSE.txt') {
-          return Promise.resolve(Buffer.from('Apache License Version 2.0'));
+          return Promise.resolve(new ReadableContent('Apache License Version 2.0'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -270,9 +271,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('mit license'));
+          return Promise.resolve(new ReadableContent('mit license'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -291,9 +292,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('MIT Licence'));
+          return Promise.resolve(new ReadableContent('MIT Licence'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act
@@ -323,9 +324,9 @@ describe('LicenseService', () => {
         mockReaderAdapter.resourceExists.mockReturnValue(true);
         mockReaderAdapter.readResource.mockImplementation((path: string) => {
           if (path === 'LICENSE') {
-            return Promise.resolve(Buffer.from(testCase.content));
+            return Promise.resolve(new ReadableContent(testCase.content));
           }
-          return Promise.resolve(Buffer.alloc(0));
+          return Promise.resolve(ReadableContent.empty());
         });
 
         // Act
@@ -341,9 +342,9 @@ describe('LicenseService', () => {
       mockReaderAdapter.resourceExists.mockReturnValue(true);
       mockReaderAdapter.readResource.mockImplementation((path: string) => {
         if (path === 'LICENSE') {
-          return Promise.resolve(Buffer.from('Unknown License'));
+          return Promise.resolve(new ReadableContent('Unknown License'));
         }
-        return Promise.resolve(Buffer.alloc(0));
+        return Promise.resolve(ReadableContent.empty());
       });
 
       // Act

@@ -1,11 +1,9 @@
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { ActdocsMigrationAdapter } from './actdocs-migration.adapter.js';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
-import mockFs from 'mock-fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
+import mockFs, { restore } from 'mock-fs';
+import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { initTestContainer } from '../container.js';
+import { ActdocsMigrationAdapter } from './actdocs-migration.adapter.js';
 
 describe('ActdocsMigrationAdapter', () => {
   let formatterAdapter: MarkdownFormatterAdapter;
@@ -22,7 +20,7 @@ describe('ActdocsMigrationAdapter', () => {
   });
 
   afterEach(() => {
-    mockFs.restore();
+    restore();
   });
 
   describe('getName', () => {
@@ -38,7 +36,7 @@ describe('ActdocsMigrationAdapter', () => {
   describe('supportsDestination', () => {
     it('returns true when a file contains actdocs markers', async () => {
       // Arrange
-      const tmpPath = join(tmpdir(), `actdocs-support-${Date.now()}.md`);
+      const tmpPath = `/tmp/actdocs-support-${Date.now()}.md`;
       mockFs({ [tmpPath]: '<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->' });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
@@ -75,7 +73,7 @@ Perm stuff
 <!-- actdocs permissions end -->
 `;
 
-      const tmpPath = join(tmpdir(), `actdocs-e2e-${Date.now()}.md`);
+      const tmpPath = `/tmp/actdocs-e2e-${Date.now()}.md`;
 
       // Mock the file system with the source content
       mockFs({ [tmpPath]: source });
@@ -153,7 +151,7 @@ Perm stuff
     it('handles files with no actdocs markers (e2e test)', async () => {
       // Arrange: create a file with no actdocs markers
       const source = 'No markers here';
-      const tmpPath = join(tmpdir(), `actdocs-no-markers-${Date.now()}.md`);
+      const tmpPath = `/tmp/actdocs-no-markers-${Date.now()}.md`;
 
       // Mock the file system with the source content
       mockFs({ [tmpPath]: source });

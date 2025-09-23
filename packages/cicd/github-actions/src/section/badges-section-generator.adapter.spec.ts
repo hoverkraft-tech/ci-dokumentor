@@ -1,7 +1,4 @@
 import { describe, it, expect, beforeEach, Mocked } from 'vitest';
-import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -9,9 +6,12 @@ import {
   SectionGenerationPayload,
   RepositoryProvider,
 } from '@ci-dokumentor/core';
+import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '../container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
 
 describe('BadgesSectionGenerator', () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
