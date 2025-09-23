@@ -192,7 +192,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     input: GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
-    return formatterAdapter.bold(Buffer.from(input.type));
+    return formatterAdapter.bold(Buffer.from(input.type ?? 'string'));
   }
 
   private getInputDeprecationMessage(

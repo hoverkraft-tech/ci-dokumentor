@@ -23,18 +23,18 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return language === FormatterLanguage.Markdown;
   }
 
-  appendContent(...parts: ReadableContent[]): ReadableContent {
+  appendContent(...contents: ReadableContent[]): ReadableContent {
     // Fast single-allocation concatenation. Convert string parts to buffers and copy into
     // a pre-allocated content to avoid multiple intermediate allocations.
-    if (!parts || parts.length === 0) {
+    if (!contents || contents.length === 0) {
       return Buffer.alloc(0);
     }
 
     // First pass: compute total length and normalize buffers lazily
-    const contentParts: ReadableContent[] = new Array(parts.length);
+    const contentParts: ReadableContent[] = new Array(contents.length);
     let total = 0;
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
+    for (let i = 0; i < contents.length; i++) {
+      const part = contents[i];
       contentParts[i] = part;
       total += contentParts[i].length;
     }
@@ -56,20 +56,20 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return out;
   }
 
-  heading(input: ReadableContent, level = 1): ReadableContent {
+  heading(content: ReadableContent, level = 1): ReadableContent {
     const hashes = '#'.repeat(Math.max(1, Math.min(6, level)));
-    return this.appendContent(Buffer.from(`${hashes} `), input, this.lineBreak());
+    return this.appendContent(Buffer.from(`${hashes} `), content, this.lineBreak());
   }
 
-  center(input: ReadableContent): ReadableContent {
+  center(content: ReadableContent): ReadableContent {
     const lb = 0x0A; // \n
     // Trim leading/trailing whitespace/newlines
     let start = 0;
-    let end = input.length - 1;
-    while (start <= end && (input[start] === 0x20 /* space */ || input[start] === 0x09 /* tab */ || input[start] === 0x0A /* LF */ || input[start] === 0x0D /* CR */)) {
+    let end = content.length - 1;
+    while (start <= end && (content[start] === 0x20 /* space */ || content[start] === 0x09 /* tab */ || content[start] === 0x0A /* LF */ || content[start] === 0x0D /* CR */)) {
       start++;
     }
-    while (end >= start && (input[end] === 0x20 /* space */ || input[end] === 0x09 /* tab */ || input[end] === 0x0A /* LF */ || input[end] === 0x0D /* CR */)) {
+    while (end >= start && (content[end] === 0x20 /* space */ || content[end] === 0x09 /* tab */ || content[end] === 0x0A /* LF */ || content[end] === 0x0D /* CR */)) {
       end--;
     }
 
@@ -79,13 +79,13 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
     if (hasContent) {
       // slice is zero-copy view over the original buffer
-      const content = input.subarray(start, end + 1);
+      const contentCopy = content.subarray(start, end + 1);
       // split on LF (0x0A), preserve lines; handle CR by trimming in each line
       const lines: ReadableContent[] = [];
       let lineStart = 0;
-      for (let i = 0; i < content.length; i++) {
-        if (content[i] === lb) {
-          const lineBuf = content.subarray(lineStart, i);
+      for (let i = 0; i < contentCopy.length; i++) {
+        if (contentCopy[i] === lb) {
+          const lineBuf = contentCopy.subarray(lineStart, i);
           // trim trailing CR from the line
           const l = lineBuf.length > 0 && lineBuf[lineBuf.length - 1] === 0x0D ? lineBuf.subarray(0, lineBuf.length - 1) : lineBuf;
           lines.push(l);
@@ -93,8 +93,8 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         }
       }
       // last line
-      if (lineStart <= content.length - 1) {
-        const lineBuf = content.subarray(lineStart, content.length);
+      if (lineStart <= contentCopy.length - 1) {
+        const lineBuf = contentCopy.subarray(lineStart, contentCopy.length);
         const l = lineBuf.length > 0 && lineBuf[lineBuf.length - 1] === 0x0D ? lineBuf.subarray(0, lineBuf.length - 1) : lineBuf;
         lines.push(l);
       }
@@ -115,18 +115,18 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return this.appendContent(...parts);
   }
 
-  paragraph(input: ReadableContent): ReadableContent {
+  paragraph(content: ReadableContent): ReadableContent {
     const linkFormat = this.options.linkFormat;
     const processedInput = linkFormat && linkFormat !== LinkFormat.None
-      ? this.transformUrls(input, linkFormat === LinkFormat.Full)
-      : input;
+      ? this.transformUrls(content, linkFormat === LinkFormat.Full)
+      : content;
     return this.appendContent(processedInput, this.lineBreak());
   }
 
-  bold(input: ReadableContent): ReadableContent {
+  bold(content: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('**'),
-      this.escape(input, '**'),
+      this.escape(content, '**'),
       Buffer.from('**')
     );
   }
@@ -139,21 +139,21 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  code(input: ReadableContent, language?: ReadableContent): ReadableContent {
+  code(content: ReadableContent, language?: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('```'),
       language || Buffer.alloc(0),
       this.lineBreak(),
-      this.trimTrailingLineBreaks(input),
+      this.trimTrailingLineBreaks(content),
       Buffer.from('```'),
       this.lineBreak(),
     );
   }
 
-  inlineCode(input: ReadableContent): ReadableContent {
+  inlineCode(content: ReadableContent): ReadableContent {
     return this.appendContent(
       Buffer.from('`'),
-      this.escape(input, '`'),
+      this.escape(this.escape(content, '`'), '*'),
       Buffer.from('`')
     );
   }
@@ -230,11 +230,11 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return Buffer.from('\n');
   }
 
-  section(section: SectionIdentifier, input: ReadableContent): ReadableContent {
+  section(section: SectionIdentifier, content: ReadableContent): ReadableContent {
     const startMarker = this.sectionStart(section);
     const endMarker = this.sectionEnd(section);
 
-    if (!input.length) {
+    if (!content.length) {
       return this.appendContent(
         startMarker,
         this.lineBreak(),
@@ -247,7 +247,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       startMarker,
       this.lineBreak(),
       this.lineBreak(),
-      this.trimTrailingLineBreaks(input),
+      this.trimTrailingLineBreaks(content),
       this.lineBreak(),
       endMarker,
       this.lineBreak()
@@ -320,7 +320,8 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     const text = input.toString();
 
     // URL regex pattern - matches http/https URLs, excluding common trailing punctuation
-    const urlRegex = /https?:\/\/[^\s)\]]{1,500}/g;
+    // Use negative lookbehind/lookahead to avoid matching URLs already wrapped in '<' '>' (autolinks)
+    const urlRegex = /(?<!<)https?:\/\/[^\s)\]>]{1,500}(?!>)/g;
 
     // Check if there are already markdown links in the text to avoid double-processing
     const linkRegex = /\[([^\]]{0,200})\]\(([^)]{0,500})\)/g;
@@ -330,7 +331,15 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
     if (!hasExistingLinks) {
       // Simple case: no existing markdown links, just transform all URLs
-      result = text.replace(urlRegex, (url) => {
+      // But skip URLs that are already in autolink format like <https://...>
+      result = text.replace(urlRegex, (url, offset) => {
+        // If the URL is already wrapped in '<' '>' then leave it untouched
+        const beforeChar = offset > 0 ? text[offset - 1] : undefined;
+        const afterChar = text[offset + url.length];
+        if (beforeChar === '<' && afterChar === '>') {
+          return url;
+        }
+
         // Remove trailing punctuation from URL
         const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
         const trailingPunct = url.slice(cleanUrl.length);
@@ -365,7 +374,16 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       for (const linkInfo of links) {
         // Process text before this link
         const beforeLink = text.substring(lastIndex, linkInfo.start);
-        processedResult += beforeLink.replace(urlRegex, (url) => {
+        processedResult += beforeLink.replace(urlRegex, (url, offsetInBefore) => {
+          // offsetInBefore is relative to beforeLink; compute absolute offset in original text
+          const absoluteOffset = lastIndex + (offsetInBefore || 0);
+          // If the URL is already wrapped in '<' '>' then leave it untouched
+          const beforeChar = absoluteOffset > 0 ? text[absoluteOffset - 1] : undefined;
+          const afterChar = text[absoluteOffset + url.length];
+          if (beforeChar === '<' && afterChar === '>') {
+            return url;
+          }
+
           // Remove trailing punctuation from URL
           const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
           const trailingPunct = url.slice(cleanUrl.length);
@@ -384,7 +402,14 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
       // Process remaining text after the last link
       const afterLastLink = text.substring(lastIndex);
-      processedResult += afterLastLink.replace(urlRegex, (url) => {
+      processedResult += afterLastLink.replace(urlRegex, (url, offsetInAfter) => {
+        const absoluteOffset = lastIndex + (offsetInAfter || 0);
+        const beforeChar = absoluteOffset > 0 ? text[absoluteOffset - 1] : undefined;
+        const afterChar = text[absoluteOffset + url.length];
+        if (beforeChar === '<' && afterChar === '>') {
+          return url;
+        }
+
         // Remove trailing punctuation from URL
         const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
         const trailingPunct = url.slice(cleanUrl.length);
