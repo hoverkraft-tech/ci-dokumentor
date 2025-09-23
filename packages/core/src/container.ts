@@ -11,6 +11,7 @@ import { FileReaderAdapter } from './reader/file-reader.adapter.js';
 import { VersionService } from './version/version.service.js';
 import { MigrationService } from './migration/migration.service.js';
 import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
+import { MarkdownLinkGenerator } from './formatter/markdown/markdown-link.generator.js';
 
 export type Container = InversifyContainer;
 
@@ -50,6 +51,7 @@ export function initContainer(
   container.bind(MigrationService).toSelf().inSingletonScope();
 
   // Formatter adapters
+  container.bind(MarkdownLinkGenerator).toSelf().inSingletonScope();
   container.bind(MarkdownTableGenerator).toSelf().inSingletonScope();
   container.bind(MarkdownFormatterAdapter).toSelf().inSingletonScope();
   container

@@ -39,6 +39,9 @@ pnpm test
 pnpm nx test core
 pnpm nx test cli
 pnpm nx test repository-github
+
+# Run tests for specific file
+pnpm nx test core src/formatter/markdown/markdown-formatter.adapter.spec.ts
 ```
 
 #### Integration Tests
@@ -74,24 +77,24 @@ pnpm test
 pnpm test:ci
 
 # Run tests in watch mode (development)
-nx test core --watch
+pnpm nx test core --watch
 ```
 
 ### Package-Specific Commands
 
 ```bash
 # Core package tests
-nx test core
+pnpm nx test core
 
 # CLI package tests
-nx test cli
+pnpm nx test cli
 
 # GitHub Actions package tests
-nx test cicd-github-actions
+pnpm nx test cicd-github-actions
 
 # Repository providers
-nx test repository-git
-nx test repository-github
+pnpm nx test repository-git
+pnpm nx test repository-github
 ```
 
 ### Coverage Reports
@@ -311,10 +314,10 @@ await expect(async () => {
 
 ```bash
 # Run single test file with debug output
-nx test core --testNamePattern="specific test name"
+pnpm nx test core --testNamePattern="specific test name"
 
 # Run with verbose output
-nx test core --verbose
+pnpm nx test core --verbose
 ```
 
 ## Related Documentation
