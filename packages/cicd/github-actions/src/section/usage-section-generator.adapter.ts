@@ -52,7 +52,6 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
   }
 
   async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
-
     // Resolve version information from section options or auto-detection
     const version = await this.versionService.getVersion(this.version, repositoryProvider);
 

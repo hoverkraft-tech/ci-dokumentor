@@ -92,7 +92,7 @@ A comprehensive test action for CI/CD workflows
             it('should handle multiline descriptions correctly', async () => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({
-                    description: 'A test action with\nmultiple lines\nof description',
+                    description: 'A test action with\nmultiple lines\n\nof description',
                 });
 
                 // Act
@@ -105,6 +105,7 @@ A comprehensive test action for CI/CD workflows
 
 A test action with
 multiple lines
+
 of description
 `
                 );
@@ -143,7 +144,7 @@ A test action with **bold**, *italic*, and \`code\` formatting
                             },
                         },
                     }),
-                    description: 'Continuous integration workflow for the project',
+                    description: 'Continuous integration workflow for the project\n\nWorkflow runs on push to main branch.',
                 } as GitHubWorkflow & { description: string };
 
                 // Act
@@ -155,6 +156,8 @@ A test action with **bold**, *italic*, and \`code\` formatting
                     `## Overview
 
 Continuous integration workflow for the project
+
+Workflow runs on push to main branch.
 
 ### Permissions
 
