@@ -99,7 +99,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ## Examples
 
-##### Generate Documentation for Workflows
+### Generate Documentation for Workflows
 
 ```yaml
 - name: Generate Workflow Documentation
@@ -108,7 +108,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
     source: '.github/workflows/ci.yml'
 ```
 
-##### Advanced Usage with All Options
+### Advanced Usage with All Options
 
 The CLI accepts a single `--source <file>` per invocation. To generate documentation for multiple files in a workflow, run the action multiple times or script the Docker/CLI call for each file. Example using a shell step to process multiple manifest files:
 
@@ -125,7 +125,7 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
     format-link: 'full'
 ```
 
-##### Dry-run Example
+### Dry-run Example
 
 To preview changes without modifying files, set the `dry-run` input to `true`. The action will pass `--dry-run` to the CLI and the core generator will produce a diff instead of writing files.
 
@@ -137,7 +137,7 @@ To preview changes without modifying files, set the `dry-run` input to `true`. T
     dry-run: 'true'
 ```
 
-##### URL Link Formatting Examples
+### URL Link Formatting Examples
 
 Control how bare URLs in your documentation are formatted:
 
