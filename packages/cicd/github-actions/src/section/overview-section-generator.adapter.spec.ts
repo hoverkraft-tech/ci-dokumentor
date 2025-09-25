@@ -42,92 +42,77 @@ describe('OverviewSectionGenerator', () => {
 
     describe('generateSection', () => {
         describe('with GitHub Action manifest', () => {
-            it('should generate overview section for GitHub Action with description', async () => {
-                // Arrange
-                const manifest: GitHubAction = GitHubActionMockFactory.create({
+            it.each([
+                {
+                    name: 'with description',
                     description: 'A comprehensive test action for CI/CD workflows',
-                });
-
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-                // Assert
-
-                expect(result.toString()).toEqual(
-                    `## Overview
+                    expected: `## Overview
 
 A comprehensive test action for CI/CD workflows
-`
-                );
-            });
-
-            it('should return empty buffer for GitHub Action without description', async () => {
-                // Arrange
-                const manifest: GitHubAction = GitHubActionMockFactory.create({
+`,
+                },
+                {
+                    name: 'without description (undefined)',
                     description: undefined,
-                });
-
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-                // Assert
-
-                expect(result.toString()).toEqual('');
-            });
-
-            it('should return empty buffer for GitHub Action with empty description', async () => {
-                // Arrange
-                const manifest: GitHubAction = GitHubActionMockFactory.create({
+                    expected: '',
+                },
+                {
+                    name: 'with empty description',
                     description: '',
-                });
-
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-                // Assert
-
-                expect(result.toString()).toEqual('');
-            });
-
-            it('should handle multiline descriptions correctly', async () => {
-                // Arrange
-                const manifest: GitHubAction = GitHubActionMockFactory.create({
+                    expected: '',
+                },
+                {
+                    name: 'with multiline description',
                     description: 'A test action with\nmultiple lines\n\nof description',
-                });
-
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-                // Assert
-
-                expect(result.toString()).toEqual(
-                    `## Overview
+                    expected: `## Overview
 
 A test action with
 multiple lines
 
 of description
-`
-                );
-            });
+`,
+                },
+                {
+                    name: 'with code block in description',
+                    description: `A test action with code block:
 
-            it('should handle descriptions with special characters', async () => {
-                // Arrange
-                const manifest: GitHubAction = GitHubActionMockFactory.create({
+\`\`\`yaml
+test:
+  key: value
+  list:
+    - item1
+    - item2
+\`\`\``,
+                    expected: `## Overview
+
+A test action with code block:
+
+\`\`\`yaml
+test:
+  key: value
+  list:
+    - item1
+    - item2
+\`\`\`
+`,
+                },
+                {
+                    name: 'with special characters',
                     description: 'A test action with **bold**, *italic*, and `code` formatting',
-                });
+                    expected: `## Overview
+
+A test action with **bold**, *italic*, and \`code\` formatting
+`,
+                },
+            ])('$name', async ({ description, expected }) => {
+                // Arrange
+                const manifest: GitHubAction = GitHubActionMockFactory.create({ description });
 
                 // Act
                 const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
                 // Assert
-
-                expect(result.toString()).toEqual(
-                    `## Overview
-
-A test action with **bold**, *italic*, and \`code\` formatting
-`
-                );
+                expect(result.toString()).toEqual(expected);
             });
         });
 

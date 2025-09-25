@@ -32,9 +32,16 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     );
 
     if (!logoContent.isEmpty()) {
-      sectionContent = logoContent.append(
+      // Ensure the heading (H1) is the very first content in the file so
+      // markdown linters (MD041) treat the first line as a top-level heading.
+      // Place the centered logo after the heading separated by a line break,
+      // and add a horizontal rule after the logo for visual separation.
+      sectionContent = sectionContent.append(
         formatterAdapter.lineBreak(),
-        sectionContent,
+        logoContent,
+        formatterAdapter.lineBreak(),
+        formatterAdapter.horizontalRule(),
+        formatterAdapter.lineBreak(),
       );
     }
 

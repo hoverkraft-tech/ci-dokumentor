@@ -73,11 +73,14 @@ describe('HeaderSectionGenerator', () => {
         // Assert
 
         expect(result.toString()).toEqual(
-          `<div align="center">
+          `# GitHub Action: Test Action
+
+<div align="center">
   <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
 </div>
 
-# GitHub Action: Test Action
+---
+
 `
         );
       });
@@ -99,11 +102,14 @@ describe('HeaderSectionGenerator', () => {
         // Assert
 
         expect(result.toString()).toEqual(
-          `<div align="center">
+          `# GitHub Action: Test Action
+
+<div align="center">
   <img src=".github/logo.png" width="60px" align="center" alt="Test Action" />
 </div>
 
-# GitHub Action: Test Action
+---
+
 `
         );
       });
@@ -125,11 +131,14 @@ describe('HeaderSectionGenerator', () => {
         // Assert
 
         expect(result.toString()).toEqual(
-          `<div align="center">
+          `# GitHub Action: Test Action
+
+<div align="center">
   <img src="../../.github/logo.png" width="60px" align="center" alt="Test Action" />
 </div>
 
-# GitHub Action: Test Action
+---
+
 `
         );
       });
@@ -219,11 +228,14 @@ describe('HeaderSectionGenerator', () => {
         // Assert
 
         expect(result.toString()).toEqual(
-          `<div align="center">
+          `# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJibHVlIj48cG9seWxpbmUgcG9pbnRzPSIyMiAxMiAxOCAxMiAxNSAyMSA5IDMgNiAxMiAyIDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==) GitHub Action: Test Action
+
+<div align="center">
   <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
 </div>
 
-# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYWN0aXZpdHkiIGNvbG9yPSJibHVlIj48cG9seWxpbmUgcG9pbnRzPSIyMiAxMiAxOCAxMiAxNSAyMSA5IDMgNiAxMiAyIDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==) GitHub Action: Test Action
+---
+
 `
         );
       });
@@ -266,11 +278,14 @@ describe('HeaderSectionGenerator', () => {
         // Assert
 
         expect(result.toString())
-          .toEqual(`<div align="center">
+          .toEqual(`# GitHub Workflow: Test Workflow
+
+<div align="center">
   <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Workflow" />
 </div>
 
-# GitHub Workflow: Test Workflow
+---
+
 `);
       });
 
@@ -296,11 +311,14 @@ describe('HeaderSectionGenerator', () => {
         // Assert
 
         expect(result.toString())
-          .toEqual(`<div align="center">
+          .toEqual(`# GitHub Workflow: Test Workflow
+
+<div align="center">
   <img src="../logo.png" width="60px" align="center" alt="Test Workflow" />
 </div>
 
-# GitHub Workflow: Test Workflow
+---
+
 `);
       });
 
@@ -402,11 +420,14 @@ describe('HeaderSectionGenerator', () => {
       // Assert
 
       expect(result.toString()).toEqual(
-        `<div align="center">
+        `# GitHub Action: Test Action
+
+<div align="center">
   <img src="https://example.com/logo.png" width="60px" align="center" alt="Test Action" />
 </div>
 
-# GitHub Action: Test Action
+---
+
 `
       );
     });

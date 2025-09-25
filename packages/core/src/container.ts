@@ -12,6 +12,7 @@ import { VersionService } from './version/version.service.js';
 import { MigrationService } from './migration/migration.service.js';
 import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
 import { MarkdownLinkGenerator } from './formatter/markdown/markdown-link.generator.js';
+import { MarkdownCodeGenerator } from './formatter/markdown/markdown-code.generator.js';
 
 export type Container = InversifyContainer;
 
@@ -53,6 +54,7 @@ export function initContainer(
   // Formatter adapters
   container.bind(MarkdownLinkGenerator).toSelf().inSingletonScope();
   container.bind(MarkdownTableGenerator).toSelf().inSingletonScope();
+  container.bind(MarkdownCodeGenerator).toSelf().inSingletonScope();
   container.bind(MarkdownFormatterAdapter).toSelf().inSingletonScope();
   container
     .bind<MarkdownFormatterAdapter>(FORMATTER_ADAPTER_IDENTIFIER)

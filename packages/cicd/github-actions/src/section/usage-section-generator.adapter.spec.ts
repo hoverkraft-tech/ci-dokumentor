@@ -57,47 +57,26 @@ describe('UsageSectionGenerator', () => {
 
   describe('generateSection', () => {
     describe('with GitHub Action manifest', () => {
-      it('should generate usage section for simple GitHub Action without inputs', async () => {
-        // Arrange
-        const manifest: GitHubAction = GitHubActionMockFactory.create();
-
-        // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-        // Assert
-
-        expect(result.toString()).toBe(
-          `## Usage
+      const cases: Array<{ title: string; inputs?: Record<string, GitHubActionInput>; version?: { ref: string; sha?: string }; expected: string }> = [
+        {
+          title: 'simple GitHub Action without inputs',
+          inputs: undefined,
+          version: undefined,
+          expected: `## Usage
 
 \`\`\`yaml
 - uses: owner/repo
 \`\`\`
 `
-        );
-      });
-
-      it('should generate usage section for GitHub Action with simple inputs', async () => {
-        // Arrange
-        const inputs: Record<string, GitHubActionInput> = {
-          'api-key': {
-            description: 'API key for authentication',
-            required: true,
+        },
+        {
+          title: 'GitHub Action with simple inputs',
+          inputs: {
+            'api-key': { description: 'API key for authentication', required: true },
+            timeout: { description: 'Request timeout in seconds', default: '30' },
           },
-          timeout: {
-            description: 'Request timeout in seconds',
-            default: '30',
-          },
-        };
-
-        const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs });
-
-        // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-        // Assert
-
-        expect(result.toString()).toBe(
-          `## Usage
+          version: undefined,
+          expected: `## Usage
 
 \`\`\`yaml
 - uses: owner/repo
@@ -111,40 +90,28 @@ describe('UsageSectionGenerator', () => {
     timeout: "30"
 \`\`\`
 `
-        );
-      });
+        },
+        {
+          title: 'GitHub Action with complex inputs',
+          inputs: {
+            'boolean-input': { description: 'A boolean input', default: 'true', required: false },
+            'number-input': { description: 'A number input', required: true },
+            'optional-input': { description: 'An optional input' },
+            'input-with-multiline-description': { description: 'An input\nwith multiline\n  \ndescription' },
+            'input-with-code-block-description': {
+              description: `An input with code block description:
+\`\`\`
+const x = 10;
+console.log(x);
+\`\`\`
 
-      it('should generate usage section for GitHub Action with complex inputs', async () => {
-        // Arrange
-        const inputs: Record<string, GitHubActionInput> = {
-          'boolean-input': {
-            description: 'A boolean input',
-            default: 'true',
-            required: false,
+End of description.
+` },
           },
-          'number-input': {
-            description: 'A number input',
-            required: true,
-          },
-          'optional-input': {
-            description: 'An optional input',
-          },
-          'optional-input-with-multiline-description': {
-            description: 'An optional input\nwith multiline\n  \ndescription',
-          }
-        };
+          version: undefined,
+          expected: `## Usage
 
-        const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs });
-
-        // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-        // Assert
-
-        expect(result.toString()).toBe(
-          `## Usage
-
-\`\`\`yaml
+\`\`\`\`yaml
 - uses: owner/repo
   with:
     # A boolean input
@@ -158,65 +125,60 @@ describe('UsageSectionGenerator', () => {
     # An optional input
     optional-input: ""
 
-    # An optional input
+    # An input
     # with multiline
     #
     # description
-    optional-input-with-multiline-description: ""
-\`\`\`
+    input-with-multiline-description: ""
+
+    # An input with code block description:
+    # \`\`\`
+    # const x = 10;
+    # console.log(x);
+    # \`\`\`
+    #
+    # End of description.
+    input-with-code-block-description: ""
+\`\`\`\`
 `
-        );
-      });
-
-      it('should generate usage section with version information when available', async () => {
-        // Arrange
-        const manifest: GitHubAction = GitHubActionMockFactory.create();
-        const version = {
-          ref: '1.0.0',
-          sha: '08c6903cd8c0fde910a37f88322edcfb5dd907a8',
-        };
-
-        // Arrange: mock version resolution
-        mockVersionService.getVersion.mockResolvedValue(version);
-
-        // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-        // Assert
-
-        expect(result.toString()).toBe(
-          `## Usage
+        },
+        {
+          title: 'usage with version information when available',
+          inputs: undefined,
+          version: { ref: '1.0.0', sha: '08c6903cd8c0fde910a37f88322edcfb5dd907a8' },
+          expected: `## Usage
 
 \`\`\`yaml
 - uses: owner/repo@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # 1.0.0
 \`\`\`
 `
-        );
-      });
-
-      it('should generate usage section with ref when sha not available', async () => {
-        // Arrange
-        const manifest: GitHubAction = GitHubActionMockFactory.create();
-        const version = {
-          ref: '1.0.0',
-        };
-
-        // Arrange: mock version resolution
-        mockVersionService.getVersion.mockResolvedValue(version);
-
-        // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-        // Assert
-
-        expect(result.toString()).toBe(
-          `## Usage
+        },
+        {
+          title: 'usage with ref when sha not available',
+          inputs: undefined,
+          version: { ref: '1.0.0' },
+          expected: `## Usage
 
 \`\`\`yaml
 - uses: owner/repo@1.0.0
 \`\`\`
 `
-        );
+        },
+      ];
+
+      it.each(cases)('should generate usage section for $title', async ({ inputs, version, expected }) => {
+        // Arrange
+        const manifest: GitHubAction = inputs ? GitHubActionMockFactory.create({ inputs }) : GitHubActionMockFactory.create();
+
+        if (version) {
+          mockVersionService.getVersion.mockResolvedValue(version);
+        }
+
+        // Act
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+        // Assert
+        expect(result.toString()).toBe(expected);
       });
     });
 
