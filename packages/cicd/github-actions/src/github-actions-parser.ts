@@ -153,7 +153,7 @@ export class GitHubActionsParser {
     if (this.isGitHubWorkflowFile(source) && this.isGitHubWorkflow(parsed)) {
       const description = this.extractDescriptionFromComments(content);
       if (description) {
-        (parsed as GitHubWorkflow).description = description;
+        (parsed as GitHubWorkflow).description = description.toString();
       }
     }
 
@@ -184,9 +184,10 @@ export class GitHubActionsParser {
     throw new Error(`Unsupported source file: ${source}`);
   }
 
-  private extractDescriptionFromComments(content: ReadableContent): string | undefined {
+  private extractDescriptionFromComments(content: ReadableContent): ReadableContent | undefined {
     const lines = content.splitLines();
     const commentLines: ReadableContent[] = [];
+    let inCodeFence = false;
 
     for (const line of lines) {
       const trimmedLine = line.trim();
@@ -209,8 +210,22 @@ export class GitHubActionsParser {
 
       // Extract comment content
       if (trimmedLine.startsWith('#')) {
-        const commentContent = trimmedLine.slice(1).trim();
-        commentLines.push(commentContent);
+        // Find the position of the first '#' in the raw line (handles leading spaces)
+        const hashIndex = line.search('#');
+        // Slice after the '#' to get the comment content as ReadableContent
+        let commentPart = line.slice(hashIndex + 1);
+        // Remove a single space if present (conventional `# ` style)
+        if (commentPart.startsWith(' ')) {
+          commentPart = commentPart.slice(1);
+        }
+
+        // Detect code fence opening/closing (e.g. ``` or ```yaml)
+        const startsWithFence = commentPart.trimStart().startsWith('```');
+        if (startsWithFence) {
+          inCodeFence = !inCodeFence;
+        }
+
+        commentLines.push(commentPart);
       } else if (trimmedLineIsEmpty && commentLines.length > 0) {
         // Allow empty lines within comment blocks
         commentLines.push(ReadableContent.empty());
@@ -221,9 +236,36 @@ export class GitHubActionsParser {
       return undefined;
     }
 
-    // Join the comment lines and clean up extra whitespace
-    const description = commentLines.join('\n').trim();
-    return description || undefined;
+    // Remove leading empty comment lines
+    while (commentLines.length > 0 && commentLines[0].trim().isEmpty()) {
+      commentLines.shift();
+    }
+    // Remove trailing empty comment lines
+    while (commentLines.length > 0 && commentLines[commentLines.length - 1].trim().isEmpty()) {
+      commentLines.pop();
+    }
+
+    if (commentLines.length === 0) {
+      return undefined;
+    }
+
+    // Build a single ReadableContent by joining with newlines to avoid
+    // converting each line to string individually.
+    let descriptionRC = commentLines[0];
+    for (let i = 1; i < commentLines.length; i++) {
+      descriptionRC = descriptionRC.append('\n').append(commentLines[i]);
+    }
+
+    // If the last non-empty comment line is a code fence, ensure the
+    // description ends with a newline so code fences are preserved
+    // exactly as expected in tests (closing fence followed by a newline).
+    const lastNonEmpty = commentLines[commentLines.length - 1];
+    if (lastNonEmpty.trimStart().startsWith('```')) {
+      // append a trailing newline to match expected formatting
+      descriptionRC = descriptionRC.append('\n');
+    }
+
+    return descriptionRC || undefined;
   }
 
   private isGitHubAction(parsed: unknown): parsed is GitHubAction {

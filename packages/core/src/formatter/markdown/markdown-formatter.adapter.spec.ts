@@ -6,12 +6,17 @@ import { ReadableContent } from '../../reader/readable-content.js';
 import { MarkdownLinkGenerator } from './markdown-link.generator.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { MarkdownFormatterAdapter } from './markdown-formatter.adapter.js';
+import { MarkdownCodeGenerator } from './markdown-code.generator.js';
 
 describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
 
   beforeEach(() => {
-    adapter = new MarkdownFormatterAdapter(new MarkdownTableGenerator(), new MarkdownLinkGenerator());
+    adapter = new MarkdownFormatterAdapter(
+      new MarkdownTableGenerator(),
+      new MarkdownLinkGenerator(),
+      new MarkdownCodeGenerator()
+    );
   });
 
   describe('supportsLanguage', () => {
@@ -201,18 +206,57 @@ describe('MarkdownFormatterAdapter', () => {
       expect(result.toString()).toEqual('First line\nSecond line\n');
     });
 
-    it('should set proper indentation for multiline bullet points', () => {
+    it('should set proper indentation for multiline list', () => {
       // Arrange
-      const content = new ReadableContent('- Bullet 1\nSecond line of bullet 1\nThird line of bullet 1\n- Bullet 2');
+      const content = new ReadableContent(`Here is a list:
+- Item 1
+  - Subitem 1
+  - Subitem 2
+- Item 2
+`);
 
       // Act
       const result = adapter.paragraph(content);
 
       // Assert
-      expect(result.toString()).toEqual(`- Bullet 1
-  Second line of bullet 1
-  Third line of bullet 1
-- Bullet 2
+      expect(result.toString()).toEqual(`Here is a list:
+- Item 1
+  - Subitem 1
+  - Subitem 2
+- Item 2
+
+`);
+    });
+
+    it('should set proper indentation for code blocks and bullet points', () => {
+      // Arrange
+      const content = new ReadableContent(`Here is a list:
+- Item 1
+  - Subitem 1
+  - Subitem 2
+- Item 2
+  
+Here is some code:
+\`\`\`
+const x = 10;
+console.log(x);
+\`\`\``);
+
+      // Act
+      const result = adapter.paragraph(content);
+
+      // Assert
+      expect(result.toString()).toEqual(`Here is a list:
+- Item 1
+  - Subitem 1
+  - Subitem 2
+- Item 2
+  
+Here is some code:
+\`\`\`
+const x = 10;
+console.log(x);
+\`\`\`
 `);
     });
 

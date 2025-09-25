@@ -230,6 +230,11 @@ export class MarkdownTableGenerator {
                 // must be preserved (not escaped). For other parts we apply
                 // htmlEscape(). Append parts directly to avoid re-escaping
                 // the '&' in '&#13;'.
+                // Wrap <pre> fragments with textlint directives so downstream
+                // linters like textlint won't parse the preformatted content as
+                // regular Markdown text. We include HTML comments which are
+                // valid in Markdown and understood by textlint as directives.
+                result = result.append('<!-- textlint-disable -->');
                 result = result.append(`<pre${langAttr}>`);
                 for (const part of innerParts) {
                     if (part.isEmpty()) continue;
@@ -241,6 +246,7 @@ export class MarkdownTableGenerator {
                     }
                 }
                 result = result.append(`</pre>`);
+                result = result.append('<!-- textlint-enable -->');
             }
         }
 

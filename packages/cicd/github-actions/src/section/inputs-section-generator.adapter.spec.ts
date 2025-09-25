@@ -287,14 +287,14 @@ describe('InputsSectionGenerator', () => {
     });
 
     describe('error handling', () => {
-      it('should throw error for unsupported manifest type', () => {
+      it('should throw error for unsupported manifest type', async () => {
         // Arrange
         const invalidManifest = {
           unsupportedType: true,
         } as unknown as GitHubActionsManifest;
 
         // Act & Assert
-        expect(generator.generateSection({ formatterAdapter, manifest: invalidManifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' })).rejects.toThrow('Unsupported manifest type for InputsSectionGenerator');
+        await expect(generator.generateSection({ formatterAdapter, manifest: invalidManifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' })).rejects.toThrow('Unsupported manifest type for InputsSectionGenerator');
       });
     });
   });

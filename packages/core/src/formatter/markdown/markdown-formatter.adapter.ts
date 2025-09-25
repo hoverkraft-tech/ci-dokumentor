@@ -5,6 +5,7 @@ import { SectionIdentifier } from '../../generator/section-generator.adapter.js'
 import { ReadableContent } from '../../reader/readable-content.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { MarkdownLinkGenerator } from './markdown-link.generator.js';
+import { MarkdownCodeGenerator } from './markdown-code.generator.js';
 
 @injectable()
 export class MarkdownFormatterAdapter implements FormatterAdapter {
@@ -14,8 +15,10 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
   constructor(
     @inject(MarkdownTableGenerator) private readonly markdownTableGenerator: MarkdownTableGenerator,
-    @inject(MarkdownLinkGenerator) private readonly markdownLinkGenerator: MarkdownLinkGenerator
-  ) { }
+    @inject(MarkdownLinkGenerator) private readonly markdownLinkGenerator: MarkdownLinkGenerator,
+    @inject(MarkdownCodeGenerator) private readonly markdownCodeGenerator: MarkdownCodeGenerator
+  ) {
+  }
 
   setOptions(options: FormatterOptions): void {
     this.options = { ...options };
@@ -83,7 +86,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   code(content: ReadableContent, language?: ReadableContent): ReadableContent {
-    const fence = this.backtickFenceFor(content);
+    const fence = this.markdownCodeGenerator.backtickFenceFor(content);
     return fence.append(
       language || ReadableContent.empty(),
       this.lineBreak(),
@@ -223,14 +226,36 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     if (content.isEmpty()) {
       return content;
     }
-
     let transformedLines = ReadableContent.empty();
     let inList = false;
+    // Determine whether the content starts inside a code fence by inspecting
+    // the full buffer. This uses the MarkdownCodeGenerator helper.
+    let inCodeFence = false;
 
     const lines = content.splitLines();
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const trimmedLine = line.trimStart();
+
+      // Detect start/end of fenced code block using the code generator helper
+      if (this.markdownCodeGenerator.isFenceLine(trimmedLine)) {
+        // Toggle code fence state and always append the fence line as-is
+        inCodeFence = !inCodeFence;
+        transformedLines = transformedLines.append(line);
+        if (i < lines.length - 1) {
+          transformedLines = transformedLines.append(this.lineBreak());
+        }
+        continue;
+      }
+
+      // While inside a fenced code block, preserve lines exactly
+      if (inCodeFence) {
+        transformedLines = transformedLines.append(line);
+        if (i < lines.length - 1) {
+          transformedLines = transformedLines.append(this.lineBreak());
+        }
+        continue;
+      }
 
       // Check for unordered list item
       const isUnordered = trimmedLine.test(/^[-*+]\s+/);
@@ -286,31 +311,4 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return transformedLines;
   }
 
-  /**
-   * Compute a backtick fence buffer that is longer than any run of backticks inside the content.
-   * This avoids closing the fenced code block prematurely when the content itself contains
-   * triple-backtick sequences. Minimum fence length is 3 (```), longer if needed.
-   */
-  private backtickFenceFor(content: ReadableContent): ReadableContent {
-    if (content.isEmpty()) {
-      return new ReadableContent('```');
-    }
-
-    let maxRun = 0;
-    let current = 0;
-    const tick = '`';
-    for (let i = 0; i < content.getSize(); i++) {
-      if (content.includesAt(tick, i)) {
-        current++;
-        if (current > maxRun) {
-          maxRun = current;
-        }
-      } else {
-        current = 0;
-      }
-    }
-
-    const fenceLen = Math.max(3, maxRun + 1);
-    return ReadableContent.empty().padEnd(fenceLen, tick);
-  }
 }
