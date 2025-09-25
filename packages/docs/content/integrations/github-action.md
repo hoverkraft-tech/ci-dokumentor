@@ -11,37 +11,37 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
+- uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
-    source: ''
+    source: ""
 
     # Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
-    destination: ''
+    destination: ""
 
     # Repository platform (auto-detected if not specified).
-    repository: ''
+    repository: ""
 
     # CI/CD platform (`github-actions`, `gitlab-ci`, etc.).
-    cicd: ''
+    cicd: ""
 
     # Comma-separated list of sections to include.
-    include-sections: ''
+    include-sections: ""
 
     # Comma-separated list of sections to exclude.
-    exclude-sections: ''
+    exclude-sections: ""
 
     # Whether to perform a dry run (no files are written).
     # Default: `false`
-    dry-run: 'false'
+    dry-run: "false"
 
     # Version to document (auto-detected if not specified).
-    version: ''
+    version: ""
 
     # JSON array of extra badges to include in the documentation.
     # Each badge should have `label`, `url`, and optional `linkUrl` properties.
-    extra-badges: ''
+    extra-badges: ""
 
     # Transform bare URLs to links.
     # Types: `auto` (autolinks), `full` (full links), `false` (disabled).
@@ -99,22 +99,32 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ## Examples
 
-### Generate Documentation for Workflows
+
+
+##### Generate Documentation for Workflows
+
+
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
+  uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
   with:
     source: '.github/workflows/ci.yml'
 ```
 
-### Advanced Usage with All Options
+
+
+##### Advanced Usage with All Options
+
+
 
 The CLI accepts a single `--source <file>` per invocation. To generate documentation for multiple files in a workflow, run the action multiple times or script the Docker/CLI call for each file. Example using a shell step to process multiple manifest files:
 
+
+
 ```yaml
 - name: Generate Enhanced Documentation
-  uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
+  uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
   with:
     source: 'action.yml'
     output: 'docs/README.md'
@@ -125,21 +135,49 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
     format-link: 'full'
 ```
 
-### Dry-run Example
+
+
+##### Dry-run Example
+
+
 
 To preview changes without modifying files, set the `dry-run` input to `true`. The action will pass `--dry-run` to the CLI and the core generator will produce a diff instead of writing files.
 
+
+
 ```yaml
 - name: Generate Documentation (dry-run)
-  uses: hoverkraft-tech/ci-dokumentor@1e186f7445501aa4aa72db0eaf5a0ddea8762f3e # main
+  uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
   with:
     source: 'action.yml'
     dry-run: 'true'
 ```
 
-### URL Link Formatting Examples
+
+
+##### URL Link Formatting Examples
+
+
 
 Control how bare URLs in your documentation are formatted:
+
+
+
+<!-- examples:end -->
+
+
+
+#### Related Documentation
+
+
+
+- [CLI Package](../packages/cli/) - Command-line interface reference
+
+- [CI/CD - GitHub Package](../packages/cicd/github-actions/) - CI/CD GitHub package reference
+
+- [Introduction](../intro.md) - Quick start and basic usage examples
+
+- [Developers Guide](../developers/ci-cd.md) - Advanced CI/CD integration patterns
 
 <!-- examples:end -->
 
