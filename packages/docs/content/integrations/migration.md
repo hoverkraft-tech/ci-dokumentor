@@ -256,15 +256,15 @@ Some description here.
 
 <!-- outputs:start -->
 
-## Outputs
-
-<!-- outputs:end -->
-
 <!-- secrets:start -->
 
 ## Secrets
 
 <!-- secrets:end -->
+
+## Outputs
+
+<!-- outputs:end -->
 ```
 
 ### Migrating from github-action-readme-generator

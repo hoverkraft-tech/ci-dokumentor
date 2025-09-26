@@ -1,4 +1,4 @@
-import { ReadableContent, SectionGenerationPayload , FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { ReadableContent, SectionGenerationPayload, FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import {
   GitHubActionsManifest,
@@ -53,7 +53,7 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     const rows = secrets.map(([name, secret]) => {
       return [
         this.getSecretName(name, formatterAdapter),
-        this.getSecretDescription(secret),
+        this.getSecretDescription(secret, formatterAdapter),
         this.getSecretRequired(secret, formatterAdapter),
       ];
     });
@@ -70,8 +70,8 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     );
   }
 
-  private getSecretDescription(secret: GitHubWorkflowSecret): ReadableContent {
-    return new ReadableContent((secret.description || '').trim());
+  private getSecretDescription(secret: GitHubWorkflowSecret, formatterAdapter: FormatterAdapter): ReadableContent {
+    return formatterAdapter.paragraph(new ReadableContent((secret.description || '').trim()));
   }
 
   private getSecretRequired(

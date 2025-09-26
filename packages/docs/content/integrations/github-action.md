@@ -82,6 +82,10 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 | **`ci-dokumentor-version`** | Version of CI Dokumentor to use. See [https://github.com/hoverkraft-tech/ci-dokumentor/releases](https://github.com/hoverkraft-tech/ci-dokumentor/releases). | **false**    | `latest`              |
 
 <!-- inputs:end -->
+
+<!-- secrets:start -->
+<!-- secrets:end -->
+
 <!-- outputs:start -->
 
 ## Outputs
@@ -91,9 +95,6 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 | **`destination`** | Destination path for generated documentation. |
 
 <!-- outputs:end -->
-
-<!-- secrets:start -->
-<!-- secrets:end -->
 
 <!-- examples:start -->
 
@@ -105,7 +106,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 - name: Generate Workflow Documentation
   uses: hoverkraft-tech/ci-dokumentor@7f2c365d77d60e2e534e8480f679313158c84ba4 # main
   with:
-    source: '.github/workflows/ci.yml'
+    source: ".github/workflows/ci.yml"
 ```
 
 ### Advanced Usage with All Options
@@ -116,13 +117,13 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
 - name: Generate Enhanced Documentation
   uses: hoverkraft-tech/ci-dokumentor@7f2c365d77d60e2e534e8480f679313158c84ba4 # main
   with:
-    source: 'action.yml'
-    output: 'docs/README.md'
-    repository: 'github'
-    cicd: 'github-actions'
-    include-sections: 'inputs,outputs,runs'
-    exclude-sections: 'examples'
-    format-link: 'full'
+    source: "action.yml"
+    output: "docs/README.md"
+    repository: "github"
+    cicd: "github-actions"
+    include-sections: "inputs,outputs,runs"
+    exclude-sections: "examples"
+    format-link: "full"
 ```
 
 ### Dry-run Example
@@ -133,8 +134,8 @@ To preview changes without modifying files, set the `dry-run` input to `true`. T
 - name: Generate Documentation (dry-run)
   uses: hoverkraft-tech/ci-dokumentor@7f2c365d77d60e2e534e8480f679313158c84ba4 # main
   with:
-    source: 'action.yml'
-    dry-run: 'true'
+    source: "action.yml"
+    dry-run: "true"
 ```
 
 <!-- examples:end -->

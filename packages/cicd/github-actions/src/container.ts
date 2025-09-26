@@ -3,7 +3,8 @@ import {
   SECTION_GENERATOR_ADAPTER_IDENTIFIER,
   GENERATOR_ADAPTER_IDENTIFIER,
   MIGRATION_ADAPTER_IDENTIFIER,
- initContainer as coreInitContainer } from '@ci-dokumentor/core';
+  initContainer as coreInitContainer
+} from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
 import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
 import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
@@ -82,10 +83,10 @@ export function initContainer(
     .to(InputsSectionGenerator);
   container
     .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
-    .to(OutputsSectionGenerator);
+    .to(SecretsSectionGenerator);
   container
     .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
-    .to(SecretsSectionGenerator);
+    .to(OutputsSectionGenerator);
   container
     .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(ExamplesSectionGenerator);

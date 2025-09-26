@@ -3,12 +3,12 @@ name: Internal - Main - Continuous Integration
 on:
   push:
     branches: [main]
-    tags: ['*']
+    tags: ["*"]
 
   workflow_dispatch:
 
   schedule:
-    - cron: '25 8 * * 1'
+    - cron: "25 8 * * 1"
 
 permissions:
   actions: read
@@ -90,7 +90,7 @@ jobs:
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           branch: docs/action-documentation-update
-          title: 'docs: update action documentation'
+          title: "docs: update action documentation"
           body: Update action documentation
           commit-message: |
             docs: update action documentation

@@ -187,11 +187,11 @@ Perm stuff
 <!-- inputs:start -->
 <!-- inputs:end -->
 
-<!-- outputs:start -->
-<!-- outputs:end -->
-
 <!-- secrets:start -->
 <!-- secrets:end -->
+
+<!-- outputs:start -->
+<!-- outputs:end -->
 
 <!-- examples:start -->
 <!-- examples:end -->

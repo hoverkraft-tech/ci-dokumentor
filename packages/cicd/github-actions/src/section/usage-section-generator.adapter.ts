@@ -1,5 +1,5 @@
 import { basename } from 'node:path';
-import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, ReadableContent , FormatterAdapter, SectionIdentifier, SectionGeneratorAdapter } from '@ci-dokumentor/core';
+import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, ReadableContent, FormatterAdapter, SectionIdentifier, SectionGeneratorAdapter } from '@ci-dokumentor/core';
 import { Document, isScalar } from 'yaml';
 import { inject, injectable } from 'inversify';
 import {
@@ -137,7 +137,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     const inputs = workflow.on?.workflow_call?.inputs || workflow.on?.workflow_dispatch?.inputs || {};
     const withUsage = this.generateWithSection(inputs) || undefined;
 
-    const jobName = basename(workflow.usesName);
+    const jobName = basename(workflow.usesName).replace(/\.[^/.]+$/, '');
     const usesName = this.generateUsesSection(workflow.usesName, version);
 
     return new Document({

@@ -144,15 +144,15 @@ Input details
 
 <!-- inputs:end -->
 
+<!-- secrets:start -->
+<!-- secrets:end -->
+
+
 <!-- outputs:start -->
 
 Output details
 
 <!-- outputs:end -->
-
-<!-- secrets:start -->
-<!-- secrets:end -->
-
 
 <!-- examples:start -->
 

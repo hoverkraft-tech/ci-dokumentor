@@ -13,8 +13,8 @@ export enum SectionIdentifier {
   Overview = 'overview', // One-sentence value proposition
   Usage = 'usage', // Quickstart / usage examples
   Inputs = 'inputs', // Inputs / parameters
-  Outputs = 'outputs', // Outputs / artefacts
   Secrets = 'secrets', // secrets / environment variables
+  Outputs = 'outputs', // Outputs / artefacts
   Examples = 'examples', // Usage examples
   Contributing = 'contributing', // Dev workflow & how to help
   Security = 'security', // Vulnerability disclosure policy

@@ -29,7 +29,7 @@ npm install @ci-dokumentor/cicd-github-actions
 The main generator adapter for GitHub Actions:
 
 ```typescript
-import { GitHubActionsGeneratorAdapter } from '@ci-dokumentor/cicd-github-actions';
+import { GitHubActionsGeneratorAdapter } from "@ci-dokumentor/cicd-github-actions";
 
 class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
   getPlatformName(): string; // Returns 'github-actions'
@@ -54,7 +54,7 @@ class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
 Parses GitHub Actions and workflow files:
 
 ```typescript
-import { GitHubActionsParser } from '@ci-dokumentor/cicd-github-actions';
+import { GitHubActionsParser } from "@ci-dokumentor/cicd-github-actions";
 
 // Parses action.yml files into GitHubAction objects
 // Parses workflow files into GitHubWorkflow objects
@@ -130,7 +130,7 @@ Custom badges can be added using the `--extra-badges` CLI option, supporting var
 The package provides dependency injection setup:
 
 ```typescript
-import { initContainer } from '@ci-dokumentor/cicd-github-actions';
+import { initContainer } from "@ci-dokumentor/cicd-github-actions";
 
 // Initialize container with GitHub Actions support
 const container = initContainer();

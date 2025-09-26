@@ -56,9 +56,9 @@ The `ReadableContent` class is a wrapper around Node.js Buffer that provides:
 **Example Usage:**
 
 ```typescript
-const content = new ReadableContent('Hello')
-  .append(' ', 'World')
-  .append('!')
+const content = new ReadableContent("Hello")
+  .append(" ", "World")
+  .append("!")
   .trim();
 ```
 
@@ -104,10 +104,10 @@ Each package provides its own container initialization:
 
 ```typescript
 // Repository platform
-import { initContainer } from '@ci-dokumentor/repository-github';
+import { initContainer } from "@ci-dokumentor/repository-github";
 
 // CI/CD platform (includes repository platform dependencies)
-import { initContainer } from '@ci-dokumentor/cicd-github-actions';
+import { initContainer } from "@ci-dokumentor/cicd-github-actions";
 ```
 
 ## Benefits
