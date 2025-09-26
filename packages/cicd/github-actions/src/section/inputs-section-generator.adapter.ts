@@ -132,36 +132,44 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
-    let description = (input.description || '').trim();
-    if (description.length > 0) {
-      description = formatterAdapter.paragraph(new ReadableContent(description)).toString();
+    let description = new ReadableContent((input.description || '').trim());
+    if (!description.isEmpty()) {
+      description = formatterAdapter.paragraph(description);
     }
 
     const deprecationMessage = this.getInputDeprecationMessage(input);
     if (deprecationMessage) {
-      if (description) {
-        description += ' - ';
+      if (!description.isEmpty()) {
+        description = description.append(' - ');
       }
-      description = [description, `**Deprecated:** ${deprecationMessage}`]
-        .map((line) => line.trim())
-        .filter(Boolean).join(' - ');
+      description = ReadableContent.empty().append(
+        ...[
+          description,
+          formatterAdapter.bold(new ReadableContent("Deprecated:")).append(deprecationMessage)
+        ]
+          .map((line) => line.trim())
+          .filter(line => !line.isEmpty())
+      );
     }
 
     if ((input as GitHubWorkflowDispatchInput).options) {
       const options = (input as GitHubWorkflowDispatchInput).options;
       if (options && options.length > 0) {
+        const optionsContent = ReadableContent.empty();
+        for (const option of options) {
+          if (!optionsContent.isEmpty()) {
+            optionsContent.append(formatterAdapter.lineBreak());
+          }
+          optionsContent.append(formatterAdapter.inlineCode(new ReadableContent(option)));
+        }
 
-
-        description = [
-          description,
-          `Options: ${options
-            .map((option) => `\`${option}\``)
-            .join(', ')}`]
-          .map((line) => line.trim()).filter(Boolean).join('\n');
+        if (!optionsContent.isEmpty()) {
+          description = description.append(formatterAdapter.lineBreak(), optionsContent);
+        }
       }
     }
 
-    return new ReadableContent(description);
+    return description;
   }
 
   private getInputDefault(

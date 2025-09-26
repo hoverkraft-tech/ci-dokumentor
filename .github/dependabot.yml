@@ -6,52 +6,52 @@ updates:
     schedule:
       interval: weekly
       day: friday
-      time: '04:00'
+      time: "04:00"
     groups:
       github-actions-dependencies:
         patterns:
-          - '*'
+          - "*"
 
   - package-ecosystem: npm
-    directory: '/'
+    directory: "/"
     open-pull-requests-limit: 20
     versioning-strategy: increase
     schedule:
       interval: weekly
       day: friday
-      time: '04:00'
+      time: "04:00"
     groups:
       npm-docs-dependencies:
         patterns:
-          - '@docusaurus/*'
-          - 'clsx'
-          - 'prism-react-renderer'
-          - 'react'
+          - "@docusaurus/*"
+          - "clsx"
+          - "prism-react-renderer"
+          - "react"
       npm-dev-dependencies:
         dependency-type: development
 
-  - package-ecosystem: 'devcontainers'
+  - package-ecosystem: "devcontainers"
     open-pull-requests-limit: 20
-    directory: '/'
+    directory: "/"
     schedule:
       interval: weekly
       day: friday
-      time: '04:00'
+      time: "04:00"
     groups:
       devcontainers-dependencies:
         patterns:
-          - '*'
+          - "*"
 
-  - package-ecosystem: 'docker'
+  - package-ecosystem: "docker"
     open-pull-requests-limit: 20
     directories:
-      - '/'
-      - '/docker'
+      - "/"
+      - "/docker"
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
       day: friday
-      time: '04:00'
+      time: "04:00"
     groups:
       docker-dependencies:
         patterns:
-          - '*'
+          - "*"

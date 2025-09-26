@@ -206,7 +206,7 @@ on:
     branches:
       - main
 jobs:
-  workflow.yml:
+  workflow:
     uses: owner/repo/.github/workflows/workflow.yml
 \`\`\`
 `
@@ -268,7 +268,7 @@ permissions:
   contents: read
   deployments: write
 jobs:
-  deploy.yml:
+  deploy:
     uses: owner/repo/.github/workflows/deploy.yml
     secrets:
       # Token for deployment
@@ -325,7 +325,7 @@ on:
     branches:
       - main
 jobs:
-  ci.yml:
+  ci:
     uses: owner/repo/.github/workflows/ci.yml
 \`\`\`
 `
@@ -357,7 +357,7 @@ on:
   schedule:
     - cron: 0 0 * * 0
 jobs:
-  release.yml:
+  release:
     uses: owner/repo/.github/workflows/release.yml
 \`\`\`
 `
@@ -387,7 +387,7 @@ on:
     branches:
       - main
 jobs:
-  test.yml:
+  test:
     uses: owner/repo/.github/workflows/test.yml
 \`\`\`
 `
@@ -425,7 +425,7 @@ on:
     branches:
       - main
 jobs:
-  workflow.yml:
+  workflow:
     uses: owner/repo/.github/workflows/workflow.yml@abc123def456 # 1.0.0
 \`\`\`
 `

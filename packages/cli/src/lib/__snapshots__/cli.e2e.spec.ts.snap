@@ -160,6 +160,8 @@ Documentation generated successfully!
 +| **\`ci-dokumentor-version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.                      | **false**    | \`latest\`              |
 +
 +<!-- inputs:end -->
++<!-- secrets:start -->
++<!-- secrets:end -->
 +<!-- outputs:start -->
 +
 +## Outputs
@@ -169,8 +171,6 @@ Documentation generated successfully!
 +| **\`destination\`** | Destination path for generated documentation. |
 +
 +<!-- outputs:end -->
-+<!-- secrets:start -->
-+<!-- secrets:end -->
 +<!-- examples:start -->
 +<!-- examples:end -->
 +<!-- contributing:start -->

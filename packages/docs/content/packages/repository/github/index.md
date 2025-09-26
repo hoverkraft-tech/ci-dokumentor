@@ -39,7 +39,7 @@ npm install @ci-dokumentor/repository-github
 The main service for GitHub repository operations:
 
 ```typescript
-import { GitHubRepositoryProvider } from '@ci-dokumentor/repository-github';
+import { GitHubRepositoryProvider } from "@ci-dokumentor/repository-github";
 
 class GitHubRepositoryProvider implements RepositoryProvider {
   getPlatformName(): string; // Returns 'github'
@@ -79,7 +79,7 @@ Uses GitHub's GraphQL API for efficient data fetching with proper error handling
 The package provides dependency injection setup:
 
 ```typescript
-import { initContainer } from '@ci-dokumentor/repository-github';
+import { initContainer } from "@ci-dokumentor/repository-github";
 
 // Initialize container with GitHub repository provider
 const container = initContainer();

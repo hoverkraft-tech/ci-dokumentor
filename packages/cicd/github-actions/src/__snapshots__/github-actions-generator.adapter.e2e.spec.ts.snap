@@ -57,6 +57,8 @@ Builds the application and deploys it to the specified environment
 | **\`config-file\`** | Path to configuration file               | **false**    | \`config/deploy.yml\` |
 
 <!-- inputs:end -->
+<!-- secrets:start -->
+<!-- secrets:end -->
 <!-- outputs:start -->
 
 ## Outputs
@@ -68,8 +70,6 @@ Builds the application and deploys it to the specified environment
 | **\`deployment-status\`** | Status of the deployment (success/failure) |
 
 <!-- outputs:end -->
-<!-- secrets:start -->
-<!-- secrets:end -->
 <!-- examples:start -->
 <!-- examples:end -->
 <!-- contributing:start -->
@@ -119,7 +119,7 @@ on:
   schedule:
     - cron: 0 2 * * 1
 jobs:
-  ci-cd.yml:
+  ci-cd:
     uses: hoverkraft-tech/ci-dokumentor/.github/workflows/ci-cd.yml@sha-version # tag
     secrets:
       # GitHub token for authentication
@@ -143,15 +143,6 @@ jobs:
 | **\`environment\`** | Deployment environment | **true**     | **string** | \`staging\`   |
 
 <!-- inputs:end -->
-<!-- outputs:start -->
-
-## Outputs
-
-| **Output**           | **Description**                 |
-| -------------------- | ------------------------------- |
-| **\`deployment-url\`** | URL of the deployed application |
-
-<!-- outputs:end -->
 <!-- secrets:start -->
 
 ## Secrets
@@ -161,6 +152,15 @@ jobs:
 | **\`github-token\`** | GitHub token for authentication | **false**    |
 
 <!-- secrets:end -->
+<!-- outputs:start -->
+
+## Outputs
+
+| **Output**           | **Description**                 |
+| -------------------- | ------------------------------- |
+| **\`deployment-url\`** | URL of the deployed application |
+
+<!-- outputs:end -->
 <!-- examples:start -->
 <!-- examples:end -->
 <!-- contributing:start -->

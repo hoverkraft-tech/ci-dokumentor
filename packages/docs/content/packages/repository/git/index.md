@@ -92,9 +92,9 @@ If you'd like, I can also add a short example that shows how to resolve the prov
 ```typescript
 // Analyze multiple repositories
 const repositories = [
-  'https://github.com/user/repo1.git',
-  'https://github.com/user/repo2.git',
-  'https://github.com/user/repo3.git',
+  "https://github.com/user/repo1.git",
+  "https://github.com/user/repo2.git",
+  "https://github.com/user/repo3.git",
 ];
 
 const repoInfos = await Promise.all(

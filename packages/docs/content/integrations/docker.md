@@ -162,7 +162,7 @@ For consistent development environments:
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   ci-dokumentor:
     image: ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest

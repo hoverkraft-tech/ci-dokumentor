@@ -114,11 +114,11 @@ open coverage/index.html
 #### Test Structure (AAA Pattern)
 
 ```typescript
-describe('Component', () => {
-  it('should behavior when condition', () => {
+describe("Component", () => {
+  it("should behavior when condition", () => {
     // Arrange - Setup test data and mocks
-    const input = 'test-input';
-    const expectedOutput = 'expected-result';
+    const input = "test-input";
+    const expectedOutput = "expected-result";
 
     // Act - Execute the code under test
     const result = systemUnderTest.method(input);
@@ -135,11 +135,11 @@ Use clear, descriptive test names that explain the behavior:
 
 ```typescript
 // ✅ Good: describes behavior and context
-it('should throw error when source file does not exist');
+it("should throw error when source file does not exist");
 
 // ❌ Bad: vague and unclear
-it('should work');
-it('test error case');
+it("should work");
+it("test error case");
 ```
 
 #### Test Dependencies and Mocking
@@ -159,13 +159,13 @@ beforeEach(() => {
 Use mock-fs for **End-to-end** file system operations tests **only**:
 
 ```typescript
-import mockFs from 'mock-fs';
+import mockFs from "mock-fs";
 
 beforeEach(() => {
   mockFs({
-    '/test': {
-      'action.yml': 'name: Test Action',
-      'README.md': '# Test',
+    "/test": {
+      "action.yml": "name: Test Action",
+      "README.md": "# Test",
     },
   });
 });
@@ -182,7 +182,7 @@ afterEach(() => {
 Test documentation generation with real manifest files:
 
 ```typescript
-it('should generate complete documentation', async () => {
+it("should generate complete documentation", async () => {
   // Arrange: Real action.yml content
   const actionContent = `
 name: My Action
@@ -194,13 +194,13 @@ inputs:
 
   // Act: Generate documentation
   await generator.generateDocumentation({
-    source: '/test/action.yml',
+    source: "/test/action.yml",
     // ... other parameters
   });
 
   // Assert: Verify generated content
-  const result = readFileSync('/test/README.md', 'utf-8');
-  expect(result).toContain('## Inputs');
+  const result = readFileSync("/test/README.md", "utf-8");
+  expect(result).toContain("## Inputs");
 });
 ```
 
@@ -209,7 +209,7 @@ inputs:
 Test migration adapters with before/after scenarios:
 
 ```typescript
-it('should migrate action-docs markers', async () => {
+it("should migrate action-docs markers", async () => {
   const before = `
 <!-- action-docs-inputs source="action.yml" -->
 <!-- action-docs-outputs source="action.yml" -->
@@ -232,10 +232,10 @@ it('should migrate action-docs markers', async () => {
 ### Repository Provider Testing
 
 ```typescript
-describe('GitHubRepositoryProvider', () => {
-  it('should support GitHub repositories', async () => {
+describe("GitHubRepositoryProvider", () => {
+  it("should support GitHub repositories", async () => {
     // Mock Git remote URL
-    mockGitRemote('https://github.com/owner/repo.git');
+    mockGitRemote("https://github.com/owner/repo.git");
 
     const supports = await provider.supports();
     expect(supports).toBe(true);
@@ -246,13 +246,13 @@ describe('GitHubRepositoryProvider', () => {
 ### CLI Testing
 
 ```typescript
-describe('CLI', () => {
-  it('should generate documentation with valid options', async () => {
+describe("CLI", () => {
+  it("should generate documentation with valid options", async () => {
     const result = await cli.run([
-      'generate',
-      '--source',
-      '/test/action.yml',
-      '--dry-run',
+      "generate",
+      "--source",
+      "/test/action.yml",
+      "--dry-run",
     ]);
 
     expect(result.exitCode).toBe(0);
@@ -267,7 +267,7 @@ describe('CLI', () => {
 For performance-critical operations:
 
 ```typescript
-it('should parse large action files efficiently', () => {
+it("should parse large action files efficiently", () => {
   const start = performance.now();
 
   parser.parse(largeActionContent);
@@ -307,7 +307,7 @@ beforeEach(() => {
 // Always await async operations in tests
 await expect(async () => {
   await service.methodThatThrows();
-}).rejects.toThrow('Expected error');
+}).rejects.toThrow("Expected error");
 ```
 
 ### Debug Tests

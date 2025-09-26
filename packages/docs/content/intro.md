@@ -62,19 +62,19 @@ For end users we recommend Docker or NPX for quick, reproducible runs. For contr
 Create a simple GitHub Action file and generate its documentation:
 
 ```yaml title="action.yml"
-name: 'Hello World Action'
-description: 'A simple action that greets the world'
+name: "Hello World Action"
+description: "A simple action that greets the world"
 inputs:
   who-to-greet:
-    description: 'Who to greet'
+    description: "Who to greet"
     required: true
-    default: 'World'
+    default: "World"
 outputs:
   time:
-    description: 'The time we greeted you'
+    description: "The time we greeted you"
 runs:
-  using: 'node20'
-  main: 'index.js'
+  using: "node20"
+  main: "index.js"
 ```
 
 **Generate documentation:**
