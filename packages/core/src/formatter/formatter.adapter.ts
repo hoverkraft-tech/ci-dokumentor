@@ -51,6 +51,8 @@ export interface FormatterAdapter {
 
   badge(label: ReadableContent, message: ReadableContent, color?: ReadableContent): ReadableContent;
 
+  list(items: ReadableContent[], ordered?: boolean): ReadableContent;
+
   horizontalRule(): ReadableContent;
 
   lineBreak(): ReadableContent;

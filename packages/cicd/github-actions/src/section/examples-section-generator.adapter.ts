@@ -88,32 +88,13 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
       return ReadableContent.empty();
     }
 
-    let examplesContent = formatterAdapter.heading(new ReadableContent('Examples'), 2).append(
-      formatterAdapter.lineBreak(),
-    );
+    const sectionTitle = formatterAdapter.heading(new ReadableContent('Examples'), 2).trim();
 
-    for (const example of examples) {
-      if (example.type === ExampleType.Heading) {
-        examplesContent = examplesContent.append(
-          formatterAdapter.heading(example.content, example.level || 3),
-          formatterAdapter.lineBreak()
-        );
-      } else if (example.type === ExampleType.Text) {
-        examplesContent = examplesContent.append(
-          formatterAdapter.paragraph(example.content),
-          formatterAdapter.lineBreak()
-        );
-      } else if (example.type === ExampleType.Code) {
-        const processedCode = this.processCodeSnippet(formatterAdapter, example.content, manifest.usesName, version);
-        examplesContent = examplesContent.append(
-          formatterAdapter.code(processedCode, example.language ?? new ReadableContent('yaml')),
-          formatterAdapter.lineBreak()
-        );
-      }
-    }
+    const blocks: ReadableContent[] = examples.map(ex => this.renderExampleBlock(ex, formatterAdapter, manifest, version));
 
-    return examplesContent;
+    return this.assembleExamplesContent(sectionTitle, blocks, formatterAdapter, examples);
   }
+
 
   /**
    * Find examples from various sources
@@ -161,18 +142,20 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
       if (['.yml', '.yaml'].includes(ext)) {
         examples.push({
           type: ExampleType.Heading,
-          content: new ReadableContent(file.replace(/\.(yml|yaml)$/, '')),
+          content: new ReadableContent(file.replace(/\.(yml|yaml)$/, '')).trim(),
           level: 3
         });
 
         const content = await this.readerAdapter.readResource(filePath);
         examples.push({
           type: ExampleType.Code,
-          content: content,
+          content: content.trim(),
           language: new ReadableContent('yaml')
         });
       } else if (ext === '.md') {
-        examples.push(...await this.parseMarkdownExamples(filePath, formatterAdapter));
+        const content = await this.readerAdapter.readResource(filePath);
+        const parsedExamples = this.parseMarkdownContent(content, formatterAdapter, 2, false);
+        examples.push(...parsedExamples);
       }
     }
 
@@ -183,62 +166,109 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
    * Extract examples from README.md or destination file
    */
   private async findExamplesFromDestination(destination: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
-    const examples: Example[] = [];
+    // Read destination and extract the region delimited by the examples section markers.
     const content = await this.readerAdapter.readResource(destination);
     const lines = content.splitLines();
 
+    const startMarker = formatterAdapter.sectionStart(SectionIdentifier.Examples);
+    const endMarker = formatterAdapter.sectionEnd(SectionIdentifier.Examples);
+
     let inExamplesSection = false;
-    let inCodeBlock = false;
-    let codeBlockLanguage = ReadableContent.empty();
-    let codeBlockContent = ReadableContent.empty();
+    const sectionLines: ReadableContent[] = [];
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-
-      // Check if we've entered an examples section
-      if (line.test(/^#+\s*examples?/i)) {
-        inExamplesSection = true;
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!inExamplesSection) {
+        if (trimmedLine.equals(startMarker)) {
+          inExamplesSection = true;
+        }
         continue;
       }
 
-      // Check if we've left the examples section (next major heading)
-      if (inExamplesSection && line.test(/^#[^#]/)) {
+      if (inExamplesSection && trimmedLine.equals(endMarker)) {
         break;
       }
 
-      if (inExamplesSection) {
-        // Handle code blocks
-        if (line.startsWith('```')) {
-          if (!inCodeBlock) {
-            inCodeBlock = true;
-            codeBlockLanguage = line.slice(3).trim() || new ReadableContent('yaml');
-            codeBlockContent = ReadableContent.empty();
-          } else {
-            inCodeBlock = false;
-            if (codeBlockContent.trim()) {
-              examples.push({
-                type: ExampleType.Code,
-                content: codeBlockContent.trim(),
-                language: codeBlockLanguage
-              });
-            }
+      // Collect raw lines (ReadableContent) from the examples section. We'll
+      // parse them using the shared markdown parser which understands
+      // headings, code blocks and text.
+      sectionLines.push(line);
+    }
+
+    if (sectionLines.length === 0) {
+      return [];
+    }
+
+    // Build a ReadableContent from the collected section lines so we can reuse
+    // the same parsing routine as for markdown files. Skip the top-level
+    // 'Examples' heading which is the section title.
+    let sectionContent = ReadableContent.empty();
+    for (const l of sectionLines) {
+      sectionContent = sectionContent.append(l, formatterAdapter.lineBreak());
+    }
+
+    // Skip an inner 'Examples' heading if present at the top of the section.
+    const parsed = this.parseMarkdownContent(sectionContent, formatterAdapter, 0, true);
+    return parsed;
+  }
+
+  /**
+   * Shared markdown parser for example content. Accepts a ReadableContent
+   * instance and returns parsed Example entries. The parser understands
+   * headings, text lines and fenced code blocks. A headingLevelOffset can be
+   * used to bump heading levels (useful when embedding file headings inside
+   * a larger section). If skipExamplesHeading is true the parser will ignore
+   * a top-level 'Examples' heading inside the content.
+   */
+  private parseMarkdownContent(content: ReadableContent, formatterAdapter: FormatterAdapter, headingLevelOffset = 0, skipExamplesHeading = false): Example[] {
+    const examples: Example[] = [];
+
+    let inCodeBlock = false;
+    let codeBlockLanguage: ReadableContent = ReadableContent.empty();
+    let codeBlockContent: ReadableContent = ReadableContent.empty();
+
+    const lines = content.splitLines();
+    for (const line of lines) {
+      // Optionally skip a top 'Examples' heading that duplicates the
+      // section title (only when parsing destination section content).
+      if (skipExamplesHeading && line.test(/^#+\s*examples?/i)) {
+        continue;
+      }
+
+      if (line.startsWith('```')) {
+        if (!inCodeBlock) {
+          inCodeBlock = true;
+          codeBlockLanguage = line.slice(3).trim();
+          codeBlockContent = ReadableContent.empty();
+        } else {
+          inCodeBlock = false;
+          const trimmed = codeBlockContent.trim();
+          if (!trimmed.isEmpty()) {
+            examples.push({
+              type: ExampleType.Code,
+              content: trimmed,
+              language: codeBlockLanguage
+            });
           }
-        } else if (inCodeBlock) {
-          codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
-        } else if (line.test(/^#+/)) {
-          // Sub-heading within examples section
-          const level = (line.match(/^#+/) || [''])[0].length;
-          const heading = line.replace(/^#+\s*/, '');
-          examples.push({
-            type: ExampleType.Heading,
-            content: heading,
-            level: level + 2 // Offset since examples is already h2
-          });
-        } else if (line.trim()) {
-          // Regular text content
+        }
+      } else if (inCodeBlock) {
+        // Preserve original indentation inside code blocks by appending the
+        // raw line (do not trim). Trimming would remove code indentation.
+        codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
+      } else if (line.test(/^#+/)) {
+        const level = (line.match(/^#+/) || [''])[0].length;
+        const heading = line.replace(/^#+\s*/, '');
+        examples.push({
+          type: ExampleType.Heading,
+          content: heading.trim(),
+          level: level + headingLevelOffset
+        });
+      } else {
+        const trimmedLine = line.trim();
+        if (!trimmedLine.isEmpty()) {
           examples.push({
             type: ExampleType.Text,
-            content: line
+            content: trimmedLine
           });
         }
       }
@@ -248,52 +278,47 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   }
 
   /**
-   * Parse markdown files for examples
+   * Render a single Example into a ReadableContent block using the formatter.
    */
-  private async parseMarkdownExamples(filePath: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
-    const examples: Example[] = [];
-    const content = await this.readerAdapter.readResource(filePath);
-    const lines = content.splitLines();
+  private renderExampleBlock(example: Example, formatterAdapter: FormatterAdapter, manifest: GitHubActionsManifest, version?: ManifestVersion): ReadableContent {
+    if (example.type === ExampleType.Heading) {
+      return formatterAdapter.heading(example.content, example.level || 3).trim();
+    }
 
-    let inCodeBlock = false;
-    let codeBlockLanguage = ReadableContent.empty();
-    let codeBlockContent = ReadableContent.empty();
+    if (example.type === ExampleType.Text) {
+      return formatterAdapter.paragraph(example.content).trim();
+    }
 
-    for (const line of lines) {
-      if (line.startsWith('```')) {
-        if (!inCodeBlock) {
-          inCodeBlock = true;
-          codeBlockLanguage = line.slice(3).trim() || new ReadableContent('yaml');
-          codeBlockContent = ReadableContent.empty();
-        } else {
-          inCodeBlock = false;
-          if (codeBlockContent.trim()) {
-            examples.push({
-              type: ExampleType.Code,
-              content: codeBlockContent.trim(),
-              language: codeBlockLanguage
-            });
-          }
-        }
-      } else if (inCodeBlock) {
-        codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
-      } else if (line.test(/^#+/)) {
-        const level = (line.match(/^#+/) || [''])[0].length;
-        const heading = line.replace(/^#+\s*/, '');
-        examples.push({
-          type: ExampleType.Heading,
-          content: heading,
-          level: level + 2
-        });
-      } else if (line.trim()) {
-        examples.push({
-          type: ExampleType.Text,
-          content: line
-        });
+    // Code block
+    const processedCode = this.processCodeSnippet(formatterAdapter, example.content, manifest.usesName, version);
+    return formatterAdapter.code(processedCode, example.language).trim();
+  }
+
+  /**
+   * Assemble the final Examples ReadableContent from section title and
+   * individual blocks. This centralizes spacing rules and keeps the
+   * generator deterministic.
+   */
+  private assembleExamplesContent(sectionTitle: ReadableContent, blocks: ReadableContent[], formatterAdapter: FormatterAdapter, examples: Example[]): ReadableContent {
+    // Start with the section title followed by a blank line.
+    let examplesContent = ReadableContent.empty().append(sectionTitle, formatterAdapter.lineBreak(), formatterAdapter.lineBreak());
+
+    for (let i = 0; i < blocks.length; i++) {
+      examplesContent = examplesContent.append(blocks[i]);
+      if (i < blocks.length - 1) {
+        examplesContent = examplesContent.append(formatterAdapter.lineBreak(), formatterAdapter.lineBreak());
       }
     }
 
-    return examples;
+    // Decide trailing newlines: preserve legacy behavior where an extra
+    // blank line follows when the first example is a code block.
+    if (examples.length > 0 && examples[0].type === ExampleType.Code) {
+      examplesContent = examplesContent.append(formatterAdapter.lineBreak(), formatterAdapter.lineBreak());
+    } else {
+      examplesContent = examplesContent.append(formatterAdapter.lineBreak());
+    }
+
+    return examplesContent;
   }
 
   /**
@@ -325,9 +350,9 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
         }
       }
 
-      codeSnippetContent = codeSnippetContent.append(line.trimTrailingLineBreaks());
+      codeSnippetContent = codeSnippetContent.append(line, formatterAdapter.lineBreak());
     });
 
-    return codeSnippetContent.trimTrailingLineBreaks().append(formatterAdapter.lineBreak());
+    return codeSnippetContent.trim();
   }
 }

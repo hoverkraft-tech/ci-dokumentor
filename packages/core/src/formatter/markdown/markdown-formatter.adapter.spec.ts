@@ -20,82 +20,28 @@ describe('MarkdownFormatterAdapter', () => {
   });
 
   describe('supportsLanguage', () => {
-    it('should return true for Markdown language', () => {
+    it.each([
+      { name: 'markdown', language: FormatterLanguage.Markdown, expected: true },
+      { name: 'unsupported', language: 'html' as FormatterLanguage, expected: false },
+    ])('should return %s for $name', ({ language, expected }) => {
       // Act
-      const result = adapter.supportsLanguage(FormatterLanguage.Markdown);
+      const result = adapter.supportsLanguage(language);
 
       // Assert
-      expect(result).toEqual(true);
-    });
-
-    it('should return false for unsupported languages', () => {
-      // Arrange
-      const unsupportedLanguage = 'html' as FormatterLanguage;
-
-      // Act
-      const result = adapter.supportsLanguage(unsupportedLanguage);
-
-      // Assert
-      expect(result).toEqual(false);
+      expect(result).toEqual(expected);
     });
   });
 
   describe('heading', () => {
-    it('should format text as markdown heading with # prefix', () => {
-      // Arrange
-      const content = new ReadableContent('Test Heading');
-
-      // Act
+    it.each([
+      { desc: 'basic', content: new ReadableContent('Test Heading'), expected: '# Test Heading\n' },
+      { desc: 'empty', content: ReadableContent.empty(), expected: '# \n' },
+      { desc: 'multi-word', content: new ReadableContent('This is a Long Heading with Multiple Words'), expected: '# This is a Long Heading with Multiple Words\n' },
+      { desc: 'special-chars', content: new ReadableContent('Heading with "quotes" & symbols!'), expected: '# Heading with "quotes" & symbols!\n' },
+      { desc: 'numbers', content: new ReadableContent('Version 1.0.0 Release Notes'), expected: '# Version 1.0.0 Release Notes\n' },
+    ])('should format heading ($desc)', ({ content, expected }) => {
       const result = adapter.heading(content);
-
-      // Assert
-      expect(result.toString()).toEqual('# Test Heading\n');
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const content = ReadableContent.empty();
-
-      // Act
-      const result = adapter.heading(content);
-
-      // Assert
-      expect(result.toString()).toEqual('# \n');
-    });
-
-    it('should handle multi-word headings', () => {
-      // Arrange
-      const content = new ReadableContent('This is a Long Heading with Multiple Words');
-
-      // Act
-      const result = adapter.heading(content);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '# This is a Long Heading with Multiple Words\n'
-      );
-    });
-
-    it('should handle headings with special characters', () => {
-      // Arrange
-      const content = new ReadableContent('Heading with "quotes" & symbols!');
-
-      // Act
-      const result = adapter.heading(content);
-
-      // Assert
-      expect(result.toString()).toEqual('# Heading with "quotes" & symbols!\n');
-    });
-
-    it('should handle headings with numbers', () => {
-      // Arrange
-      const content = new ReadableContent('Version 1.0.0 Release Notes');
-
-      // Act
-      const result = adapter.heading(content);
-
-      // Assert
-      expect(result.toString()).toEqual('# Version 1.0.0 Release Notes\n');
+      expect(result.toString()).toEqual(expected);
     });
 
     it('should handle different heading levels', () => {
@@ -124,86 +70,24 @@ describe('MarkdownFormatterAdapter', () => {
   });
 
   describe('center', () => {
-    it('should format text with center alignment', () => {
-      // Arrange
-      const content = new ReadableContent('Centered Text');
-
-      // Act
+    it.each([
+      { desc: 'single-line', content: new ReadableContent('Centered Text'), expected: `<div align="center">\n  Centered Text\n</div>\n` },
+      { desc: 'empty', content: ReadableContent.empty(), expected: `<div align="center"></div>\n` },
+      { desc: 'multi-line', content: new ReadableContent('Line 1\nLine 2'), expected: `<div align="center">\n  Line 1\n  Line 2\n</div>\n` },
+    ])('should format center ($desc)', ({ content, expected }) => {
       const result = adapter.center(content);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `<div align="center">
-  Centered Text
-</div>
-`
-      );
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const content = ReadableContent.empty();
-
-      // Act
-      const result = adapter.center(content);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `<div align="center"></div>
-`
-      );
-    });
-
-    it('should handle multi-line text', () => {
-      // Arrange
-      const content = new ReadableContent('Line 1\nLine 2');
-
-      // Act
-      const result = adapter.center(content);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        `<div align="center">
-  Line 1
-  Line 2
-</div>
-`
-      );
+      expect(result.toString()).toEqual(expected);
     });
   });
 
   describe('paragraph', () => {
-    it('should format text as paragraph with newline', () => {
-      // Arrange
-      const content = new ReadableContent('This is a paragraph');
-
-      // Act
+    it.each([
+      { desc: 'single-line', content: new ReadableContent('This is a paragraph'), expected: 'This is a paragraph\n' },
+      { desc: 'empty', content: ReadableContent.empty(), expected: '\n' },
+      { desc: 'multi-line', content: new ReadableContent('First line\nSecond line'), expected: 'First line\nSecond line\n' },
+    ])('should format paragraph ($desc)', ({ content, expected }) => {
       const result = adapter.paragraph(content);
-
-      // Assert
-      expect(result.toString()).toEqual('This is a paragraph\n');
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const content = ReadableContent.empty();
-
-      // Act
-      const result = adapter.paragraph(content);
-
-      // Assert
-      expect(result.toString()).toEqual('\n');
-    });
-
-    it('should handle multi-line text', () => {
-      // Arrange
-      const content = new ReadableContent('First line\nSecond line');
-
-      // Act
-      const result = adapter.paragraph(content);
-
-      // Assert
-      expect(result.toString()).toEqual('First line\nSecond line\n');
+      expect(result.toString()).toEqual(expected);
     });
 
     it('should set proper indentation for multiline list', () => {
@@ -476,43 +360,14 @@ console.log(x);
   });
 
   describe('bold', () => {
-    it('should format text as bold with ** markers', () => {
-      // Arrange
-      const content = new ReadableContent('Bold Text');
-
-      // Act
+    it.each([
+      { desc: 'basic', content: new ReadableContent('Bold Text'), expected: '**Bold Text**' },
+      { desc: 'escape asterisks', content: new ReadableContent('test ** test'), expected: '**test \\*\\* test**' },
+      { desc: 'empty', content: ReadableContent.empty(), expected: '****' },
+      { desc: 'special', content: new ReadableContent('Text with "quotes" & symbols!'), expected: '**Text with "quotes" & symbols!**' },
+    ])('should format bold ($desc)', ({ content, expected }) => {
       const result = adapter.bold(content);
-
-      // Assert
-      expect(result.toString()).toEqual('**Bold Text**');
-    });
-
-    it('should escape asterisks inside bold', () => {
-      const content = new ReadableContent('test ** test');
-      const result = adapter.bold(content);
-      expect(result.toString()).toEqual('**test \\*\\* test**');
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const content = ReadableContent.empty();
-
-      // Act
-      const result = adapter.bold(content);
-
-      // Assert
-      expect(result.toString()).toEqual('****');
-    });
-
-    it('should handle text with special characters', () => {
-      // Arrange
-      const content = new ReadableContent('Text with "quotes" & symbols!');
-
-      // Act
-      const result = adapter.bold(content);
-
-      // Assert
-      expect(result.toString()).toEqual('**Text with "quotes" & symbols!**');
+      expect(result.toString()).toEqual(expected);
     });
 
     it('should escape link text brackets and url parentheses', () => {
@@ -526,43 +381,14 @@ console.log(x);
   // Escaping tests were moved into their dedicated describe blocks below.
 
   describe('italic', () => {
-    it('should format text as italic with * markers', () => {
-      // Arrange
-      const content = new ReadableContent('Italic Text');
-
-      // Act
+    it.each([
+      { desc: 'basic', content: new ReadableContent('Italic Text'), expected: '*Italic Text*' },
+      { desc: 'escape asterisk', content: new ReadableContent('test * test'), expected: '*test \\* test*' },
+      { desc: 'empty', content: ReadableContent.empty(), expected: '**' },
+      { desc: 'special', content: new ReadableContent('Text with "quotes" & symbols!'), expected: '*Text with "quotes" & symbols!*' },
+    ])('should format italic ($desc)', ({ content, expected }) => {
       const result = adapter.italic(content);
-
-      // Assert
-      expect(result.toString()).toEqual('*Italic Text*');
-    });
-
-    it('should escape asterisks inside italic', () => {
-      const content = new ReadableContent('test * test');
-      const result = adapter.italic(content);
-      expect(result.toString()).toEqual('*test \\* test*');
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const content = ReadableContent.empty();
-
-      // Act
-      const result = adapter.italic(content);
-
-      // Assert
-      expect(result.toString()).toEqual('**');
-    });
-
-    it('should handle text with special characters', () => {
-      // Arrange
-      const content = new ReadableContent('Text with "quotes" & symbols!');
-
-      // Act
-      const result = adapter.italic(content);
-
-      // Assert
-      expect(result.toString()).toEqual('*Text with "quotes" & symbols!*');
+      expect(result.toString()).toEqual(expected);
     });
   });
 
@@ -633,8 +459,7 @@ console.log(x);
 
     it('should use a longer fence when content contains backtick runs', () => {
       // Arrange: content contains a triple-backtick sequence inside
-      const content = new ReadableContent(`
-const example = \`inline\`;
+      const content = new ReadableContent(`const example = \`inline\`;
 // code fence inside:
 \`\`\`
 some inner code
@@ -647,7 +472,6 @@ end
 
       // Assert: fence should be at least 4 backticks so inner ``` does not close it
       expect(result.toString()).toEqual(`\`\`\`\`
-
 const example = \`inline\`;
 // code fence inside:
 \`\`\`
@@ -660,151 +484,38 @@ end
   });
 
   describe('inlineCode', () => {
-    it('should format text as inline code with backticks', () => {
-      // Arrange
-      const content = new ReadableContent('console.log()');
-
-      // Act
+    it.each([
+      { desc: 'basic', content: new ReadableContent('console.log()'), expected: '`console.log()`' },
+      { desc: 'empty', content: ReadableContent.empty(), expected: '``' },
+      { desc: 'special', content: new ReadableContent('getValue("key")'), expected: '`getValue("key")`' },
+      { desc: 'escape backtick', content: new ReadableContent('a ` b'), expected: '`a \\` b`' },
+      { desc: 'escape markers', content: new ReadableContent('a ** b * c'), expected: '`a \\*\\* b \\* c`' },
+    ])('should format inlineCode ($desc)', ({ content, expected }) => {
       const result = adapter.inlineCode(content);
-
-      // Assert
-      expect(result.toString()).toEqual('`console.log()`');
-    });
-
-    it('should handle empty string input', () => {
-      // Arrange
-      const content = ReadableContent.empty();
-
-      // Act
-      const result = adapter.inlineCode(content);
-
-      // Assert
-      expect(result.toString()).toEqual('``');
-    });
-
-    it('should handle text with special characters', () => {
-      // Arrange
-      const content = new ReadableContent('getValue("key")');
-
-      // Act
-      const result = adapter.inlineCode(content);
-
-      // Assert
-      expect(result.toString()).toEqual('`getValue("key")`');
-    });
-
-    it('should escape backticks in inlineCode', () => {
-      const content = new ReadableContent('a ` b');
-      const result = adapter.inlineCode(content);
-      expect(result.toString()).toEqual('`a \\` b`');
-    });
-
-    it('should escape bold/italic markers in inlineCode', () => {
-      const content = new ReadableContent('a ** b * c');
-      const result = adapter.inlineCode(content);
-      expect(result.toString()).toEqual('`a \\*\\* b \\* c`');
+      expect(result.toString()).toEqual(expected);
     });
   });
 
   describe('link', () => {
-    it('should format text as markdown link', () => {
-      // Arrange
-      const text = new ReadableContent('GitHub');
-      const url = new ReadableContent('https://github.com');
-
-
-      // Act
+    it.each([
+      { desc: 'basic', text: new ReadableContent('GitHub'), url: new ReadableContent('https://github.com'), expected: '[GitHub](https://github.com)' },
+      { desc: 'empty text', text: ReadableContent.empty(), url: new ReadableContent('https://example.com'), expected: '[](https://example.com)' },
+      { desc: 'special chars', text: new ReadableContent('Link with "quotes" & symbols!'), url: new ReadableContent('https://example.com/path?query=value'), expected: '[Link with "quotes" & symbols!](https://example.com/path?query=value)' },
+    ])('should format link ($desc)', ({ text, url, expected }) => {
       const result = adapter.link(text, url);
-
-      // Assert
-      expect(result.toString()).toEqual('[GitHub](https://github.com)');
-    });
-
-    it('should handle empty text', () => {
-      // Arrange
-      const text = ReadableContent.empty();
-      const url = new ReadableContent('https://example.com');
-
-      // Act
-      const result = adapter.link(text, url);
-
-      // Assert
-      expect(result.toString()).toEqual('[](https://example.com)');
-    });
-
-    it('should handle text with special characters', () => {
-      // Arrange
-      const text = new ReadableContent('Link with "quotes" & symbols!');
-      const url = new ReadableContent('https://example.com/path?query=value');
-
-      // Act
-      const result = adapter.link(text, url);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '[Link with "quotes" & symbols!](https://example.com/path?query=value)'
-      );
+      expect(result.toString()).toEqual(expected);
     });
   });
 
   describe('image', () => {
-    it('should format as markdown image without options', () => {
-      // Arrange
-      const altText = new ReadableContent('Alternative Text');
-      const url = new ReadableContent('https://example.com/image.png');
-
-      // Act
-      const result = adapter.image(url, altText);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '![Alternative Text](https://example.com/image.png)'
-      );
-    });
-
-    it('should format as HTML img tag with width option', () => {
-      // Arrange
-      const altText = new ReadableContent('Alternative Text');
-      const url = new ReadableContent('https://example.com/image.png');
-      const options = { width: '300px' };
-
-      // Act
-      const result = adapter.image(url, altText, options);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '<img src="https://example.com/image.png" width="300px" alt="Alternative Text" />'
-      );
-    });
-
-    it('should format as HTML img tag with align option', () => {
-      // Arrange
-      const altText = new ReadableContent('Alternative Text');
-      const url = new ReadableContent('https://example.com/image.png');
-      const options = { align: 'center' };
-
-      // Act
-      const result = adapter.image(url, altText, options);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '<img src="https://example.com/image.png" align="center" alt="Alternative Text" />'
-      );
-    });
-
-    it('should format as HTML img tag with both width and align options', () => {
-      // Arrange
-      const altText = new ReadableContent('Alternative Text');
-      const url = new ReadableContent('https://example.com/image.png');
-      const options = { width: '300px', align: 'center' };
-
-      // Act
-      const result = adapter.image(url, altText, options);
-
-      // Assert
-      expect(result.toString()).toEqual(
-        '<img src="https://example.com/image.png" width="300px" align="center" alt="Alternative Text" />'
-      );
+    it.each([
+      { desc: 'markdown image', alt: new ReadableContent('Alternative Text'), url: new ReadableContent('https://example.com/image.png'), options: undefined, expected: '![Alternative Text](https://example.com/image.png)' },
+      { desc: 'width', alt: new ReadableContent('Alternative Text'), url: new ReadableContent('https://example.com/image.png'), options: { width: '300px' }, expected: '<img src="https://example.com/image.png" width="300px" alt="Alternative Text" />' },
+      { desc: 'align', alt: new ReadableContent('Alternative Text'), url: new ReadableContent('https://example.com/image.png'), options: { align: 'center' }, expected: '<img src="https://example.com/image.png" align="center" alt="Alternative Text" />' },
+      { desc: 'both', alt: new ReadableContent('Alternative Text'), url: new ReadableContent('https://example.com/image.png'), options: { width: '300px', align: 'center' }, expected: '<img src="https://example.com/image.png" width="300px" align="center" alt="Alternative Text" />' },
+    ])('should format image ($desc)', ({ alt, url, options, expected }) => {
+      const result = adapter.image(url, alt, options as Record<string, string> | undefined);
+      expect(result.toString()).toEqual(expected);
     });
 
     it('should handle empty alt text', () => {
@@ -900,6 +611,59 @@ end
       const result = adapter.badge(label, url);
       // badge uses label and url raw - after escapeForContext it should escape url paren and label asterisk
       expect(result.toString()).toEqual('![cov\\*er](https://example.com/ba\\)dge.svg)');
+    });
+  });
+
+  describe('list', () => {
+    it('should format unordered list', () => {
+      // Arrange
+      const items = [
+        new ReadableContent('Item 1'),
+        new ReadableContent('Item 2'),
+        new ReadableContent('Item 3'),
+      ];
+
+      // Act
+      const result = adapter.list(items);
+
+      // Assert
+      expect(result.toString()).toEqual(
+        `- Item 1
+- Item 2
+- Item 3
+`
+      );
+    });
+
+    it('should format ordered list', () => {
+      // Arrange
+      const items = [
+        new ReadableContent('First'),
+        new ReadableContent('Second'),
+        new ReadableContent('Third'),
+      ];
+
+      // Act
+      const result = adapter.list(items, true);
+
+      // Assert
+      expect(result.toString()).toEqual(
+        `1. First
+2. Second
+3. Third
+`
+      );
+    });
+
+    it('should handle empty list', () => {
+      // Arrange
+      const items: ReadableContent[] = [];
+
+      // Act
+      const result = adapter.list(items);
+
+      // Assert
+      expect(result.toString()).toEqual('');
     });
   });
 
