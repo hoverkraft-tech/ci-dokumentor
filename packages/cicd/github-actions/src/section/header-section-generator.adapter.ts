@@ -100,7 +100,21 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private getTitlePrefix(manifest: GitHubActionsManifest): ReadableContent {
-    return new ReadableContent('runs' in manifest ? 'GitHub Action: ' : 'GitHub Workflow: ');
+    let title;
+
+    switch (true) {
+      case this.isGitHubAction(manifest):
+        title = 'GitHub Action';
+        break;
+      case this.isGitHubWorkflow(manifest):
+        if (manifest.on.workflow_call) {
+          title = 'GitHub Reusable Workflow';
+          break;
+        }
+        title = 'GitHub Workflow';
+        break;
+    }
+    return new ReadableContent(`${title ? title + ': ' : ''}`);
   }
 
   private generateBrandingIcon(

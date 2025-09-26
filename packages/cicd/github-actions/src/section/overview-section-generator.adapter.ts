@@ -18,24 +18,30 @@ export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapt
 
     let overviewContent = formatterAdapter.heading(new ReadableContent('Overview'), 2).append(
       formatterAdapter.lineBreak(),
-      formatterAdapter.paragraph(new ReadableContent(description)),
+      formatterAdapter.paragraph(new ReadableContent(description).trim()),
     );
 
     if (this.isGitHubWorkflow(manifest)) {
-      overviewContent = overviewContent.append(
-        formatterAdapter.lineBreak(),
-        formatterAdapter.heading(new ReadableContent('Permissions'), 3),
-        formatterAdapter.lineBreak(),
-      );
-
       const permissions = manifest.permissions || {};
-      Object.entries(permissions).forEach(
+      const permissionsContent = formatterAdapter.list(Object.entries(permissions).map(
         ([permission, level]) => {
-          overviewContent = overviewContent.append(formatterAdapter.paragraph(
-            new ReadableContent(`- **${permission}**: ${level}`)
-          ));
+          return formatterAdapter.bold(
+            formatterAdapter.inlineCode(new ReadableContent(permission))
+          ).append(
+            `: `,
+            formatterAdapter.inlineCode(new ReadableContent(level))
+          )
         }
-      );
+      ));
+
+      if (!permissionsContent.isEmpty()) {
+        overviewContent = overviewContent.append(
+          formatterAdapter.lineBreak(),
+          formatterAdapter.heading(new ReadableContent('Permissions'), 3),
+          formatterAdapter.lineBreak(),
+          permissionsContent,
+        );
+      }
     }
 
     return overviewContent;

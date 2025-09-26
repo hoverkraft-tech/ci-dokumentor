@@ -279,12 +279,11 @@ export class ReadableContent {
 
     let start = 0;
     let end = this.buffer.length - 1;
-    const isWhitespace = (b: number) => b === 0x20 || b === 0x09 || b === 0x0A || b === 0x0D;
-
-    while (start <= end && isWhitespace(this.buffer[start])) {
+    while (start <= end && this.isWhitespace(this.buffer[start])) {
       start++;
     }
-    while (end >= start && isWhitespace(this.buffer[end])) {
+
+    while (end >= start && this.isWhitespace(this.buffer[end])) {
       end--;
     }
 
@@ -303,9 +302,9 @@ export class ReadableContent {
     }
 
     let start = 0;
-    const isWhitespace = (b: number) => b === 0x20 || b === 0x09 || b === 0x0A || b === 0x0D;
 
-    while (start < this.buffer.length && isWhitespace(this.buffer[start])) {
+
+    while (start < this.buffer.length && this.isWhitespace(this.buffer[start])) {
       start++;
     }
 
@@ -316,27 +315,11 @@ export class ReadableContent {
     return new ReadableContent(this.buffer.subarray(start));
   }
 
-  /**
-   * Trim trailing CR/LF bytes from a buffer.
-   * Returns a buffer that ends with exactly one LF ("\n").
-   * If the input is empty or contains only newlines, returns a buffer with a single "\n".
-   */
-  trimTrailingLineBreaks(): ReadableContent {
-    if (this.isEmpty()) {
-      return new ReadableContent('\n');
-    }
-
-    let end = this.buffer.length - 1;
-    while (end >= 0 && (this.buffer[end] === 0x0A /* \n */ || this.buffer[end] === 0x0D /* \r */)) {
-      end--;
-    }
-
-    if (end < 0) {
-      return new ReadableContent('\n');
-    }
-
-    const contentPart = this.slice(0, end + 1);
-    return contentPart.append(new ReadableContent('\n'));
+  private isWhitespace(byte: number): boolean {
+    return byte === 0x20 // space
+      || byte === 0x09 // tab
+      || byte === 0x0A // line feed
+      || byte === 0x0D; // carriage return
   }
 
   toUpperCase(): ReadableContent {

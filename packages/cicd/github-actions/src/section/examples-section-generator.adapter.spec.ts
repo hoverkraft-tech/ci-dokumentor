@@ -191,7 +191,6 @@ jobs:
         with:
           local: true
 \`\`\`
-
 `);
     });
 
@@ -199,6 +198,8 @@ jobs:
       // Arrange
       // Mock destination file with examples section
       const destinationContent = `# Test Action
+
+<!-- examples:start -->
 
 ## Examples
 
@@ -219,6 +220,8 @@ uses: owner/test-action@latest
 with:
   input: advanced
 \`\`\`
+
+<!-- examples:end -->
 `;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
@@ -229,17 +232,13 @@ with:
         formatterAdapter: formatterAdapter,
         manifest: mockGitHubAction,
         repositoryProvider: mockRepositoryProvider,
-        destination: '/test/destination'
+        destination: '/test/destination.md'
       });
 
       // Assert
       expect(result.toString()).toEqual(`## Examples
 
-
-
-##### Basic Usage
-
-
+### Basic Usage
 
 \`\`\`yaml
 uses: owner/test-action@abc123456789 # v1.0.0
@@ -247,24 +246,15 @@ with:
   input: value
 \`\`\`
 
-
-
-##### Advanced Usage
-
-
+### Advanced Usage
 
 This is an advanced example.
-
-
 
 \`\`\`yaml
 uses: owner/test-action@abc123456789 # v1.0.0
 with:
   input: advanced
 \`\`\`
-
-
-
 `);
     });
 
@@ -319,10 +309,14 @@ with:
       mockVersionService.getVersion.mockResolvedValue(versionWithoutSha);
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      const destinationWithExamples = '# Examples\n\n' +
-        '```yaml\n' +
-        'uses: owner/test-action@v1.0.0\n' +
-        '```\n';
+      const destinationWithExamples = `<!-- examples:start -->
+# Examples
+
+\`\`\`yaml
+uses: owner/test-action@v1.0.0
+\`\`\`
+<!-- examples:end -->
+`;
       mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(destinationWithExamples));
 
       // Act
@@ -336,13 +330,9 @@ with:
       // Assert
       expect(result.toString()).toEqual(`## Examples
 
-
-
 \`\`\`yaml
 uses: owner/test-action@v1.0.0
 \`\`\`
-
-
 
 `);
     });

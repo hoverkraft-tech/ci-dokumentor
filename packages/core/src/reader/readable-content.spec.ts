@@ -365,30 +365,6 @@ describe('ReadableContent', () => {
         });
     });
 
-    describe('trimTrailingLineBreaks', () => {
-        it('reduces trailing CRLFs to a single LF', () => {
-            // Arrange
-            const src = new ReadableContent('line1\r\n\n\r\n');
-
-            // Act
-            const out = src.trimTrailingLineBreaks();
-
-            // Assert
-            expect(out.toString()).toEqual('line1\n');
-        });
-
-        it('returns single LF for empty or only-newlines', () => {
-            // Arrange
-            const src = new ReadableContent('\n\r\n');
-
-            // Act
-            const out = src.trimTrailingLineBreaks();
-
-            // Assert
-            expect(out.toString()).toEqual('\n');
-        });
-    });
-
     describe('toUpperCase', () => {
         it('returns upper-cased content', () => {
             // Arrange

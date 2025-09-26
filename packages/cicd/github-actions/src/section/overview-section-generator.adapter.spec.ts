@@ -143,9 +143,6 @@ A test action with **bold**, *italic*, and \`code\` formatting
 Continuous integration workflow for the project
 
 Workflow runs on push to main branch.
-
-### Permissions
-
 `
                 );
             });
@@ -182,9 +179,9 @@ Continuous integration workflow with permissions
 
 ### Permissions
 
-- **contents**: read
-- **pull-requests**: write
-- **id-token**: write
+- **\`contents\`**: \`read\`
+- **\`pull-requests\`**: \`write\`
+- **\`id-token\`**: \`write\`
 `
                 );
             });
@@ -214,9 +211,6 @@ Continuous integration workflow with permissions
                     `## Overview
 
 Workflow with empty permissions
-
-### Permissions
-
 `
                 );
             });
@@ -245,9 +239,6 @@ Workflow with empty permissions
                     `## Overview
 
 Workflow without permissions
-
-### Permissions
-
 `
                 );
             });
@@ -309,14 +300,14 @@ Automated release workflow
 
 ### Permissions
 
-- **contents**: write
-- **packages**: write
-- **pull-requests**: read
-- **id-token**: write
-- **security-events**: write
-- **actions**: read
-- **checks**: read
-- **deployments**: write
+- **\`contents\`**: \`write\`
+- **\`packages\`**: \`write\`
+- **\`pull-requests\`**: \`read\`
+- **\`id-token\`**: \`write\`
+- **\`security-events\`**: \`write\`
+- **\`actions\`**: \`read\`
+- **\`checks\`**: \`read\`
+- **\`deployments\`**: \`write\`
 `
                 );
             });

@@ -21,6 +21,12 @@ updates:
       day: friday
       time: '04:00'
     groups:
+      npm-docs-dependencies:
+        patterns:
+          - '@docusaurus/*'
+          - 'clsx'
+          - 'prism-react-renderer'
+          - 'react'
       npm-dev-dependencies:
         dependency-type: development
 

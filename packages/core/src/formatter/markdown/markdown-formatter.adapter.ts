@@ -90,7 +90,8 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return fence.append(
       language || ReadableContent.empty(),
       this.lineBreak(),
-      content.trimTrailingLineBreaks(),
+      content.trim(),
+      this.lineBreak(),
       fence,
       this.lineBreak(),
     );
@@ -164,6 +165,19 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
+  list(items: ReadableContent[], ordered = false): ReadableContent {
+    if (items.length === 0) {
+      return ReadableContent.empty();
+    }
+
+    let result = ReadableContent.empty();
+    for (let i = 0; i < items.length; i++) {
+      const prefix = ordered ? `${i + 1}. ` : '- ';
+      result = result.append(prefix, items[i], this.lineBreak());
+    }
+    return result;
+  }
+
   horizontalRule(): ReadableContent {
     return new ReadableContent('---').append(this.lineBreak());
   }
@@ -188,7 +202,8 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     return startMarker.append(
       this.lineBreak(),
       this.lineBreak(),
-      content.trimTrailingLineBreaks(),
+      content.trim(),
+      this.lineBreak(),
       this.lineBreak(),
       endMarker,
       this.lineBreak()
