@@ -23,7 +23,7 @@
     }
   },
   "dependencies": {
-    "inversify": "^7.10.0",
+    "inversify": "^7.10.1",
     "diff": "^8.0.2"
   }
 }
