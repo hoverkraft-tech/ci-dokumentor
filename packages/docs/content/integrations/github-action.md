@@ -11,37 +11,37 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
+- uses: hoverkraft-tech/ci-dokumentor@7f2c365d77d60e2e534e8480f679313158c84ba4 # main
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
-    source: ''
+    source: ""
 
     # Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
-    destination: ''
+    destination: ""
 
     # Repository platform (auto-detected if not specified).
-    repository: ''
+    repository: ""
 
     # CI/CD platform (`github-actions`, `gitlab-ci`, etc.).
-    cicd: ''
+    cicd: ""
 
     # Comma-separated list of sections to include.
-    include-sections: ''
+    include-sections: ""
 
     # Comma-separated list of sections to exclude.
-    exclude-sections: ''
+    exclude-sections: ""
 
     # Whether to perform a dry run (no files are written).
     # Default: `false`
-    dry-run: 'false'
+    dry-run: "false"
 
     # Version to document (auto-detected if not specified).
-    version: ''
+    version: ""
 
     # JSON array of extra badges to include in the documentation.
     # Each badge should have `label`, `url`, and optional `linkUrl` properties.
-    extra-badges: ''
+    extra-badges: ""
 
     # Transform bare URLs to links.
     # Types: `auto` (autolinks), `full` (full links), `false` (disabled).
@@ -103,7 +103,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
+  uses: hoverkraft-tech/ci-dokumentor@7f2c365d77d60e2e534e8480f679313158c84ba4 # main
   with:
     source: '.github/workflows/ci.yml'
 ```
@@ -114,7 +114,7 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
 
 ```yaml
 - name: Generate Enhanced Documentation
-  uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
+  uses: hoverkraft-tech/ci-dokumentor@7f2c365d77d60e2e534e8480f679313158c84ba4 # main
   with:
     source: 'action.yml'
     output: 'docs/README.md'
@@ -131,7 +131,7 @@ To preview changes without modifying files, set the `dry-run` input to `true`. T
 
 ```yaml
 - name: Generate Documentation (dry-run)
-  uses: hoverkraft-tech/ci-dokumentor@f073622a799dcbeb3ddbf706fc16fcca98fb7944 # main
+  uses: hoverkraft-tech/ci-dokumentor@7f2c365d77d60e2e534e8480f679313158c84ba4 # main
   with:
     source: 'action.yml'
     dry-run: 'true'
