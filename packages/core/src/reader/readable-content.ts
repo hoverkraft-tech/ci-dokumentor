@@ -83,12 +83,10 @@ export class ReadableContent {
     return this.buffer.equals(otherBuffer);
   }
 
-
   /**
    * Test if content matches a regular expression.
    * @param regex - Regular expression to test
    * @returns True if the regex matches the content
-   * @deprecated This method uses inefficient string conversion. Consider alternative approaches.
    */
   test(regex: RegExp): boolean {
     if (this.isEmpty()) {
@@ -102,7 +100,6 @@ export class ReadableContent {
    * Match content against a regular expression.
    * @param regex - Regular expression to match
    * @returns Match results or null if no match
-   * @deprecated This method uses inefficient string conversion. Consider alternative approaches.
    */
   match(regex: RegExp): RegExpMatchArray | null {
     if (this.isEmpty()) {
@@ -116,7 +113,6 @@ export class ReadableContent {
    * Execute a regular expression against the content.
    * @param regex - Regular expression to execute
    * @returns Execution result or null if no match
-   * @deprecated This method uses inefficient string conversion. Consider alternative approaches.
    */
   execRegExp(regex: RegExp): RegExpExecArray | null {
     if (this.isEmpty()) {
@@ -138,8 +134,8 @@ export class ReadableContent {
    * @param searchValue - Value to search for (string, ReadableContent, or RegExp)
    * @param replaceValue - Value to replace with (string or ReadableContent)
    * @return New ReadableContent instance with replacements made
-   * @deprecated This method uses inefficient string conversion. Consider alternative approaches.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replace(searchValue: string | ReadableContent | RegExp, replaceValue: string | ReadableContent | ((substring: string, ...args: any[]) => string)): ReadableContent {
     if (this.isEmpty()) {
       return this;
@@ -418,7 +414,51 @@ export class ReadableContent {
    * Get a portion of the content.
    */
   slice(start?: number, end?: number): ReadableContent {
-    return new ReadableContent(this.buffer.subarray(start, end));
+    if (this.isEmpty()) {
+      return ReadableContent.empty();
+    }
+
+    const str = this.toString();
+    const codepoints = Array.from(str);
+    const length = codepoints.length;
+
+    const normalizeIndex = (index: number | undefined, defaultValue: number): number => {
+      if (index === undefined) {
+        return defaultValue;
+      }
+
+      if (index < 0) {
+        return Math.max(length + index, 0);
+      }
+
+      if (index > length) {
+        return length;
+      }
+
+      return index;
+    };
+
+    const startIndex = normalizeIndex(start, 0);
+    const endIndex = normalizeIndex(end, length);
+
+    if (endIndex <= startIndex) {
+      return ReadableContent.empty();
+    }
+
+    // Build prefix byte offsets so we can slice the underlying buffer without
+    // breaking multi-byte characters (e.g., emojis).
+    const byteOffsets: number[] = new Array(length + 1);
+    byteOffsets[0] = 0;
+
+    for (let i = 0; i < length; i++) {
+      const byteLength = Buffer.byteLength(codepoints[i], 'utf8');
+      byteOffsets[i + 1] = byteOffsets[i] + byteLength;
+    }
+
+    const startByte = byteOffsets[startIndex];
+    const endByte = byteOffsets[endIndex];
+
+    return new ReadableContent(this.buffer.subarray(startByte, endByte));
   }
 
   /**

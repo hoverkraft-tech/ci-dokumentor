@@ -146,100 +146,63 @@ console.log(x);
 
     describe('URL transformation', () => {
       describe('autolink format (default)', () => {
-        it('should transform URLs to autolinks by default', () => {
-          // Arrange
-          const content = new ReadableContent('Visit https://example.com for more information');
+        it.each([
+          {
+            desc: 'transform URLs to autolinks by default',
+            input: 'Visit https://example.com for more information',
+            expected: 'Visit <https://example.com> for more information\n',
+          },
+          {
+            desc: 'not transform URLs that are already in autolink format',
+            input: 'Visit <https://example.com> for more',
+            expected: 'Visit <https://example.com> for more\n',
+          },
+          {
+            desc: 'transform multiple URLs to autolinks',
+            input: 'Check https://github.com and https://stackoverflow.com',
+            expected: 'Check <https://github.com> and <https://stackoverflow.com>\n',
+          },
+          {
+            desc: 'handle URLs with query parameters and fragments',
+            input: 'Search https://google.com/search?q=test#results',
+            expected: 'Search <https://google.com/search?q=test#results>\n',
+          },
+          {
+            desc: 'not transform URLs that are already in markdown links',
+            input: 'Visit [Example](https://example.com) for more',
+            expected: 'Visit [Example](https://example.com) for more\n',
+          },
+          {
+            desc: 'transform standalone URLs but preserve existing markdown links',
+            input: 'Visit [Example](https://example.com) or https://github.com',
+            expected: 'Visit [Example](https://example.com) or <https://github.com>\n',
+          },
+          {
+            desc: 'transform URLs within blockquotes',
+            input: '> Here is some blockquote with a URL: https://example.com and an autolink <https://test.com> and a link [https://link.com](https://link.com)',
+            expected: '> Here is some blockquote with a URL: <https://example.com> and an autolink <https://test.com> and a link [https://link.com](https://link.com)\n',
+          },
+          {
+            desc: 'transform URLs preceding emojis',
+            input: 'Here is some 😊 with a URL: https://example.com and an autolink <https://test.com> and a link [https://link.com](https://link.com)',
+            expected: 'Here is some 😊 with a URL: <https://example.com> and an autolink <https://test.com> and a link [https://link.com](https://link.com)\n',
+          },
+          {
+            desc: 'not transform URLs within inline code',
+            input: 'Here is some code: `const url = "https://example.com";` and an autolink https://test.com',
+            expected: 'Here is some code: `const url = "https://example.com";` and an autolink <https://test.com>\n',
+          },
+          {
+            desc: 'not transform URLs within code block',
+            input: 'Here is some code block:\n```\nconst url = "https://example.com";\n```\n and an autolink https://test.com',
+            expected: 'Here is some code block:\n```\nconst url = "https://example.com";\n```\n and an autolink <https://test.com>\n',
+          },
+        ])('should %s', ({ input, expected }) => {
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
-          // Act
-          const result = adapter.paragraph(content);
+          const result = adapter.paragraph(new ReadableContent(input));
 
-          // Assert
-          expect(result.toString()).toEqual('Visit <https://example.com> for more information\n');
-        });
-
-        it('should not transform URLs that are already in autolink format', () => {
-          // Arrange
-          const content = new ReadableContent('Visit <https://example.com> for more');
-          adapter.setOptions({ linkFormat: LinkFormat.Auto });
-
-          // Act
-          const result = adapter.paragraph(content);
-
-          // Assert
-          expect(result.toString()).toEqual('Visit <https://example.com> for more\n');
-        });
-
-        it('should transform multiple URLs to autolinks', () => {
-          // Arrange
-          const content = new ReadableContent('Check https://github.com and https://stackoverflow.com');
-          adapter.setOptions({ linkFormat: LinkFormat.Auto });
-
-          // Act
-          const result = adapter.paragraph(content);
-
-          // Assert
-          expect(result.toString()).toEqual('Check <https://github.com> and <https://stackoverflow.com>\n');
-        });
-
-        it('should handle URLs with query parameters and fragments', () => {
-          // Arrange
-          const content = new ReadableContent('Search https://google.com/search?q=test#results');
-          adapter.setOptions({ linkFormat: LinkFormat.Auto });
-
-          // Act
-          const result = adapter.paragraph(content);
-
-          // Assert
-          expect(result.toString()).toEqual('Search <https://google.com/search?q=test#results>\n');
-        });
-
-        it('should not transform URLs that are already in markdown links', () => {
-          // Arrange
-          const content = new ReadableContent('Visit [Example](https://example.com) for more');
-          adapter.setOptions({ linkFormat: LinkFormat.Auto });
-
-          // Act
-          const result = adapter.paragraph(content);
-
-          // Assert
-          expect(result.toString()).toEqual('Visit [Example](https://example.com) for more\n');
-        });
-
-        it('should transform standalone URLs but preserve existing markdown links', () => {
-          // Arrange
-          const content = new ReadableContent('Visit [Example](https://example.com) or https://github.com');
-          adapter.setOptions({ linkFormat: LinkFormat.Auto });
-
-          // Act
-          const result = adapter.paragraph(content);
-
-          // Assert
-          expect(result.toString()).toEqual('Visit [Example](https://example.com) or <https://github.com>\n');
-        });
-
-        it('should not transform URLs within inline code', () => {
-          // Arrange
-          const content = new ReadableContent('Here is some code: `const url = "https://example.com";` and a link https://test.com');
-          adapter.setOptions({ linkFormat: LinkFormat.Auto });
-
-          // Act
-          const result = adapter.paragraph(content);
-
-          // Assert
-          expect(result.toString()).toEqual('Here is some code: `const url = "https://example.com";` and a link <https://test.com>\n');
-        });
-
-        it('should not transform URLs within code block', () => {
-          // Arrange
-          const content = new ReadableContent('Here is some code block:\n```\nconst url = "https://example.com";\n```\n and a link https://test.com');
-          adapter.setOptions({ linkFormat: LinkFormat.Auto });
-
-          // Act
-          const result = adapter.paragraph(content);
-
-          // Assert
-          expect(result.toString()).toEqual('Here is some code block:\n```\nconst url = "https://example.com";\n```\n and a link <https://test.com>\n');
+          expect(result.toString()).toEqual(expected);
         });
       });
 
