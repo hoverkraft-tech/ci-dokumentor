@@ -116,7 +116,7 @@ jobs:
           path: .
       - name: Publish CLI to npm
         run: |
-          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --dry-run
+          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --tag latest --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
