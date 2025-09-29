@@ -41,10 +41,12 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
                 external: [
                     "inversify",
                     "reflect-metadata",
+                    "@ci-dokumentor/cicd-github-actions",
+                    "@ci-dokumentor/cicd-gitlab-ci",
                     "@ci-dokumentor/core",
                     "@ci-dokumentor/repository-git",
                     "@ci-dokumentor/repository-github",
-                    "@ci-dokumentor/cicd-github-actions",
+                    "@ci-dokumentor/repository-gitlab",
                 ],
             },
         },

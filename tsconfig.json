@@ -13,10 +13,16 @@
       "path": "./packages/cicd/github-actions"
     },
     {
-      "path": "./packages/repository/github"
+      "path": "./packages/cicd/gitlab-ci"
     },
     {
       "path": "./packages/repository/git"
+    },
+    {
+      "path": "./packages/repository/github"
+    },
+    {
+      "path": "./packages/repository/gitlab"
     }
   ]
 }

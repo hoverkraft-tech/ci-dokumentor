@@ -1,0 +1,25 @@
+{
+  "name": "@ci-dokumentor/cicd-gitlab-ci",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@ci-dokumentor/core": "workspace:*",
+    "@ci-dokumentor/repository-git": "workspace:*",
+    "@ci-dokumentor/repository-gitlab": "workspace:*",
+    "yaml": "^2.8.0",
+    "inversify": "^7.10.1"
+  }
+}
