@@ -99,7 +99,7 @@ jobs:
 
   npm-publish:
     needs: ci
-    if: github.event_name == 'push'
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -116,13 +116,13 @@ jobs:
           path: .
       - name: Publish CLI to npm
         run: |
-          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --tag latest --dry-run
+          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --tag 0.2.0 --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   docs-deploy:
     needs: ci
-    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     permissions:
       pages: write

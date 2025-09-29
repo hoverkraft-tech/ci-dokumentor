@@ -61,12 +61,16 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) ghcr.io/hoverkraft-tec
 
 ### GitHub Actions
 
+<!-- examples:start -->
+
 ```yaml
 - name: Generate CI Documentation
   uses: hoverkraft-tech/ci-dokumentor@main
   with:
     source: "action.yml"
 ```
+
+<!-- examples:end -->
 
 > **📖 Full Documentation**: For more details on GitHub Actions integration, see our [GitHub Action documentation](./packages/docs/content/integrations/github-action.md).
 
