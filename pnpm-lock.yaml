@@ -127,6 +127,24 @@ importers:
         specifier: ^4.29.4
         version: 4.29.4
 
+  packages/cicd/gitlab-ci:
+    dependencies:
+      '@ci-dokumentor/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@ci-dokumentor/repository-git':
+        specifier: workspace:*
+        version: link:../../repository/git
+      '@ci-dokumentor/repository-gitlab':
+        specifier: workspace:*
+        version: link:../../repository/gitlab
+      inversify:
+        specifier: ^7.10.1
+        version: 7.10.2(reflect-metadata@0.2.2)
+      yaml:
+        specifier: ^2.8.0
+        version: 2.8.1
+
   packages/cli:
     dependencies:
       commander:
@@ -142,6 +160,9 @@ importers:
       '@ci-dokumentor/cicd-github-actions':
         specifier: workspace:*
         version: link:../cicd/github-actions
+      '@ci-dokumentor/cicd-gitlab-ci':
+        specifier: workspace:*
+        version: link:../cicd/gitlab-ci
       '@ci-dokumentor/core':
         specifier: workspace:*
         version: link:../core
@@ -151,6 +172,9 @@ importers:
       '@ci-dokumentor/repository-github':
         specifier: workspace:*
         version: link:../repository/github
+      '@ci-dokumentor/repository-gitlab':
+        specifier: workspace:*
+        version: link:../repository/gitlab
 
   packages/core:
     dependencies:
@@ -229,6 +253,21 @@ importers:
         version: 9.0.2
       inversify:
         specifier: ^7.10.2
+        version: 7.10.2(reflect-metadata@0.2.2)
+
+  packages/repository/gitlab:
+    dependencies:
+      '@ci-dokumentor/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@ci-dokumentor/repository-git':
+        specifier: workspace:*
+        version: link:../git
+      '@gitbeaker/rest':
+        specifier: ^40.3.2
+        version: 40.6.0
+      inversify:
+        specifier: ^7.10.1
         version: 7.10.2(reflect-metadata@0.2.2)
 
 packages:
@@ -1613,6 +1652,18 @@ packages:
   '@eslint/plugin-kit@0.4.0':
     resolution: {integrity: sha512-sB5uyeq+dwCWyPi31B2gQlVlo+j5brPlWx4yZBrEaRo/nhdDE8Xke1gsGgtiBdaBTxuTkceLVuVt/pclrasb0A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@gitbeaker/core@40.6.0':
+    resolution: {integrity: sha512-tVVm8ZPrS9YCHEcuPV8vD1IcEf9POpdygWo+kPvkK7LcC36EERVcXagb8snEaGgGLfUaVQh8qP4iDZgPnP3YBQ==}
+    engines: {node: '>=18.20.0'}
+
+  '@gitbeaker/requester-utils@40.6.0':
+    resolution: {integrity: sha512-DQu2l3iXtB+8e1Ye2ekeUHABt4mGMRTLtuVWtFqf74sqJnerHNOxVOjPn19qu/nKdvKR3ZLwSRTtPzEsxgcShg==}
+    engines: {node: '>=18.20.0'}
+
+  '@gitbeaker/rest@40.6.0':
+    resolution: {integrity: sha512-sAwYJclU3NlB/gdxqhH6Hnmy5LWzvW7D3W33eShQEnxMhM0VjnFHPHcgJLQCIux3hMiub1uGtTw1hBJTxDc2mQ==}
+    engines: {node: '>=18.20.0'}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -5622,6 +5673,10 @@ packages:
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
+  picomatch-browser@2.2.6:
+    resolution: {integrity: sha512-0ypsOQt9D4e3hziV8O4elD9uN0z/jtUEfxVRtNaAAtXIyUx9m/SzlO020i8YNL2aL/E6blOvvHQcin6HZlFy/w==}
+    engines: {node: '>=8.6'}
+
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
@@ -6141,6 +6196,9 @@ packages:
   range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
+
+  rate-limiter-flexible@4.0.1:
+    resolution: {integrity: sha512-2/dGHpDFpeA0+755oUkW+EKyklqLS9lu0go9pDsbhqQjZcxfRyJ6LA4JI0+HAdZ2bemD/oOjUeZQB2lCZqXQfQ==}
 
   raw-body@2.5.2:
     resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
@@ -7270,6 +7328,9 @@ packages:
   wsl-utils@0.1.0:
     resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
     engines: {node: '>=18'}
+
+  xcase@2.0.1:
+    resolution: {integrity: sha512-UmFXIPU+9Eg3E9m/728Bii0lAIuoc+6nbrNUKaRPJOFp91ih44qqGlWtxMB6kXFrRD6po+86ksHM5XHCfk6iPw==}
 
   xdg-basedir@5.1.0:
     resolution: {integrity: sha512-GCPAHLvrIH13+c0SuacwvRYj2SxJXQ4kaVTT5xgL3kPrz56XxkF21IGhjSE1+W0aw7gpBWRGXLCPnPby6lSpmQ==}
@@ -9458,6 +9519,24 @@ snapshots:
     dependencies:
       '@eslint/core': 0.16.0
       levn: 0.4.1
+
+  '@gitbeaker/core@40.6.0':
+    dependencies:
+      '@gitbeaker/requester-utils': 40.6.0
+      qs: 6.14.0
+      xcase: 2.0.1
+
+  '@gitbeaker/requester-utils@40.6.0':
+    dependencies:
+      picomatch-browser: 2.2.6
+      qs: 6.14.0
+      rate-limiter-flexible: 4.0.1
+      xcase: 2.0.1
+
+  '@gitbeaker/rest@40.6.0':
+    dependencies:
+      '@gitbeaker/core': 40.6.0
+      '@gitbeaker/requester-utils': 40.6.0
 
   '@hapi/hoek@9.3.0': {}
 
@@ -14205,6 +14284,8 @@ snapshots:
 
   picocolors@1.1.1: {}
 
+  picomatch-browser@2.2.6: {}
+
   picomatch@2.3.1: {}
 
   picomatch@4.0.2: {}
@@ -14755,6 +14836,8 @@ snapshots:
   range-parser@1.2.0: {}
 
   range-parser@1.2.1: {}
+
+  rate-limiter-flexible@4.0.1: {}
 
   raw-body@2.5.2:
     dependencies:
@@ -16091,6 +16174,8 @@ snapshots:
   wsl-utils@0.1.0:
     dependencies:
       is-wsl: 3.1.0
+
+  xcase@2.0.1: {}
 
   xdg-basedir@5.1.0: {}
 
