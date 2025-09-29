@@ -61,13 +61,13 @@ docker run --rm ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest --help
 docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest generate --source /workspace/action.yml
 ```
 
-> **📖 Full Documentation**: See our [Docker documentation](./packages/docs/content/integrations/docker.md) for complete Docker usage guide, troubleshooting, and advanced configurations.
+> **📖 Full Documentation**: See ou[Docker documentation](./packages/docs/content/integrations/docker.md)d) for complete Docker usage guide, troubleshooting, and advanced configurations.
 
 ### GitHub Actions
 
 ```yaml
 - name: Generate CI Documentation
-  uses: hoverkraft-tech/ci-dokumentor@d9897cd3b6ac3dcb183b73bf32f76909ee91dfb2 # main
+  uses: hoverkraft-tech/ci-dokumentor@2e918e5e8af5276b57890e8ed485528622ff06cf # main
   with:
     source: "action.yml"
 ```
