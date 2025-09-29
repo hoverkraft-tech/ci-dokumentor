@@ -184,8 +184,8 @@ console.log(x);
           },
           {
             desc: 'transform URLs preceding emojis',
-            input: 'Here is some 😊 with a URL: https://example.com and an autolink <https://test.com> and a link [https://link.com](https://link.com)',
-            expected: 'Here is some 😊 with a URL: <https://example.com> and an autolink <https://test.com> and a link [https://link.com](https://link.com)\n',
+            input: 'Here is some 😊 with a URL: https://example.com and an autolink <https://test.com> and a link [https://link.com](https://link.com). 😊',
+            expected: 'Here is some 😊 with a URL: <https://example.com> and an autolink <https://test.com> and a link [https://link.com](https://link.com). 😊\n',
           },
           {
             desc: 'not transform URLs within inline code',

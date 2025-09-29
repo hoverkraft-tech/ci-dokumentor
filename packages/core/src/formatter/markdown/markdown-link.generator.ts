@@ -66,7 +66,7 @@ export class MarkdownLinkGenerator {
             lastIndex = linkInfo.end;
         }
 
-        const afterLast = content.slice(lastIndex);
+        const afterLast = text.slice(lastIndex);
         const processedAfter = afterLast.replace(
             this.urlRegex,
             (url: string, offsetInAfter: number) => this.replaceUrl(url, lastIndex + (offsetInAfter ?? 0), content, fullLinkFormat)
