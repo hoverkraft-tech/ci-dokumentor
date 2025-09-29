@@ -116,6 +116,9 @@ jobs:
           path: .
       - name: Publish CLI to npm
         run: |
+          # Write .npmrc file
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+
           tag=latest
           if [ "${{ github.ref_type }}" = "tag" ]; then
             tag=${{ github.ref_name }}
