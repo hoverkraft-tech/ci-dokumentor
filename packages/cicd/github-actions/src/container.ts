@@ -1,6 +1,5 @@
 import {
   Container,
-  SECTION_GENERATOR_ADAPTER_IDENTIFIER,
   GENERATOR_ADAPTER_IDENTIFIER,
   MIGRATION_ADAPTER_IDENTIFIER,
   initContainer as coreInitContainer
@@ -9,7 +8,10 @@ import { Container as InversifyContainer } from 'inversify';
 import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
 import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
 import { GitHubActionsParser } from './github-actions-parser.js';
-import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
+import { 
+  GitHubActionsGeneratorAdapter, 
+  GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER 
+} from './github-actions-generator.adapter.js';
 
 // Section generators
 import { HeaderSectionGenerator } from './section/header-section-generator.adapter.js';
@@ -67,40 +69,40 @@ export function initContainer(
 
   // Bind section generators
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(HeaderSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(BadgesSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(OverviewSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(UsageSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(InputsSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(SecretsSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(OutputsSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(ExamplesSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(ContributingSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(SecuritySectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(LicenseSectionGenerator);
   container
-    .bind(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .bind(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(GeneratedSectionGenerator);
 
   // Bind migration adapters to the container

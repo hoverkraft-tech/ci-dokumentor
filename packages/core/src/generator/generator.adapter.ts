@@ -1,6 +1,5 @@
 import { RendererAdapter } from '../renderer/renderer.adapter.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
-import { ManifestVersion } from '../version/version.service.js';
 import { SectionOptions, SectionOptionsDescriptors } from './section-generator.adapter.js';
 
 export const GENERATOR_ADAPTER_IDENTIFIER = Symbol('GeneratorAdapter');
@@ -63,7 +62,6 @@ export interface GeneratorAdapter {
     sections: GenerateSectionsOptions;
     rendererAdapter: RendererAdapter;
     repositoryProvider: RepositoryProvider;
-    version?: ManifestVersion
   }): Promise<void>;
 
   /**
