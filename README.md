@@ -30,6 +30,8 @@
 - 🔧 [GitHub Action](./docs/content/integrations/github-action.md) - GitHub Actions integration
 - 👨‍💻 [Contributing](./docs/content/developers/contributing.md) - How to contribute
 
+<!-- examples:start -->
+
 ## Integrations
 
 ### Npm package
@@ -60,8 +62,6 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) ghcr.io/hoverkraft-tec
 > **📖 Full Documentation**: See [docker/README.md](docker/README.md) for complete Docker usage guide, troubleshooting, and advanced configurations.
 
 ### GitHub Actions
-
-<!-- examples:start -->
 
 ```yaml
 - name: Generate CI Documentation
