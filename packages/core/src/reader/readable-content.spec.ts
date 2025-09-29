@@ -441,6 +441,39 @@ describe('ReadableContent', () => {
             // Assert
             expect(part.toString()).toEqual('234');
         });
+
+        it('returns a portion of the content containing emojis', () => {
+            // Arrange
+            const src = new ReadableContent('0😀2😃4😁6');
+
+            // Act
+            const part = src.slice(2, 5);
+
+            // Assert
+            expect(part.toString()).toEqual('2😃4');
+        });
+
+        it('returns empty content when start equals end', () => {
+            // Arrange
+            const src = new ReadableContent('hello');
+
+            // Act
+            const part = src.slice(2, 2);
+
+            // Assert
+            expect(part.isEmpty()).toEqual(true);
+        });
+
+        it('returns content from start to end when end is omitted', () => {
+            // Arrange
+            const src = new ReadableContent('abcdef');
+
+            // Act
+            const part = src.slice(3);
+
+            // Assert
+            expect(part.toString()).toEqual('def');
+        });
     });
 
     describe('splitLines', () => {

@@ -3,8 +3,8 @@ import { ReadableContent } from '../../reader/readable-content.js';
 
 @injectable()
 export class MarkdownLinkGenerator {
-    private static readonly URL_REGEX = /(?<!<)https?:\/\/[^\s)\]>]{1,500}(?!>)/g;
-    private static readonly LINK_REGEX = /\[([^\]]{0,200})\]\(([^)]{0,500})\)/g;
+    private readonly urlRegex = /(?<!<)https?:\/\/[^\s)\]>]{1,500}(?!>)/g;
+    private readonly linkRegex = /\[([^\]]{0,200})\]\(([^)]{0,500})\)/g;
 
     /**
      * Transform URLs in text to markdown links.
@@ -30,56 +30,61 @@ export class MarkdownLinkGenerator {
         }
 
         // Quick check for markdown links; reset stateful lastIndex before using test/exec
-        MarkdownLinkGenerator.LINK_REGEX.lastIndex = 0;
-        const containsMarkdownLinks = content.test(MarkdownLinkGenerator.LINK_REGEX);
+        this.linkRegex.lastIndex = 0;
+        const containsMarkdownLinks = content.execRegExp(this.linkRegex);
+        this.linkRegex.lastIndex = 0;
 
         if (!containsMarkdownLinks) {
-            return content.replace(
-                MarkdownLinkGenerator.URL_REGEX,
+            const replaced = content.replace(
+                this.urlRegex,
                 (url: string, offset: number) => this.replaceUrl(url, offset, content, fullLinkFormat)
             );
+
+            return new ReadableContent(replaced);
         }
 
         // There are markdown links: replace URLs only outside link destinations
-        MarkdownLinkGenerator.LINK_REGEX.lastIndex = 0;
         const links: Array<{ start: number; end: number; fullMatch: string }> = [];
         let match: RegExpExecArray | null;
-        while ((match = content.execRegExp(MarkdownLinkGenerator.LINK_REGEX)) !== null) {
-            links.push({ start: match.index, end: (match.index) + match[0].length, fullMatch: match[0] });
+        while ((match = content.execRegExp(this.linkRegex)) !== null) {
+            links.push({ start: match.index, end: match.index + match[0].length, fullMatch: match[0] });
         }
+        this.linkRegex.lastIndex = 0;
 
-        let output = ReadableContent.empty();
+        let result = ReadableContent.empty();
         let lastIndex = 0;
 
+        const text = content.toString();
         for (const linkInfo of links) {
-            const beforeLink = content.slice(lastIndex, linkInfo.start);
-            output = output.append(
-                beforeLink.replace(
-                    MarkdownLinkGenerator.URL_REGEX,
-                    (url: string, offsetInBefore: number) => this.replaceUrl(url, lastIndex + (offsetInBefore || 0), content, fullLinkFormat)
-                ),
-                linkInfo.fullMatch
+            const beforeLink = text.slice(lastIndex, linkInfo.start);
+            const processedBefore = beforeLink.replace(
+                this.urlRegex,
+                (url: string, offsetInBefore: number) => this.replaceUrl(url, lastIndex + (offsetInBefore ?? 0), content, fullLinkFormat)
             );
+
+            result = result.append(processedBefore, linkInfo.fullMatch);
             lastIndex = linkInfo.end;
         }
 
         const afterLast = content.slice(lastIndex);
-        output = output.append(
-            afterLast.replace(
-                MarkdownLinkGenerator.URL_REGEX,
-                (url: string, offsetInAfter: number) => this.replaceUrl(url, lastIndex + (offsetInAfter || 0), content, fullLinkFormat)
-            )
+        const processedAfter = afterLast.replace(
+            this.urlRegex,
+            (url: string, offsetInAfter: number) => this.replaceUrl(url, lastIndex + (offsetInAfter ?? 0), content, fullLinkFormat)
         );
 
-        return output;
+        result = result.append(processedAfter);
+
+        return result;
     }
 
     private replaceUrl(url: string, absoluteOffset: number, baseContent: ReadableContent, fullLinkFormat: boolean): string {
-        const baseContentString = baseContent.toString();
-
-        const beforeChar = absoluteOffset > 0 ? baseContentString[absoluteOffset - 1] : undefined;
-        const afterChar = baseContentString[absoluteOffset + url.length];
-        if (beforeChar === '<' && afterChar === '>') return url;
+        if (
+            absoluteOffset > 0
+            && baseContent.includesAt('<', absoluteOffset - 1)
+            && baseContent.includesAt('>', absoluteOffset + url.length)
+        ) {
+            return url;
+        }
 
         const cleanUrl = url.replace(/[.,;!?]{0,5}$/, '');
         const trailingPunct = url.slice(cleanUrl.length);
