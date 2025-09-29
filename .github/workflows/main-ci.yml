@@ -121,7 +121,7 @@ jobs:
             tag=${{ github.ref_name }}
           fi
 
-          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --tag "@ci-dokumentor/cli@$tag" --dry-run
+          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --tag "@ci-dokumentor/cli@$tag"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
