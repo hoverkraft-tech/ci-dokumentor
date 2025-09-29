@@ -29,6 +29,7 @@ export abstract class GitHubActionsSectionGeneratorAdapter
   /**
    * Apply runtime option values to the section generator
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setSectionOptions(_options: Partial<SectionOptions>): void {
     // Default implementation - subclasses can override
   }
