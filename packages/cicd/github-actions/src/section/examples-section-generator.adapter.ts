@@ -90,7 +90,7 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
 
     const sectionTitle = formatterAdapter.heading(new ReadableContent('Examples'), 2).trim();
 
-    const blocks: ReadableContent[] = examples.map(ex => this.renderExampleBlock(ex, formatterAdapter, manifest, version));
+    const blocks: ReadableContent[] = examples.map((ex) => this.renderExampleBlock(ex, formatterAdapter, manifest, version));
 
     return this.assembleExamplesContent(sectionTitle, blocks, formatterAdapter, examples);
   }
@@ -100,23 +100,12 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
    * Find examples from various sources
    */
   private async findExamples(rootDir: string, destination: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
+    const dirs = [join(rootDir, 'examples'), join(rootDir, '.github', 'examples')];
+
     const examples: Example[] = [];
 
-    // Strategy 1: Look for examples/ directory
-    const examplesDir = join(rootDir, 'examples');
-    const examplesDirExists = this.readerAdapter.containerExists(examplesDir);
-    if (examplesDirExists) {
-      examples.push(...await this.findExamplesFromDirectory(examplesDir, formatterAdapter));
-    }
+    examples.push(...await this.findExamplesInDirectories(dirs, formatterAdapter));
 
-    // Strategy 2: Look for .github/examples/ directory
-    const githubExamplesDir = join(rootDir, '.github', 'examples');
-    const githubExamplesDirExists = this.readerAdapter.containerExists(githubExamplesDir);
-    if (githubExamplesDirExists) {
-      examples.push(...await this.findExamplesFromDirectory(githubExamplesDir, formatterAdapter));
-    }
-
-    // Strategy 3: Look for examples in destination file (if it exists)
     if (destination && this.readerAdapter.resourceExists(destination)) {
       examples.push(...await this.findExamplesFromDestination(destination, formatterAdapter));
     }
@@ -125,41 +114,61 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   }
 
   /**
+   * Helper to scan multiple directories and aggregate examples.
+   */
+  private async findExamplesInDirectories(dirs: string[], formatterAdapter: FormatterAdapter): Promise<Example[]> {
+    const out: Example[] = [];
+
+    for (const dir of dirs) {
+      if (!this.readerAdapter.containerExists(dir)) continue;
+      out.push(...await this.findExamplesFromDirectory(dir, formatterAdapter));
+    }
+
+    return out;
+  }
+
+  /**
    * Find examples from a directory containing example files
    */
   private async findExamplesFromDirectory(dirPath: string, formatterAdapter: FormatterAdapter): Promise<Example[]> {
     const examples: Example[] = [];
-
     const files = await this.readerAdapter.readContainer(dirPath);
 
     for (const file of files) {
       const filePath = join(dirPath, file);
-      if (!this.readerAdapter.resourceExists(filePath)) {
-        continue;
-      }
+      if (!this.readerAdapter.resourceExists(filePath)) continue;
 
       const ext = extname(file).toLowerCase();
-      if (['.yml', '.yaml'].includes(ext)) {
+
+      if (this.isYamlExt(ext)) {
+        // Add a heading derived from the filename and a YAML code block
         examples.push({
           type: ExampleType.Heading,
           content: new ReadableContent(file.replace(/\.(yml|yaml)$/, '')).trim(),
-          level: 3
+          level: 3,
         });
 
         const content = await this.readerAdapter.readResource(filePath);
         examples.push({
           type: ExampleType.Code,
           content: content.trim(),
-          language: new ReadableContent('yaml')
+          language: new ReadableContent('yaml'),
         });
-      } else if (ext === '.md') {
+      } else if (this.isMarkdownExt(ext)) {
         const content = await this.readerAdapter.readResource(filePath);
-        const parsedExamples = this.parseMarkdownContent(content, formatterAdapter, 2, false);
-        examples.push(...parsedExamples);
+        examples.push(...this.parseMarkdownContent(content, formatterAdapter, 2, false));
       }
     }
 
     return examples;
+  }
+
+  private isYamlExt(ext: string): boolean {
+    return ['.yml', '.yaml'].includes(ext);
+  }
+
+  private isMarkdownExt(ext: string): boolean {
+    return ext === '.md';
   }
 
   /**
@@ -224,53 +233,60 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     const examples: Example[] = [];
 
     let inCodeBlock = false;
-    let codeBlockLanguage: ReadableContent = ReadableContent.empty();
-    let codeBlockContent: ReadableContent = ReadableContent.empty();
+    let codeBlockFence = '';
+    let codeBlockLanguage = ReadableContent.empty();
+    let codeBlockContent = ReadableContent.empty();
 
+    const fenceRegex = /^(`{3,})(.*)/;
+    const headingRegex = /^(#+)\s*(.*)$/;
     const lines = content.splitLines();
-    for (const line of lines) {
-      // Optionally skip a top 'Examples' heading that duplicates the
-      // section title (only when parsing destination section content).
-      if (skipExamplesHeading && line.test(/^#+\s*examples?/i)) {
-        continue;
-      }
 
-      if (line.startsWith('```')) {
+    for (const line of lines) {
+      if (skipExamplesHeading && line.test(/^#+\s*examples?\s*$/i)) continue;
+
+      const fenceMatch = line.toString().match(fenceRegex);
+      if (fenceMatch) {
+        const [, fence, language] = fenceMatch;
+
         if (!inCodeBlock) {
           inCodeBlock = true;
-          codeBlockLanguage = line.slice(3).trim();
+          codeBlockFence = fence;
+          codeBlockLanguage = new ReadableContent(language.trim());
           codeBlockContent = ReadableContent.empty();
-        } else {
+          continue;
+        }
+
+        if (fence === codeBlockFence) {
           inCodeBlock = false;
           const trimmed = codeBlockContent.trim();
           if (!trimmed.isEmpty()) {
-            examples.push({
-              type: ExampleType.Code,
-              content: trimmed,
-              language: codeBlockLanguage
-            });
+            examples.push({ type: ExampleType.Code, content: trimmed, language: codeBlockLanguage });
           }
+          codeBlockFence = '';
+          continue;
         }
-      } else if (inCodeBlock) {
-        // Preserve original indentation inside code blocks by appending the
-        // raw line (do not trim). Trimming would remove code indentation.
+
+        // If different fence while in block, treat the line as content
         codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
-      } else if (line.test(/^#+/)) {
-        const level = (line.match(/^#+/) || [''])[0].length;
-        const heading = line.replace(/^#+\s*/, '');
-        examples.push({
-          type: ExampleType.Heading,
-          content: heading.trim(),
-          level: level + headingLevelOffset
-        });
-      } else {
-        const trimmedLine = line.trim();
-        if (!trimmedLine.isEmpty()) {
-          examples.push({
-            type: ExampleType.Text,
-            content: trimmedLine
-          });
-        }
+        continue;
+      }
+
+      if (inCodeBlock) {
+        codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
+        continue;
+      }
+
+      const headingMatch = line.toString().match(headingRegex);
+      if (headingMatch) {
+        const level = headingMatch[1].length;
+        const heading = headingMatch[2];
+        examples.push({ type: ExampleType.Heading, content: new ReadableContent(heading.trim()), level: level + headingLevelOffset });
+        continue;
+      }
+
+      const trimmedLine = line.trim();
+      if (!trimmedLine.isEmpty()) {
+        examples.push({ type: ExampleType.Text, content: trimmedLine });
       }
     }
 
@@ -303,20 +319,18 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
     // Start with the section title followed by a blank line.
     let examplesContent = ReadableContent.empty().append(sectionTitle, formatterAdapter.lineBreak(), formatterAdapter.lineBreak());
 
-    for (let i = 0; i < blocks.length; i++) {
-      examplesContent = examplesContent.append(blocks[i]);
-      if (i < blocks.length - 1) {
-        examplesContent = examplesContent.append(formatterAdapter.lineBreak(), formatterAdapter.lineBreak());
-      }
+    // Append blocks separated by two line breaks
+    for (const [i, block] of blocks.entries()) {
+      examplesContent = examplesContent.append(block);
+      if (i < blocks.length - 1) examplesContent = examplesContent.append(formatterAdapter.lineBreak(), formatterAdapter.lineBreak());
     }
 
-    // Decide trailing newlines: preserve legacy behavior where an extra
-    // blank line follows when the first example is a code block.
-    if (examples.length > 0 && examples[0].type === ExampleType.Code) {
-      examplesContent = examplesContent.append(formatterAdapter.lineBreak(), formatterAdapter.lineBreak());
-    } else {
-      examplesContent = examplesContent.append(formatterAdapter.lineBreak());
-    }
+    // Preserve legacy trailing newline behavior for code-first examples
+    const trailing = (examples.length > 0 && examples[0].type === ExampleType.Code)
+      ? [formatterAdapter.lineBreak(), formatterAdapter.lineBreak()]
+      : [formatterAdapter.lineBreak()];
+
+    examplesContent = examplesContent.append(...trailing);
 
     return examplesContent;
   }

@@ -123,7 +123,7 @@ runs:
       expect(generatedContent).toBeDefined();
       expect(generatedContent.length).toBeGreaterThan(0);
 
-      // Snapshot test the generated content      
+      // Snapshot test the generated content
       const sanitizedContent = sanitizeSnapshotContent(generatedContent);
       expect(sanitizedContent).toMatchSnapshot('github-action-documentation');
     });
@@ -168,19 +168,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: \${{ matrix.node-version }}
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run tests
         run: npm test
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -196,23 +196,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
           registry: \${{ env.REGISTRY }}
           username: \${{ github.actor }}
           password: \${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: \${{ env.REGISTRY }}/\${{ github.repository }}
-      
+
       - name: Build and push
         id: build
         uses: docker/build-push-action@v5
