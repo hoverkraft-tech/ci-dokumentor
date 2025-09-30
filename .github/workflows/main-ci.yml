@@ -136,7 +136,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@af8469bf41a2c26df37047020f407445401c6d64 # main
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@2806e03b54fece4c32461c0ded3f07e5d47bbe8f # main
         with:
           build-path: packages/docs/build
           build-artifact-name: build
