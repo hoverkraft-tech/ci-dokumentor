@@ -104,6 +104,17 @@ test:
 A test action with **bold**, *italic*, and \`code\` formatting
 `,
                 },
+                {
+                    name: 'with description and comments combined',
+                    description: 'Short description from manifest\n\nThis is extended description from comments.\nIt provides more details about the action.',
+                    expected: `## Overview
+
+Short description from manifest
+
+This is extended description from comments.
+It provides more details about the action.
+`,
+                },
             ])('$name', async ({ description, expected }) => {
                 // Arrange
                 const manifest: GitHubAction = GitHubActionMockFactory.create({ description });
