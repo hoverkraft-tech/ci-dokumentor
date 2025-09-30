@@ -37,10 +37,47 @@ jobs:
     with:
       sign-images: true
 
-  docs-action:
+  npm-publish:
     needs: ci
-    if: github.event_name != 'schedule'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Setup Node.js
+        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@1d00c9eb280acbee5df4b4a2087f786e66b13d87 # 0.14.1
+
+      - name: Download package tarball
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: package-tarball
+          path: .
+      - name: Publish CLI to npm
+        run: |
+          # Write .npmrc file
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+
+          tag="${{ github.ref_name }}"
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            tag=
+          fi
+
+          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --tag "@ci-dokumentor/cli@$tag"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  docs:
+    if: github.event_name != 'schedule'
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.url }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
@@ -97,48 +134,6 @@ jobs:
 
             [skip ci]
 
-  npm-publish:
-    needs: ci
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - name: Setup Node.js
-        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@1d00c9eb280acbee5df4b4a2087f786e66b13d87 # 0.14.1
-
-      - name: Download package tarball
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        with:
-          name: package-tarball
-          path: .
-      - name: Publish CLI to npm
-        run: |
-          # Write .npmrc file
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-
-          tag="${{ github.ref_name }}"
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            tag=
-          fi
-
-          npm publish ci-dokumentor-cli-*.tgz --provenance --access public --tag "@ci-dokumentor/cli@$tag"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  docs-deploy:
-    needs: ci
-    if: github.event_name != 'schedule'
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.url }}
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@af8469bf41a2c26df37047020f407445401c6d64 # main
