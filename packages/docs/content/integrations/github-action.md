@@ -11,7 +11,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@fe7b78e19572b70e2a5db7f2a61b99c70358061a # 0.1.2
+- uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
   with:
     # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
     # This input is required.
@@ -104,7 +104,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: hoverkraft-tech/ci-dokumentor@fe7b78e19572b70e2a5db7f2a61b99c70358061a # 0.1.2
+  uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
   with:
     source: ".github/workflows/ci.yml"
 ```
@@ -115,7 +115,7 @@ The CLI accepts a single `--source <file>` per invocation. To generate documenta
 
 ```yaml
 - name: Generate Enhanced Documentation
-  uses: hoverkraft-tech/ci-dokumentor@fe7b78e19572b70e2a5db7f2a61b99c70358061a # 0.1.2
+  uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
   with:
     source: "action.yml"
     output: "docs/README.md"
@@ -132,7 +132,7 @@ To preview changes without modifying files, set the `dry-run` input to `true`. T
 
 ```yaml
 - name: Generate Documentation (dry-run)
-  uses: hoverkraft-tech/ci-dokumentor@fe7b78e19572b70e2a5db7f2a61b99c70358061a # 0.1.2
+  uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
   with:
     source: "action.yml"
     dry-run: "true"
