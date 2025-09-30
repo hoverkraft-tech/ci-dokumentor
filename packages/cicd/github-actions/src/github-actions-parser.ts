@@ -9,7 +9,7 @@ import { parse } from 'yaml';
 export type GitHubActionInput = {
   description?: string;
   required?: boolean;
-  default?: string;
+  default?: string | boolean | number; // YAML parser may return different types
   type?: string; // e.g., 'string', 'boolean', 'choice'
 };
 
@@ -81,7 +81,7 @@ type GitHubWorkflowInput = {
   description: string;
   required?: boolean;
   type?: string;
-  default?: string;
+  default?: string | boolean | number; // YAML parser may return different types
 };
 
 export type GitHubWorkflowDispatchInput = GitHubWorkflowInput & {

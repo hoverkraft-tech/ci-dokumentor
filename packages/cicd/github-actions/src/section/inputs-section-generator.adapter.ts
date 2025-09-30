@@ -176,9 +176,19 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
-    return input.default
-      ? formatterAdapter.inlineCode(new ReadableContent(input.default))
-      : new ReadableContent('-');
+    const hasNotDefault = input.default === null || input.default === undefined || input.default === '';
+    if (hasNotDefault) {
+      return new ReadableContent('-');
+    }
+
+    let defaultValue: string;
+    if (typeof input.default === 'boolean') {
+      defaultValue = input.default ? 'true' : 'false';
+    } else {
+      defaultValue = String(input.default);
+    }
+
+    return formatterAdapter.inlineCode(new ReadableContent(defaultValue));
   }
 
   private getInputRequired(

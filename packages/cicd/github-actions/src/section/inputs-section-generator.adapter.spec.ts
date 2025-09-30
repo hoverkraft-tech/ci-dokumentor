@@ -85,6 +85,44 @@ describe('InputsSectionGenerator', () => {
         );
       });
 
+      it('should generate inputs section for GitHub Action with boolean default values', async () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          inputs: {
+            'boolean-true-input': {
+              description: 'Input with boolean true default',
+              required: false,
+              default: true, // YAML parser might return boolean values instead of strings
+            },
+            'boolean-false-input': {
+              description: 'Input with boolean false default',
+              required: false,
+              default: false,
+            },
+            'string-input': {
+              description: 'Input with string default',
+              required: false,
+              default: 'string-value',
+            },
+          },
+        });
+
+        // Act
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Inputs
+
+| **Input**                 | **Description**                  | **Required** | **Default**    |
+| ------------------------- | -------------------------------- | ------------ | -------------- |
+| **\`boolean-true-input\`**  | Input with boolean true default  | **false**    | \`true\`         |
+| **\`boolean-false-input\`** | Input with boolean false default | **false**    | \`false\`        |
+| **\`string-input\`**        | Input with string default        | **false**    | \`string-value\` |
+`
+        );
+      });
+
       it('should generate inputs section for GitHub Action without inputs', async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
