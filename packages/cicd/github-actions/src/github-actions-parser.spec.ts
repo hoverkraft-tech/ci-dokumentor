@@ -305,10 +305,10 @@ jobs:
         }
       });
 
-      it('should not extract description from action files', async () => {
+      it('should extract and combine description from action manifest and comments', async () => {
         // Arrange
         const filePath = '/test/action.yml';
-        const fileContent = `# This is an action comment
+        const fileContent = `# This is an action comment from the top of the file
 name: Test Action
 description: Action description from field
 runs:
@@ -324,8 +324,86 @@ runs:
         // Assert
         expect(result).toBeDefined();
         expect(result.name).toBe('Test Action');
-        expect(result.description).toBe('Action description from field');
+        expect(result.description).toBe('Action description from field\n\nThis is an action comment from the top of the file');
         expect('description' in result && typeof result.description === 'string').toBe(true);
+      });
+
+      it('should extract description from action comments only when no description field', async () => {
+        // Arrange
+        const filePath = '/test/action.yml';
+        const fileContent = `# This is an action comment
+# Second line of comment
+name: Test Action
+runs:
+  using: composite
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+
+        // Act
+        const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubAction;
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(result.name).toBe('Test Action');
+        expect(result.description).toBe('This is an action comment\nSecond line of comment');
+      });
+
+      it('should use only description field when no comments', async () => {
+        // Arrange
+        const filePath = '/test/action.yml';
+        const fileContent = `name: Test Action
+description: Action description from field
+runs:
+  using: composite
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+
+        // Act
+        const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubAction;
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(result.name).toBe('Test Action');
+        expect(result.description).toBe('Action description from field');
+      });
+
+      it('should extract multiline description from action comments with code blocks', async () => {
+        // Arrange
+        const filePath = '/test/action.yml';
+        const fileContent = `# This action does something important.
+# Here's a code example:
+# \`\`\`yaml
+# steps:
+#   - uses: action@v1
+# \`\`\`
+name: Test Action
+description: Short description
+runs:
+  using: composite
+`;
+
+        mockReaderAdapter.resourceExists.mockReturnValue(true);
+        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+
+        // Act
+        const result = await parser.parseFile(filePath, mockRepositoryInfo) as GitHubAction;
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(result.name).toBe('Test Action');
+        expect(result.description).toBe(
+          'Short description\n\n' +
+          'This action does something important.\n' +
+          'Here\'s a code example:\n' +
+          '```yaml\n' +
+          'steps:\n' +
+          '  - uses: action@v1\n' +
+          '```\n'
+        );
       });
 
       it('should parse a complete workflow file', async () => {

@@ -149,15 +149,28 @@ export class GitHubActionsParser {
 
     parsed.usesName = this.getUsesName(source, repositoryInfo);
 
-    // Extract description from comments for workflows
+    // Extract description from comments
+    const commentsDescription = this.extractDescriptionFromComments(content);
+    
     if (this.isGitHubWorkflowFile(source) && this.isGitHubWorkflow(parsed)) {
-      const description = this.extractDescriptionFromComments(content);
-      if (description) {
-        (parsed as GitHubWorkflow).description = description.toString();
+      // For workflows, use comments as the description (no description field in manifest)
+      if (commentsDescription) {
+        (parsed as GitHubWorkflow).description = commentsDescription.toString();
       }
     }
 
     if (this.isGitHubAction(parsed)) {
+      // For actions, combine the description field with comments
+      if (commentsDescription) {
+        const existingDescription = parsed.description;
+        if (existingDescription) {
+          // Combine: description field + newline + comments
+          (parsed as GitHubAction).description = `${existingDescription}\n\n${commentsDescription.toString()}`;
+        } else {
+          // Only comments available
+          (parsed as GitHubAction).description = commentsDescription.toString();
+        }
+      }
       return parsed as GitHubAction;
     }
 
