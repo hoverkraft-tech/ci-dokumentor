@@ -395,15 +395,14 @@ runs:
         // Assert
         expect(result).toBeDefined();
         expect(result.name).toBe('Test Action');
-        expect(result.description).toBe(
-          'Short description\n\n' +
-          'This action does something important.\n' +
-          'Here\'s a code example:\n' +
-          '```yaml\n' +
-          'steps:\n' +
-          '  - uses: action@v1\n' +
-          '```\n'
-        );
+        expect(result.description).toEqual(`Short description
+
+This action does something important.
+Here's a code example:
+\`\`\`yaml
+steps:
+  - uses: action@v1
+\`\`\``);
       });
 
       it('should parse a complete workflow file', async () => {

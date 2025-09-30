@@ -151,7 +151,7 @@ export class GitHubActionsParser {
 
     // Extract description from comments
     const commentsDescription = this.extractDescriptionFromComments(content);
-    
+
     if (this.isGitHubWorkflowFile(source) && this.isGitHubWorkflow(parsed)) {
       // For workflows, use comments as the description (no description field in manifest)
       if (commentsDescription) {
@@ -165,7 +165,13 @@ export class GitHubActionsParser {
         const existingDescription = parsed.description;
         if (existingDescription) {
           // Combine: description field + newline + comments
-          (parsed as GitHubAction).description = `${existingDescription}\n\n${commentsDescription.toString()}`;
+          (parsed as GitHubAction).description = ReadableContent.empty()
+            .append(
+              existingDescription.trim(),
+              `\n\n`,
+              commentsDescription.trim()
+            )
+            .toString();
         } else {
           // Only comments available
           (parsed as GitHubAction).description = commentsDescription.toString();
@@ -232,7 +238,7 @@ export class GitHubActionsParser {
           commentPart = commentPart.slice(1);
         }
 
-        // Detect code fence opening/closing (e.g. ``` or ```yaml)
+        // Detect code fence opening/closing (e.g. ``` or```yaml)
         const startsWithFence = commentPart.trimStart().startsWith('```');
         if (startsWithFence) {
           inCodeFence = !inCodeFence;
