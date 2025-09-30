@@ -7,7 +7,7 @@ export class ReadableContent {
   // operations. This prevents potential catastrophic backtracking when a
   // (possibly user-controlled) regular expression is run against very large
   // inputs. The value is conservative; adjust if you have a measured need.
-  private static readonly REGEX_SAFE_MAX_BYTES = 16 * 1024; // 16 KB
+  private static readonly REGEX_SAFE_MAX_BYTES = 24 * 1024; // 24 KB
 
   private buffer: Buffer;
 
@@ -20,8 +20,10 @@ export class ReadableContent {
       this.buffer = Buffer.from(content);
     } else if (content instanceof ReadableContent) {
       this.buffer = content.buffer;
-    } else {
+    } else if (Buffer.isBuffer(content)) {
       this.buffer = content;
+    } else {
+      throw new Error('Invalid content type; must be string, Buffer, or ReadableContent, got ' + typeof content);
     }
   }
 
@@ -356,6 +358,7 @@ export class ReadableContent {
     let result = ReadableContent.empty();
 
     let idx = 0;
+
     let found = this.buffer.indexOf(searchBuf, idx);
     while (found !== -1) {
       if (found > idx) {
