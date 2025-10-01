@@ -63,13 +63,14 @@ describe('GenerateCommand', () => {
       const options = generateCommand.options;
       const optionFlags = options.map((opt) => opt.flags);
 
-      expect(optionFlags).toContain('-s, --source <file>');
+      expect(optionFlags).toContain('-s, --source <file...>');
       expect(optionFlags).toContain('-d, --destination <file>');
       expect(optionFlags).toContain('-r, --repository <platform>');
       expect(optionFlags).toContain('-c, --cicd <platform>');
       expect(optionFlags).toContain('-i, --include-sections <sections>');
       expect(optionFlags).toContain('-e, --exclude-sections <sections>');
       expect(optionFlags).toContain('--dry-run');
+      expect(optionFlags).toContain('--concurrency [number]');
     });
   });
 

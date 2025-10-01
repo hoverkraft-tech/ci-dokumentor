@@ -6,10 +6,12 @@ import {
   GenerateDocumentationUseCaseInput,
 } from '../usecases/generate-documentation.usecase.js';
 import { BaseCommand } from './base-command.js';
+import fg from 'fast-glob';
+import pLimit from 'p-limit';
 
 export type GenerateCommandOptions = {
   outputFormat: string;
-  source: string;
+  source: string | string[];
   destination?: string;
   repository?: string;
   cicd?: string;
@@ -17,6 +19,7 @@ export type GenerateCommandOptions = {
   excludeSections?: string;
   dryRun: boolean;
   formatLink?: string | boolean;
+  concurrency?: number;
   [key: string]: unknown; // Allow dynamic keys for provider-specific options and section options
 };
 
@@ -50,12 +53,12 @@ export class GenerateCommand extends BaseCommand {
       .alias('gen')
       .description('Generate documentation from CI/CD manifest files')
       .requiredOption(
-        '-s, --source <file>',
-        'Source manifest file path to handle'
+        '-s, --source <file...>',
+        'Source manifest file path(s) to handle. Supports glob patterns and multiple files.'
       )
       .option(
         '-d, --destination <file>',
-        'Destination file path for generated documentation (auto-detected if not specified)',
+        'Destination file path for generated documentation (auto-detected if not specified). Only applicable when processing a single file.',
       )
       .addOption(
         new Option(
@@ -86,8 +89,17 @@ export class GenerateCommand extends BaseCommand {
         'Transform bare URLs to links. Types: auto (default autolinks <url>), full ([url](url)), false (disabled)',
         LinkFormat.Auto
       )
+      .option(
+        '--concurrency [number]',
+        'Maximum number of files to process concurrently',
+        '5'
+      )
       .hook('preAction', async (thisCommand) => {
-        await this.populateSupportedOptions(thisCommand);
+        // For multi-file processing, we need to get the first source to detect platform-specific options
+        const sources = thisCommand.getOptionValue('source');
+        const firstSource = Array.isArray(sources) ? sources[0] : sources;
+        
+        await this.populateSupportedOptions(thisCommand, firstSource);
 
         thisCommand.allowExcessArguments(false);
         thisCommand.allowUnknownOption(false);
@@ -101,18 +113,14 @@ export class GenerateCommand extends BaseCommand {
         }
       })
       .action(async (options: GenerateCommandOptions) => {
-        const input: GenerateDocumentationUseCaseInput = this.mapGenerateCommandOptions(options);
-
-        await this.mapSupportedOptions(input, options);
-
-        await this.generateDocumentationUseCase.execute(input);
+        await this.processMultipleFiles(options);
       })
       .allowUnknownOption(true)
       .allowExcessArguments(true)
       .helpCommand(true);
   }
 
-  private async populateSupportedOptions(thisCommand: Command) {
+  private async populateSupportedOptions(thisCommand: Command, source?: string) {
     // Add repository-specific options
     const repositorySupportedOptions = await this.generateDocumentationUseCase.getRepositorySupportedOptions(
       thisCommand.getOptionValue('repository')
@@ -133,7 +141,7 @@ export class GenerateCommand extends BaseCommand {
     // Add section-specific options
     const sectionSupportedOptions = await this.generateDocumentationUseCase.getSectionSupportedOptions({
       cicdPlatform: thisCommand.getOptionValue('cicd'),
-      source: thisCommand.getOptionValue('source'),
+      source: source,
     });
 
     for (const [, sectionOptions] of Object.entries(sectionSupportedOptions)) {
@@ -150,7 +158,7 @@ export class GenerateCommand extends BaseCommand {
 
     const supportedSections = await this.generateDocumentationUseCase.getSupportedSections({
       cicdPlatform: thisCommand.getOptionValue('cicd'),
-      source: thisCommand.getOptionValue('source'),
+      source: source,
     });
 
     if (supportedSections) {
@@ -159,9 +167,87 @@ export class GenerateCommand extends BaseCommand {
     }
   }
 
+  /**
+   * Process multiple files concurrently with error handling
+   */
+  private async processMultipleFiles(options: GenerateCommandOptions): Promise<void> {
+    // Resolve source files (handle globs and arrays)
+    const sourceFiles = await this.resolveSourceFiles(options.source);
+
+    if (sourceFiles.length === 0) {
+      throw new Error('No source files found matching the provided pattern(s)');
+    }
+
+    // Validate destination is not provided when processing multiple files
+    if (sourceFiles.length > 1 && options.destination) {
+      throw new Error('--destination option cannot be used when processing multiple files. Destinations will be auto-detected.');
+    }
+
+    // Parse concurrency option
+    const concurrency = parseInt(String(options.concurrency || '5'), 10);
+    if (isNaN(concurrency) || concurrency < 1) {
+      throw new Error('--concurrency must be a positive integer');
+    }
+
+    // Create a limit for concurrent operations
+    const limit = pLimit(concurrency);
+
+    // Process all files with concurrency control
+    const tasks = sourceFiles.map(source =>
+      limit(async () => {
+        const fileOptions = { ...options, source };
+        const input: GenerateDocumentationUseCaseInput = this.mapGenerateCommandOptions(fileOptions);
+        await this.mapSupportedOptions(input, fileOptions);
+        return this.generateDocumentationUseCase.execute(input);
+      })
+    );
+
+    // Execute all tasks and collect results
+    const results = await Promise.allSettled(tasks);
+
+    // Check for failures
+    const failures = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+    if (failures.length > 0) {
+      const errorMessages = failures.map((f, idx) => {
+        const failedFile = sourceFiles[results.indexOf(f)];
+        return `  - ${failedFile}: ${f.reason?.message || f.reason}`;
+      }).join('\n');
+      
+      throw new Error(`Failed to process ${failures.length} of ${sourceFiles.length} files:\n${errorMessages}`);
+    }
+  }
+
+  /**
+   * Resolve source files from patterns and arrays
+   */
+  private async resolveSourceFiles(source: string | string[]): Promise<string[]> {
+    const sources = Array.isArray(source) ? source : [source];
+    const resolvedFiles = new Set<string>();
+
+    for (const pattern of sources) {
+      // Check if pattern contains glob characters
+      if (pattern.includes('*') || pattern.includes('?') || pattern.includes('[')) {
+        // Use fast-glob to resolve pattern
+        const files = await fg(pattern, { 
+          onlyFiles: true,
+          absolute: false,
+        });
+        files.forEach(file => resolvedFiles.add(file));
+      } else {
+        // Direct file path
+        resolvedFiles.add(pattern);
+      }
+    }
+
+    return Array.from(resolvedFiles).sort();
+  }
+
   private mapGenerateCommandOptions(options: GenerateCommandOptions): GenerateDocumentationUseCaseInput {
+    // Ensure source is a string at this point (called per-file in processMultipleFiles)
+    const source = Array.isArray(options.source) ? options.source[0] : options.source;
+    
     const generateOptions: GenerateDocumentationUseCaseInput = {
-      source: options.source,
+      source,
       destination: options.destination,
       outputFormat: this.getOutputFormatOption(this),
       dryRun: options.dryRun,
@@ -207,9 +293,11 @@ export class GenerateCommand extends BaseCommand {
     }
 
     // Handle section-specific options
+    // Use the first source if it's an array for determining section options
+    const source = Array.isArray(options.source) ? options.source[0] : options.source;
     const sectionSupportedOptions = this.generateDocumentationUseCase.getSectionSupportedOptions({
       cicdPlatform: options.cicd,
-      source: options.source,
+      source,
     });
 
     const sectionConfig: Record<string, SectionOptions> = {};

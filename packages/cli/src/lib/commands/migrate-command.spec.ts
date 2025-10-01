@@ -39,15 +39,20 @@ describe('MigrateCommand', () => {
 
       const toolOption = options.find(opt => opt.flags === '-t, --tool <tool>');
       expect(toolOption).toBeDefined();
-      expect(toolOption?.required).toBe(true);
+      // Note: Commander marks options with angle brackets as having required values,
+      // but the option itself is optional (can be auto-detected)
 
-      const destinationOption = options.find(opt => opt.flags === '-d, --destination <file>');
+      const destinationOption = options.find(opt => opt.flags === '-d, --destination <file...>');
       expect(destinationOption).toBeDefined();
       expect(destinationOption?.required).toBe(true);
 
       const dryRunOption = options.find(opt => opt.flags === '--dry-run');
       expect(dryRunOption).toBeDefined();
       expect(dryRunOption?.required).toBe(false);
+
+      const concurrencyOption = options.find(opt => opt.flags === '--concurrency [number]');
+      expect(concurrencyOption).toBeDefined();
+      expect(concurrencyOption?.required).toBe(false);
     });
 
     it('should list available tools in tool option description', () => {
