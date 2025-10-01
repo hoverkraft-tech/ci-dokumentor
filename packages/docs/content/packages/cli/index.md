@@ -468,7 +468,7 @@ ci-dokumentor generate --source action.yml --extra-badges '[
 
 #### Multiple files
 
-The CLI now supports processing multiple files in a single invocation using:
+The CLI supports processing multiple files in a single invocation using:
 
 **Direct specification:**
 ```bash
