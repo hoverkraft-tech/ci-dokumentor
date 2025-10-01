@@ -1,13 +1,13 @@
 import { inject, injectable, injectFromBase } from 'inversify';
 import { Command, Option } from 'commander';
+import fg from 'fast-glob';
+import pLimit from 'p-limit';
 import { GenerateSectionsOptions, RepositoryOptions, SectionOptions, LinkFormat, FormatterOptions } from '@ci-dokumentor/core';
 import {
   GenerateDocumentationUseCase,
   GenerateDocumentationUseCaseInput,
 } from '../usecases/generate-documentation.usecase.js';
 import { BaseCommand } from './base-command.js';
-import fg from 'fast-glob';
-import pLimit from 'p-limit';
 
 export type GenerateCommandOptions = {
   outputFormat: string;
@@ -208,7 +208,7 @@ export class GenerateCommand extends BaseCommand {
     // Check for failures
     const failures = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
     if (failures.length > 0) {
-      const errorMessages = failures.map((f, idx) => {
+      const errorMessages = failures.map((f) => {
         const failedFile = sourceFiles[results.indexOf(f)];
         return `  - ${failedFile}: ${f.reason?.message || f.reason}`;
       }).join('\n');

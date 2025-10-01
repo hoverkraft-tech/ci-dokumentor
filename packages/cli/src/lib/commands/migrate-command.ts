@@ -1,13 +1,13 @@
 import { inject, injectable, injectFromBase } from 'inversify';
 import { Command } from 'commander';
+import fg from 'fast-glob';
+import pLimit from 'p-limit';
 import { MigrationService } from '@ci-dokumentor/core';
 import {
   MigrateDocumentationUseCase,
   MigrateDocumentationUseCaseInput,
 } from '../usecases/migrate-documentation.usecase.js';
 import { BaseCommand } from './base-command.js';
-import fg from 'fast-glob';
-import pLimit from 'p-limit';
 
 export type MigrateCommandOptions = {
   outputFormat: string;
@@ -104,7 +104,7 @@ export class MigrateCommand extends BaseCommand {
     // Check for failures
     const failures = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
     if (failures.length > 0) {
-      const errorMessages = failures.map((f, idx) => {
+      const errorMessages = failures.map((f) => {
         const failedFile = destinationFiles[results.indexOf(f)];
         return `  - ${failedFile}: ${f.reason?.message || f.reason}`;
       }).join('\n');
