@@ -54,6 +54,8 @@ export interface MigrateDocumentationUseCaseOutput {
  */
 @injectable()
 export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
+  private static readonly DEFAULT_CONCURRENCY = 5;
+
   constructor(
     @inject(LoggerService) loggerService: LoggerService,
     @inject(MigrationService) private readonly migrationService: MigrationService,
@@ -99,40 +101,16 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     input: MigrateDocumentationUseCaseInput & { destination: string }
   ): Promise<MigrateDocumentationUseCaseOutput> {
     this.validateInput(input);
-
-    this.loggerService.info(
-      `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation migration...`, input.outputFormat);
-    this.loggerService.info(`Target file: ${input.destination}`, input.outputFormat);
+    this.logExecutionStart(input);
 
     const migrationAdapter = await this.resolveMigrationAdapter(input);
     this.loggerService.info(`Migration tool: ${migrationAdapter.getName()}`, input.outputFormat);
 
-    // Use migration service to handle the full migration process with proper architecture
-    const { destination, data } = await this.migrationService.migrateDocumentationFromTool({
-      destination: input.destination,
-      migrationAdapter,
-      dryRun: input.dryRun,
-    });
+    const { destination, data } = await this.migrateDocumentation(input, migrationAdapter);
 
-    // Output the result using the logger
-    const useCaseOutput: MigrateDocumentationUseCaseOutput = {
-      success: true,
-      destination,
-      data
-    };
+    this.logExecutionSuccess(input);
 
-    this.loggerService.info('Migration completed successfully!', input.outputFormat);
-
-    const message = input.dryRun
-      ? `(Dry-run) Documentation would be migrated in: ${input.destination}`
-      : `Documentation migrated in: ${input.destination}`;
-
-    this.loggerService.info(message, input.outputFormat);
-
-    // Output the result using the logger
-    this.loggerService.result(useCaseOutput, input.outputFormat);
-
-    return useCaseOutput;
+    return this.createSuccessOutput(destination, data, input.outputFormat);
   }
 
   /**
@@ -142,24 +120,106 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     input: MigrateDocumentationUseCaseInput,
     destinationFiles: string[]
   ): Promise<MigrateDocumentationUseCaseOutput> {
-    const concurrency = input.concurrency ?? 5;
+    const concurrency = input.concurrency ?? MigrateDocumentationUseCase.DEFAULT_CONCURRENCY;
+
+    this.logMultiFileExecutionStart(input, destinationFiles.length);
+
+    const tasks = destinationFiles.map(destination => () => 
+      this.executeSingleFile({ ...input, destination })
+    );
+
+    const results = await this.executeConcurrently(tasks, concurrency);
+    const fileResults = this.collectFileResults(results, destinationFiles);
+
+    this.validateFileResults(fileResults, destinationFiles);
 
     this.loggerService.info(
-      `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation migration for ${destinationFiles.length} files...`,
+      `Successfully processed ${destinationFiles.length} files!`,
       input.outputFormat
     );
 
-    // Create tasks for each file
-    const tasks = destinationFiles.map(destination => async () => {
-      const fileInput = { ...input, destination };
-      return this.executeSingleFile(fileInput);
+    return {
+      success: true,
+      results: fileResults,
+    };
+  }
+
+  /**
+   * Log execution start information
+   */
+  private logExecutionStart(input: MigrateDocumentationUseCaseInput & { destination: string }): void {
+    const prefix = input.dryRun ? '[DRY RUN] ' : '';
+    this.loggerService.info(`${prefix}Starting documentation migration...`, input.outputFormat);
+    this.loggerService.info(`Target file: ${input.destination}`, input.outputFormat);
+  }
+
+  /**
+   * Log multi-file execution start
+   */
+  private logMultiFileExecutionStart(
+    input: MigrateDocumentationUseCaseInput,
+    fileCount: number
+  ): void {
+    const prefix = input.dryRun ? '[DRY RUN] ' : '';
+    this.loggerService.info(
+      `${prefix}Starting documentation migration for ${fileCount} files...`,
+      input.outputFormat
+    );
+  }
+
+  /**
+   * Log successful execution completion
+   */
+  private logExecutionSuccess(input: MigrateDocumentationUseCaseInput & { destination: string }): void {
+    this.loggerService.info('Migration completed successfully!', input.outputFormat);
+
+    const message = input.dryRun
+      ? `(Dry-run) Documentation would be migrated in: ${input.destination}`
+      : `Documentation migrated in: ${input.destination}`;
+
+    this.loggerService.info(message, input.outputFormat);
+  }
+
+  /**
+   * Migrate documentation using the migration service
+   */
+  private async migrateDocumentation(
+    input: MigrateDocumentationUseCaseInput & { destination: string },
+    migrationAdapter: MigrationAdapter
+  ): Promise<{ destination: string; data: string | undefined }> {
+    return this.migrationService.migrateDocumentationFromTool({
+      destination: input.destination,
+      migrationAdapter,
+      dryRun: input.dryRun,
     });
+  }
 
-    // Execute with concurrency control
-    const results = await this.executeConcurrently(tasks, concurrency);
+  /**
+   * Create success output with result logging
+   */
+  private createSuccessOutput(
+    destination: string,
+    data: string | undefined,
+    outputFormat: string | undefined
+  ): MigrateDocumentationUseCaseOutput {
+    const useCaseOutput: MigrateDocumentationUseCaseOutput = {
+      success: true,
+      destination,
+      data
+    };
 
-    // Collect results
-    const fileResults = results.map((result, index) => {
+    this.loggerService.result(useCaseOutput, outputFormat);
+    return useCaseOutput;
+  }
+
+  /**
+   * Collect and format file processing results
+   */
+  private collectFileResults(
+    results: PromiseSettledResult<MigrateDocumentationUseCaseOutput>[],
+    destinationFiles: string[]
+  ): Array<{ destination: string; success: boolean; error?: string }> {
+    return results.map((result, index) => {
       const destination = destinationFiles[index];
       if (result.status === 'fulfilled') {
         return {
@@ -174,8 +234,15 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
         };
       }
     });
+  }
 
-    // Check for failures
+  /**
+   * Validate file results and throw if any failed
+   */
+  private validateFileResults(
+    fileResults: Array<{ success: boolean; error?: string }>,
+    destinationFiles: string[]
+  ): void {
     const failures = fileResults.filter(r => !r.success);
     
     if (failures.length > 0) {
@@ -186,16 +253,6 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
       );
       throw new Error(errorMessage);
     }
-
-    this.loggerService.info(
-      `Successfully processed ${destinationFiles.length} files!`,
-      input.outputFormat
-    );
-
-    return {
-      success: true,
-      results: fileResults,
-    };
   }
 
   private validateInput(input: MigrateDocumentationUseCaseInput & { destination: string }): void {

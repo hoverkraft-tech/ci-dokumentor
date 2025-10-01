@@ -35,7 +35,7 @@ export abstract class AbstractMultiFileUseCase {
    */
   protected async executeConcurrently<T>(
     tasks: Array<() => Promise<T>>,
-    concurrency: number = 5
+    concurrency = 5
   ): Promise<PromiseSettledResult<T>[]> {
     return this.concurrencyService.executeWithLimit(tasks, concurrency);
   }

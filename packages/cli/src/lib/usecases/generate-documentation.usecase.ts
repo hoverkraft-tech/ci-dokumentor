@@ -106,6 +106,8 @@ export interface GenerateDocumentationUseCaseOutput {
  */
 @injectable()
 export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
+  private static readonly DEFAULT_CONCURRENCY = 5;
+
   constructor(
     @inject(LoggerService) loggerService: LoggerService,
     @inject(GeneratorService)
@@ -255,63 +257,20 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
     input: GenerateDocumentationUseCaseInput & { source: string }
   ): Promise<GenerateDocumentationUseCaseOutput> {
     this.validateInput(input);
-
-    this.loggerService.info(
-      `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation generation...`, input.outputFormat);
-    this.loggerService.info(`Source manifest: ${input.source}`, input.outputFormat);
-    if (input.destination) {
-      this.loggerService.info(`Destination path: ${input.destination}`, input.outputFormat);
-    }
-
-    // Log section options if provided
-    if (input.sections) {
-      if (input.sections.includeSections?.length) {
-        this.loggerService.info(
-          `Including sections: ${input.sections.includeSections.join(', ')}`,
-          input.outputFormat
-        );
-      }
-      if (input.sections.excludeSections?.length) {
-        this.loggerService.info(
-          `Excluding sections: ${input.sections.excludeSections.join(', ')}`,
-          input.outputFormat
-        );
-      }
-    }
-
+    this.logExecutionStart(input);
+    
     const generatorAdapter = await this.resolveGeneratorAdapter(input);
     const repositoryProvider = await this.resolveRepositoryProvider(input);
 
-    // Generate documentation using the specific CI/CD platform adapter
-    const { destination, data } = await this.generatorService.generateDocumentationForPlatform({
-      source: input.source,
-      destination: input.destination,
-      dryRun: input.dryRun,
-      sections: input.sections,
+    const { destination, data } = await this.generateDocumentation(
+      input,
       generatorAdapter,
-      repositoryProvider,
-      formatterOptions: input.formatterOptions,
-    });
+      repositoryProvider
+    );
 
-    this.loggerService.info('Documentation generated successfully!', input.outputFormat);
+    this.logExecutionSuccess(input, destination);
 
-    const message = input.dryRun
-      ? `(Dry-run) Documentation would be saved to: ${destination}`
-      : `Documentation saved to: ${destination}`;
-
-    this.loggerService.info(message, input.outputFormat);
-
-    // Output the result using the logger
-    const useCaseOutput: GenerateDocumentationUseCaseOutput = {
-      success: true,
-      destination,
-      data
-    };
-
-    // Log the result at the command level
-    this.loggerService.result(useCaseOutput, input.outputFormat);
-
-    return useCaseOutput;
+    return this.createSuccessOutput(destination, data, input.outputFormat);
   }
 
   /**
@@ -321,24 +280,141 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
     input: GenerateDocumentationUseCaseInput,
     sourceFiles: string[]
   ): Promise<GenerateDocumentationUseCaseOutput> {
-    const concurrency = input.concurrency ?? 5;
+    const concurrency = input.concurrency ?? GenerateDocumentationUseCase.DEFAULT_CONCURRENCY;
+
+    this.logMultiFileExecutionStart(input, sourceFiles.length);
+
+    const tasks = sourceFiles.map(source => () => 
+      this.executeSingleFile({ ...input, source })
+    );
+
+    const results = await this.executeConcurrently(tasks, concurrency);
+    const fileResults = this.collectFileResults(results, sourceFiles);
+
+    this.validateFileResults(fileResults, sourceFiles);
 
     this.loggerService.info(
-      `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation generation for ${sourceFiles.length} files...`,
+      `Successfully processed ${sourceFiles.length} files!`,
       input.outputFormat
     );
 
-    // Create tasks for each file
-    const tasks = sourceFiles.map(source => async () => {
-      const fileInput = { ...input, source };
-      return this.executeSingleFile(fileInput);
+    return {
+      success: true,
+      results: fileResults,
+    };
+  }
+
+  /**
+   * Log execution start information
+   */
+  private logExecutionStart(input: GenerateDocumentationUseCaseInput & { source: string }): void {
+    const prefix = input.dryRun ? '[DRY RUN] ' : '';
+    this.loggerService.info(`${prefix}Starting documentation generation...`, input.outputFormat);
+    this.loggerService.info(`Source manifest: ${input.source}`, input.outputFormat);
+    
+    if (input.destination) {
+      this.loggerService.info(`Destination path: ${input.destination}`, input.outputFormat);
+    }
+
+    this.logSectionOptions(input);
+  }
+
+  /**
+   * Log section filtering options
+   */
+  private logSectionOptions(input: GenerateDocumentationUseCaseInput): void {
+    if (!input.sections) return;
+
+    if (input.sections.includeSections?.length) {
+      this.loggerService.info(
+        `Including sections: ${input.sections.includeSections.join(', ')}`,
+        input.outputFormat
+      );
+    }
+    
+    if (input.sections.excludeSections?.length) {
+      this.loggerService.info(
+        `Excluding sections: ${input.sections.excludeSections.join(', ')}`,
+        input.outputFormat
+      );
+    }
+  }
+
+  /**
+   * Log multi-file execution start
+   */
+  private logMultiFileExecutionStart(
+    input: GenerateDocumentationUseCaseInput,
+    fileCount: number
+  ): void {
+    const prefix = input.dryRun ? '[DRY RUN] ' : '';
+    this.loggerService.info(
+      `${prefix}Starting documentation generation for ${fileCount} files...`,
+      input.outputFormat
+    );
+  }
+
+  /**
+   * Log successful execution completion
+   */
+  private logExecutionSuccess(
+    input: GenerateDocumentationUseCaseInput,
+    destination: string
+  ): void {
+    this.loggerService.info('Documentation generated successfully!', input.outputFormat);
+
+    const message = input.dryRun
+      ? `(Dry-run) Documentation would be saved to: ${destination}`
+      : `Documentation saved to: ${destination}`;
+
+    this.loggerService.info(message, input.outputFormat);
+  }
+
+  /**
+   * Generate documentation using the generator service
+   */
+  private async generateDocumentation(
+    input: GenerateDocumentationUseCaseInput & { source: string },
+    generatorAdapter: GeneratorAdapter,
+    repositoryProvider: RepositoryProvider
+  ): Promise<{ destination: string; data: string | undefined }> {
+    return this.generatorService.generateDocumentationForPlatform({
+      source: input.source,
+      destination: input.destination,
+      dryRun: input.dryRun,
+      sections: input.sections,
+      generatorAdapter,
+      repositoryProvider,
+      formatterOptions: input.formatterOptions,
     });
+  }
 
-    // Execute with concurrency control
-    const results = await this.executeConcurrently(tasks, concurrency);
+  /**
+   * Create success output with result logging
+   */
+  private createSuccessOutput(
+    destination: string,
+    data: string | undefined,
+    outputFormat: string | undefined
+  ): GenerateDocumentationUseCaseOutput {
+    const useCaseOutput: GenerateDocumentationUseCaseOutput = {
+      success: true,
+      destination,
+      data
+    };
 
-    // Collect results
-    const fileResults = results.map((result, index) => {
+    this.loggerService.result(useCaseOutput, outputFormat);
+    return useCaseOutput;
+  }
+
+  /**
+   * Collect and format file processing results
+   */
+  private collectFileResults(
+    results: PromiseSettledResult<GenerateDocumentationUseCaseOutput>[],
+    sourceFiles: string[]
+  ): Array<{ source: string; success: boolean; destination?: string; error?: string }> {
+    return results.map((result, index) => {
       const source = sourceFiles[index];
       if (result.status === 'fulfilled') {
         return {
@@ -354,8 +430,15 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
         };
       }
     });
+  }
 
-    // Check for failures
+  /**
+   * Validate file results and throw if any failed
+   */
+  private validateFileResults(
+    fileResults: Array<{ success: boolean; error?: string }>,
+    sourceFiles: string[]
+  ): void {
     const failures = fileResults.filter(r => !r.success);
     
     if (failures.length > 0) {
@@ -366,16 +449,6 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
       );
       throw new Error(errorMessage);
     }
-
-    this.loggerService.info(
-      `Successfully processed ${sourceFiles.length} files!`,
-      input.outputFormat
-    );
-
-    return {
-      success: true,
-      results: fileResults,
-    };
   }
 
   private validateInput(input: GenerateDocumentationUseCaseInput & { source: string }): void {
