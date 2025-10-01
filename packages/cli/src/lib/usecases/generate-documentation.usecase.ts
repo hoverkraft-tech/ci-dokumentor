@@ -106,8 +106,6 @@ export interface GenerateDocumentationUseCaseOutput {
  */
 @injectable()
 export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
-  private static readonly DEFAULT_CONCURRENCY = 5;
-
   constructor(
     @inject(LoggerService) loggerService: LoggerService,
     @inject(GeneratorService)
@@ -270,7 +268,7 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
 
     this.logExecutionSuccess(input, destination);
 
-    return this.createSuccessOutput(destination, data, input.outputFormat);
+    return this.buildSuccessOutput(destination, data, input.outputFormat);
   }
 
   /**
@@ -280,23 +278,40 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
     input: GenerateDocumentationUseCaseInput,
     sourceFiles: string[]
   ): Promise<GenerateDocumentationUseCaseOutput> {
-    const concurrency = input.concurrency ?? GenerateDocumentationUseCase.DEFAULT_CONCURRENCY;
+    const concurrency = input.concurrency ?? AbstractMultiFileUseCase.DEFAULT_CONCURRENCY;
 
-    this.logMultiFileExecutionStart(input, sourceFiles.length);
+    this.logMultiFileExecutionStart(
+      'documentation generation',
+      sourceFiles.length,
+      input.dryRun,
+      input.outputFormat
+    );
 
     const tasks = sourceFiles.map(source => () => 
       this.executeSingleFile({ ...input, source })
     );
 
     const results = await this.executeConcurrently(tasks, concurrency);
-    const fileResults = this.collectFileResults(results, sourceFiles);
-
-    this.validateFileResults(fileResults, sourceFiles);
-
-    this.loggerService.info(
-      `Successfully processed ${sourceFiles.length} files!`,
-      input.outputFormat
+    
+    type FileResult = { source: string; success: boolean; destination?: string; error?: string };
+    
+    const fileResults = this.collectFileResults<GenerateDocumentationUseCaseOutput, FileResult>(
+      results,
+      sourceFiles,
+      (source, output) => ({
+        source,
+        success: true,
+        destination: output.destination,
+      }),
+      (source, error) => ({
+        source,
+        success: false,
+        error: (error as Error)?.message || String(error),
+      })
     );
+
+    this.validateFileResults(fileResults, sourceFiles, (_, index) => sourceFiles[index]);
+    this.logMultiFileExecutionSuccess(sourceFiles.length, input.outputFormat);
 
     return {
       success: true,
@@ -341,20 +356,6 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
   }
 
   /**
-   * Log multi-file execution start
-   */
-  private logMultiFileExecutionStart(
-    input: GenerateDocumentationUseCaseInput,
-    fileCount: number
-  ): void {
-    const prefix = input.dryRun ? '[DRY RUN] ' : '';
-    this.loggerService.info(
-      `${prefix}Starting documentation generation for ${fileCount} files...`,
-      input.outputFormat
-    );
-  }
-
-  /**
    * Log successful execution completion
    */
   private logExecutionSuccess(
@@ -392,63 +393,21 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
   /**
    * Create success output with result logging
    */
-  private createSuccessOutput(
+  private buildSuccessOutput(
     destination: string,
     data: string | undefined,
     outputFormat: string | undefined
   ): GenerateDocumentationUseCaseOutput {
-    const useCaseOutput: GenerateDocumentationUseCaseOutput = {
-      success: true,
+    return this.createSuccessOutput(
       destination,
-      data
-    };
-
-    this.loggerService.result(useCaseOutput, outputFormat);
-    return useCaseOutput;
-  }
-
-  /**
-   * Collect and format file processing results
-   */
-  private collectFileResults(
-    results: PromiseSettledResult<GenerateDocumentationUseCaseOutput>[],
-    sourceFiles: string[]
-  ): Array<{ source: string; success: boolean; destination?: string; error?: string }> {
-    return results.map((result, index) => {
-      const source = sourceFiles[index];
-      if (result.status === 'fulfilled') {
-        return {
-          source,
-          success: true,
-          destination: result.value.destination,
-        };
-      } else {
-        return {
-          source,
-          success: false,
-          error: result.reason?.message || String(result.reason),
-        };
-      }
-    });
-  }
-
-  /**
-   * Validate file results and throw if any failed
-   */
-  private validateFileResults(
-    fileResults: Array<{ success: boolean; error?: string }>,
-    sourceFiles: string[]
-  ): void {
-    const failures = fileResults.filter(r => !r.success);
-    
-    if (failures.length > 0) {
-      const errorMessage = this.formatFailureMessages(
-        fileResults,
-        (_, index) => sourceFiles[index],
-        sourceFiles.length
-      );
-      throw new Error(errorMessage);
-    }
+      data,
+      outputFormat,
+      (dest, d) => ({
+        success: true,
+        destination: dest,
+        data: d
+      })
+    );
   }
 
   private validateInput(input: GenerateDocumentationUseCaseInput & { source: string }): void {

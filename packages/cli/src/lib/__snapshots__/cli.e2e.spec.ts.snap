@@ -68,7 +68,7 @@ Documentation generated successfully!
 ===================================================================
 --- test.md
 +++ test.md
-@@ -0,0 +1,121 @@
+@@ -0,0 +1,137 @@
 +<!-- header:start -->
 +
 +# ![Icon](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItYm9vay1vcGVuIiBjb2xvcj0iYmx1ZSI+PHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhMyAzIDAgMCAwLTMtM0gyeiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMiAzaC02YTQgNCAwIDAgMC00IDR2MTRhMyAzIDAgMCAxIDMtM2g3eiI+PC9wYXRoPjwvc3ZnPg==) GitHub Action: CI Dokumentor
@@ -96,11 +96,17 @@ Documentation generated successfully!
 +\`\`\`yaml
 +- uses: hoverkraft-tech/ci-dokumentor@sha-version # tag
 +  with:
-+    # Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).
++    # Source manifest file path(s) to handle. Supports:
++    # - Single file: \`action.yml\`
++    # - Multiple files (space-separated): \`action.yml .github/workflows/ci.yml\`
++    # - Multiple files (newline-separated): Use multiline YAML string
++    # - Glob patterns: \`*.yml\` or \`.github/workflows/*.yml\`
++    #
 +    # This input is required.
 +    source: ""
 +
 +    # Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
++    # Only applicable when processing a single file.
 +    destination: ""
 +
 +    # Repository platform (auto-detected if not specified).
@@ -132,6 +138,10 @@ Documentation generated successfully!
 +    # Default: \`auto\`
 +    format-link: auto
 +
++    # Maximum number of files to process concurrently when processing multiple files.
++    # Default: \`5\`
++    concurrency: "5"
++
 +    # The GitHub token used to fetch repository information.
 +    # Default: \`\${{ github.token }}\`
 +    github-token: \${{ github.token }}
@@ -148,8 +158,13 @@ Documentation generated successfully!
 +
 +| **Input**                   | **Description**                                                                                                        | **Required** | **Default**           |
 +| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------ | --------------------- |
-+| **\`source\`**                | Source manifest file path to handle (e.g. \`action.yml\`, \`.github/workflows/ci.yml\`).                                   | **true**     | -                     |
++| **\`source\`**                | Source manifest file path(s) to handle. Supports:                                                                      | **true**     | -                     |
++|                             | - Single file: \`action.yml\`                                                                                            |              |                       |
++|                             | - Multiple files (space-separated): \`action.yml .github/workflows/ci.yml\`                                              |              |                       |
++|                             | - Multiple files (newline-separated): Use multiline YAML string                                                        |              |                       |
++|                             | - Glob patterns: \`*.yml\` or \`.github/workflows/*.yml\`                                                                  |              |                       |
 +| **\`destination\`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter). | **false**    | -                     |
++|                             | Only applicable when processing a single file.                                                                         |              |                       |
 +| **\`repository\`**            | Repository platform (auto-detected if not specified).                                                                  | **false**    | -                     |
 +| **\`cicd\`**                  | CI/CD platform (\`github-actions\`, \`gitlab-ci\`, etc.).                                                                  | **false**    | -                     |
 +| **\`include-sections\`**      | Comma-separated list of sections to include.                                                                           | **false**    | -                     |
@@ -160,6 +175,7 @@ Documentation generated successfully!
 +|                             | Each badge should have \`label\`, \`url\`, and optional \`linkUrl\` properties.                                              |              |                       |
 +| **\`format-link\`**           | Transform bare URLs to links.                                                                                          | **false**    | \`auto\`                |
 +|                             | Types: \`auto\` (autolinks), \`full\` (full links), \`false\` (disabled).                                                    |              |                       |
++| **\`concurrency\`**           | Maximum number of files to process concurrently when processing multiple files.                                        | **false**    | \`5\`                   |
 +| **\`github-token\`**          | The GitHub token used to fetch repository information.                                                                 | **false**    | \`\${{ github.token }}\` |
 +| **\`ci-dokumentor-version\`** | Version of CI Dokumentor to use. See <https://github.com/hoverkraft-tech/ci-dokumentor/releases>.                      | **false**    | \`latest\`              |
 +

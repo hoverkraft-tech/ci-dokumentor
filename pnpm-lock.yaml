@@ -132,15 +132,9 @@ importers:
       commander:
         specifier: ^14.0.1
         version: 14.0.1
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       inversify:
         specifier: ^7.10.1
         version: 7.10.1(reflect-metadata@0.2.2)
-      p-limit:
-        specifier: ^7.1.1
-        version: 7.1.1
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
