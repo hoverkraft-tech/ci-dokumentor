@@ -15,7 +15,7 @@ export class ConcurrencyService {
      */
     async executeWithLimit<T>(
         tasks: Array<() => Promise<T>>,
-        concurrency: number = 5
+        concurrency = 5
     ): Promise<PromiseSettledResult<T>[]> {
         if (concurrency < 1) {
             throw new Error('Concurrency must be at least 1');

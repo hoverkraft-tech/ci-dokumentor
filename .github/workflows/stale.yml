@@ -1,3 +1,4 @@
+---
 name: Mark stale issues and pull requests
 
 on:

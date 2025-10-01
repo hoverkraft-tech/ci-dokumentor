@@ -150,12 +150,12 @@ ci-dokumentor migrate --tool action-docs --destination "**/README.md" --concurre
 
 #### Command Options - `migrate`
 
-| Option                      | Alias | Description                                                                         | Default    |
-| --------------------------- | ----- | ----------------------------------------------------------------------------------- | ---------- |
-| `--tool <tool>`             | `-t`  | Migration tool to convert from (optional, can be auto-detected)                     | -          |
-| `--destination <file...>`   | `-d`  | Destination file(s) containing documentation markers to migrate. Supports glob patterns and multiple files. | (required) |
-| `--concurrency [number]`    | -     | Maximum number of files to process concurrently when processing multiple files      | `5`        |
-| `--dry-run`                 | -     | Preview what would be migrated without writing files                                | `false`    |
+| Option                    | Alias | Description                                                                                                 | Default    |
+| ------------------------- | ----- | ----------------------------------------------------------------------------------------------------------- | ---------- |
+| `--tool <tool>`           | `-t`  | Migration tool to convert from (optional, can be auto-detected)                                             | -          |
+| `--destination <file...>` | `-d`  | Destination file(s) containing documentation markers to migrate. Supports glob patterns and multiple files. | (required) |
+| `--concurrency [number]`  | -     | Maximum number of files to process concurrently when processing multiple files                              | `5`        |
+| `--dry-run`               | -     | Preview what would be migrated without writing files                                                        | `false`    |
 
 #### Supported Migration Tools
 
@@ -299,17 +299,17 @@ ci-dokumentor generate --source "*.yml" --concurrency 10
 
 #### Command Options - `generate`
 
-| Option                          | Alias | Description                                                                                        | Default    |
-| ------------------------------- | ----- | -------------------------------------------------------------------------------------------------- | ---------- |
-| `--source <file...>`            | `-s`  | Source manifest file path(s) to handle. Supports glob patterns and multiple files.                 | (required) |
+| Option                          | Alias | Description                                                                                                                        | Default    |
+| ------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `--source <file...>`            | `-s`  | Source manifest file path(s) to handle. Supports glob patterns and multiple files.                                                 | (required) |
 | `--destination <file>`          | `-d`  | Destination file path for generated documentation (auto-detected if not specified). Only applicable when processing a single file. | -          |
-| `--repository <platform>`       | `-r`  | Repository platform (auto-detected if not specified)                                               | -          |
-| `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)                                                    | -          |
-| `--include-sections <sections>` | -     | Comma-separated list of sections to include                                                        | -          |
-| `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude                                                        | -          |
-| `--format-link [type]`          | -     | Transform bare URLs to links (`auto`, `full`, `false`)                                             | `auto`     |
-| `--concurrency [number]`        | -     | Maximum number of files to process concurrently when processing multiple files                     | `5`        |
-| `--dry-run`                     | -     | Preview what would be generated without writing files                                              | `false`    |
+| `--repository <platform>`       | `-r`  | Repository platform (auto-detected if not specified)                                                                               | -          |
+| `--cicd <platform>`             | `-c`  | CI/CD platform (auto-detected if not specified)                                                                                    | -          |
+| `--include-sections <sections>` | -     | Comma-separated list of sections to include                                                                                        | -          |
+| `--exclude-sections <sections>` | -     | Comma-separated list of sections to exclude                                                                                        | -          |
+| `--format-link [type]`          | -     | Transform bare URLs to links (`auto`, `full`, `false`)                                                                             | `auto`     |
+| `--concurrency [number]`        | -     | Maximum number of files to process concurrently when processing multiple files                                                     | `5`        |
+| `--dry-run`                     | -     | Preview what would be generated without writing files                                                                              | `false`    |
 
 #### URL Link Formatting
 
@@ -471,6 +471,7 @@ ci-dokumentor generate --source action.yml --extra-badges '[
 The CLI supports processing multiple files in a single invocation using:
 
 **Direct specification:**
+
 ```bash
 # Multiple source files
 ci-dokumentor generate --source action1.yml --source action2.yml
@@ -480,6 +481,7 @@ ci-dokumentor migrate --destination file1.md --destination file2.md
 ```
 
 **Glob patterns:**
+
 ```bash
 # Process all YAML files in the current directory
 ci-dokumentor generate --source "*.yml"
@@ -492,6 +494,7 @@ ci-dokumentor migrate --tool action-docs --destination "**/README.md"
 ```
 
 **Concurrency control:**
+
 ```bash
 # Process files with custom concurrency (default is 5)
 ci-dokumentor generate --source "*.yml" --concurrency 10
@@ -501,6 +504,7 @@ ci-dokumentor generate --source "*.yml" --concurrency 1
 ```
 
 **Important notes:**
+
 - When processing multiple files, the `--destination` option cannot be used for generate command (destinations are auto-detected)
 - Common options (repository, cicd, sections, etc.) are applied to all files
 - Files are processed concurrently for better performance

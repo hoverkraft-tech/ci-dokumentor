@@ -54,8 +54,6 @@ export interface MigrateDocumentationUseCaseOutput {
  */
 @injectable()
 export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
-  private static readonly DEFAULT_CONCURRENCY = 5;
-
   constructor(
     @inject(LoggerService) loggerService: LoggerService,
     @inject(MigrationService) private readonly migrationService: MigrationService,
@@ -77,7 +75,7 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
   ): Promise<MigrateDocumentationUseCaseOutput> {
     // Resolve destination files from patterns
     const destinationFiles = await this.resolveFiles(input.destination);
-    
+
     if (destinationFiles.length === 0) {
       throw new Error('No destination files found matching the provided pattern(s)');
     }
@@ -106,11 +104,24 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     const migrationAdapter = await this.resolveMigrationAdapter(input);
     this.loggerService.info(`Migration tool: ${migrationAdapter.getName()}`, input.outputFormat);
 
-    const { destination, data } = await this.migrateDocumentation(input, migrationAdapter);
+    const { destination, data } = await this.migrationService.migrateDocumentationFromTool({
+      destination: input.destination,
+      migrationAdapter,
+      dryRun: input.dryRun,
+    });
 
     this.logExecutionSuccess(input);
 
-    return this.createSuccessOutput(destination, data, input.outputFormat);
+    return this.createSuccessOutput(
+      destination,
+      data,
+      input.outputFormat,
+      (dest, d) => ({
+        success: true,
+        destination: dest,
+        data: d
+      })
+    );
   }
 
   /**
@@ -120,23 +131,39 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     input: MigrateDocumentationUseCaseInput,
     destinationFiles: string[]
   ): Promise<MigrateDocumentationUseCaseOutput> {
-    const concurrency = input.concurrency ?? MigrateDocumentationUseCase.DEFAULT_CONCURRENCY;
+    const concurrency = input.concurrency ?? AbstractMultiFileUseCase.DEFAULT_CONCURRENCY;
 
-    this.logMultiFileExecutionStart(input, destinationFiles.length);
+    this.logMultiFileExecutionStart(
+      'documentation migration',
+      destinationFiles.length,
+      input.dryRun,
+      input.outputFormat
+    );
 
-    const tasks = destinationFiles.map(destination => () => 
+    const tasks = destinationFiles.map(destination => () =>
       this.executeSingleFile({ ...input, destination })
     );
 
     const results = await this.executeConcurrently(tasks, concurrency);
-    const fileResults = this.collectFileResults(results, destinationFiles);
 
-    this.validateFileResults(fileResults, destinationFiles);
+    type FileResult = { destination: string; success: boolean; error?: string };
 
-    this.loggerService.info(
-      `Successfully processed ${destinationFiles.length} files!`,
-      input.outputFormat
+    const fileResults = this.collectFileResults<MigrateDocumentationUseCaseOutput, FileResult>(
+      results,
+      destinationFiles,
+      (destination) => ({
+        destination,
+        success: true,
+      }),
+      (destination, error) => ({
+        destination,
+        success: false,
+        error: (error as Error)?.message || String(error),
+      })
     );
+
+    this.validateFileResults(fileResults, destinationFiles, (_, index) => destinationFiles[index]);
+    this.logMultiFileExecutionSuccess(destinationFiles.length, input.outputFormat);
 
     return {
       success: true,
@@ -154,20 +181,6 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
   }
 
   /**
-   * Log multi-file execution start
-   */
-  private logMultiFileExecutionStart(
-    input: MigrateDocumentationUseCaseInput,
-    fileCount: number
-  ): void {
-    const prefix = input.dryRun ? '[DRY RUN] ' : '';
-    this.loggerService.info(
-      `${prefix}Starting documentation migration for ${fileCount} files...`,
-      input.outputFormat
-    );
-  }
-
-  /**
    * Log successful execution completion
    */
   private logExecutionSuccess(input: MigrateDocumentationUseCaseInput & { destination: string }): void {
@@ -178,81 +191,6 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
       : `Documentation migrated in: ${input.destination}`;
 
     this.loggerService.info(message, input.outputFormat);
-  }
-
-  /**
-   * Migrate documentation using the migration service
-   */
-  private async migrateDocumentation(
-    input: MigrateDocumentationUseCaseInput & { destination: string },
-    migrationAdapter: MigrationAdapter
-  ): Promise<{ destination: string; data: string | undefined }> {
-    return this.migrationService.migrateDocumentationFromTool({
-      destination: input.destination,
-      migrationAdapter,
-      dryRun: input.dryRun,
-    });
-  }
-
-  /**
-   * Create success output with result logging
-   */
-  private createSuccessOutput(
-    destination: string,
-    data: string | undefined,
-    outputFormat: string | undefined
-  ): MigrateDocumentationUseCaseOutput {
-    const useCaseOutput: MigrateDocumentationUseCaseOutput = {
-      success: true,
-      destination,
-      data
-    };
-
-    this.loggerService.result(useCaseOutput, outputFormat);
-    return useCaseOutput;
-  }
-
-  /**
-   * Collect and format file processing results
-   */
-  private collectFileResults(
-    results: PromiseSettledResult<MigrateDocumentationUseCaseOutput>[],
-    destinationFiles: string[]
-  ): Array<{ destination: string; success: boolean; error?: string }> {
-    return results.map((result, index) => {
-      const destination = destinationFiles[index];
-      if (result.status === 'fulfilled') {
-        return {
-          destination,
-          success: true,
-        };
-      } else {
-        return {
-          destination,
-          success: false,
-          error: result.reason?.message || String(result.reason),
-        };
-      }
-    });
-  }
-
-  /**
-   * Validate file results and throw if any failed
-   */
-  private validateFileResults(
-    fileResults: Array<{ success: boolean; error?: string }>,
-    destinationFiles: string[]
-  ): void {
-    const failures = fileResults.filter(r => !r.success);
-    
-    if (failures.length > 0) {
-      const errorMessage = this.formatFailureMessages(
-        fileResults,
-        (_, index) => destinationFiles[index],
-        destinationFiles.length
-      );
-      throw new Error(errorMessage);
-    }
   }
 
   private validateInput(input: MigrateDocumentationUseCaseInput & { destination: string }): void {
