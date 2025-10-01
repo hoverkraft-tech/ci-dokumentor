@@ -10,6 +10,7 @@ import { DiffRendererAdapter } from './renderer/diff-renderer.adapter.js';
 import { FileReaderAdapter } from './reader/file-reader.adapter.js';
 import { VersionService } from './version/version.service.js';
 import { MigrationService } from './migration/migration.service.js';
+import { ConcurrencyService } from './concurrency/concurrency.service.js';
 import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
 import { MarkdownLinkGenerator } from './formatter/markdown/markdown-link.generator.js';
 import { MarkdownCodeGenerator } from './formatter/markdown/markdown-code.generator.js';
@@ -50,6 +51,7 @@ export function initContainer(
   container.bind(LicenseService).toSelf().inSingletonScope();
   container.bind(VersionService).toSelf().inSingletonScope();
   container.bind(MigrationService).toSelf().inSingletonScope();
+  container.bind(ConcurrencyService).toSelf().inSingletonScope();
 
   // Formatter adapters
   container.bind(MarkdownLinkGenerator).toSelf().inSingletonScope();

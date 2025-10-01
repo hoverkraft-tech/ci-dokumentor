@@ -9,7 +9,8 @@ import {
   RepositoryService,
   SectionOptionsDescriptors,
   FormatterOptions,
-  FileReaderAdapter
+  FileReaderAdapter,
+  ConcurrencyService
 } from '@ci-dokumentor/core';
 import type { ReaderAdapter } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
@@ -21,15 +22,18 @@ export interface GenerateDocumentationUseCaseInput {
   outputFormat: string | undefined;
 
   /**
-   * Source manifest file path for the CI/CD platform to handle (required)
-   * This should point to a CI/CD manifest file such as `action.yml` or a
-   * workflow file like `.github/workflows/ci.yml`.
+   * Source manifest file path(s) or pattern(s) for the CI/CD platform to handle (required)
+   * Can be:
+   * - A single file path: `action.yml`
+   * - Multiple file paths: `['action1.yml', 'action2.yml']`
+   * - A glob pattern: `*.yml` or `.github/workflows/*.yml`
    */
-  source: string;
+  source: string | string[];
 
   /**
    * Destination path for generated documentation (optional)
    * If not provided, the generator adapter will auto-detect the destination path
+   * Only applicable when processing a single file
    */
   destination?: string;
 
@@ -74,12 +78,25 @@ export interface GenerateDocumentationUseCaseInput {
    * Formatter options for output customization
    */
   formatterOptions: FormatterOptions;
+
+  /**
+   * Maximum number of files to process concurrently (optional)
+   * Default: 5
+   */
+  concurrency?: number;
 }
 
 export interface GenerateDocumentationUseCaseOutput {
   success: boolean;
   destination?: string;
   data?: string;
+  /** Results for each file when processing multiple files */
+  results?: Array<{
+    source: string;
+    success: boolean;
+    destination?: string;
+    error?: string;
+  }>;
 }
 
 /**
@@ -94,7 +111,8 @@ export class GenerateDocumentationUseCase {
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
     private readonly repositoryService: RepositoryService,
-    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter
+    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter,
+    @inject(ConcurrencyService) private readonly concurrencyService: ConcurrencyService
   ) { }
 
 
@@ -197,6 +215,51 @@ export class GenerateDocumentationUseCase {
   async execute(
     input: GenerateDocumentationUseCaseInput
   ): Promise<GenerateDocumentationUseCaseOutput> {
+    // Resolve source files from patterns
+    const sourceFiles = await this.resolveSourceFiles(input.source);
+    
+    if (sourceFiles.length === 0) {
+      throw new Error('No source files found matching the provided pattern(s)');
+    }
+
+    // Validate destination is not provided when processing multiple files
+    if (sourceFiles.length > 1 && input.destination) {
+      throw new Error('--destination option cannot be used when processing multiple files. Destinations will be auto-detected.');
+    }
+
+    // Single file processing (original behavior)
+    if (sourceFiles.length === 1) {
+      return this.executeSingleFile({
+        ...input,
+        source: sourceFiles[0]
+      });
+    }
+
+    // Multiple file processing
+    return this.executeMultipleFiles(input, sourceFiles);
+  }
+
+  /**
+   * Resolve source files from patterns using ReaderAdapter
+   */
+  private async resolveSourceFiles(source: string | string[]): Promise<string[]> {
+    const sources = Array.isArray(source) ? source : [source];
+    const resolvedFiles = new Set<string>();
+
+    for (const pattern of sources) {
+      const files = await this.readerAdapter.findResources(pattern);
+      files.forEach(file => resolvedFiles.add(file));
+    }
+
+    return Array.from(resolvedFiles).sort();
+  }
+
+  /**
+   * Execute documentation generation for a single file
+   */
+  private async executeSingleFile(
+    input: GenerateDocumentationUseCaseInput & { source: string }
+  ): Promise<GenerateDocumentationUseCaseOutput> {
     this.validateInput(input);
 
     this.loggerService.info(
@@ -257,7 +320,67 @@ export class GenerateDocumentationUseCase {
     return useCaseOutput;
   }
 
-  private validateInput(input: GenerateDocumentationUseCaseInput): void {
+  /**
+   * Execute documentation generation for multiple files concurrently
+   */
+  private async executeMultipleFiles(
+    input: GenerateDocumentationUseCaseInput,
+    sourceFiles: string[]
+  ): Promise<GenerateDocumentationUseCaseOutput> {
+    const concurrency = input.concurrency ?? 5;
+
+    this.loggerService.info(
+      `${input.dryRun ? '[DRY RUN] ' : ''}Starting documentation generation for ${sourceFiles.length} files...`,
+      input.outputFormat
+    );
+
+    // Create tasks for each file
+    const tasks = sourceFiles.map(source => async () => {
+      const fileInput = { ...input, source };
+      return this.executeSingleFile(fileInput);
+    });
+
+    // Execute with concurrency control
+    const results = await this.concurrencyService.executeWithLimit(tasks, concurrency);
+
+    // Collect results
+    const fileResults = results.map((result, index) => {
+      const source = sourceFiles[index];
+      if (result.status === 'fulfilled') {
+        return {
+          source,
+          success: true,
+          destination: result.value.destination,
+        };
+      } else {
+        return {
+          source,
+          success: false,
+          error: result.reason?.message || String(result.reason),
+        };
+      }
+    });
+
+    // Check for failures
+    const failures = fileResults.filter(r => !r.success);
+    
+    if (failures.length > 0) {
+      const errorMessages = failures.map(f => `  - ${f.source}: ${f.error}`).join('\n');
+      throw new Error(`Failed to process ${failures.length} of ${sourceFiles.length} files:\n${errorMessages}`);
+    }
+
+    this.loggerService.info(
+      `Successfully processed ${sourceFiles.length} files!`,
+      input.outputFormat
+    );
+
+    return {
+      success: true,
+      results: fileResults,
+    };
+  }
+
+  private validateInput(input: GenerateDocumentationUseCaseInput & { source: string }): void {
     if (!input.source) {
       throw new Error('Source manifest file path is required');
     }
@@ -293,7 +416,7 @@ export class GenerateDocumentationUseCase {
   /**
    * Auto-detect repository platform if not provided    
    */
-  private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput): Promise<RepositoryProvider> {
+  private async resolveRepositoryProvider(input: GenerateDocumentationUseCaseInput & { source: string }): Promise<RepositoryProvider> {
     let repositoryProviderAdapter: RepositoryProvider | undefined;
     if (input.repository?.platform) {
       this.loggerService.info(`Repository platform: ${input.repository.platform}`, input.outputFormat);
@@ -328,7 +451,7 @@ export class GenerateDocumentationUseCase {
   /**
  * Get CI/CD adapter (either from platform input or auto-detect)
  */
-  private async resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput): Promise<GeneratorAdapter> {
+  private async resolveGeneratorAdapter(input: GenerateDocumentationUseCaseInput & { source: string }): Promise<GeneratorAdapter> {
     let generatorAdapter: GeneratorAdapter | undefined;
     if (input.cicd?.platform) {
       this.loggerService.info(`CI/CD platform: ${input.cicd.platform}`, input.outputFormat);

@@ -32,4 +32,17 @@ export interface ReaderAdapter {
      * Return the full paths of the contained resources.
      */
     readContainer(path: string): Promise<string[]>;
+
+    /**
+     * Find resources matching the given pattern.
+     * 
+     * The pattern can be:
+     * - A direct file path (returns array with single path if file exists)
+     * - A glob pattern (e.g., `*.yml`, `**\/*.md`, `.github/workflows/*.yml`)
+     * 
+     * Returns an array of file paths (not directories) that match the pattern.
+     * If no files match, returns an empty array.
+     * Results are returned in sorted order for predictable behavior.
+     */
+    findResources(pattern: string): Promise<string[]>;
 }
