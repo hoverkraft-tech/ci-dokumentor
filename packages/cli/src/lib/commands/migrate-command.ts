@@ -10,8 +10,9 @@ import { BaseCommand } from './base-command.js';
 export type MigrateCommandOptions = {
   outputFormat: string;
   tool: string;
-  destination: string;
+  destination: string | string[];
   dryRun: boolean;
+  concurrency?: number;
   [key: string]: unknown;
 };
 
@@ -47,13 +48,18 @@ export class MigrateCommand extends BaseCommand {
         `Migration tool to convert from (${availableTools.join(', ')})`,
       )
       .requiredOption(
-        '-d, --destination <file>',
-        'Destination file containing documentation markers to migrate'
+        '-d, --destination <file...>',
+        'Destination file(s) containing documentation markers to migrate. Supports glob patterns and multiple files.'
       )
       .option(
         '--dry-run',
         'Preview what would be migrated without writing files',
         false
+      )
+      .option(
+        '--concurrency [number]',
+        'Maximum number of files to process concurrently',
+        '5'
       )
       .action(async (options: MigrateCommandOptions) => {
         const input: MigrateDocumentationUseCaseInput = this.mapMigrateCommandOptions(options);
@@ -68,6 +74,7 @@ export class MigrateCommand extends BaseCommand {
       destination: options.destination,
       outputFormat: this.getOutputFormatOption(this),
       dryRun: options.dryRun,
+      concurrency: options.concurrency ? parseInt(String(options.concurrency), 10) : undefined,
     };
   }
 
