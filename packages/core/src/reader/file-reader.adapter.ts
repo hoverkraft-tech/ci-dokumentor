@@ -1,6 +1,7 @@
 import { createReadStream, existsSync, statSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { injectable } from 'inversify';
+import fg from 'fast-glob';
 import { ReaderAdapter } from './reader.adapter.js';
 import { ReadableContent } from './readable-content.js';
 
@@ -63,6 +64,24 @@ export class FileReaderAdapter implements ReaderAdapter {
         }
 
         return results;
+    }
+
+    async findResources(pattern: string): Promise<string[]> {
+        // Check if pattern contains glob characters
+        if (pattern.includes('*') || pattern.includes('?') || pattern.includes('[')) {
+            // Use fast-glob to resolve pattern
+            const files = await fg(pattern, { 
+                onlyFiles: true,
+                absolute: false,
+            });
+            return files.sort();
+        } else {
+            // Direct file path
+            if (this.resourceExists(pattern)) {
+                return [pattern];
+            }
+            return [];
+        }
     }
 
     private getStat(path: string): { isFile: () => boolean, isDirectory: () => boolean } | undefined {
