@@ -26,10 +26,12 @@ exports[`CLI > cli function > should display generate command usage 1`] = `
 Generate documentation from CI/CD manifest files
 
 Options:
-  -s, --source <file>                Source manifest file path to handle
+  -s, --source <file...>             Source manifest file path(s) to handle.
+                                     Supports glob patterns and multiple files.
   -d, --destination <file>           Destination file path for generated
                                      documentation (auto-detected if not
-                                     specified)
+                                     specified). Only applicable when processing
+                                     a single file.
   -r, --repository <platform>        Repository platform (auto-detected if not
                                      specified) (choices: "github", "git")
   -c, --cicd <platform>              CI/CD platform (auto-detected if not
@@ -42,6 +44,8 @@ Options:
                                      (default autolinks <url>), full
                                      ([url](url)), false (disabled) (default:
                                      "auto")
+  --concurrency [number]             Maximum number of files to process
+                                     concurrently (default: "5")
   -h, --help                         display help for command
 
 Commands:
