@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
+import mockFs, { restore as mockFsRestore } from 'mock-fs';
 import { GenerateDocumentationUseCase } from '../usecases/generate-documentation.usecase.js';
 import { CommandTester } from '../../../__tests__/command-tester.js';
 import { GenerateCommand } from './generate-command.js';
-import mockFs from 'mock-fs';
 
 describe('GenerateCommand - Multiple Files', () => {
   let generateCommand: GenerateCommand;
@@ -55,7 +55,7 @@ describe('GenerateCommand - Multiple Files', () => {
   });
 
   afterEach(() => {
-    mockFs.restore();
+    mockFsRestore();
     vi.resetAllMocks();
   });
 
