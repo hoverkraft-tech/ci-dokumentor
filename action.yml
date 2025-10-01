@@ -7,10 +7,15 @@ branding:
 
 inputs:
   source:
-    description: Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
+    description: |
+      Source manifest file path(s) to handle. Supports:
+      - Single file: `action.yml`
+      - Multiple files (space-separated): `action.yml .github/workflows/ci.yml`
+      - Multiple files (newline-separated): Use multiline YAML string
+      - Glob patterns: `*.yml` or `.github/workflows/*.yml`
     required: true
   destination:
-    description: Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
+    description: Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter). Only applicable when processing a single file.
     required: false
   repository:
     description: Repository platform (auto-detected if not specified).
@@ -43,6 +48,10 @@ inputs:
       Types: `auto` (autolinks), `full` (full links), `false` (disabled).
     required: false
     default: "auto"
+  concurrency:
+    description: Maximum number of files to process concurrently when processing multiple files.
+    required: false
+    default: "5"
   github-token:
     description: The GitHub token used to fetch repository information.
     default: ${{ github.token }}
@@ -74,13 +83,29 @@ runs:
         INPUT_VERSION: ${{ inputs.version }}
         INPUT_EXTRA_BADGES: ${{ inputs.extra-badges }}
         INPUT_FORMAT_LINK: ${{ inputs.format-link }}
+        INPUT_CONCURRENCY: ${{ inputs.concurrency }}
         INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
         INPUT_CI_DOKUMENTOR_VERSION: ${{ inputs.ci-dokumentor-version }}
       run: |
         echo "::debug::Source path set to: $INPUT_SOURCE"
         envs="-e GITHUB_OUTPUT"
         # Build command as an array to preserve arguments containing spaces/newlines (e.g. multiline JSON)
-        args=(generate --output-format "github-action" --source "$INPUT_SOURCE")
+        args=(generate --output-format "github-action")
+        
+        # Handle multiple sources - split by newlines or spaces
+        while IFS= read -r source_line; do
+          # Trim whitespace
+          source_line=$(echo "$source_line" | xargs)
+          if [ -n "$source_line" ]; then
+            # Split by spaces to handle space-separated sources
+            for source_item in $source_line; do
+              if [ -n "$source_item" ]; then
+                args+=(--source "$source_item")
+                echo "::debug::Adding source: $source_item"
+              fi
+            done
+          fi
+        done <<< "$INPUT_SOURCE"
 
         if [ -n "$INPUT_DESTINATION" ]; then
           args+=(--destination "$INPUT_DESTINATION")
@@ -121,6 +146,11 @@ runs:
         if [ -n "$INPUT_FORMAT_LINK" ]; then
           args+=(--format-link "$INPUT_FORMAT_LINK")
           echo "::debug::Format link set to: $INPUT_FORMAT_LINK"
+        fi
+
+        if [ -n "$INPUT_CONCURRENCY" ]; then
+          args+=(--concurrency "$INPUT_CONCURRENCY")
+          echo "::debug::Concurrency set to: $INPUT_CONCURRENCY"
         fi
 
         echo "::debug::Args set to: ${args[*]}"

@@ -13,11 +13,12 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ```yaml
 - uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
   with:
-    # Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).
+    # Source manifest file path(s) to handle. Supports single file, multiple files, or glob patterns.
     # This input is required.
     source: ""
 
-    # Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).
+    # Destination path for generated documentation (optional; destination is auto-detected if not specified).
+    # Only applicable when processing a single file.
     destination: ""
 
     # Repository platform (auto-detected if not specified).
@@ -49,6 +50,10 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
     # Default: `auto`
     format-link: auto
 
+    # Maximum number of files to process concurrently when processing multiple files.
+    # Default: `5`
+    concurrency: "5"
+
     # The GitHub token used to fetch repository information.
     # Default: `${{ github.token }}`
     github-token: ${{ github.token }}
@@ -66,8 +71,8 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 | **Input**                   | **Description**                                                                                                                                              | **Required** | **Default**           |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ | --------------------- |
-| **`source`**                | Source manifest file path to handle (e.g. `action.yml`, `.github/workflows/ci.yml`).                                                                         | **true**     | -                     |
-| **`destination`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified by the adapter).                                       | **false**    | -                     |
+| **`source`**                | Source manifest file path(s) to handle. Supports single file, multiple files (space or newline-separated), or glob patterns (e.g. `*.yml`, `.github/workflows/*.yml`). | **true**     | -                     |
+| **`destination`**           | Destination path for generated documentation (optional; destination is auto-detected if not specified). Only applicable when processing a single file.       | **false**    | -                     |
 | **`repository`**            | Repository platform (auto-detected if not specified).                                                                                                        | **false**    | -                     |
 | **`cicd`**                  | CI/CD platform (`github-actions`, `gitlab-ci`, etc.).                                                                                                        | **false**    | -                     |
 | **`include-sections`**      | Comma-separated list of sections to include.                                                                                                                 | **false**    | -                     |
@@ -78,6 +83,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 |                             | Each badge should have `label`, `url`, and optional `linkUrl` properties.                                                                                    |              |                       |
 | **`format-link`**           | Transform bare URLs to links.                                                                                                                                | **false**    | `auto`                |
 |                             | Types: `auto` (autolinks), `full` (full links), `false` (disabled).                                                                                          |              |                       |
+| **`concurrency`**           | Maximum number of files to process concurrently when processing multiple files.                                                                              | **false**    | `5`                   |
 | **`github-token`**          | The GitHub token used to fetch repository information.                                                                                                       | **false**    | `${{ github.token }}` |
 | **`ci-dokumentor-version`** | Version of CI Dokumentor to use. See [https://github.com/hoverkraft-tech/ci-dokumentor/releases](https://github.com/hoverkraft-tech/ci-dokumentor/releases). | **false**    | `latest`              |
 
@@ -126,9 +132,42 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ### Multiple Files Processing
 
-While the GitHub Action itself accepts a single `source` input, you can use matrix strategies or multiple steps to process multiple files:
+The GitHub Action now natively supports multiple files and glob patterns through the `source` input:
 
-**Using Matrix Strategy:**
+**Using Glob Pattern:**
+
+```yaml
+- name: Generate Documentation for All YAML Files
+  uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
+  with:
+    source: "*.yml"
+    concurrency: 10
+```
+
+**Using Multiple Files (Space-Separated):**
+
+```yaml
+- name: Generate Documentation for Multiple Files
+  uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
+  with:
+    source: "action.yml .github/workflows/ci.yml .github/workflows/cd.yml"
+```
+
+**Using Multiple Files (Multiline):**
+
+```yaml
+- name: Generate Documentation for Multiple Files
+  uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
+  with:
+    source: |
+      action.yml
+      .github/workflows/ci.yml
+      .github/workflows/cd.yml
+```
+
+**Alternative: Using Matrix Strategy for Parallel Execution:**
+
+For more control over parallel execution, you can still use GitHub Actions matrix:
 
 ```yaml
 - name: Generate Documentation
@@ -141,26 +180,6 @@ While the GitHub Action itself accepts a single `source` input, you can use matr
   uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
   with:
     source: ${{ matrix.file }}
-```
-
-**Using Docker/CLI Directly with Glob Patterns:**
-
-For more advanced use cases, you can use the Docker image or CLI directly with glob patterns:
-
-```yaml
-- name: Generate Documentation for Multiple Files
-  run: |
-    docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
-      ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
-      generate --source "/workspace/*.yml" --concurrency 10
-```
-
-**Using Script Step:**
-
-```yaml
-- name: Generate Documentation for All YAML Files
-  run: |
-    npx ci-dokumentor generate --source "*.yml" --concurrency 5
 ```
 
 ### Dry-run Example
