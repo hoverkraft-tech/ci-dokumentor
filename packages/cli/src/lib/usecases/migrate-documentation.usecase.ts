@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 import { FileReaderAdapter, MigrationAdapter, MigrationService, ConcurrencyService } from '@ci-dokumentor/core';
 import type { ReaderAdapter } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
+import { AbstractMultiFileUseCase } from './abstract-multi-file.usecase.js';
 
 export interface MigrateDocumentationUseCaseInput {
   /**
@@ -52,13 +53,15 @@ export interface MigrateDocumentationUseCaseOutput {
  * Following clean architecture principles
  */
 @injectable()
-export class MigrateDocumentationUseCase {
+export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
   constructor(
-    @inject(LoggerService) private readonly loggerService: LoggerService,
+    @inject(LoggerService) loggerService: LoggerService,
     @inject(MigrationService) private readonly migrationService: MigrationService,
-    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter,
-    @inject(ConcurrencyService) private readonly concurrencyService: ConcurrencyService
-  ) { }
+    @inject(FileReaderAdapter) readerAdapter: ReaderAdapter,
+    @inject(ConcurrencyService) concurrencyService: ConcurrencyService
+  ) {
+    super(loggerService, readerAdapter, concurrencyService);
+  }
 
   /**
    * Get list of available migration tools
@@ -71,7 +74,7 @@ export class MigrateDocumentationUseCase {
     input: MigrateDocumentationUseCaseInput
   ): Promise<MigrateDocumentationUseCaseOutput> {
     // Resolve destination files from patterns
-    const destinationFiles = await this.resolveDestinationFiles(input.destination);
+    const destinationFiles = await this.resolveFiles(input.destination);
     
     if (destinationFiles.length === 0) {
       throw new Error('No destination files found matching the provided pattern(s)');
@@ -87,21 +90,6 @@ export class MigrateDocumentationUseCase {
 
     // Multiple file processing
     return this.executeMultipleFiles(input, destinationFiles);
-  }
-
-  /**
-   * Resolve destination files from patterns using ReaderAdapter
-   */
-  private async resolveDestinationFiles(destination: string | string[]): Promise<string[]> {
-    const destinations = Array.isArray(destination) ? destination : [destination];
-    const resolvedFiles = new Set<string>();
-
-    for (const pattern of destinations) {
-      const files = await this.readerAdapter.findResources(pattern);
-      files.forEach(file => resolvedFiles.add(file));
-    }
-
-    return Array.from(resolvedFiles).sort();
   }
 
   /**
@@ -168,7 +156,7 @@ export class MigrateDocumentationUseCase {
     });
 
     // Execute with concurrency control
-    const results = await this.concurrencyService.executeWithLimit(tasks, concurrency);
+    const results = await this.executeConcurrently(tasks, concurrency);
 
     // Collect results
     const fileResults = results.map((result, index) => {
@@ -191,8 +179,12 @@ export class MigrateDocumentationUseCase {
     const failures = fileResults.filter(r => !r.success);
     
     if (failures.length > 0) {
-      const errorMessages = failures.map(f => `  - ${f.destination}: ${f.error}`).join('\n');
-      throw new Error(`Failed to process ${failures.length} of ${destinationFiles.length} files:\n${errorMessages}`);
+      const errorMessage = this.formatFailureMessages(
+        fileResults,
+        (_, index) => destinationFiles[index],
+        destinationFiles.length
+      );
+      throw new Error(errorMessage);
     }
 
     this.loggerService.info(

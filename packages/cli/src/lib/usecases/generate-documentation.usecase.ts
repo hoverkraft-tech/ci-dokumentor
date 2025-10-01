@@ -14,6 +14,7 @@ import {
 } from '@ci-dokumentor/core';
 import type { ReaderAdapter } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
+import { AbstractMultiFileUseCase } from './abstract-multi-file.usecase.js';
 
 export interface GenerateDocumentationUseCaseInput {
   /**
@@ -104,16 +105,18 @@ export interface GenerateDocumentationUseCaseOutput {
  * Following clean architecture principles
  */
 @injectable()
-export class GenerateDocumentationUseCase {
+export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase {
   constructor(
-    @inject(LoggerService) private readonly loggerService: LoggerService,
+    @inject(LoggerService) loggerService: LoggerService,
     @inject(GeneratorService)
     private readonly generatorService: GeneratorService,
     @inject(RepositoryService)
     private readonly repositoryService: RepositoryService,
-    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter,
-    @inject(ConcurrencyService) private readonly concurrencyService: ConcurrencyService
-  ) { }
+    @inject(FileReaderAdapter) readerAdapter: ReaderAdapter,
+    @inject(ConcurrencyService) concurrencyService: ConcurrencyService
+  ) {
+    super(loggerService, readerAdapter, concurrencyService);
+  }
 
 
   /**
@@ -172,13 +175,16 @@ export class GenerateDocumentationUseCase {
     source
   }: {
     cicdPlatform?: string;
-    source?: string;
+    source?: string | string[];
   }): Record<string, SectionOptionsDescriptors> {
+    // Use first source if array for detection
+    const sourceForDetection = Array.isArray(source) ? source[0] : source;
+    
     let generatorAdapter: GeneratorAdapter | undefined;
     if (cicdPlatform) {
       generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
-    } else if (source) {
-      generatorAdapter = this.generatorService.autoDetectCicdAdapter(source);
+    } else if (sourceForDetection) {
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(sourceForDetection);
     }
 
     if (generatorAdapter) {
@@ -196,13 +202,16 @@ export class GenerateDocumentationUseCase {
     source
   }: {
     cicdPlatform?: string;
-    source?: string;
+    source?: string | string[];
   }): string[] | undefined {
+    // Use first source if array for detection
+    const sourceForDetection = Array.isArray(source) ? source[0] : source;
+    
     let generatorAdapter: GeneratorAdapter | undefined;
     if (cicdPlatform) {
       generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
-    } else if (source) {
-      generatorAdapter = this.generatorService.autoDetectCicdAdapter(source);
+    } else if (sourceForDetection) {
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(sourceForDetection);
     }
 
     if (generatorAdapter) {
@@ -216,7 +225,7 @@ export class GenerateDocumentationUseCase {
     input: GenerateDocumentationUseCaseInput
   ): Promise<GenerateDocumentationUseCaseOutput> {
     // Resolve source files from patterns
-    const sourceFiles = await this.resolveSourceFiles(input.source);
+    const sourceFiles = await this.resolveFiles(input.source);
     
     if (sourceFiles.length === 0) {
       throw new Error('No source files found matching the provided pattern(s)');
@@ -237,21 +246,6 @@ export class GenerateDocumentationUseCase {
 
     // Multiple file processing
     return this.executeMultipleFiles(input, sourceFiles);
-  }
-
-  /**
-   * Resolve source files from patterns using ReaderAdapter
-   */
-  private async resolveSourceFiles(source: string | string[]): Promise<string[]> {
-    const sources = Array.isArray(source) ? source : [source];
-    const resolvedFiles = new Set<string>();
-
-    for (const pattern of sources) {
-      const files = await this.readerAdapter.findResources(pattern);
-      files.forEach(file => resolvedFiles.add(file));
-    }
-
-    return Array.from(resolvedFiles).sort();
   }
 
   /**
@@ -341,7 +335,7 @@ export class GenerateDocumentationUseCase {
     });
 
     // Execute with concurrency control
-    const results = await this.concurrencyService.executeWithLimit(tasks, concurrency);
+    const results = await this.executeConcurrently(tasks, concurrency);
 
     // Collect results
     const fileResults = results.map((result, index) => {
@@ -365,8 +359,12 @@ export class GenerateDocumentationUseCase {
     const failures = fileResults.filter(r => !r.success);
     
     if (failures.length > 0) {
-      const errorMessages = failures.map(f => `  - ${f.source}: ${f.error}`).join('\n');
-      throw new Error(`Failed to process ${failures.length} of ${sourceFiles.length} files:\n${errorMessages}`);
+      const errorMessage = this.formatFailureMessages(
+        fileResults,
+        (_, index) => sourceFiles[index],
+        sourceFiles.length
+      );
+      throw new Error(errorMessage);
     }
 
     this.loggerService.info(

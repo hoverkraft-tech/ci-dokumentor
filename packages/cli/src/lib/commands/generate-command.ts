@@ -93,11 +93,7 @@ export class GenerateCommand extends BaseCommand {
         '5'
       )
       .hook('preAction', async (thisCommand) => {
-        // For multi-file processing, we need to get the first source to detect platform-specific options
-        const sources = thisCommand.getOptionValue('source');
-        const firstSource = Array.isArray(sources) ? sources[0] : sources;
-        
-        await this.populateSupportedOptions(thisCommand, firstSource);
+        await this.populateSupportedOptions(thisCommand);
 
         thisCommand.allowExcessArguments(false);
         thisCommand.allowUnknownOption(false);
@@ -122,7 +118,7 @@ export class GenerateCommand extends BaseCommand {
       .helpCommand(true);
   }
 
-  private async populateSupportedOptions(thisCommand: Command, source?: string) {
+  private async populateSupportedOptions(thisCommand: Command) {
     // Add repository-specific options
     const repositorySupportedOptions = await this.generateDocumentationUseCase.getRepositorySupportedOptions(
       thisCommand.getOptionValue('repository')
@@ -143,7 +139,7 @@ export class GenerateCommand extends BaseCommand {
     // Add section-specific options
     const sectionSupportedOptions = await this.generateDocumentationUseCase.getSectionSupportedOptions({
       cicdPlatform: thisCommand.getOptionValue('cicd'),
-      source: source,
+      source: thisCommand.getOptionValue('source'),
     });
 
     for (const [, sectionOptions] of Object.entries(sectionSupportedOptions)) {
@@ -160,7 +156,7 @@ export class GenerateCommand extends BaseCommand {
 
     const supportedSections = await this.generateDocumentationUseCase.getSupportedSections({
       cicdPlatform: thisCommand.getOptionValue('cicd'),
-      source: source,
+      source: thisCommand.getOptionValue('source'),
     });
 
     if (supportedSections) {
@@ -218,11 +214,9 @@ export class GenerateCommand extends BaseCommand {
     }
 
     // Handle section-specific options
-    // Use the first source if it's an array for determining section options
-    const source = Array.isArray(options.source) ? options.source[0] : options.source;
     const sectionSupportedOptions = this.generateDocumentationUseCase.getSectionSupportedOptions({
       cicdPlatform: options.cicd,
-      source,
+      source: options.source,
     });
 
     const sectionConfig: Record<string, SectionOptions> = {};

@@ -36,10 +36,17 @@ describe('MigrateDocumentationUseCase', () => {
       return path === './README.md';
     });
 
+    const mockConcurrencyService = {
+      executeWithLimit: vi.fn().mockImplementation(async (tasks: any[], _: number) => {
+        return Promise.allSettled(tasks.map(task => task()));
+      }),
+    } as any;
+
     migrateDocumentationUseCase = new MigrateDocumentationUseCase(
       mockLoggerService,
       mockMigrationService,
-      mockReaderAdapter
+      mockReaderAdapter,
+      mockConcurrencyService
     );
   });
 
