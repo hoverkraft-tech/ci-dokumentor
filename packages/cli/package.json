@@ -43,9 +43,7 @@
   },
   "dependencies": {
     "commander": "^14.0.1",
-    "fast-glob": "^3.3.3",
     "inversify": "^7.10.1",
-    "p-limit": "^7.1.1",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
