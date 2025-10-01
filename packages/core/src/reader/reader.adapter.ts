@@ -37,11 +37,11 @@ export interface ReaderAdapter {
      * Find resources matching the given pattern.
      * 
      * The pattern can be:
-     * - A direct file path (returns array with single path if file exists)
+     * - A direct resource path (returns array with single path if resource exists)
      * - A glob pattern (e.g., `*.yml`, `**\/*.md`, `.github/workflows/*.yml`)
      * 
-     * Returns an array of file paths (not directories) that match the pattern.
-     * If no files match, returns an empty array.
+     * Returns an array of resource paths (not directories) that match the pattern.
+     * If no resources match, returns an empty array.
      * Results are returned in sorted order for predictable behavior.
      */
     findResources(pattern: string): Promise<string[]>;

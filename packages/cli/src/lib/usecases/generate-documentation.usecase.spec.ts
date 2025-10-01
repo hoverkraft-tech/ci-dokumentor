@@ -25,11 +25,18 @@ describe('GenerateDocumentationUseCase', () => {
       return p === './action.yml' || p === './README.md';
     });
 
+    const mockConcurrencyService = {
+      executeWithLimit: vi.fn().mockImplementation(async (tasks: any[], _: number) => {
+        return Promise.allSettled(tasks.map(task => task()));
+      }),
+    } as any;
+
     generateDocumentationUseCase = new GenerateDocumentationUseCase(
       mockLoggerService,
       mockGeneratorService,
       mockRepositoryService,
-      mockReaderAdapter
+      mockReaderAdapter,
+      mockConcurrencyService
     );
   });
 
