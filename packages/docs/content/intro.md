@@ -132,24 +132,29 @@ The CLI provides two main commands:
 
 The main command is `generate` with these key options:
 
-- `--source <file>` - Source manifest file path to handle (required)
-- `--destination <file>` - Destination file path for generated documentation (auto-detected if not specified)
+- `--source <file...>` - Source manifest file path(s) to handle. Supports glob patterns and multiple files. (required)
+- `--destination <file>` - Destination file path for generated documentation (auto-detected if not specified; only applicable for single file)
 - `--repository <platform>` - Repository platform (auto-detected)
 - `--cicd <platform>` - CI/CD platform (auto-detected)
 - `--output-format <format>` - Output format: `text`, `json`, `github-action` (Optional; default: `text`)
+- `--concurrency [number]` - Maximum number of files to process concurrently (Optional; default: `5`)
 - `--dry-run` - Simulate generation without writing files (Optional)
 
 ### Migrate Command
 
 The `migrate` command helps transition from other documentation tools to ci-dokumentor format:
 
-- `--tool <tool>` - Source tool to migrate from (`action-docs`, `auto-doc`, `actdocs`, `github-action-readme-generator`)
-- `--destination <file>` - File containing markers to migrate (required)
+- `--tool <tool>` - Source tool to migrate from (optional, can be auto-detected: `action-docs`, `auto-doc`, `actdocs`, `github-action-readme-generator`)
+- `--destination <file...>` - File(s) containing markers to migrate. Supports glob patterns and multiple files. (required)
+- `--concurrency [number]` - Maximum number of files to process concurrently (Optional; default: `5`)
 - `--dry-run` - Preview changes without writing files
 
 ```bash
-# Migrate from action-docs
+# Migrate from action-docs (single file)
 ci-dokumentor migrate --tool action-docs --destination README.md
+
+# Migrate multiple files using glob pattern
+ci-dokumentor migrate --tool action-docs --destination "**/README.md"
 
 # Preview migration
 ci-dokumentor migrate --tool auto-doc --destination README.md --dry-run

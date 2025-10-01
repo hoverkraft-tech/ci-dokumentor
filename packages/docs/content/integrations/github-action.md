@@ -111,19 +111,56 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ### Advanced Usage with All Options
 
-The CLI accepts a single `--source <file>` per invocation. To generate documentation for multiple files in a workflow, run the action multiple times or script the Docker/CLI call for each file. Example using a shell step to process multiple manifest files:
-
 ```yaml
 - name: Generate Enhanced Documentation
   uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
   with:
     source: "action.yml"
-    output: "docs/README.md"
+    destination: "docs/README.md"
     repository: "github"
     cicd: "github-actions"
     include-sections: "inputs,outputs,runs"
     exclude-sections: "examples"
     format-link: "full"
+```
+
+### Multiple Files Processing
+
+While the GitHub Action itself accepts a single `source` input, you can use matrix strategies or multiple steps to process multiple files:
+
+**Using Matrix Strategy:**
+
+```yaml
+- name: Generate Documentation
+  strategy:
+    matrix:
+      file:
+        - action.yml
+        - .github/workflows/ci.yml
+        - .github/workflows/cd.yml
+  uses: hoverkraft-tech/ci-dokumentor@ed9fddccd2f5f5596ad929f2fa2a931fcdd5a282 # 0.1.3
+  with:
+    source: ${{ matrix.file }}
+```
+
+**Using Docker/CLI Directly with Glob Patterns:**
+
+For more advanced use cases, you can use the Docker image or CLI directly with glob patterns:
+
+```yaml
+- name: Generate Documentation for Multiple Files
+  run: |
+    docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) \
+      ghcr.io/hoverkraft-tech/ci-dokumentor/cli:latest \
+      generate --source "/workspace/*.yml" --concurrency 10
+```
+
+**Using Script Step:**
+
+```yaml
+- name: Generate Documentation for All YAML Files
+  run: |
+    npx ci-dokumentor generate --source "*.yml" --concurrency 5
 ```
 
 ### Dry-run Example
