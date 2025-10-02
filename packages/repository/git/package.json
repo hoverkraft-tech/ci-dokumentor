@@ -19,6 +19,6 @@
     "@ci-dokumentor/core": "workspace:*",
     "git-url-parse": "^16.1.0",
     "simple-git": "^3.28.0",
-    "inversify": "^7.10.1"
+    "inversify": "^7.10.2"
   }
 }
