@@ -1,22 +1,24 @@
 import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
+import { ProjectSchema } from '@gitbeaker/rest';
 import { GitRepositoryProvider, ParsedRemoteUrl } from '@ci-dokumentor/repository-git';
 import { LicenseService, LicenseInfo, ManifestVersion, ReaderAdapter } from '@ci-dokumentor/core';
 import { LicenseServiceMockFactory, RepositoryInfoMockFactory, ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
-import { GitBeakerMockFactory } from '../__tests__/gitbeaker-mock.factory.js';
+import { GitBeakerMockFactory, ProjectsShowMock } from '../__tests__/gitbeaker-mock.factory.js';
 import { GitLabRepositoryProvider } from './gitlab-repository.provider.js';
 import type { GitLabRepositoryProviderOptions } from './gitlab-repository.provider.js';
-
-const { projectsShowMock } = GitBeakerMockFactory.create();
 
 describe('GitLabRepositoryProvider', () => {
   let gitLabRepositoryProvider: GitLabRepositoryProvider;
   let mockGitRepositoryService: Mocked<GitRepositoryProvider>;
   let mockLicenseService: Mocked<LicenseService>;
   let mockReaderAdapter: Mocked<ReaderAdapter>;
+  let projectsShowMock: ProjectsShowMock;
 
   beforeEach(async () => {
     // Reset mocks before each test
     vi.resetAllMocks();
+
+    ({ projectsShowMock } = GitBeakerMockFactory.create());
 
     // Create a mock git repository service
     mockGitRepositoryService = {
@@ -231,9 +233,9 @@ describe('GitLabRepositoryProvider', () => {
         fullName: 'test-owner/test-repo'
       });
 
-      projectsShowMock.mockReturnValue({
+      projectsShowMock.mockResolvedValue({
         avatar_url: 'https://gitlab.com/avatar.png'
-      });
+      } as unknown as ProjectSchema);
 
       // Act
       const result = await gitLabRepositoryProvider.getLogo();
@@ -243,7 +245,7 @@ describe('GitLabRepositoryProvider', () => {
       expect(projectsShowMock).toHaveBeenCalledWith('test-owner/test-repo');
     });
 
-    it('should return undefined when API call fails', async () => {
+    it('should throw error when API call fails', async () => {
       // Arrange
       mockReaderAdapter.resourceExists.mockReturnValue(false);
       mockGitRepositoryService.getRepositoryInfo.mockResolvedValue({
@@ -256,11 +258,8 @@ describe('GitLabRepositoryProvider', () => {
 
       projectsShowMock.mockRejectedValue(new Error('API error'));
 
-      // Act
-      const result = await gitLabRepositoryProvider.getLogo();
-
-      // Assert
-      expect(result).toBeUndefined();
+      // Act & Assert
+      await expect(gitLabRepositoryProvider.getLogo()).rejects.toThrow('API error')
     });
   });
 
@@ -275,13 +274,15 @@ describe('GitLabRepositoryProvider', () => {
         fullName: 'test-owner/test-repo'
       });
 
-      projectsShowMock.mockReturnValue({
+      projectsShowMock.mockResolvedValue({
         license: {
+          key: 'mit',
+          source_url: 'https://opensource.org/licenses/MIT',
           name: 'MIT License',
-          spdx_id: 'MIT',
-          url: 'https://opensource.org/licenses/MIT'
+          nickname: 'MIT',
+          html_url: 'https://opensource.org/licenses/MIT'
         }
-      });
+      } as unknown as ProjectSchema);
 
       // Act
       const result = await gitLabRepositoryProvider.getLicense();
@@ -295,7 +296,7 @@ describe('GitLabRepositoryProvider', () => {
       expect(projectsShowMock).toHaveBeenCalledWith('test-owner/test-repo');
     });
 
-    it('should fallback to license service when API fails', async () => {
+    it('should throw error when API fails', async () => {
       // Arrange
       mockGitRepositoryService.getRepositoryInfo.mockResolvedValue({
         rootDir: '/test',
@@ -314,12 +315,8 @@ describe('GitLabRepositoryProvider', () => {
       };
       mockLicenseService.detectLicenseFromFile.mockResolvedValue(expectedLicense);
 
-      // Act
-      const result = await gitLabRepositoryProvider.getLicense();
-
-      // Assert
-      expect(result).toBe(expectedLicense);
-      expect(mockLicenseService.detectLicenseFromFile).toHaveBeenCalled();
+      // Act & assert
+      await expect(gitLabRepositoryProvider.getLicense()).rejects.toThrow('API error')
     });
   });
 
