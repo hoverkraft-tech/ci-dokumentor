@@ -90,7 +90,7 @@ export abstract class AbstractRepositoryProvider<Options extends RepositoryOptio
   /**
    * Generic caching helper
    */
-  private async getCached<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  protected async getCached<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
     if (this.cache.has(key)) {
       return this.cache.get(key) as T;
     }

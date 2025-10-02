@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "../../repository/git"
+    },
+    {
+      "path": "../../repository/gitlab"
+    },
+    {
+      "path": "../../core"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}

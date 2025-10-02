@@ -5,7 +5,7 @@ import mockFs, { restore } from 'mock-fs';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import { FormatterAdapter } from '../formatter/formatter.adapter.js';
-import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { SectionIdentifier } from '../generator/section/section-generator.adapter.js';
 import { initContainer, resetContainer } from '../container.js';
 import { ReadableContent } from '../reader/readable-content.js';
 import { DiffRendererAdapter } from './diff-renderer.adapter.js';

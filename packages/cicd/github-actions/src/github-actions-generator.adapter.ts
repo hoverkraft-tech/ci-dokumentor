@@ -1,13 +1,7 @@
 import { dirname, join } from 'node:path';
 import {
-  GeneratorAdapter,
-  SECTION_GENERATOR_ADAPTER_IDENTIFIER,
+  AbstractGeneratorAdapter,
   SectionGeneratorAdapter,
-  RepositoryProvider,
-  GenerateSectionsOptions,
-  RendererAdapter,
-  SectionOptionsDescriptors,
-  SectionGenerationPayload,
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
@@ -15,48 +9,30 @@ import {
   GitHubActionsParser,
 } from './github-actions-parser.js';
 
+export const GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
+  'GitHubActionsSectionGeneratorAdapter'
+);
+
 /**
  * GitHub Actions generator adapter.
  * This class is a placeholder for the actual implementation of the GitHub Actions generator.
  * It implements the GeneratorAdapter interface from the core package.
  */
-export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
+export class GitHubActionsGeneratorAdapter extends AbstractGeneratorAdapter<GitHubActionsManifest> {
   constructor(
     @inject(GitHubActionsParser)
     public readonly gitHubActionsParser: GitHubActionsParser,
-    @multiInject(SECTION_GENERATOR_ADAPTER_IDENTIFIER)
-    private readonly sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubActionsManifest>[]
-  ) { }
+    @multiInject(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubActionsManifest>[]
+  ) {
+    super(sectionGeneratorAdapters);
+  }
 
   /**
    * Get the platform name identifier for this adapter
    */
   getPlatformName(): string {
     return 'github-actions';
-  }
-
-  /**
-   * Get the list of supported section identifiers for this adapter
-   */
-  getSupportedSections(): string[] {
-    return this.sectionGeneratorAdapters.map((adapter) =>
-      adapter.getSectionIdentifier()
-    );
-  }
-
-  /**
-   * Get section-specific options from all section generators
-   */
-  getSectionsOptions(): Record<string, SectionOptionsDescriptors> {
-    const sectionOptions: Record<string, SectionOptionsDescriptors> = {};
-
-    for (const sectionGenerator of this.sectionGeneratorAdapters) {
-      const sectionId = sectionGenerator.getSectionIdentifier();
-      // getSectionOptions is now mandatory, so we can call it directly
-      sectionOptions[sectionId] = sectionGenerator.getSectionOptions();
-    }
-
-    return sectionOptions;
   }
 
   /**
@@ -92,61 +68,10 @@ export class GitHubActionsGeneratorAdapter implements GeneratorAdapter {
     throw new Error(`Unsupported source file: ${source}`);
   }
 
-  async generateDocumentation({
-    source,
-    sections,
-    rendererAdapter,
-    repositoryProvider,
-  }: {
-    source: string;
-    sections: GenerateSectionsOptions;
-    rendererAdapter: RendererAdapter;
-    repositoryProvider: RepositoryProvider;
-  }): Promise<void> {
-    const gitHubActionOrWorkflow = await this.gitHubActionsParser.parseFile(
-      source,
-      await repositoryProvider.getRepositoryInfo()
-    );
-
-    for (const sectionGeneratorAdapter of this.sectionGeneratorAdapters) {
-      // Check if the section should be included or excluded based on the options
-      if (!this.shouldGenerateSection(sectionGeneratorAdapter, sections)) {
-        continue;
-      }
-
-      // Apply section-specific options if provided
-      const sectionId = sectionGeneratorAdapter.getSectionIdentifier();
-      if (sections.sectionConfig && sections.sectionConfig[sectionId]) {
-        sectionGeneratorAdapter.setSectionOptions(sections.sectionConfig[sectionId]);
-      }
-
-      // Section generators now use repository provider for on-demand data fetching
-      const payload: SectionGenerationPayload<GitHubActionsManifest> = {
-        formatterAdapter: rendererAdapter.getFormatterAdapter(),
-        manifest: gitHubActionOrWorkflow,
-        repositoryProvider,
-        destination: rendererAdapter.getDestination(),
-      };
-
-      const sectionContent = await sectionGeneratorAdapter.generateSection(payload);
-
-      await rendererAdapter.writeSection(
-        sectionGeneratorAdapter.getSectionIdentifier(),
-        sectionContent,
-      );
-    }
-  }
-
-  private shouldGenerateSection(
-    sectionGeneratorAdapter: SectionGeneratorAdapter<GitHubActionsManifest>,
-    options: GenerateSectionsOptions
-  ): boolean {
-    if (options.includeSections && !options.includeSections.includes(sectionGeneratorAdapter.getSectionIdentifier())) {
-      return false;
-    }
-    if (options.excludeSections && options.excludeSections.includes(sectionGeneratorAdapter.getSectionIdentifier())) {
-      return false;
-    }
-    return true;
+  /**
+   * Parse the source file into a manifest
+   */
+  protected async parseFile(source: string, repositoryInfo: any): Promise<GitHubActionsManifest> {
+    return await this.gitHubActionsParser.parseFile(source, repositoryInfo);
   }
 }

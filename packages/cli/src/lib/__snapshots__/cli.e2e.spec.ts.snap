@@ -33,9 +33,11 @@ Options:
                                      specified). Only applicable when processing
                                      a single file.
   -r, --repository <platform>        Repository platform (auto-detected if not
-                                     specified) (choices: "github", "git")
+                                     specified) (choices: "github", "gitlab",
+                                     "git")
   -c, --cicd <platform>              CI/CD platform (auto-detected if not
-                                     specified) (choices: "github-actions")
+                                     specified) (choices: "github-actions",
+                                     "gitlab-ci")
   -i, --include-sections <sections>  Comma-separated list of sections to include
   -e, --exclude-sections <sections>  Comma-separated list of sections to exclude
   --dry-run                          Preview what would be generated without

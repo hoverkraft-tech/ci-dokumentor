@@ -25,11 +25,15 @@
       "@ci-dokumentor/cicd-github-actions": [
         "packages/cicd/github-actions/src/index.ts"
       ],
+      "@ci-dokumentor/cicd-gitlab-ci": ["packages/cicd/gitlab-ci/src/index.ts"],
       "@ci-dokumentor/core": ["packages/core/src/index.ts"],
       "@ci-dokumentor/core/tests": ["packages/core/__tests__/index.ts"],
       "@ci-dokumentor/repository-git": ["packages/repository/git/src/index.ts"],
       "@ci-dokumentor/repository-github": [
         "packages/repository/github/src/index.ts"
+      ],
+      "@ci-dokumentor/repository-gitlab": [
+        "packages/repository/gitlab/src/index.ts"
       ]
     }
   }
