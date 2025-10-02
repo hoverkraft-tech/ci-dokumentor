@@ -8,7 +8,7 @@ import {
   SectionGeneratorAdapter,
   SectionOptionsDescriptors,
   SectionGenerationPayload,
-} from './section-generator.adapter.js';
+} from './section/section-generator.adapter.js';
 
 /**
  * Abstract base class for generator adapters to avoid code duplication

@@ -19,11 +19,13 @@ export type GitLabRepositoryProviderOptions = {
   gitlabUrl?: string;
 };
 
+export type GitlabClient = InstanceType<typeof Gitlab<false>>;
+
 @injectable()
 export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabRepositoryProviderOptions> {
   private gitlabToken?: string;
   private gitlabUrl?: string;
-  private gitlabClient?: InstanceType<typeof Gitlab>;
+  private gitlabClient?: GitlabClient;
 
   constructor(
     @inject(GitRepositoryProvider)
@@ -131,7 +133,6 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
   protected async fetchLicense(): Promise<LicenseInfo | undefined> {
     const project = await this.getProjectInfo();
 
-    // GitLab API provides license information
     const license = project.license as ProjectLicenseSchema;
     if (license?.name) {
       return {
@@ -206,7 +207,7 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
   /**
    * Create a GitLab client using optional GITLAB_TOKEN from environment
    */
-  private getGitLabClient(): InstanceType<typeof Gitlab> {
+  private getGitLabClient(): GitlabClient {
     if (this.gitlabClient) {
       return this.gitlabClient;
     }
@@ -223,7 +224,7 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
       options.host = this.gitlabUrl;
     }
 
-    this.gitlabClient = new Gitlab(options);
+    this.gitlabClient = new Gitlab(options) as GitlabClient;
     return this.gitlabClient;
   }
 }
