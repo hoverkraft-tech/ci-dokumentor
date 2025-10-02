@@ -25,7 +25,7 @@
   "dependencies": {
     "diff": "^8.0.2",
     "fast-glob": "^3.3.3",
-    "inversify": "^7.10.1",
+    "inversify": "^7.10.2",
     "p-limit": "^7.1.1"
   }
 }
