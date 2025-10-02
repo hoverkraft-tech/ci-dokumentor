@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { FormatterLanguage } from '../formatter-language.js';
 import { FormatterAdapter, FormatterOptions, LinkFormat } from '../formatter.adapter.js';
-import { SectionIdentifier } from '../../generator/section-generator.adapter.js';
+import { SectionIdentifier } from '../../generator/section/section-generator.adapter.js';
 import { ReadableContent } from '../../reader/readable-content.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
 import { MarkdownLinkGenerator } from './markdown-link.generator.js';

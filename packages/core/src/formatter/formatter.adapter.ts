@@ -1,5 +1,5 @@
 import { ReadableContent } from '../reader/readable-content.js';
-import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { SectionIdentifier } from '../generator/section/section-generator.adapter.js';
 import { FormatterLanguage } from './formatter-language.js';
 
 export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');

@@ -5,7 +5,7 @@ import {
 } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { injectable, inject } from 'inversify';
-import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { SectionIdentifier } from '../generator/section/section-generator.adapter.js';
 import type { ReaderAdapter } from '../reader/reader.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import { ReadableContent } from '../reader/readable-content.js';

@@ -3,7 +3,7 @@ import mockFs, { file, restore } from 'mock-fs';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MarkdownFormatterAdapter } from '../formatter/markdown/markdown-formatter.adapter.js';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
-import { SectionIdentifier } from '../generator/section-generator.adapter.js';
+import { SectionIdentifier } from '../generator/section/section-generator.adapter.js';
 import { initContainer, resetContainer } from '../container.js';
 import { ReadableContent } from '../reader/readable-content.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';
