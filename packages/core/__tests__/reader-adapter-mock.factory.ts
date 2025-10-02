@@ -7,6 +7,7 @@ export interface ReaderAdapterDefaults {
     resourceExists: ReturnType<ReaderAdapter['resourceExists']>
     containerExists: ReturnType<ReaderAdapter['containerExists']>
     readContainer: Awaited<ReturnType<ReaderAdapter['readContainer']>>
+    findResources: Awaited<ReturnType<ReaderAdapter['findResources']>>
 }
 
 export class ReaderAdapterMockFactory {
@@ -16,6 +17,7 @@ export class ReaderAdapterMockFactory {
             resourceExists: vi.fn() as Mocked<ReaderAdapter['resourceExists']>,
             containerExists: vi.fn() as Mocked<ReaderAdapter['containerExists']>,
             readContainer: vi.fn().mockResolvedValue([]) as Mocked<ReaderAdapter['readContainer']>,
+            findResources: vi.fn() as Mocked<ReaderAdapter['findResources']>,
         } as Mocked<ReaderAdapter>;
 
         if (defaults?.getContent !== undefined) {
@@ -29,6 +31,12 @@ export class ReaderAdapterMockFactory {
         }
         if (defaults?.readContainer !== undefined) {
             mock.readContainer.mockResolvedValue(defaults.readContainer as unknown as Awaited<ReturnType<ReaderAdapter['readContainer']>>);
+        }
+        if (defaults?.findResources !== undefined) {
+            mock.findResources.mockResolvedValue(defaults.findResources);
+        } else {
+            // Default behavior: return the pattern as a single-element array (like a single file match)
+            mock.findResources.mockImplementation(async (pattern: string) => [pattern]);
         }
 
         return mock;

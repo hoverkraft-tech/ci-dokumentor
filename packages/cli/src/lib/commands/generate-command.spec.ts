@@ -84,12 +84,13 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         dryRun: false,
         outputFormat: undefined,
         sections: {},
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -109,7 +110,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         repository: {
           platform: 'github',
@@ -118,6 +119,7 @@ describe('GenerateCommand', () => {
         outputFormat: undefined,
         sections: {},
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -137,7 +139,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         cicd: {
           platform: 'github-actions',
@@ -146,6 +148,7 @@ describe('GenerateCommand', () => {
         outputFormat: undefined,
         sections: {},
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -165,7 +168,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview', 'badges'],
@@ -173,6 +176,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -192,7 +196,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         sections: {
           excludeSections: ['license', 'security'],
@@ -200,6 +204,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -221,7 +226,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview'],
@@ -230,6 +235,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -249,7 +255,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview', 'badges'],
@@ -257,6 +263,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -276,7 +283,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         sections: {
           includeSections: ['header', 'overview'],
@@ -284,6 +291,7 @@ describe('GenerateCommand', () => {
         dryRun: false,
         outputFormat: undefined,
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -305,7 +313,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-destination',
         repository: {
           platform: 'github',
@@ -317,6 +325,7 @@ describe('GenerateCommand', () => {
         outputFormat: undefined,
         sections: {},
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -351,7 +360,7 @@ describe('GenerateCommand', () => {
       const optionFlags = generateCommand.options.map((opt) => opt.flags);
       expect(optionFlags).toContain('--foo <value>');
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: undefined,
         repository: {
           platform: 'github',
@@ -361,6 +370,7 @@ describe('GenerateCommand', () => {
         outputFormat: undefined,
         sections: {},
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
     });
 
@@ -390,7 +400,7 @@ describe('GenerateCommand', () => {
       expect(mockGenerateDocumentationUseCase.getRepositorySupportedOptions).toHaveBeenCalledWith('github');
 
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: undefined,
         repository: {
           platform: 'github',
@@ -402,6 +412,7 @@ describe('GenerateCommand', () => {
         outputFormat: undefined,
         sections: {},
         formatterOptions: { linkFormat: LinkFormat.Auto },
+        concurrency: 5,
       });
 
     });
@@ -428,14 +439,15 @@ describe('GenerateCommand', () => {
       expect(mockGenerateDocumentationUseCase.getSupportedSections).toHaveBeenCalled();
 
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: undefined,
         dryRun: false,
         outputFormat: undefined,
         sections: {
           includeSections: ['header'],
         },
-        formatterOptions: { linkFormat: 'auto' }
+        formatterOptions: { linkFormat: 'auto' },
+        concurrency: 5,
       });
 
     });
@@ -476,7 +488,7 @@ describe('GenerateCommand', () => {
 
       // Assert
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
-        source: './test-source',
+        source: ['./test-source'],
         destination: './test-output',
         dryRun: true,
         outputFormat: undefined,
@@ -484,6 +496,7 @@ describe('GenerateCommand', () => {
         formatterOptions: {
           linkFormat: 'auto',
         },
+        concurrency: 5,
       });
     });
   });
