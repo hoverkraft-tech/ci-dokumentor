@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@d324c777132734fc988c79a74dff3ee0248835fc # 0.25.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@1c379f7f6e0fc850fe5a7111f74d54e159b4dcd2 # 0.26.0
     with:
       linter-env: |
         FILTER_REGEX_EXCLUDE=dist/**/*
@@ -101,7 +101,7 @@ jobs:
 
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@f9e149b6cdfa8443994994f10085691a57b8cf0e # 0.27.1
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@4f29319e02dd65152386c436e8c3136f380a0e71 # 0.28.0
     permissions:
       contents: read
       issues: read
