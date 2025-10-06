@@ -1,9 +1,9 @@
 import { inject, injectable, multiInject } from 'inversify';
-import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
-import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
 import { FormatterService } from '../formatter/formatter.service.js';
 import { RepositoryProvider } from '../repository/repository.provider.js';
 import { FormatterOptions } from '../formatter/formatter.adapter.js';
+import { RENDERER_FACTORY_IDENTIFIER } from '../renderer/renderer.factory.js';
+import type { RendererFactory } from '../renderer/renderer.factory.js';
 import {
   GenerateSectionsOptions,
   GENERATOR_ADAPTER_IDENTIFIER,
@@ -15,10 +15,8 @@ export class GeneratorService {
   constructor(
     @inject(FormatterService)
     private readonly formatterService: FormatterService,
-    @inject(FileRendererAdapter)
-    private readonly fileRendererAdapter: FileRendererAdapter,
-    @inject(DiffRendererAdapter)
-    private readonly diffRendererAdapter: DiffRendererAdapter,
+    @inject(RENDERER_FACTORY_IDENTIFIER)
+    private readonly rendererFactory: RendererFactory,
     @multiInject(GENERATOR_ADAPTER_IDENTIFIER)
     private readonly generatorAdapters: GeneratorAdapter[]
   ) { }
@@ -99,7 +97,7 @@ export class GeneratorService {
     formatterAdapter.setOptions(formatterOptions);
 
     // Use provided renderer adapter or default to FileRenderer
-    const rendererAdapter = dryRun ? this.diffRendererAdapter : this.fileRendererAdapter;
+    const rendererAdapter = this.rendererFactory(dryRun);
 
     // Initialize renderer for this destination
     await rendererAdapter.initialize(destinationPath, formatterAdapter);

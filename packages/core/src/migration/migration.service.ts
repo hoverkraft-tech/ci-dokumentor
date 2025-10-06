@@ -1,7 +1,7 @@
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { FormatterService } from '../formatter/formatter.service.js';
-import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
-import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
+import { RENDERER_FACTORY_IDENTIFIER } from '../renderer/renderer.factory.js';
+import type { RendererFactory } from '../renderer/renderer.factory.js';
 import { MigrationAdapter, MIGRATION_ADAPTER_IDENTIFIER } from './migration.adapter.js';
 
 /**
@@ -14,10 +14,8 @@ export class MigrationService {
   constructor(
     @inject(FormatterService)
     private readonly formatterService: FormatterService,
-    @inject(FileRendererAdapter)
-    private readonly fileRendererAdapter: FileRendererAdapter,
-    @inject(DiffRendererAdapter)
-    private readonly diffRendererAdapter: DiffRendererAdapter,
+    @inject(RENDERER_FACTORY_IDENTIFIER)
+    private readonly rendererFactory: RendererFactory,
     @multiInject(MIGRATION_ADAPTER_IDENTIFIER) @optional() adapters: MigrationAdapter[] = []
   ) {
     for (const adapter of adapters) {
@@ -66,7 +64,7 @@ export class MigrationService {
     const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destination);
 
     // Use provided renderer adapter or default to FileRenderer
-    const rendererAdapter = dryRun ? this.diffRendererAdapter : this.fileRendererAdapter;
+    const rendererAdapter = this.rendererFactory(dryRun);
 
     // Initialize renderer for this destination
     await rendererAdapter.initialize(destination, formatterAdapter);
