@@ -77,7 +77,16 @@ export class GitHubActionLoggerAdapter implements LoggerAdapter {
     if (!this.injectedOutputPath) {
       throw new Error('GitHub Actions output path is not defined.');
     }
-    const stringValue = typeof data === 'string' ? data : JSON.stringify(data);
+    
+    // Convert data to string, handling undefined and other special values
+    let stringValue: string;
+    if (typeof data === 'string') {
+      stringValue = data;
+    } else if (data === undefined) {
+      stringValue = '';
+    } else {
+      stringValue = JSON.stringify(data);
+    }
 
     // Check if the value contains newlines (multiline)
     if (stringValue.includes('\n')) {
