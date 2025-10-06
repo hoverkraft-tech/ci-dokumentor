@@ -14,6 +14,7 @@ import { ConcurrencyService } from './concurrency/concurrency.service.js';
 import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
 import { MarkdownLinkGenerator } from './formatter/markdown/markdown-link.generator.js';
 import { MarkdownCodeGenerator } from './formatter/markdown/markdown-code.generator.js';
+import { RENDERER_FACTORY_IDENTIFIER, containerRendererFactory, RendererFactory } from './renderer/renderer.factory.js';
 
 export type Container = InversifyContainer;
 
@@ -45,8 +46,9 @@ export function initContainer(
   container.bind(FormatterService).toSelf().inSingletonScope();
   container.bind(GeneratorService).toSelf().inSingletonScope();
   container.bind(FileReaderAdapter).toSelf().inSingletonScope();
-  container.bind(FileRendererAdapter).toSelf().inSingletonScope();
-  container.bind(DiffRendererAdapter).toSelf().inSingletonScope();
+  container.bind(FileRendererAdapter).toSelf().inTransientScope();
+  container.bind(DiffRendererAdapter).toSelf().inTransientScope();
+  container.bind<RendererFactory>(RENDERER_FACTORY_IDENTIFIER).toFactory(containerRendererFactory);
   container.bind(RepositoryService).toSelf().inSingletonScope();
   container.bind(LicenseService).toSelf().inSingletonScope();
   container.bind(VersionService).toSelf().inSingletonScope();

@@ -56,16 +56,16 @@ jobs:
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: build
-          path: .
+          path: /
+
       - name: Verify CLI build exists
         run: |
           echo "Checking if CLI binary exists..."
-          ls -la packages/cli/dist/bin/ || echo "CLI binary directory missing"
           if [ ! -f "packages/cli/dist/bin/ci-dokumentor.js" ]; then
             echo "CLI binary not found, building CLI package..."
-            npx nx build @ci-dokumentor/cli
+            exit 1
           fi
-          ls -la packages/cli/dist/bin/
+
       - name: Create package tarball
         run: |
           cd packages/cli

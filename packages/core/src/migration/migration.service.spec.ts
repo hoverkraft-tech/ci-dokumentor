@@ -31,10 +31,13 @@ describe('MigrationService', () => {
 
     service = new MigrationService(
       mockFormatterService,
-      mockFileRenderer,
-      mockDiffRenderer,
+      (dryRun: boolean) => dryRun ? mockDiffRenderer : mockFileRenderer,
       [adapter]
     );
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   describe('constructor', () => {
@@ -46,8 +49,7 @@ describe('MigrationService', () => {
     it('should work with empty adapter array', () => {
       const emptyService = new MigrationService(
         mockFormatterService,
-        mockFileRenderer,
-        mockDiffRenderer,
+        (dryRun: boolean) => dryRun ? mockDiffRenderer : mockFileRenderer,
         []
       );
       expect(emptyService.getSupportedTools()).toEqual([]);
