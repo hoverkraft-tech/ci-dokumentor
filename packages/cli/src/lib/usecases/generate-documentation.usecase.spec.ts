@@ -1,6 +1,7 @@
 import { describe, vi, beforeEach, afterEach, Mocked } from 'vitest';
 
 import { GeneratorService, LinkFormat, RepositoryService, ReaderAdapter } from '@ci-dokumentor/core';
+import type { ConcurrencyService } from '@ci-dokumentor/core';
 import { GeneratorServiceMockFactory, RepositoryServiceMockFactory, RepositoryProviderMockFactory, GeneratorAdapterMockFactory, ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
@@ -26,17 +27,17 @@ describe('GenerateDocumentationUseCase', () => {
     });
 
     const mockConcurrencyService = {
-      executeWithLimit: vi.fn().mockImplementation(async (tasks: any[], _: number) => {
+      executeWithLimit: vi.fn().mockImplementation(async <T>(tasks: Array<() => Promise<T>>) => {
         return Promise.allSettled(tasks.map(task => task()));
       }),
-    } as any;
+    } satisfies Pick<ConcurrencyService, 'executeWithLimit'>;
 
     generateDocumentationUseCase = new GenerateDocumentationUseCase(
       mockLoggerService,
       mockGeneratorService,
       mockRepositoryService,
       mockReaderAdapter,
-      mockConcurrencyService
+      mockConcurrencyService as ConcurrencyService
     );
   });
 
@@ -175,6 +176,13 @@ describe('GenerateDocumentationUseCase', () => {
 
       expect(result.success).toBe(true);
       expect(result.destination).toBe('/tmp/out/README.md');
+      expect(result.results).toEqual([
+        {
+          source: './action.yml',
+          success: true,
+          destination: '/tmp/out/README.md',
+        },
+      ]);
       expect(mockGeneratorService.generateDocumentationForPlatform).toHaveBeenCalledWith(
         {
           source: './action.yml',

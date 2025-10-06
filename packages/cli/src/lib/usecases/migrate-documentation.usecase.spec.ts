@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
 import { MigrationAdapter, MigrationService, ReaderAdapter } from '@ci-dokumentor/core';
+import type { ConcurrencyService } from '@ci-dokumentor/core';
 import { ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';
@@ -37,16 +38,16 @@ describe('MigrateDocumentationUseCase', () => {
     });
 
     const mockConcurrencyService = {
-      executeWithLimit: vi.fn().mockImplementation(async (tasks: any[], _: number) => {
+      executeWithLimit: vi.fn().mockImplementation(async <T>(tasks: Array<() => Promise<T>>) => {
         return Promise.allSettled(tasks.map(task => task()));
       }),
-    } as any;
+    } satisfies Pick<ConcurrencyService, 'executeWithLimit'>;
 
     migrateDocumentationUseCase = new MigrateDocumentationUseCase(
       mockLoggerService,
       mockMigrationService,
       mockReaderAdapter,
-      mockConcurrencyService
+      mockConcurrencyService as ConcurrencyService
     );
   });
 
@@ -75,8 +76,15 @@ describe('MigrateDocumentationUseCase', () => {
       const result = await migrateDocumentationUseCase.execute(input);
 
       expect(result.success).toBe(true);
-      expect(result.destination).toBe('./README.md');
       expect(result.data).toBe('migration result');
+      expect(result.destination).toBe('./README.md');
+      expect(result.results).toEqual([
+        {
+          data: 'migration result',
+          destination: './README.md',
+          success: true,
+        },
+      ]);
       expect(mockMigrationService.migrateDocumentationFromTool).toHaveBeenCalledWith({
         destination: './README.md',
         migrationAdapter: mockMigrationService.getMigrationAdapterByTool('action-docs'),
@@ -95,7 +103,15 @@ describe('MigrateDocumentationUseCase', () => {
       const result = await migrateDocumentationUseCase.execute(input);
 
       expect(result.success).toBe(true);
+      expect(result.destination).toBe('./README.md');
       expect(result.data).toBe('migration result');
+      expect(result.results).toEqual([
+        {
+          data: 'migration result',
+          destination: './README.md',
+          success: true,
+        },
+      ]);
       expect(mockLoggerService.info).toHaveBeenCalledWith(
         expect.stringContaining('[DRY RUN]'),
         'text'
@@ -186,7 +202,15 @@ describe('MigrateDocumentationUseCase', () => {
 
       const result = await migrateDocumentationUseCase.execute(input);
 
-      expect(result.data).toBe('');
+      expect(result.destination).toBe('./README.md');
+      expect(result.data).toBeUndefined();
+      expect(result.results).toEqual([
+        {
+          data: '',
+          destination: './README.md',
+          success: true,
+        },
+      ]);
       expect(mockLoggerService.info).toHaveBeenCalledWith(
         'Documentation migrated in: ./README.md',
         'text'
