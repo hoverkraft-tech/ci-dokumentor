@@ -130,5 +130,32 @@ describe('GitHubActionLoggerAdapter', () => {
       const contents = readFileSync(githubOutputPath, { encoding: 'utf8' });
       expect(contents).toBe('');
     });
+
+    it('should handle multiline string result using delimiter format', () => {
+      const data = 'Line 1\nLine 2\nLine 3';
+      githubActionLoggerAdapter.result(data);
+      const contents = readFileSync(githubOutputPath, { encoding: 'utf8' });
+      expect(contents).toBe('result<<EOF\nLine 1\nLine 2\nLine 3\nEOF\n');
+    });
+
+    it('should handle object with multiline string value', () => {
+      const data = {
+        message: 'First line\nSecond line',
+        status: 'success'
+      };
+      githubActionLoggerAdapter.result(data);
+      const contents = readFileSync(githubOutputPath, { encoding: 'utf8' });
+      expect(contents).toContain('message<<EOF\nFirst line\nSecond line\nEOF\n');
+      expect(contents).toContain('status=success\n');
+    });
+
+    it('should handle multiline output with multiple destinations', () => {
+      const data = {
+        destination: 'path/to/file1.md\npath/to/file2.md\npath/to/file3.md'
+      };
+      githubActionLoggerAdapter.result(data);
+      const contents = readFileSync(githubOutputPath, { encoding: 'utf8' });
+      expect(contents).toBe('destination<<EOF\npath/to/file1.md\npath/to/file2.md\npath/to/file3.md\nEOF\n');
+    });
   });
 });

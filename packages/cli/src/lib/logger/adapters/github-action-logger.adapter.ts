@@ -79,6 +79,14 @@ export class GitHubActionLoggerAdapter implements LoggerAdapter {
     }
     const stringValue = typeof data === 'string' ? data : JSON.stringify(data);
 
-    appendFileSync(this.injectedOutputPath, `${key}=${stringValue}\n`, { encoding: 'utf8' });
+    // Check if the value contains newlines (multiline)
+    if (stringValue.includes('\n')) {
+      // Use GitHub Actions multiline output format with delimiter
+      const delimiter = 'EOF';
+      appendFileSync(this.injectedOutputPath, `${key}<<${delimiter}\n${stringValue}\n${delimiter}\n`, { encoding: 'utf8' });
+    } else {
+      // Use simple key=value format for single-line outputs
+      appendFileSync(this.injectedOutputPath, `${key}=${stringValue}\n`, { encoding: 'utf8' });
+    }
   }
 }
