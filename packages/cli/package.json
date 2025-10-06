@@ -1,7 +1,7 @@
 {
   "name": "@ci-dokumentor/cli",
   "description": "Command Line Interface for CI Dokumentor - Automated documentation generator for CI/CD components",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
