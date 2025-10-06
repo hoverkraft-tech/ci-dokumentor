@@ -104,6 +104,13 @@ describe('GitHubActionLoggerAdapter', () => {
       expect(contents).toContain('result=true\n');
     });
 
+    it('should write undefined result to GITHUB_OUTPUT file as empty string', () => {
+      const data = undefined;
+      githubActionLoggerAdapter.result(data);
+      const contents = readFileSync(githubOutputPath, { encoding: 'utf8' });
+      expect(contents).toContain('result=\n');
+    });
+
     it('should write array result to GITHUB_OUTPUT file', () => {
       const data = [1, 2, 3];
       githubActionLoggerAdapter.result(data);
@@ -129,6 +136,19 @@ describe('GitHubActionLoggerAdapter', () => {
       githubActionLoggerAdapter.result(data);
       const contents = readFileSync(githubOutputPath, { encoding: 'utf8' });
       expect(contents).toBe('');
+    });
+
+    it('should handle object with undefined values', () => {
+      const data = {
+        key1: 'value1',
+        key2: undefined,
+        key3: 'value3'
+      };
+      githubActionLoggerAdapter.result(data);
+      const contents = readFileSync(githubOutputPath, { encoding: 'utf8' });
+      expect(contents).toContain('key1=value1\n');
+      expect(contents).toContain('key2=\n');
+      expect(contents).toContain('key3=value3\n');
     });
 
     it('should handle multiline string result using delimiter format', () => {
