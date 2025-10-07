@@ -61,9 +61,8 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(ReadableContent);
       const content = result.toString();
-      expect(content).toContain('# Docker Build Component');
-      expect(content).not.toContain('<div');
-      expect(content).not.toContain('---');
+      expect(content).toEqual(`# Docker Build Component
+`);
     });
 
     it('should generate header with title and logo when logo exists', async () => {
@@ -84,10 +83,15 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(ReadableContent);
       const content = result.toString();
-      expect(content).toContain('# Docker Build Component');
-      expect(content).toContain('<div align="center">');
-      expect(content).toContain('<img src="https://example.com/logo.png"');
-      expect(content).toContain('---');
+      expect(content).toEqual(`# Docker Build Component
+
+<div align="center">
+  <img src="https://example.com/logo.png" width="60px" align="center" alt="Docker Build Component" />
+</div>
+
+---
+
+`);
     });
 
     it('should handle file:// logo URLs correctly', async () => {
@@ -108,8 +112,15 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(ReadableContent);
       const content = result.toString();
-      expect(content).toContain('# Test Component');
-      expect(content).toContain('<img src="../../.gitlab/logo.png"');
+      expect(content).toEqual(`# Test Component
+
+<div align="center">
+  <img src="../../.gitlab/logo.png" width="60px" align="center" alt="Test Component" />
+</div>
+
+---
+
+`);
     });
 
     it('should work with GitLab CI pipeline manifests', async () => {
@@ -130,7 +141,8 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(ReadableContent);
       const content = result.toString();
-      expect(content).toContain('# CI/CD Pipeline');
+      expect(content).toEqual(`# CI/CD Pipeline
+`);
     });
 
     it('should handle destination being undefined', async () => {
@@ -151,8 +163,15 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(ReadableContent);
       const content = result.toString();
-      expect(content).toContain('# Test Component');
-      expect(content).toContain('<img src=".gitlab/logo.png"');
+      expect(content).toEqual(`# Test Component
+
+<div align="center">
+  <img src=".gitlab/logo.png" width="60px" align="center" alt="Test Component" />
+</div>
+
+---
+
+`);
     });
 
     it('should generate proper relative paths for nested component docs', async () => {
@@ -173,8 +192,15 @@ describe('HeaderSectionGenerator', () => {
       // Assert
       expect(result).toBeInstanceOf(ReadableContent);
       const content = result.toString();
-      expect(content).toContain('# Nested Component');
-      expect(content).toContain('<img src="../../../../assets/logo.svg"');
+      expect(content).toEqual(`# Nested Component
+
+<div align="center">
+  <img src="../../../../assets/logo.svg" width="60px" align="center" alt="Nested Component" />
+</div>
+
+---
+
+`);
     });
   });
 });

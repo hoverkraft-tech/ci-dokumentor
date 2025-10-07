@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach, Mocked } from 'vitest';
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -7,7 +7,7 @@ import {
   ReadableContent,
   VersionService,
 } from '@ci-dokumentor/core';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+import { RepositoryProviderMockFactory, VersionServiceMockFactory } from '@ci-dokumentor/core/tests';
 import { GitLabComponentMockFactory } from '../../__tests__/gitlab-component-mock.factory.js';
 import { GitLabCIPipelineMockFactory } from '../../__tests__/gitlab-pipeline-mock.factory.js';
 import { initTestContainer } from '../container.js';
@@ -23,9 +23,9 @@ describe('UsageSectionGenerator', () => {
     vi.resetAllMocks();
 
     mockRepositoryProvider = RepositoryProviderMockFactory.create();
-    mockVersionService = {
-      getVersion: vi.fn().mockResolvedValue({ ref: 'v1.0.0', sha: 'abc123' })
-    } as unknown as Mocked<VersionService>;
+    mockVersionService = VersionServiceMockFactory.create({
+      getVersion: { ref: 'v1.0.0', sha: 'abc123' }
+    });
 
     const container = initTestContainer();
     formatterAdapter = container.get(MarkdownFormatterAdapter);
