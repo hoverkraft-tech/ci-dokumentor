@@ -2,6 +2,10 @@
 
 This file is written for automated coding agents (for example: Copilot coding agents). It exists to provide a concise operational contract and guardrails for agents working in this repository. It is not the canonical source for design or style rules. Those live in the developer documentation linked below.
 
+## Organization-wide guidelines (required)
+
+- Follow the prioritized shared instructions in [hoverkraft-tech/.github/AGENTS.md](https://github.com/hoverkraft-tech/.github/blob/main/AGENTS.md) before working in this repository.
+
 ## Canonical docs
 
 - Primary source-of-truth (human + machine readable): [packages/docs/content/developers/](./packages/docs/content/developers/)

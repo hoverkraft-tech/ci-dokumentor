@@ -47,8 +47,10 @@ export class HeaderSectionGenerator extends GitLabCISectionGeneratorAdapter {
     manifest: GitLabCIManifest,
     repositoryInfo: RepositoryInfo
   ): ReadableContent {
+    const title = manifest.name || repositoryInfo.name || 'GitLab CI Pipeline';
+
     return formatterAdapter.heading(
-      new ReadableContent(manifest.name),
+      new ReadableContent(title),
       1
     );
   }
@@ -78,7 +80,7 @@ export class HeaderSectionGenerator extends GitLabCISectionGeneratorAdapter {
     const logoImage = formatterAdapter.image(
       new ReadableContent(logoUrl),
       new ReadableContent(manifest.name),
-      { width: '200px', align: 'center' }
+      { width: '60px', align: 'center' }
     );
 
     return formatterAdapter.center(logoImage);

@@ -1,4 +1,4 @@
-import { Mocked } from "vitest";
+import { Mocked, vi } from "vitest";
 import { VersionService } from "../src/version/version.service.js";
 
 type VersionServiceDefaults = {

@@ -16,5 +16,5 @@ export function sanitizeSnapshotContent(content: string | unknown[][]): string {
         .replaceAll(rootPath, '/test')
         // Replace sha version and tag with a placeholder
         .replaceAll(/@[a-f0-9]{40} # [\w-./]+/g, '@sha-version # tag')
-        .replaceAll(/ref:\s+'[a-f0-9]{40}' # [\w-./]+/g, 'ref: \'sha-version\' # tag');
+        .replaceAll(/ref:\s+'[a-f0-9]{40}' # [\w-./]+/g, "ref: 'sha-version' # tag");
 }
