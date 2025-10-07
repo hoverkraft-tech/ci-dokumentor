@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
 import {
   FormatterAdapter,
   SectionIdentifier,
