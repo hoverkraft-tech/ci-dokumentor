@@ -73,7 +73,7 @@ jobs:
           # When running for tags, update package.json version to match tag name
           if [ "${{ github.ref_type }}" == "tag" ] && [ -n "${{ github.ref_name }}" ]; then
             echo "Updating package version to match tag name: ${{ github.ref_name }}"
-            npm version "${{ github.ref_name }}" --no-git-tag-version
+            npm version "${{ github.ref_name }}" --no-git-tag-version --no-workspaces-update
           fi
 
           npm pack --pack-destination ${{ runner.temp }}/
