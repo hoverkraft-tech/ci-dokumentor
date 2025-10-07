@@ -11,7 +11,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 ## Usage
 
 ```yaml
-- uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+- uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     # Source manifest file path(s) to handle. Supports:
     # - Single file: `action.yml`
@@ -120,7 +120,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ```yaml
 - name: Generate Workflow Documentation
-  uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+  uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     source: ".github/workflows/ci.yml"
 ```
@@ -129,7 +129,7 @@ CI Dokumentor can be used directly as a GitHub Action in your workflows, making 
 
 ```yaml
 - name: Generate Enhanced Documentation
-  uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+  uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     source: "action.yml"
     destination: "docs/README.md"
@@ -148,7 +148,7 @@ The GitHub Action now natively supports multiple files and glob patterns through
 
 ```yaml
 - name: Generate Documentation for All YAML Files
-  uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+  uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     source: "*.yml"
     concurrency: 10
@@ -158,7 +158,7 @@ The GitHub Action now natively supports multiple files and glob patterns through
 
 ```yaml
 - name: Generate Documentation for Multiple Files
-  uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+  uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     source: "action.yml .github/workflows/ci.yml .github/workflows/cd.yml"
 ```
@@ -167,7 +167,7 @@ The GitHub Action now natively supports multiple files and glob patterns through
 
 ```yaml
 - name: Generate Documentation for Multiple Files
-  uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+  uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     source: |
       action.yml
@@ -187,7 +187,7 @@ For more control over parallel execution, you can still use GitHub Actions matri
         - action.yml
         - .github/workflows/ci.yml
         - .github/workflows/cd.yml
-  uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+  uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     source: ${{ matrix.file }}
 ```
@@ -198,7 +198,7 @@ To preview changes without modifying files, set the `dry-run` input to `true`. T
 
 ```yaml
 - name: Generate Documentation (dry-run)
-  uses: hoverkraft-tech/ci-dokumentor@b051c2ce43586eb75ce84b85728992ad1f634f13 # 0.2.1
+  uses: hoverkraft-tech/ci-dokumentor@c46a1a108957237cf485103a80b060c35c7dba33 # 0.2.2
   with:
     source: "action.yml"
     dry-run: "true"
