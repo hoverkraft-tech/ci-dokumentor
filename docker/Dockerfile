@@ -8,12 +8,14 @@ WORKDIR /build
 
 # Copy package manager files and package manifests needed for install
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/core/package.json ./packages/core/
+COPY packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
+COPY packages/cicd/gitlab-ci/package.json ./packages/cicd/gitlab-ci/
 COPY packages/cli/package.json ./packages/cli/
+COPY packages/core/package.json ./packages/core/
 COPY packages/docs/package.json ./packages/docs/
 COPY packages/repository/git/package.json ./packages/repository/git/
 COPY packages/repository/github/package.json ./packages/repository/github/
-COPY packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
+COPY packages/repository/gitlab/package.json ./packages/repository/gitlab/
 
 # Install all deps (including dev) for building
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile

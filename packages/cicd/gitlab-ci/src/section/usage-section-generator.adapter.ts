@@ -39,8 +39,9 @@ export class UsageSectionGenerator extends GitLabCISectionGeneratorAdapter imple
   async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitLabCIManifest>): Promise<ReadableContent> {
     // Resolve version information from section options or auto-detection
     const version = await this.versionService.getVersion(this.version, repositoryProvider);
-    const versionTag = version?.ref || 'latest';
-    
+    const resolvedRef = version?.sha ?? version?.ref ?? 'latest';
+    const refComment = version?.sha && version?.ref ? ` # ${version.ref}` : '';
+
     if (this.isGitLabComponent(manifest)) {
       // For GitLab components
       const usageExample = `include:
@@ -59,7 +60,7 @@ export class UsageSectionGenerator extends GitLabCISectionGeneratorAdapter imple
       const usageExample = `include:
   - project: '${manifest.usesName.split('@')[0]}'
     file: '.gitlab-ci.yml'
-    ref: '${versionTag}'`;
+    ref: '${resolvedRef}'${refComment}`;
 
       return formatterAdapter.code(
         new ReadableContent(usageExample),

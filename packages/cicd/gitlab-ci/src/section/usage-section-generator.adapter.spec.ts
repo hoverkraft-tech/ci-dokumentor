@@ -98,7 +98,61 @@ include:
 include:
   - project: 'test-user/test-repo'
     file: '.gitlab-ci.yml'
-    ref: 'v1.0.0'
+    ref: 'abc123' # v1.0.0
+\`\`\`
+`);
+      });
+
+      it('should fall back to version ref when sha is unavailable', async () => {
+        // Arrange
+        const manifest = GitLabCIPipelineMockFactory.create({
+          usesName: 'test-user/test-repo'
+        });
+        mockVersionService.getVersion.mockResolvedValue({ ref: 'v2.0.0' });
+
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: 'README.md'
+        });
+
+        // Assert
+        expect(result).toBeInstanceOf(ReadableContent);
+        const content = result.toString();
+        expect(content).toEqual(`\`\`\`yaml
+include:
+  - project: 'test-user/test-repo'
+    file: '.gitlab-ci.yml'
+    ref: 'v2.0.0'
+\`\`\`
+`);
+      });
+
+      it('should default to latest when no version information is available', async () => {
+        // Arrange
+        const manifest = GitLabCIPipelineMockFactory.create({
+          usesName: 'test-user/test-repo'
+        });
+        mockVersionService.getVersion.mockResolvedValue(undefined);
+
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: 'README.md'
+        });
+
+        // Assert
+        expect(result).toBeInstanceOf(ReadableContent);
+        const content = result.toString();
+        expect(content).toEqual(`\`\`\`yaml
+include:
+  - project: 'test-user/test-repo'
+    file: '.gitlab-ci.yml'
+    ref: 'latest'
 \`\`\`
 `);
       });
