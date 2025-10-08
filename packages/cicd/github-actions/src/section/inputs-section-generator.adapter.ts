@@ -1,4 +1,4 @@
-import { ReadableContent, SectionGenerationPayload, FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { AbstractInputsSectionGenerator, FormatterAdapter, ReadableContent, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import {
   GitHubAction,
@@ -10,30 +10,28 @@ import {
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
+const abstractHelper = new AbstractInputsSectionGenerator();
+
 @injectable()
 export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
-    return SectionIdentifier.Inputs;
+    return abstractHelper.getSectionIdentifier();
   }
 
-  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
-    let manifestInputsContent: ReadableContent;
+  async generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
+    return abstractHelper.generateSection.call(this, payload);
+  }
+
+  protected async generateInputsContent(
+    formatterAdapter: FormatterAdapter,
+    manifest: GitHubActionsManifest
+  ): Promise<ReadableContent> {
     if (this.isGitHubAction(manifest)) {
-      manifestInputsContent = this.generateActionInputsTable(formatterAdapter, manifest);
+      return this.generateActionInputsTable(formatterAdapter, manifest);
     } else if (this.isGitHubWorkflow(manifest)) {
-      manifestInputsContent = this.generateWorkflowInputsTable(formatterAdapter, manifest);
-    } else {
-      throw new Error('Unsupported manifest type for InputsSectionGenerator');
+      return this.generateWorkflowInputsTable(formatterAdapter, manifest);
     }
-
-    if (manifestInputsContent.isEmpty()) {
-      return ReadableContent.empty();
-    }
-
-    return formatterAdapter.heading(new ReadableContent('Inputs'), 2).append(
-      formatterAdapter.lineBreak(),
-      manifestInputsContent,
-    );
+    throw new Error('Unsupported manifest type for InputsSectionGenerator');
   }
 
   private generateActionInputsTable(
@@ -49,10 +47,10 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     const rows = Object.entries(manifest.inputs || {}).map(([name, input]) => {
       return [
-        this.getInputName(name, formatterAdapter),
+        abstractHelper.formatInputName(name, formatterAdapter),
         this.getInputDescription(input, formatterAdapter),
-        this.getInputRequired(input, formatterAdapter),
-        this.getInputDefault(input, formatterAdapter),
+        abstractHelper.formatInputRequired(input.required, formatterAdapter),
+        abstractHelper.formatInputDefault(input.default, formatterAdapter),
       ];
     });
 
@@ -108,34 +106,22 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     const rows = inputs.map(([name, input]) => {
       return [
-        this.getInputName(name, formatterAdapter),
+        abstractHelper.formatInputName(name, formatterAdapter),
         this.getInputDescription(input, formatterAdapter),
-        this.getInputRequired(input, formatterAdapter),
-        this.getInputType(input, formatterAdapter),
-        this.getInputDefault(input, formatterAdapter),
+        abstractHelper.formatInputRequired(input.required, formatterAdapter),
+        abstractHelper.formatInputType(input.type, formatterAdapter),
+        abstractHelper.formatInputDefault(input.default, formatterAdapter),
       ];
     });
 
     return formatterAdapter.table(headers, rows);
   }
 
-  private getInputName(
-    name: string,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return formatterAdapter.bold(
-      formatterAdapter.inlineCode(new ReadableContent(name))
-    );
-  }
-
   private getInputDescription(
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
-    let description = new ReadableContent((input.description || '').trim());
-    if (!description.isEmpty()) {
-      description = formatterAdapter.paragraph(description);
-    }
+    let description = abstractHelper.formatInputDescription(input.description, formatterAdapter);
 
     const deprecationMessage = this.getInputDeprecationMessage(input);
     if (deprecationMessage) {
@@ -170,41 +156,6 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     }
 
     return description;
-  }
-
-  private getInputDefault(
-    input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    const hasNotDefault = input.default === null || input.default === undefined || input.default === '';
-    if (hasNotDefault) {
-      return new ReadableContent('-');
-    }
-
-    let defaultValue: string;
-    if (typeof input.default === 'boolean') {
-      defaultValue = input.default ? 'true' : 'false';
-    } else {
-      defaultValue = String(input.default);
-    }
-
-    return formatterAdapter.inlineCode(new ReadableContent(defaultValue));
-  }
-
-  private getInputRequired(
-    input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return formatterAdapter.bold(
-      new ReadableContent(input.required ? 'true' : 'false')
-    );
-  }
-
-  private getInputType(
-    input: GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return formatterAdapter.bold(new ReadableContent(input.type ?? 'string'));
   }
 
   private getInputDeprecationMessage(

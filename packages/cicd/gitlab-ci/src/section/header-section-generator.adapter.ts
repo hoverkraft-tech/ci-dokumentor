@@ -1,48 +1,21 @@
-import { relative, dirname } from 'node:path';
-import { FormatterAdapter, SectionIdentifier, ReadableContent, RepositoryInfo, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { AbstractHeaderSectionGenerator, FormatterAdapter, ReadableContent, RepositoryInfo, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import { GitLabCIManifest } from '../gitlab-ci-parser.js';
 import { GitLabCISectionGeneratorAdapter } from './gitlab-ci-section-generator.adapter.js';
 
 @injectable()
 export class HeaderSectionGenerator extends GitLabCISectionGeneratorAdapter {
+  private helper = new AbstractHeaderSectionGenerator<GitLabCIManifest>();
+
   getSectionIdentifier(): SectionIdentifier {
-    return SectionIdentifier.Header;
+    return this.helper.getSectionIdentifier();
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider, destination }: SectionGenerationPayload<GitLabCIManifest>): Promise<ReadableContent> {
-    const [repositoryInfo, logo] = await Promise.all([
-      repositoryProvider.getRepositoryInfo(),
-      repositoryProvider.getLogo(),
-    ]);
-
-    let sectionContent = this.generateTitle(
-      formatterAdapter,
-      manifest,
-      repositoryInfo
-    );
-
-    const logoContent = this.generateLogo(
-      formatterAdapter,
-      manifest,
-      logo,
-      destination
-    );
-
-    if (!logoContent.isEmpty()) {
-      sectionContent = sectionContent.append(
-        formatterAdapter.lineBreak(),
-        logoContent,
-        formatterAdapter.lineBreak(),
-        formatterAdapter.horizontalRule(),
-        formatterAdapter.lineBreak(),
-      );
-    }
-
-    return sectionContent;
+  async generateSection(payload: SectionGenerationPayload<GitLabCIManifest>): Promise<ReadableContent> {
+    return this.helper.generateSection.call(this, payload);
   }
 
-  private generateTitle(
+  protected generateTitle(
     formatterAdapter: FormatterAdapter,
     manifest: GitLabCIManifest,
     repositoryInfo: RepositoryInfo
@@ -55,34 +28,22 @@ export class HeaderSectionGenerator extends GitLabCISectionGeneratorAdapter {
     );
   }
 
-  private generateLogo(
+  protected getLogoAltText(manifest: GitLabCIManifest): ReadableContent {
+    return new ReadableContent(manifest.name || 'GitLab CI');
+  }
+
+  protected generateLogo(
     formatterAdapter: FormatterAdapter,
     manifest: GitLabCIManifest,
-    logo: string | undefined,
+    logoPath: string | undefined,
     destination: string | undefined
   ): ReadableContent {
-    if (!logo) {
-      return ReadableContent.empty();
-    }
-
-    let logoUrl = logo;
-
-    // Handle file:// URLs by converting them to relative paths
-    if (logo.startsWith('file://')) {
-      const logoPath = logo.slice(7); // Remove 'file://' prefix
-      if (destination) {
-        logoUrl = relative(dirname(destination), logoPath);
-      } else {
-        logoUrl = logoPath;
-      }
-    }
-
-    const logoImage = formatterAdapter.image(
-      new ReadableContent(logoUrl),
-      new ReadableContent(manifest.name),
-      { width: '60px', align: 'center' }
+    return this.helper.generateLogo(
+      formatterAdapter,
+      manifest,
+      logoPath,
+      destination,
+      (m: GitLabCIManifest) => this.getLogoAltText(m)
     );
-
-    return formatterAdapter.center(logoImage);
   }
 }

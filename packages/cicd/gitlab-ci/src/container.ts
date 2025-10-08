@@ -17,6 +17,7 @@ import { HeaderSectionGenerator } from './section/header-section-generator.adapt
 import { OverviewSectionGenerator } from './section/overview-section-generator.adapter.js';
 import { UsageSectionGenerator } from './section/usage-section-generator.adapter.js';
 import { InputsSectionGenerator } from './section/inputs-section-generator.adapter.js';
+import { GeneratedSectionGenerator } from './section/generated-section-generator.adapter.js';
 
 let container: Container | null = null;
 
@@ -65,6 +66,9 @@ export function initContainer(
   container
     .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(InputsSectionGenerator);
+  container
+    .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(GeneratedSectionGenerator);
 
   return container;
 }
