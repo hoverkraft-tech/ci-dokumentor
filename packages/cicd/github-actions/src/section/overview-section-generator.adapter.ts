@@ -1,25 +1,15 @@
-import { AbstractOverviewSectionGenerator, ReadableContent, FormatterAdapter, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { OverviewSectionMixin, ReadableContent, FormatterAdapter } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
-const abstractHelper = new AbstractOverviewSectionGenerator();
-
 @injectable()
-export class OverviewSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
-  getSectionIdentifier(): SectionIdentifier {
-    return abstractHelper.getSectionIdentifier();
-  }
-
-  async generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
-    return abstractHelper.generateSection.call(this, payload);
-  }
-
-  protected getDescription(manifest: GitHubActionsManifest): string | undefined {
+export class OverviewSectionGenerator extends OverviewSectionMixin<GitHubActionsManifest, typeof GitHubActionsSectionGeneratorAdapter>(GitHubActionsSectionGeneratorAdapter) {
+  public override getDescription(manifest: GitHubActionsManifest): string | undefined {
     return 'description' in manifest ? manifest.description : undefined;
   }
 
-  protected async generateAdditionalContent(
+  public override async generateAdditionalContent(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest
   ): Promise<ReadableContent> {

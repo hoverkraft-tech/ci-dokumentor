@@ -1,21 +1,11 @@
-import { AbstractInputsSectionGenerator, FormatterAdapter, ReadableContent, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { InputsSectionMixin, FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import { GitLabCIManifest, GitLabComponentInput } from '../gitlab-ci-parser.js';
 import { GitLabCISectionGeneratorAdapter } from './gitlab-ci-section-generator.adapter.js';
 
-const abstractHelper = new AbstractInputsSectionGenerator();
-
 @injectable()
-export class InputsSectionGenerator extends GitLabCISectionGeneratorAdapter {
-  getSectionIdentifier(): SectionIdentifier {
-    return abstractHelper.getSectionIdentifier();
-  }
-
-  async generateSection(payload: SectionGenerationPayload<GitLabCIManifest>): Promise<ReadableContent> {
-    return abstractHelper.generateSection.call(this, payload);
-  }
-
-  protected async generateInputsContent(
+export class InputsSectionGenerator extends InputsSectionMixin<GitLabCIManifest, typeof GitLabCISectionGeneratorAdapter>(GitLabCISectionGeneratorAdapter) {
+  public override async generateInputsContent(
     formatterAdapter: FormatterAdapter,
     manifest: GitLabCIManifest
   ): Promise<ReadableContent> {
@@ -49,11 +39,11 @@ export class InputsSectionGenerator extends GitLabCISectionGeneratorAdapter {
 
     const rows = Object.entries(inputs).map(([name, input]) => {
       return [
-        abstractHelper.formatInputName(name, formatterAdapter),
-        abstractHelper.formatInputDescription(input.description, formatterAdapter),
-        abstractHelper.formatInputRequired(input.required, formatterAdapter),
-        abstractHelper.formatInputType(input.type, formatterAdapter),
-        abstractHelper.formatInputDefault(input.default, formatterAdapter),
+        this.formatInputName(name, formatterAdapter),
+        this.formatInputDescription(input.description, formatterAdapter),
+        this.formatInputRequired(input.required, formatterAdapter),
+        this.formatInputType(input.type, formatterAdapter),
+        this.formatInputDefault(input.default, formatterAdapter),
       ];
     });
 

@@ -1,4 +1,4 @@
-import { AbstractInputsSectionGenerator, FormatterAdapter, ReadableContent, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { InputsSectionMixin, FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import {
   GitHubAction,
@@ -10,19 +10,9 @@ import {
 } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
-const abstractHelper = new AbstractInputsSectionGenerator();
-
 @injectable()
-export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
-  getSectionIdentifier(): SectionIdentifier {
-    return abstractHelper.getSectionIdentifier();
-  }
-
-  async generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
-    return abstractHelper.generateSection.call(this, payload);
-  }
-
-  protected async generateInputsContent(
+export class InputsSectionGenerator extends InputsSectionMixin<GitHubActionsManifest, typeof GitHubActionsSectionGeneratorAdapter>(GitHubActionsSectionGeneratorAdapter) {
+  public override async generateInputsContent(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest
   ): Promise<ReadableContent> {
@@ -47,10 +37,10 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     const rows = Object.entries(manifest.inputs || {}).map(([name, input]) => {
       return [
-        abstractHelper.formatInputName(name, formatterAdapter),
+        this.formatInputName(name, formatterAdapter),
         this.getInputDescription(input, formatterAdapter),
-        abstractHelper.formatInputRequired(input.required, formatterAdapter),
-        abstractHelper.formatInputDefault(input.default, formatterAdapter),
+        this.formatInputRequired(input.required, formatterAdapter),
+        this.formatInputDefault(input.default, formatterAdapter),
       ];
     });
 
@@ -106,11 +96,11 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
     const rows = inputs.map(([name, input]) => {
       return [
-        abstractHelper.formatInputName(name, formatterAdapter),
+        this.formatInputName(name, formatterAdapter),
         this.getInputDescription(input, formatterAdapter),
-        abstractHelper.formatInputRequired(input.required, formatterAdapter),
-        abstractHelper.formatInputType(input.type, formatterAdapter),
-        abstractHelper.formatInputDefault(input.default, formatterAdapter),
+        this.formatInputRequired(input.required, formatterAdapter),
+        this.formatInputType(input.type, formatterAdapter),
+        this.formatInputDefault(input.default, formatterAdapter),
       ];
     });
 
@@ -121,7 +111,7 @@ export class InputsSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter
   ): ReadableContent {
-    let description = abstractHelper.formatInputDescription(input.description, formatterAdapter);
+    let description = this.formatInputDescription(input.description, formatterAdapter);
 
     const deprecationMessage = this.getInputDeprecationMessage(input);
     if (deprecationMessage) {
