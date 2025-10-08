@@ -1,22 +1,12 @@
-import { AbstractHeaderSectionGenerator, FormatterAdapter, ReadableContent, RepositoryInfo, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { HeaderSectionMixin, FormatterAdapter, ReadableContent, RepositoryInfo } from '@ci-dokumentor/core';
 import { icons } from 'feather-icons';
 import { injectable } from 'inversify';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
-const abstractHelper = new AbstractHeaderSectionGenerator();
-
 @injectable()
-export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
-  getSectionIdentifier(): SectionIdentifier {
-    return abstractHelper.getSectionIdentifier();
-  }
-
-  async generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
-    return abstractHelper.generateSection.call(this, payload);
-  }
-
-  protected generateTitle(
+export class HeaderSectionGenerator extends HeaderSectionMixin<GitHubActionsManifest, typeof GitHubActionsSectionGeneratorAdapter>(GitHubActionsSectionGeneratorAdapter) {
+  public override generateTitle(
     formatterAdapter: FormatterAdapter,
     manifest: GitHubActionsManifest,
     repositoryInfo: RepositoryInfo
@@ -31,23 +21,8 @@ export class HeaderSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     return formatterAdapter.heading(headingContent, 1);
   }
 
-  protected getLogoAltText(manifest: GitHubActionsManifest): ReadableContent {
+  public override getLogoAltText(manifest: GitHubActionsManifest): ReadableContent {
     return this.getDisplayName(manifest);
-  }
-
-  protected generateLogo(
-    formatterAdapter: FormatterAdapter,
-    manifest: GitHubActionsManifest,
-    logoPath: string | undefined,
-    destination: string | undefined
-  ): ReadableContent {
-    return abstractHelper.generateLogo(
-      formatterAdapter,
-      manifest,
-      logoPath,
-      destination,
-      (m: GitHubActionsManifest) => this.getLogoAltText(m)
-    );
   }
 
   private getDisplayName(

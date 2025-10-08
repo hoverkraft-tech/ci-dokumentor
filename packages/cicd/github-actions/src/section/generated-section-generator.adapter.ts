@@ -1,17 +1,8 @@
-import { AbstractGeneratedSectionGenerator, ReadableContent, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
+import { GeneratedSectionMixin } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
-const abstractHelper = new AbstractGeneratedSectionGenerator();
-
 @injectable()
-export class GeneratedSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
-  getSectionIdentifier(): SectionIdentifier {
-    return abstractHelper.getSectionIdentifier();
-  }
-
-  async generateSection(payload: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
-    return abstractHelper.generateSection(payload);
-  }
+export class GeneratedSectionGenerator extends GeneratedSectionMixin<GitHubActionsManifest, typeof GitHubActionsSectionGeneratorAdapter>(GitHubActionsSectionGeneratorAdapter) {
 }
