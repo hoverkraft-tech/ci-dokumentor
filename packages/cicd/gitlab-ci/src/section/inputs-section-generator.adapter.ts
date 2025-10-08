@@ -1,15 +1,24 @@
-import { SectionIdentifier, ReadableContent, SectionGenerationPayload, FormatterAdapter } from '@ci-dokumentor/core';
+import { AbstractInputsSectionGenerator, FormatterAdapter, ReadableContent, SectionIdentifier, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import { GitLabCIManifest, GitLabComponentInput } from '../gitlab-ci-parser.js';
 import { GitLabCISectionGeneratorAdapter } from './gitlab-ci-section-generator.adapter.js';
 
+const abstractHelper = new AbstractInputsSectionGenerator();
+
 @injectable()
 export class InputsSectionGenerator extends GitLabCISectionGeneratorAdapter {
   getSectionIdentifier(): SectionIdentifier {
-    return SectionIdentifier.Inputs;
+    return abstractHelper.getSectionIdentifier();
   }
 
-  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitLabCIManifest>): Promise<ReadableContent> {
+  async generateSection(payload: SectionGenerationPayload<GitLabCIManifest>): Promise<ReadableContent> {
+    return abstractHelper.generateSection.call(this, payload);
+  }
+
+  protected async generateInputsContent(
+    formatterAdapter: FormatterAdapter,
+    manifest: GitLabCIManifest
+  ): Promise<ReadableContent> {
     let inputs: Record<string, GitLabComponentInput> | undefined;
 
     if (this.isGitLabComponent(manifest)) {
@@ -23,16 +32,7 @@ export class InputsSectionGenerator extends GitLabCISectionGeneratorAdapter {
       return ReadableContent.empty();
     }
 
-    const inputsContent = this.generateInputsTable(formatterAdapter, inputs);
-
-    if (inputsContent.isEmpty()) {
-      return ReadableContent.empty();
-    }
-
-    return formatterAdapter.heading(new ReadableContent('Inputs'), 2).append(
-      formatterAdapter.lineBreak(),
-      inputsContent,
-    );
+    return this.generateInputsTable(formatterAdapter, inputs);
   }
 
   private generateInputsTable(
@@ -49,59 +49,14 @@ export class InputsSectionGenerator extends GitLabCISectionGeneratorAdapter {
 
     const rows = Object.entries(inputs).map(([name, input]) => {
       return [
-        this.getInputName(name, formatterAdapter),
-        this.getInputDescription(input, formatterAdapter),
-        this.getInputRequired(input, formatterAdapter),
-        this.getInputType(input, formatterAdapter),
-        this.getInputDefault(input, formatterAdapter),
+        abstractHelper.formatInputName(name, formatterAdapter),
+        abstractHelper.formatInputDescription(input.description, formatterAdapter),
+        abstractHelper.formatInputRequired(input.required, formatterAdapter),
+        abstractHelper.formatInputType(input.type, formatterAdapter),
+        abstractHelper.formatInputDefault(input.default, formatterAdapter),
       ];
     });
 
     return formatterAdapter.table(headers, rows);
-  }
-
-  private getInputName(
-    name: string,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return formatterAdapter.bold(
-      formatterAdapter.inlineCode(new ReadableContent(name))
-    );
-  }
-
-  private getInputDescription(
-    input: GitLabComponentInput,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    const description = new ReadableContent((input.description || '').trim());
-    if (!description.isEmpty()) {
-      return formatterAdapter.paragraph(description);
-    }
-    return description;
-  }
-
-  private getInputDefault(
-    input: GitLabComponentInput,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return input.default
-      ? formatterAdapter.inlineCode(new ReadableContent(input.default))
-      : new ReadableContent('-');
-  }
-
-  private getInputRequired(
-    input: GitLabComponentInput,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return formatterAdapter.bold(
-      new ReadableContent(input.required ? 'true' : 'false')
-    );
-  }
-
-  private getInputType(
-    input: GitLabComponentInput,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return formatterAdapter.bold(new ReadableContent(input.type ?? 'string'));
   }
 }
