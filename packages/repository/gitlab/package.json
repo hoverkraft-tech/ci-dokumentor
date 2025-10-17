@@ -19,6 +19,6 @@
     "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/repository-git": "workspace:*",
     "@gitbeaker/rest": "^43.5.0",
-    "inversify": "^7.10.1"
+    "inversify": "^7.10.3"
   }
 }
