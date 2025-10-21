@@ -100,7 +100,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   inlineCode(content: ReadableContent): ReadableContent {
     return ReadableContent.empty().append(
       '`',
-      content.escape(['`', '*']),
+      content.escape(['`', '*', '{']),
       '`'
     );
   }
