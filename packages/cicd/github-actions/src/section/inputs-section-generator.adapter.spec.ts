@@ -179,6 +179,30 @@ describe('InputsSectionGenerator', () => {
 `
         );
       });
+
+      it('should correctly render ${{ github.token }} in default value', async () => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          inputs: {
+            'github-token': {
+              description: 'GitHub Token for deploying to GitHub Pages.',
+              default: '${{ github.token }}',
+            },
+          },
+        });
+
+        // Act
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+        // Assert
+        expect(result.toString()).toContain('${{ github.token }}');
+        expect(result.toString()).toEqual(
+          '## Inputs\n\n' +
+          '| **Input**          | **Description**                             | **Required** | **Default**           |\n' +
+          '| ------------------ | ------------------------------------------- | ------------ | --------------------- |\n' +
+          '| **`github-token`** | GitHub Token for deploying to GitHub Pages. | **false**    | `${{ github.token }}` |\n'
+        );
+      });
     });
 
     describe('with GitHub Workflow manifest', () => {
