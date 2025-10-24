@@ -19,7 +19,7 @@ export class GitBeakerMockFactory {
         projectsShowMock: ProjectsShowMock;
     } {
 
-        vi.mocked(Gitlab).mockImplementation((...args: unknown[]) => {
+        vi.mocked(Gitlab).mockImplementation(function (...args: unknown[]) {
             gitlabConstructorMock(...args);
 
             return {

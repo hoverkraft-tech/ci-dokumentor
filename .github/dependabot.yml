@@ -22,14 +22,14 @@ updates:
       day: friday
       time: "04:00"
     groups:
+      npm-dev-dependencies:
+        dependency-type: development
       npm-docs-dependencies:
         patterns:
           - "@docusaurus/*"
           - "clsx"
           - "prism-react-renderer"
           - "react"
-      npm-dev-dependencies:
-        dependency-type: development
 
   - package-ecosystem: "devcontainers"
     open-pull-requests-limit: 20
