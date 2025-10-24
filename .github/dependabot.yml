@@ -28,8 +28,10 @@ updates:
         patterns:
           - "@docusaurus/*"
           - "clsx"
+          - "@mdx-js/*"
           - "prism-react-renderer"
           - "react"
+          - "react-*"
 
   - package-ecosystem: "devcontainers"
     open-pull-requests-limit: 20
