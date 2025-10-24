@@ -25,10 +25,10 @@
 
 ### Quick Links
 
-- 🚀 [Getting Started](./docs/content/getting-started/installation.md) - Installation and quick start
-- 🐳 [Docker](./docs/content/integrations/docker.md) - Docker integration guide
-- 🔧 [GitHub Action](./docs/content/integrations/github-action.md) - GitHub Actions integration
-- 👨‍💻 [Contributing](./docs/content/developers/contributing.md) - How to contribute
+- 🚀 [Getting Started](./packages/docs/content/intro.md) - Installation and quick start
+- 🐳 [Docker](./packages/docs/content/integrations/docker.md) - Docker integration guide
+- 🔧 [GitHub Action](./packages/docs/content/integrations/github-action.md) - GitHub Actions integration
+- 👨‍💻 [Contributing](./packages/docs/content/developers/contributing.md) - How to contribute
 
 <!-- examples:start -->
 
