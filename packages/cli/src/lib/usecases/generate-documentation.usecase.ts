@@ -222,7 +222,7 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
     const resolvedFiles = await this.resolveFiles(input.source);
 
     if (resolvedFiles.length === 0) {
-      throw new Error('No source files found matching the provided pattern(s)');
+      throw new Error(`No source files found matching the provided pattern(s): ${Array.isArray(input.source) ? input.source.join(', ') : input.source}`);
     }
 
     // Validate destination is not provided when processing multiple files
