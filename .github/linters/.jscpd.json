@@ -1,6 +1,8 @@
 {
   "threshold": 5,
   "ignore": [
+    "**/.pnpm-store/**",
+    "**/node_modules/**",
     "packages/**/package.json",
     "packages/**/eslint.config.mjs",
     "packages/**/vite.config.ts",

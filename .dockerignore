@@ -11,6 +11,7 @@ packages/docs/
 **/out-tsc
 
 # dependencies
+**/.pnpm-store
 **/node_modules
 
 # IDEs and editors
