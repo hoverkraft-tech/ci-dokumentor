@@ -17,9 +17,25 @@ export class OverviewSectionGenerator extends OverviewSectionMixin<GitHubActions
       return ReadableContent.empty();
     }
 
-    const permissions = manifest.permissions || {};
+    // Merge permissions from manifest.permissions and all jobs
+    const mergedPermissions: Record<string, string> = { ...(manifest.permissions || {}) };
+    
+    // Add permissions from each job
+    if (manifest.jobs) {
+      for (const job of Object.values(manifest.jobs)) {
+        if (job.permissions) {
+          for (const [permission, level] of Object.entries(job.permissions)) {
+            mergedPermissions[permission] = level;
+          }
+        }
+      }
+    }
+
+    // Sort permissions alphabetically (ascending)
+    const sortedPermissions = Object.entries(mergedPermissions).sort(([a], [b]) => a.localeCompare(b));
+    
     const permissionsContent = formatterAdapter.list(
-      Object.entries(permissions).map(([permission, level]) => {
+      sortedPermissions.map(([permission, level]) => {
         return formatterAdapter
           .bold(formatterAdapter.inlineCode(new ReadableContent(permission)))
           .append(`: `, formatterAdapter.inlineCode(new ReadableContent(level)));
