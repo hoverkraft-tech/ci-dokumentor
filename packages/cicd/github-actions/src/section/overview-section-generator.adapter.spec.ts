@@ -191,8 +191,8 @@ Continuous integration workflow with permissions
 ### Permissions
 
 - **\`contents\`**: \`read\`
-- **\`pull-requests\`**: \`write\`
 - **\`id-token\`**: \`write\`
+- **\`pull-requests\`**: \`write\`
 `
                 );
             });
@@ -311,14 +311,191 @@ Automated release workflow
 
 ### Permissions
 
-- **\`contents\`**: \`write\`
-- **\`packages\`**: \`write\`
-- **\`pull-requests\`**: \`read\`
-- **\`id-token\`**: \`write\`
-- **\`security-events\`**: \`write\`
 - **\`actions\`**: \`read\`
 - **\`checks\`**: \`read\`
+- **\`contents\`**: \`write\`
 - **\`deployments\`**: \`write\`
+- **\`id-token\`**: \`write\`
+- **\`packages\`**: \`write\`
+- **\`pull-requests\`**: \`read\`
+- **\`security-events\`**: \`write\`
+`
+                );
+            });
+
+            it('should merge permissions from workflow-level and job-level', async () => {
+                // Arrange
+                const manifest = {
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        permissions: {
+                            contents: 'read',
+                            'pull-requests': 'write',
+                        },
+                        jobs: {
+                            job1: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    'id-token': 'write',
+                                    packages: 'write',
+                                },
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
+                            job2: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    actions: 'read',
+                                },
+                                steps: [{ run: 'echo "test"' }],
+                            },
+                        },
+                    }),
+                    description: 'Workflow with merged permissions',
+                } as GitHubWorkflow & { description: string };
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+                // Assert
+                expect(result.toString()).toEqual(
+                    `## Overview
+
+Workflow with merged permissions
+
+### Permissions
+
+- **\`actions\`**: \`read\`
+- **\`contents\`**: \`read\`
+- **\`id-token\`**: \`write\`
+- **\`packages\`**: \`write\`
+- **\`pull-requests\`**: \`write\`
+`
+                );
+            });
+
+            it('should override workflow-level permissions with job-level permissions', async () => {
+                // Arrange
+                const manifest = {
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        permissions: {
+                            contents: 'read',
+                            packages: 'read',
+                        },
+                        jobs: {
+                            job1: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    contents: 'write', // Override read to write
+                                    'id-token': 'write',
+                                },
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
+                        },
+                    }),
+                    description: 'Workflow with overridden permissions',
+                } as GitHubWorkflow & { description: string };
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+                // Assert
+                expect(result.toString()).toEqual(
+                    `## Overview
+
+Workflow with overridden permissions
+
+### Permissions
+
+- **\`contents\`**: \`write\`
+- **\`id-token\`**: \`write\`
+- **\`packages\`**: \`read\`
+`
+                );
+            });
+
+            it('should handle workflow with only job-level permissions', async () => {
+                // Arrange
+                const manifest = {
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        jobs: {
+                            job1: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    contents: 'write',
+                                    'id-token': 'write',
+                                },
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
+                            job2: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    packages: 'write',
+                                },
+                                steps: [{ run: 'echo "test"' }],
+                            },
+                        },
+                    }),
+                    description: 'Workflow with only job-level permissions',
+                } as GitHubWorkflow & { description: string };
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+                // Assert
+                expect(result.toString()).toEqual(
+                    `## Overview
+
+Workflow with only job-level permissions
+
+### Permissions
+
+- **\`contents\`**: \`write\`
+- **\`id-token\`**: \`write\`
+- **\`packages\`**: \`write\`
+`
+                );
+            });
+
+            it('should handle workflow with some jobs having permissions and some not', async () => {
+                // Arrange
+                const manifest = {
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        permissions: {
+                            contents: 'read',
+                        },
+                        jobs: {
+                            job1: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    'id-token': 'write',
+                                },
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
+                            job2: {
+                                'runs-on': 'ubuntu-latest',
+                                steps: [{ run: 'echo "test"' }], // No permissions
+                            },
+                        },
+                    }),
+                    description: 'Workflow with mixed job permissions',
+                } as GitHubWorkflow & { description: string };
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+                // Assert
+                expect(result.toString()).toEqual(
+                    `## Overview
+
+Workflow with mixed job permissions
+
+### Permissions
+
+- **\`contents\`**: \`read\`
+- **\`id-token\`**: \`write\`
 `
                 );
             });

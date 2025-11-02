@@ -44,6 +44,7 @@ export type GitHubWorkflowJob = {
     matrix?: Record<string, unknown>;
   };
   environment?: string | { name: string };
+  permissions?: Record<string, string>; // Permissions for the job
   steps?: Array<{
     name?: string;
     uses?: string;
