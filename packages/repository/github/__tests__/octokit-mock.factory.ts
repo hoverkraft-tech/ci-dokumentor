@@ -1,4 +1,6 @@
-const graphqlMock = vi.fn();
+import { Mock, vi } from 'vitest';
+
+const graphqlMock: Mock = vi.fn();
 
 export class OcktokitMockFactory {
     static create() {
