@@ -499,6 +499,96 @@ Workflow with mixed job permissions
 `
                 );
             });
+
+            it('should keep highest permission level when workflow has write and job has read', async () => {
+                // Arrange
+                const manifest = {
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        permissions: {
+                            contents: 'write',
+                            packages: 'write',
+                        },
+                        jobs: {
+                            job1: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    contents: 'read', // Should keep 'write' from workflow
+                                    'id-token': 'write',
+                                },
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
+                        },
+                    }),
+                    description: 'Workflow where job has lower permission',
+                } as GitHubWorkflow & { description: string };
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+                // Assert
+                expect(result.toString()).toEqual(
+                    `## Overview
+
+Workflow where job has lower permission
+
+### Permissions
+
+- **\`contents\`**: \`write\`
+- **\`id-token\`**: \`write\`
+- **\`packages\`**: \`write\`
+`
+                );
+            });
+
+            it('should handle mixed permission levels across multiple jobs', async () => {
+                // Arrange
+                const manifest = {
+                    ...GitHubWorkflowMockFactory.create({
+                        on: { push: { branches: ['main'] } },
+                        permissions: {
+                            contents: 'read',
+                            actions: 'none',
+                        },
+                        jobs: {
+                            job1: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    contents: 'write', // Upgrade from read to write
+                                    packages: 'read',
+                                },
+                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                            },
+                            job2: {
+                                'runs-on': 'ubuntu-latest',
+                                permissions: {
+                                    actions: 'read', // Upgrade from none to read
+                                    packages: 'write', // Upgrade from read to write
+                                },
+                                steps: [{ run: 'echo "test"' }],
+                            },
+                        },
+                    }),
+                    description: 'Workflow with mixed permission levels',
+                } as GitHubWorkflow & { description: string };
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+                // Assert
+                expect(result.toString()).toEqual(
+                    `## Overview
+
+Workflow with mixed permission levels
+
+### Permissions
+
+- **\`actions\`**: \`read\`
+- **\`contents\`**: \`write\`
+- **\`packages\`**: \`write\`
+`
+                );
+            });
         });
 
         describe('edge cases', () => {
