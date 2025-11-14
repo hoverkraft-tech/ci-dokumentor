@@ -12,17 +12,16 @@ on:
         description: The image tag for the CI Dokumentor CLI
         value: ${{ fromJSON(jobs.docker.outputs.built-images).cli.tags[0] }}
 
-permissions:
-  actions: read
-  contents: read
-  packages: read
-  security-events: write
-  statuses: write
-  id-token: write
+permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@5f11437c716059f30c635f90055060e4ef8b31a0 # 0.28.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@753288393de1f3d92f687a6761d236ca800f5306 # 0.28.1
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+      statuses: write
     with:
       linter-env: |
         FILTER_REGEX_EXCLUDE=dist/**/*
@@ -33,29 +32,38 @@ jobs:
         VALIDATE_TSX=false
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@23af54bc615d657aa9c13c472ae701445c1811a6 # 0.17.1
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@32a69b7b8fd5f7ab7bf656e7e88aa90ad235cf8d # 0.18.0
     permissions:
-      id-token: write
-      security-events: write
       contents: read
+      id-token: write
+      pull-requests: write
+      security-events: write
     with:
       build: |
         {
           "commands": ["build"],
           "artifact": ["packages/docs/build", "packages/cli/dist"]
         }
+      test: |
+        { "coverage": "codecov" }
 
   package-test:
     needs: [linter, nodejs]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
       - name: Setup Node.js
-        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@23af54bc615d657aa9c13c472ae701445c1811a6 # 0.17.1
+        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@32a69b7b8fd5f7ab7bf656e7e88aa90ad235cf8d # 0.18.0
+
       - name: Download build artifacts
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
-          name: build
+          artifact-ids: ${{ needs.nodejs.outputs.build-artifact-id }}
           path: /
 
       - name: Verify CLI build exists
@@ -91,8 +99,11 @@ jobs:
       - name: Test help command
         run: npx ci-dokumentor --help
 
-      # Test generate command
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      # Test generate command
       - name: Test generate command
         run: |
           npx ci-dokumentor generate \
@@ -101,6 +112,7 @@ jobs:
           --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload package tarball
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
@@ -137,6 +149,9 @@ jobs:
   docker-test:
     needs: docker
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     env:
       IMAGE: ${{ fromJSON(needs.docker.outputs.built-images).cli.images[0] }}
     steps:
@@ -146,8 +161,11 @@ jobs:
       # Test help command
       - run: docker run --rm "$IMAGE" --help
 
-      # Test generate command (dry-run) on this repository's action.yml file
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      # Test generate command (dry-run) on this repository's action.yml file
       - run: |
           docker run --rm \
           -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
@@ -165,8 +183,12 @@ jobs:
   action-test:
     needs: docker
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - id: generate-docs
         uses: ./
