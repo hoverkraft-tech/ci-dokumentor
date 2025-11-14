@@ -143,10 +143,11 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
     return new Document({
       name: `${workflow.name}`,
       on: onContent,
-      permissions,
+      permissions: {},
       jobs: {
         [jobName]: {
           uses: usesName,
+          permissions,
           secrets: secretsUsage,
           with: withUsage,
         },

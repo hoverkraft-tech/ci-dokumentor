@@ -205,6 +205,7 @@ on:
   push:
     branches:
       - main
+permissions: {}
 jobs:
   workflow:
     uses: owner/repo/.github/workflows/workflow.yml
@@ -264,12 +265,13 @@ on:
   push:
     branches:
       - main
-permissions:
-  contents: read
-  deployments: write
+permissions: {}
 jobs:
   deploy:
     uses: owner/repo/.github/workflows/deploy.yml
+    permissions:
+      contents: read
+      deployments: write
     secrets:
       # Token for deployment
       # This input is required.
@@ -324,6 +326,7 @@ on:
   pull_request:
     branches:
       - main
+permissions: {}
 jobs:
   ci:
     uses: owner/repo/.github/workflows/ci.yml
@@ -356,6 +359,7 @@ on:
       - published
   schedule:
     - cron: 0 0 * * 0
+permissions: {}
 jobs:
   release:
     uses: owner/repo/.github/workflows/release.yml
@@ -386,6 +390,7 @@ on:
   push:
     branches:
       - main
+permissions: {}
 jobs:
   test:
     uses: owner/repo/.github/workflows/test.yml
@@ -424,6 +429,7 @@ on:
   push:
     branches:
       - main
+permissions: {}
 jobs:
   workflow:
     uses: owner/repo/.github/workflows/workflow.yml@abc123def456 # 1.0.0
