@@ -118,6 +118,7 @@ on:
       - main
   schedule:
     - cron: 0 2 * * 1
+permissions: {}
 jobs:
   ci-cd:
     uses: hoverkraft-tech/ci-dokumentor/.github/workflows/ci-cd.yml@sha-version # tag
