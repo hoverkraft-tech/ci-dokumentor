@@ -11,16 +11,7 @@ on:
   schedule:
     - cron: "25 8 * * 1"
 
-permissions:
-  actions: read
-  contents: read
-  issues: read
-  packages: write
-  pull-requests: read
-  security-events: write
-  statuses: write
-  # FIXME: This is a workaround for having workflow ref. See https://github.com/orgs/community/discussions/38659
-  id-token: write
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -29,11 +20,25 @@ concurrency:
 jobs:
   clean:
     uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@6b0d5ca498b7a533b43e1f2e8d988678d164a429 # 0.29.1
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      pull-requests: read
     with:
       images: '["cli"]'
 
   ci:
     uses: ./.github/workflows/__shared-ci.yml
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      issues: read
+      packages: write
+      pull-requests: write
+      security-events: write
+      statuses: write
     secrets: inherit
     with:
       sign-images: true
@@ -47,14 +52,18 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
       - name: Setup Node.js
-        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@23af54bc615d657aa9c13c472ae701445c1811a6 # 0.17.1
+        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@32a69b7b8fd5f7ab7bf656e7e88aa90ad235cf8d # 0.18.0
 
       - name: Download package tarball
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: package-tarball
           path: .
+
       - name: Publish CLI to npm
         run: |
           # Write .npmrc file
@@ -78,6 +87,8 @@ jobs:
       url: ${{ steps.deployment.outputs.url }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - id: generate-readme
         uses: ./
@@ -121,7 +132,7 @@ jobs:
           app-id: ${{ vars.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@5f11437c716059f30c635f90055060e4ef8b31a0 # 0.28.0
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@753288393de1f3d92f687a6761d236ca800f5306 # 0.28.1
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           branch: docs/action-documentation-update
@@ -134,7 +145,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@38963f37ef5be0b6ae84147f542d96d9eb02802b # main
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@ecafdeac18a6a6dcc01058cd53ac7431bedb5c3b # 0.14.1
         with:
           build-path: packages/docs/build
           build-artifact-name: build
