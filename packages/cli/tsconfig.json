@@ -8,24 +8,6 @@
     },
     {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "../core"
-    },
-    {
-      "path": "../cicd/github-actions"
-    },
-    {
-      "path": "../cicd/gitlab-ci"
-    },
-    {
-      "path": "../repository/git"
-    },
-    {
-      "path": "../repository/github"
-    },
-    {
-      "path": "../repository/gitlab"
     }
   ]
 }
