@@ -4,15 +4,6 @@
   "include": [],
   "references": [
     {
-      "path": "../../repository/git"
-    },
-    {
-      "path": "../../repository/gitlab"
-    },
-    {
-      "path": "../../core"
-    },
-    {
       "path": "./tsconfig.lib.json"
     },
     {
