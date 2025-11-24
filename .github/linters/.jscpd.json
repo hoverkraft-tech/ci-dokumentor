@@ -7,6 +7,8 @@
     "packages/**/eslint.config.mjs",
     "packages/**/vite.config.ts",
     "packages/**/tsconfig.spec.json",
-    "packages/**/tsconfig.lib.json"
+    "packages/**/tsconfig.lib.json",
+    "packages/**/eslint-report.json",
+    "packages/**/coverage/**"
   ]
 }

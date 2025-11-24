@@ -45,6 +45,7 @@ Thumbs.db
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 /packages/**/coverage
+/packages/**/eslint-report.json
 
 # TypeScript build info files
 *.tsbuildinfo
