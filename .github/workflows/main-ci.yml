@@ -51,17 +51,17 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@32a69b7b8fd5f7ab7bf656e7e88aa90ad235cf8d # 0.18.0
+        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@ce2467e5d41ff0abe85094dcc39c98288448065a # 0.20.4
 
       - name: Download package tarball
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
-          name: package-tarball
+          artifact-ids: ${{ needs.ci.outputs.package-tarball-artifact-id }}
           path: .
 
       - name: Publish CLI to npm
@@ -86,9 +86,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.url }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
+
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          artifact-ids: ${{ needs.ci.outputs.build-artifact-id }}
+          path: /
 
       - id: generate-readme
         uses: ./
@@ -126,13 +131,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           format-link: full
 
-      - uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+      - uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
         id: generate-token
         with:
           app-id: ${{ vars.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@753288393de1f3d92f687a6761d236ca800f5306 # 0.28.1
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@5e8d0e6d1e76d8577a070db6d0128a91b1c9d5ad # 0.30.2
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           branch: docs/action-documentation-update
@@ -145,7 +150,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@ecafdeac18a6a6dcc01058cd53ac7431bedb5c3b # 0.14.1
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@dbdcce2870b33525ac1fa26069bf95b2dd586fda # 0.15.2
         with:
           build-path: packages/docs/build
-          build-artifact-name: build
