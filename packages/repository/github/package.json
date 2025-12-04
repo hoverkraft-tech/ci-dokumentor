@@ -20,6 +20,6 @@
     "@ci-dokumentor/repository-git": "workspace:*",
     "@octokit/auth-token": "^6.0.0",
     "@octokit/graphql": "^9.0.3",
-    "inversify": "^7.10.4"
+    "inversify": "^7.10.5"
   }
 }
