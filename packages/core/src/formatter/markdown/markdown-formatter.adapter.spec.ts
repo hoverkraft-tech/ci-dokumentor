@@ -12,10 +12,11 @@ describe('MarkdownFormatterAdapter', () => {
   let adapter: MarkdownFormatterAdapter;
 
   beforeEach(() => {
+    const markdownCodeGenerator = new MarkdownCodeGenerator();
     adapter = new MarkdownFormatterAdapter(
-      new MarkdownTableGenerator(),
+      new MarkdownTableGenerator(markdownCodeGenerator),
       new MarkdownLinkGenerator(),
-      new MarkdownCodeGenerator()
+      markdownCodeGenerator
     );
   });
 

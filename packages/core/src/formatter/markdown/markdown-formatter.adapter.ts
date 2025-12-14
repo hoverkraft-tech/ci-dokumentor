@@ -86,23 +86,11 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   code(content: ReadableContent, language?: ReadableContent): ReadableContent {
-    const fence = this.markdownCodeGenerator.backtickFenceFor(content);
-    return fence.append(
-      language || ReadableContent.empty(),
-      this.lineBreak(),
-      content.trim(),
-      this.lineBreak(),
-      fence,
-      this.lineBreak(),
-    );
+    return this.markdownCodeGenerator.codeBlock(content, language);
   }
 
   inlineCode(content: ReadableContent): ReadableContent {
-    return ReadableContent.empty().append(
-      '`',
-      content.escape(['`', '*', '{']),
-      '`'
-    );
+    return this.markdownCodeGenerator.inlineCode(content);
   }
 
   link(text: ReadableContent, url: ReadableContent): ReadableContent {

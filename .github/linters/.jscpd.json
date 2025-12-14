@@ -3,12 +3,16 @@
   "ignore": [
     "**/.pnpm-store/**",
     "**/node_modules/**",
-    "packages/**/package.json",
-    "packages/**/eslint.config.mjs",
-    "packages/**/vite.config.ts",
-    "packages/**/tsconfig.spec.json",
-    "packages/**/tsconfig.lib.json",
-    "packages/**/eslint-report.json",
-    "packages/**/coverage/**"
+    "**/packages/**/package.json",
+    "**/packages/**/eslint.config.mjs",
+    "**/packages/**/vite.config.ts",
+    "**/packages/**/tsconfig.spec.json",
+    "**/packages/**/tsconfig.lib.json",
+    "**/packages/**/eslint-report.json",
+    "**/packages/**/coverage/**",
+    "**/packages/**/dist/**",
+    "**/packages/**/out-tsc/**",
+    "**/packages/**/.docusaurus/**",
+    "**/packages/**/build/**"
   ]
 }
