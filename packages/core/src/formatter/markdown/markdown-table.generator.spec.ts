@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ReadableContent } from '../../reader/readable-content.js';
 import { MarkdownTableGenerator } from './markdown-table.generator.js';
+import { MarkdownCodeGenerator } from './markdown-code.generator.js';
 
 describe('MarkdownTableGenerator', () => {
   let markdownTableGenerator: MarkdownTableGenerator;
 
   beforeEach(() => {
-    markdownTableGenerator = new MarkdownTableGenerator();
+    markdownTableGenerator = new MarkdownTableGenerator(new MarkdownCodeGenerator());
   });
 
   describe('table', () => {
@@ -131,9 +132,10 @@ describe('MarkdownTableGenerator', () => {
       // single block (we expect a <pre> fragment containing the inner content
       // where inner newlines are encoded as &#13;). We assert substring to keep
       // the test robust to column width/padding differences.
-      const out = result.toString();
-      // the output now wraps pre blocks with textlint directives; assert substring
-      expect(out).toContain('This is inline<!-- textlint-disable --><pre>a&#13;b</pre><!-- textlint-enable -->span');
+      expect(result.toString()).toEqual(`| Example                                                                               |
+| ------------------------------------------------------------------------------------- |
+| This is inline<!-- textlint-disable --><pre>a&#13;b</pre><!-- textlint-enable -->span |
+`);
     });
 
     it('should handle multiline content in table cells', () => {
@@ -248,15 +250,25 @@ describe('MarkdownTableGenerator', () => {
           new ReadableContent('Python'),
           new ReadableContent('Example:\n```python\ndef hello():\n    return "Hello World"\n```'),
         ],
+        [
+          new ReadableContent('Yaml'),
+          new ReadableContent('Example:\n```yaml\nfile-path: **/*.md\n\n```'),
+        ],
       ];
 
       // Act
       const result = markdownTableGenerator.table(headers, rows);
 
-      // Assert: Markdown table with wrapped <pre lang="..."> for code cells and &#13; for inner newlines
-      const out = result.toString();
-      expect(out).toContain('<!-- textlint-disable --><pre lang="js">function hello() {&#13; return "Hello World";&#13;}</pre><!-- textlint-enable -->');
-      expect(out).toContain('<!-- textlint-disable --><pre lang="python">def hello():&#13; return "Hello World"</pre><!-- textlint-enable -->');
+      // Assert: Markdown table with wrapped <pre lang="..."> for code cells and &#13; for inner newlines and escaped *
+      expect(result.toString()).toEqual(`| Language   | Example Code                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| JavaScript | Example:                                                                                                                  |
+|            | <!-- textlint-disable --><pre lang="js">function hello() {&#13; return "Hello World";&#13;}</pre><!-- textlint-enable --> |
+| Python     | Example:                                                                                                                  |
+|            | <!-- textlint-disable --><pre lang="python">def hello():&#13; return "Hello World"</pre><!-- textlint-enable -->          |
+| Yaml       | Example:                                                                                                                  |
+|            | <!-- textlint-disable --><pre lang="yaml">file-path: \\*\\*/\\*.md&#13;</pre><!-- textlint-enable -->                        |
+`);
     });
 
     it('should handle mixed code blocks and regular multiline content', () => {
@@ -277,8 +289,13 @@ describe('MarkdownTableGenerator', () => {
       const result = markdownTableGenerator.table(headers, rows);
 
       // Assert: Markdown table; code cell rendered in wrapped <pre lang="..."> with &#13; and text lines as separate table rows
-      const out2 = result.toString();
-      expect(out2).toContain('<!-- textlint-disable --><pre lang="js">const x = 1;&#13;console.log(x);</pre><!-- textlint-enable -->');
+      expect(result.toString()).toEqual(`| Type | Content                                                                                                |
+| ---- | ------------------------------------------------------------------------------------------------------ |
+| Code | <!-- textlint-disable --><pre lang="js">const x = 1;&#13;console.log(x);</pre><!-- textlint-enable --> |
+| Text | Line 1                                                                                                 |
+|      | Line 2                                                                                                 |
+|      | Line 3                                                                                                 |
+`);
     });
 
     it('should preserve ~~~ fenced code blocks as single lines in table cells', () => {
@@ -295,7 +312,10 @@ describe('MarkdownTableGenerator', () => {
       const result = markdownTableGenerator.table(headers, rows);
 
       // Assert: Markdown table with wrapped <pre lang="text"> and &#13; for inner newlines
-      expect(result.toString()).toContain('<!-- textlint-disable --><pre lang="text">line a&#13;line b</pre><!-- textlint-enable -->');
+      expect(result.toString()).toEqual(`| Lang   | Example                                                                                   |
+| ------ | ----------------------------------------------------------------------------------------- |
+| Custom | <!-- textlint-disable --><pre lang="text">line a&#13;line b</pre><!-- textlint-enable --> |
+`);
     });
 
     it('renders fenced code in a single cell and plain text in another cell', () => {
@@ -316,9 +336,11 @@ describe('MarkdownTableGenerator', () => {
       // block (we expect a <pre> fragment containing the inner content where
       // inner newlines are encoded as &#13;). We assert substring to keep the
       // test robust to column width/padding differences.
-      const out = result.toString();
-      // ensure the wrapped pre block is present and other columns remain
-      expect(out).toContain('<!-- textlint-disable --><pre lang="js">console.log(1)</pre><!-- textlint-enable -->');
+      expect(result.toString()).toEqual(`| H1                                                                                   | H2          | H3            |
+| ------------------------------------------------------------------------------------ | ----------- | ------------- |
+| pre:                                                                                 | normal text | \`inline code\` |
+| <!-- textlint-disable --><pre lang="js">console.log(1)</pre><!-- textlint-enable --> |             |               |
+`);
     });
   });
 });

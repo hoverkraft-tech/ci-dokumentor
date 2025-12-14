@@ -1,5 +1,6 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { ReadableContent } from '../../reader/readable-content.js';
+import { MarkdownCodeGenerator } from './markdown-code.generator.js';
 
 /**
  * Class responsible for generating markdown tables from headers and rows.
@@ -7,6 +8,11 @@ import { ReadableContent } from '../../reader/readable-content.js';
  */
 @injectable()
 export class MarkdownTableGenerator {
+    constructor(
+        @inject(MarkdownCodeGenerator) private readonly markdownCodeGenerator: MarkdownCodeGenerator
+    ) {
+    }
+
     table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent {
         const isEmptyTable = (!headers || headers.length === 0) && (!rows || rows.length === 0);
         if (isEmptyTable) {
@@ -38,7 +44,7 @@ export class MarkdownTableGenerator {
             const hLines = headerLines[c] || [ReadableContent.empty()];
             for (const hl of hLines) {
                 const line = hl || ReadableContent.empty();
-                const tb = this.containsFence(line) ? this.transformLineForFence(line) : line;
+                const tb = this.transformTableCellLine(line);
                 const normalizedCell = this.normalizeCell(tb || ReadableContent.empty());
                 colWidths[c] = Math.max(colWidths[c], normalizedCell.getSize());
             }
@@ -49,7 +55,7 @@ export class MarkdownTableGenerator {
                 const clines = this.splitMultilineCell(row[c] || ReadableContent.empty());
                 for (const ln of clines) {
                     const line = ln || ReadableContent.empty();
-                    const tb = this.containsFence(line) ? this.transformLineForFence(line) : line;
+                    const tb = this.transformTableCellLine(line);
                     const norm = this.normalizeCell(tb || ReadableContent.empty());
                     colWidths[c] = Math.max(colWidths[c], norm.getSize());
                 }
@@ -73,7 +79,7 @@ export class MarkdownTableGenerator {
         // main header (first header line)
         for (let c = 0; c < numCols; c++) {
             const first = (headerLines[c] && headerLines[c][0]) || ReadableContent.empty();
-            const tb = this.containsFence(first) ? this.transformLineForFence(first) : first;
+            const tb = this.transformTableCellLine(first);
 
             const cell = this.padCell(tb, colWidths[c]);
             if (c > 0) {
@@ -96,7 +102,7 @@ export class MarkdownTableGenerator {
 
             for (let c = 0; c < numCols; c++) {
                 const hl = (headerLines[c] && headerLines[c][lineIndex]) || ReadableContent.empty();
-                const tb = this.containsFence(hl) ? this.transformLineForFence(hl) : hl;
+                const tb = this.transformTableCellLine(hl);
 
                 const cell = this.padCell(tb, colWidths[c]);
                 if (c > 0) {
@@ -127,9 +133,7 @@ export class MarkdownTableGenerator {
             const lines = this.splitMultilineCell(row[c] || ReadableContent.empty());
             const tlines = lines.map(
                 (line) => (
-                    this.containsFence(line || ReadableContent.empty())
-                        ? this.transformLineForFence(line || ReadableContent.empty())
-                        : (line || ReadableContent.empty())
+                    this.transformTableCellLine(line || ReadableContent.empty())
                 )
             );
             cellLines.push(tlines as ReadableContent[]);
@@ -172,89 +176,13 @@ export class MarkdownTableGenerator {
         return normalized.padEnd(padCount, ' ');
     }
 
-    private transformLineForFence(lineBuf: ReadableContent): ReadableContent {
-        const segments = this.splitCellIntoSegments(lineBuf);
-        if (segments.length === 0) {
-            return ReadableContent.empty();
+    private transformTableCellLine(line: ReadableContent): ReadableContent {
+        if (!this.shouldRenderHtmlPreForMultilineCode(line)) {
+            return line;
         }
 
-        let result = ReadableContent.empty();
-        for (const seg of segments) {
-            if (seg.type === 'text') {
-                const trimmedContent = seg.content.trim();
-                if (!trimmedContent.isEmpty()) {
-                    result = result.append(trimmedContent.htmlEscape());
-                }
-            } else {
-                const langAttr = seg.lang ? ` lang="${seg.lang}"` : '';
-                const inner = seg.content || ReadableContent.empty();
-                const innerParts: ReadableContent[] = [];
-                let last = 0;
-                for (let i = 0; i < inner.getSize(); i++) {
-                    if (inner.includesAt(0x0A, i)) {
-                        if (i > last) {
-                            innerParts.push(inner.slice(last, i));
-                        }
-                        innerParts.push(new ReadableContent('&#13;'));
-                        last = i + 1;
-                    }
-                }
-
-                if (last < inner.getSize()) {
-                    innerParts.push(inner.slice(last));
-                }
-
-                for (let pi = 0; pi < innerParts.length; pi += 2) {
-                    const seg2 = innerParts[pi];
-                    if (seg2.isEmpty()) {
-                        continue;
-                    }
-
-                    let start = 0;
-                    while (start < seg2.getSize() && (seg2.includesAt(0x20, start) || seg2.includesAt(0x09, start) || seg2.includesAt(0x0D, start))) {
-                        start++;
-                    }
-
-                    if (start === 0) {
-                        continue;
-                    }
-
-                    if (start >= seg2.getSize()) {
-                        innerParts[pi] = ReadableContent.empty();
-                    } else {
-                        innerParts[pi] = new ReadableContent(' ').append(seg2.slice(start));
-                    }
-                }
-
-                // Build the <pre> contents carefully: already-formed '&#13;' tokens
-                // must be preserved (not escaped). For other parts we apply
-                // htmlEscape(). Append parts directly to avoid re-escaping
-                // the '&' in '&#13;'.
-                // Wrap <pre> fragments with textlint directives so downstream
-                // linters like textlint won't parse the preformatted content as
-                // regular Markdown text. We include HTML comments which are
-                // valid in Markdown and understood by textlint as directives.
-                result = result.append('<!-- textlint-disable -->');
-                result = result.append(`<pre${langAttr}>`);
-                for (const part of innerParts) {
-                    if (part.isEmpty()) continue;
-                    // preserve exact entity sequences used for inner newlines
-                    if (part.equals('&#13;')) {
-                        result = result.append('&#13;');
-                    } else {
-                        result = result.append(part.htmlEscape());
-                    }
-                }
-                result = result.append(`</pre>`);
-                result = result.append('<!-- textlint-enable -->');
-            }
-        }
-
-        return result;
+        return this.transformLineForFence(line);
     }
-
-    // The methods below are extracted and simplified copies from the adapter to keep
-    // the generator self-contained. They intentionally operate on ReadableContentHandler.
 
     private lineBreak(): ReadableContent {
         return new ReadableContent('\n');
@@ -265,10 +193,11 @@ export class MarkdownTableGenerator {
         if (content.isEmpty()) {
             return [ReadableContent.empty()];
         }
+
         // Use the buffer-based fenced block finder first (safe, linear scan).
-        const fenced = this.findFencedBlocks(content);
+        const fenced = this.markdownCodeGenerator.findCodeBlocks(content);
         // Find inline backtick spans (one or more backticks) outside fenced blocks.
-        const inlineSpans = this.findInlineBacktickSpans(content, fenced);
+        const inlineSpans = this.markdownCodeGenerator.findInlineCode(content, fenced);
 
         const codeBlocks: { start: number; end: number; replacement: string }[] = [];
         for (const b of fenced) {
@@ -305,7 +234,53 @@ export class MarkdownTableGenerator {
             }
             restoredLines.push(restoredLine);
         }
+
         return restoredLines;
+    }
+
+    private transformLineForFence(lineBuf: ReadableContent): ReadableContent {
+        const segments = this.splitCellIntoSegments(lineBuf);
+        if (segments.length === 0) {
+            return ReadableContent.empty();
+        }
+
+        let result = ReadableContent.empty();
+        for (const seg of segments) {
+            if (seg.type === 'text') {
+                const trimmedContent = seg.content.trim();
+                if (!trimmedContent.isEmpty()) {
+                    result = result.append(trimmedContent.htmlEscape());
+                }
+            } else {
+                result = result.append(this.markdownCodeGenerator.codeBlock(seg.content, seg.lang, true));
+            }
+        }
+
+        return result;
+    }
+
+    private shouldRenderHtmlPreForMultilineCode(content: ReadableContent): boolean {
+        if (content.isEmpty()) {
+            return false;
+        }
+
+        const blocks = this.markdownCodeGenerator.findCodeBlocks(content);
+        if (blocks.length > 0) {
+            return true;
+        }
+
+        // Also detect inline backtick spans but only treat them as fences if
+        // they contain an inner newline. That avoids switching to <pre> mode
+        // for simple inline code spans that are single-line.
+        const spans = this.markdownCodeGenerator.findInlineCode(content, []);
+        for (const span of spans) {
+            const inner = content.slice(span.start + span.delimLen, span.end - span.delimLen);
+            if (inner.includes('\n') || inner.includes('\r')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private splitCellIntoSegments(cell: ReadableContent): Array<{ type: 'text' | 'code'; content: ReadableContent; lang?: ReadableContent }> {
@@ -315,12 +290,12 @@ export class MarkdownTableGenerator {
             return out;
         }
 
-        const blocks = this.findFencedBlocks(cell);
+        const blocks = this.markdownCodeGenerator.findCodeBlocks(cell);
         // If no fenced blocks found, also try to detect inline backtick spans and
         // treat them as code segments. This mirrors fenced block handling so that
         // inline code spans with newlines are rendered as <pre> in tables.
         if (blocks.length === 0) {
-            const spans = this.findInlineBacktickSpans(cell, []);
+            const spans = this.markdownCodeGenerator.findInlineCode(cell, []);
             if (spans.length === 0) {
                 out.push({ type: 'text', content: cell });
                 return out;
@@ -360,203 +335,6 @@ export class MarkdownTableGenerator {
             out.push({ type: 'text', content: cell.slice(last) });
         }
         return out;
-    }
-
-    private containsFence(content: ReadableContent): boolean {
-        if (content.isEmpty()) {
-            return false;
-        }
-
-        const blocks = this.findFencedBlocks(content);
-        if (blocks.length > 0) {
-            return true;
-        }
-
-        // also detect inline backtick spans (e.g. `code` or ``code``) but only
-        // treat them as fences if they contain an inner newline. That avoids
-        // switching the whole table rendering to fenced mode for simple inline
-        // code spans that are single-line.
-        const spans = this.findInlineBacktickSpans(content, []);
-        for (const span of spans) {
-            const inner = content.slice(span.start + span.delimLen, span.end - span.delimLen);
-
-            if (inner.includes('\n') || inner.includes('\r')) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Find inline backtick spans (e.g. `code` or ``code``). Returns ranges with
-     * delimiter length. This is a safe linear scan and avoids expensive regexes.
-     * existingBlocks is an optional list of ranges to ignore (e.g. fenced blocks).
-     */
-    private findInlineBacktickSpans(content: ReadableContent, existingBlocks: Array<{ start: number; end: number }>): Array<{ start: number; end: number; delimLen: number }> {
-        const result: Array<{ start: number; end: number; delimLen: number }> = [];
-
-        if (content.isEmpty()) {
-            return result;
-        }
-
-        const contentSize = content.getSize();
-        let pos = 0;
-
-        while (pos < contentSize) {
-            const idx = content.search('`', pos);
-            if (idx === -1) {
-                break;
-            }
-
-            // skip if inside existing fenced block
-            if (existingBlocks.some((b) => idx >= b.start && idx < b.end)) {
-                pos = idx + 1;
-                continue;
-            }
-
-            let k = idx;
-            while (k < contentSize && content.includesAt('`', k)) {
-                k++;
-            }
-
-            const delimLen = k - idx;
-            let searchPos = k;
-            let found = -1;
-            while (searchPos < contentSize) {
-                const next = content.search('`', searchPos);
-                if (next === -1) {
-                    break;
-                }
-
-                if (existingBlocks.some((b) => next >= b.start && next < b.end)) {
-                    searchPos = next + 1;
-                    continue;
-                }
-                let kk = next;
-
-                while (kk < contentSize && content.includesAt('`', kk)) {
-                    kk++;
-                }
-                const closeLen = kk - next;
-                if (closeLen === delimLen) { found = next; break; }
-                searchPos = kk;
-            }
-
-            if (found === -1) {
-                pos = k;
-                continue;
-            }
-
-            result.push({ start: idx, end: found + delimLen, delimLen });
-            pos = found + delimLen;
-        }
-
-        return result;
-    }
-
-    private findFencedBlocks(content: ReadableContent): Array<{ start: number; end: number; innerStart: number; innerEnd: number; lang?: ReadableContent }> {
-        const res: Array<{ start: number; end: number; innerStart: number; innerEnd: number; lang?: ReadableContent }> = [];
-
-        if (content.isEmpty()) {
-            return res;
-        }
-
-        const contentSize = content.getSize();
-        let pos = 0;
-        while (pos < contentSize) {
-            const backtickIdx = content.search(0x60 /* ` */, pos);
-            const tildeIdx = content.search(0x7E /* ~ */, pos);
-            let idx = -1;
-            let marker = 0;
-            if (backtickIdx === -1 && tildeIdx === -1) {
-                break;
-            }
-            else if (backtickIdx === -1) {
-                idx = tildeIdx; marker = 0x7E;
-            }
-            else if (tildeIdx === -1) {
-                idx = backtickIdx; marker = 0x60;
-            }
-            else if (backtickIdx < tildeIdx) {
-                idx = backtickIdx; marker = 0x60;
-            }
-            else {
-                idx = tildeIdx; marker = 0x7E;
-            }
-
-            if (idx === -1) {
-                break;
-            }
-            if (idx !== 0 && !content.includesAt(0x0A, idx - 1)) {
-                pos = idx + 1;
-                continue;
-            }
-
-            let k = idx;
-            while (k < contentSize && content.includesAt(marker, k)) {
-                k++;
-            }
-
-            const fenceLen = k - idx;
-            if (fenceLen < 3) {
-                pos = idx + 1;
-                continue;
-            }
-
-            const infoLineEnd = content.search(0x0A, k);
-            if (infoLineEnd === -1) {
-                break;
-            }
-
-            const innerStart = infoLineEnd + 1;
-            let lang: ReadableContent | undefined = undefined;
-            if (infoLineEnd > k) {
-                let ls = k;
-                let le = infoLineEnd - 1;
-                while (ls <= le && content.includesAt(0x20, ls)) {
-                    ls++;
-                }
-                while (le >= ls && (content.includesAt(0x20, le) || content.includesAt(0x0D, le))) {
-                    le--;
-                }
-                if (le >= ls) {
-                    lang = content.slice(ls, le + 1);
-                }
-            }
-            let searchPos = innerStart;
-            let found = -1;
-            while (searchPos < contentSize) {
-                const next = content.search(marker, searchPos);
-                if (next === -1) {
-                    break;
-                }
-                if (next !== 0 && !content.includesAt(0x0A, next - 1)) {
-                    searchPos = next + 1;
-                    continue;
-                }
-
-                let kk = next;
-                while (kk < contentSize && content.includesAt(marker, kk)) {
-                    kk++;
-                }
-
-                const closeLen = kk - next;
-                if (closeLen >= fenceLen) {
-                    const lineEnd = content.search(0x0A, kk);
-                    const endPos = (lineEnd === -1) ? kk : (lineEnd + 1);
-                    found = next;
-                    const innerEnd = next - 1 >= 0 && content.includesAt(0x0A, next - 1) ? next - 1 : next;
-                    res.push({ start: idx, end: endPos, innerStart, innerEnd, lang });
-                    pos = endPos;
-                    break;
-                }
-                searchPos = kk + 1;
-            }
-            if (found === -1) {
-                break;
-            }
-        }
-        return res;
     }
 }
 
