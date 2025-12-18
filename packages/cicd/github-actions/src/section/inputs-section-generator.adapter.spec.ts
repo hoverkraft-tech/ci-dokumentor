@@ -104,6 +104,11 @@ describe('InputsSectionGenerator', () => {
               required: false,
               default: 'string-value',
             },
+            'multiline-default-input': {
+              description: 'Input with multiline default',
+              required: false,
+              default: 'line1\nline2\nline with *',
+            },
           },
         });
 
@@ -114,11 +119,12 @@ describe('InputsSectionGenerator', () => {
         expect(result.toString()).toEqual(
           `## Inputs
 
-| **Input**                 | **Description**                  | **Required** | **Default**    |
-| ------------------------- | -------------------------------- | ------------ | -------------- |
-| **\`boolean-true-input\`**  | Input with boolean true default  | **false**    | \`true\`         |
-| **\`boolean-false-input\`** | Input with boolean false default | **false**    | \`false\`        |
-| **\`string-input\`**        | Input with string default        | **false**    | \`string-value\` |
+| **Input**                     | **Description**                  | **Required** | **Default**                                                                                              |
+| ----------------------------- | -------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------- |
+| **\`boolean-true-input\`**      | Input with boolean true default  | **false**    | \`true\`                                                                                                   |
+| **\`boolean-false-input\`**     | Input with boolean false default | **false**    | \`false\`                                                                                                  |
+| **\`string-input\`**            | Input with string default        | **false**    | \`string-value\`                                                                                           |
+| **\`multiline-default-input\`** | Input with multiline default     | **false**    | <!-- textlint-disable --><pre lang="text">line1&#13;line2&#13;line with \\*</pre><!-- textlint-enable --> |
 `
         );
       });

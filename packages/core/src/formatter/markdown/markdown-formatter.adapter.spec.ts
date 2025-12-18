@@ -365,7 +365,7 @@ console.log(x);
       const result = adapter.code(content);
 
       // Assert
-      expect(result.toString()).toEqual('```\nconsole.log("Hello World");\n```\n');
+      expect(result.toString()).toEqual('```text\nconsole.log("Hello World");\n```\n');
     });
 
     it('should format text as code block with language', () => {
@@ -390,7 +390,7 @@ console.log(x);
       const result = adapter.code(content);
 
       // Assert
-      expect(result.toString()).toEqual('```\n\n```\n');
+      expect(result.toString()).toEqual('```text\n\n```\n');
     });
 
     it('should handle multi-line code', () => {
@@ -435,7 +435,7 @@ end
       const result = adapter.code(content);
 
       // Assert: fence should be at least 4 backticks so inner ``` does not close it
-      expect(result.toString()).toEqual(`\`\`\`\`
+      expect(result.toString()).toEqual(`\`\`\`\`text
 const example = \`inline\`;
 // code fence inside:
 \`\`\`
@@ -454,10 +454,13 @@ end
       { desc: 'special', content: new ReadableContent('getValue("key")'), expected: '`getValue("key")`' },
       { desc: 'escape backtick', content: new ReadableContent('a ` b'), expected: '`a \\` b`' },
       { desc: 'escape markers', content: new ReadableContent('a ** b * c'), expected: '`a \\*\\* b \\* c`' },
+      { desc: 'multiline', content: new ReadableContent('line1\nline2'), expected: '```text\nline1\nline2\n```\n' },
     ])('should format inlineCode ($desc)', ({ content, expected }) => {
       const result = adapter.inlineCode(content);
       expect(result.toString()).toEqual(expected);
     });
+
+
   });
 
   describe('link', () => {

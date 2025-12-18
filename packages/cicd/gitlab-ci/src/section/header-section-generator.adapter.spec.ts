@@ -157,7 +157,7 @@ describe('HeaderSectionGenerator', () => {
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-        destination: undefined as any
+        destination: undefined as unknown as string
       });
 
       // Assert

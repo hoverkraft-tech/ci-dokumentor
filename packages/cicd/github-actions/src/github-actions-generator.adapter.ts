@@ -1,6 +1,7 @@
 import { dirname, join } from 'node:path';
 import {
   AbstractGeneratorAdapter,
+  RepositoryInfo,
   SectionGeneratorAdapter,
 } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
@@ -71,7 +72,7 @@ export class GitHubActionsGeneratorAdapter extends AbstractGeneratorAdapter<GitH
   /**
    * Parse the source file into a manifest
    */
-  protected async parseFile(source: string, repositoryInfo: any): Promise<GitHubActionsManifest> {
+  protected async parseFile(source: string, repositoryInfo: RepositoryInfo): Promise<GitHubActionsManifest> {
     return await this.gitHubActionsParser.parseFile(source, repositoryInfo);
   }
 }

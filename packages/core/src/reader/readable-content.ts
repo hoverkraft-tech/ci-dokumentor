@@ -3,6 +3,11 @@
  * for content manipulation without exposing Buffer-specific operations.
  */
 export class ReadableContent {
+  static readonly SPACE_CHAR_CODE = 0x20; // ' '
+  static readonly TAB_CHAR_CODE = 0x09; // '\t'
+  static readonly NEW_LINE_CHAR_CODE = 0x0A; // '\n'
+  static readonly CARRIAGE_RETURN_CHAR_CODE = 0x0D; // '\r'
+
   // Maximum buffer size (in bytes) allowed for running user-provided RegExp
   // operations. This prevents potential catastrophic backtracking when a
   // (possibly user-controlled) regular expression is run against very large
@@ -314,10 +319,10 @@ export class ReadableContent {
   }
 
   private isWhitespace(byte: number): boolean {
-    return byte === 0x20 // space
-      || byte === 0x09 // tab
-      || byte === 0x0A // line feed
-      || byte === 0x0D; // carriage return
+    return byte === ReadableContent.SPACE_CHAR_CODE // space
+      || byte === ReadableContent.TAB_CHAR_CODE // tab
+      || byte === ReadableContent.NEW_LINE_CHAR_CODE // line feed
+      || byte === ReadableContent.CARRIAGE_RETURN_CHAR_CODE; // carriage return
   }
 
   toUpperCase(): ReadableContent {
@@ -464,6 +469,19 @@ export class ReadableContent {
     return new ReadableContent(this.buffer.subarray(startByte, endByte));
   }
 
+  isMultiLine(): boolean {
+    if (this.isEmpty()) {
+      return false;
+    }
+
+    for (let i = 0; i < this.buffer.length; i++) {
+      if (this.buffer[i] === ReadableContent.NEW_LINE_CHAR_CODE) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Split the content into lines based on newline characters.
    * Handles both LF (`\n`) and CRLF (`\r\n`) line endings.
@@ -480,9 +498,9 @@ export class ReadableContent {
     const lines: ReadableContent[] = [];
     let lineStart = 0;
     for (let i = 0; i < this.buffer.length; i++) {
-      if (this.buffer[i] === 0x0A) {
+      if (this.buffer[i] === ReadableContent.NEW_LINE_CHAR_CODE) {
         let line = this.buffer.subarray(lineStart, i);
-        if (line.length > 0 && line[line.length - 1] === 0x0D) {
+        if (line.length > 0 && line[line.length - 1] === ReadableContent.CARRIAGE_RETURN_CHAR_CODE) {
           // Remove trailing CR from a CRLF sequence. Operate on the `line`
           // slice we already created (not on the full buffer) to avoid
           // returning the wrong portion of the underlying buffer.
@@ -494,7 +512,7 @@ export class ReadableContent {
     }
     if (lineStart <= this.buffer.length - 1) {
       let line = this.buffer.subarray(lineStart, this.buffer.length);
-      if (line.length > 0 && line[line.length - 1] === 0x0D) {
+      if (line.length > 0 && line[line.length - 1] === ReadableContent.CARRIAGE_RETURN_CHAR_CODE) {
         line = line.subarray(0, line.length - 1);
       }
       lines.push(new ReadableContent(line));

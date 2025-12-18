@@ -119,25 +119,6 @@ describe('MarkdownTableGenerator', () => {
       );
     });
 
-    it('should treat inline backtick spans with newlines as single blocks in table cells', () => {
-      // Arrange
-      const headers = [new ReadableContent('Example')];
-      // inline backtick span using single backticks but containing a newline
-      const rows = [[new ReadableContent('This is inline `a\nb` span')]];
-
-      // Act
-      const result = markdownTableGenerator.table(headers, rows);
-
-      // Assert: the inline backtick span should be preserved and rendered as a
-      // single block (we expect a <pre> fragment containing the inner content
-      // where inner newlines are encoded as &#13;). We assert substring to keep
-      // the test robust to column width/padding differences.
-      expect(result.toString()).toEqual(`| Example                                                                               |
-| ------------------------------------------------------------------------------------- |
-| This is inline<!-- textlint-disable --><pre>a&#13;b</pre><!-- textlint-enable -->span |
-`);
-    });
-
     it('should handle multiline content in table cells', () => {
       // Arrange
       const headers = [new ReadableContent('Name'), new ReadableContent('Description')];

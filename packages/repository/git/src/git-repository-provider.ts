@@ -32,8 +32,9 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
   /**
    * Apply runtime options to the provider instance.
    */
-  setOptions(_options: GitRepositoryProviderOptions): void {
+  setOptions(options: GitRepositoryProviderOptions): void {
     // No options to set anymore
+    void options;
   }
 
   /**

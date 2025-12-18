@@ -29,8 +29,9 @@ export abstract class GitLabCISectionGeneratorAdapter
   /**
    * Apply runtime option values to the section generator
    */
-  setSectionOptions(_options: Partial<SectionOptions>): void {
+  setSectionOptions(options: Partial<SectionOptions>): void {
     // Default implementation - subclasses can override
+    void options;
   }
 
   protected isGitLabComponent(parsed: unknown): parsed is GitLabComponent {

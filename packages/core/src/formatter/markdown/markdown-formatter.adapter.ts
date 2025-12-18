@@ -90,6 +90,11 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   inlineCode(content: ReadableContent): ReadableContent {
+    // For multiline content, use a fenced code block instead of inline code
+    if (content.isMultiLine()) {
+      return this.markdownCodeGenerator.codeBlock(content);
+    }
+
     return this.markdownCodeGenerator.inlineCode(content);
   }
 
@@ -171,7 +176,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   lineBreak(): ReadableContent {
-    return new ReadableContent('\n');
+    return new ReadableContent(String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE));
   }
 
   section(section: SectionIdentifier, content: ReadableContent): ReadableContent {

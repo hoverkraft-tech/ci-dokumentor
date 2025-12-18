@@ -7,6 +7,7 @@ export class MarkdownCodeGenerator {
     private static readonly TICK = '`';
     private static readonly MIN_FENCE_LEN = 3;
     private static readonly HTML_NEWLINE_ENTITY = '&#13;';
+    private static readonly DEFAULT_LANGUAGE = new ReadableContent('text');
 
     /**
      * Heuristic to check whether a single line starts a fenced code block.
@@ -44,17 +45,21 @@ export class MarkdownCodeGenerator {
     }
 
     codeBlock(content: ReadableContent, language?: ReadableContent, toHTML = false): ReadableContent {
+        const resolvedLanguage = language && !language.isEmpty()
+            ? language
+            : MarkdownCodeGenerator.DEFAULT_LANGUAGE;
+
         if (toHTML) {
-            return this.htmlCodeBlock(content, language);
+            return this.htmlCodeBlock(content, resolvedLanguage);
         }
         const fence = this.backtickFenceFor(content);
         return fence.append(
-            language || ReadableContent.empty(),
-            '\n',
+            resolvedLanguage,
+            String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE),
             content.trim(),
-            '\n',
+            String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE),
             fence,
-            '\n',
+            String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE),
         );
     }
 
@@ -66,13 +71,12 @@ export class MarkdownCodeGenerator {
         );
     }
 
-    private htmlCodeBlock(content: ReadableContent, language?: ReadableContent): ReadableContent {
-        const langAttr = language ? ` lang="${language}"` : '';
+    private htmlCodeBlock(content: ReadableContent, language: ReadableContent): ReadableContent {
         const inner = content || ReadableContent.empty();
         const innerParts: ReadableContent[] = [];
         let last = 0;
         for (let i = 0; i < inner.getSize(); i++) {
-            if (inner.includesAt(0x0A, i)) {
+            if (inner.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, i)) {
                 if (i > last) {
                     innerParts.push(inner.slice(last, i));
                 }
@@ -92,7 +96,14 @@ export class MarkdownCodeGenerator {
             }
 
             let start = 0;
-            while (start < seg2.getSize() && (seg2.includesAt(0x20, start) || seg2.includesAt(0x09, start) || seg2.includesAt(0x0D, start))) {
+            while (
+                start < seg2.getSize()
+                && (
+                    seg2.includesAt(ReadableContent.SPACE_CHAR_CODE, start)
+                    || seg2.includesAt(ReadableContent.TAB_CHAR_CODE, start)
+                    || seg2.includesAt(ReadableContent.CARRIAGE_RETURN_CHAR_CODE, start)
+                )
+            ) {
                 start++;
             }
 
@@ -116,7 +127,7 @@ export class MarkdownCodeGenerator {
         // regular Markdown text.
         let result = ReadableContent.empty()
             .append('<!-- textlint-disable -->')
-            .append(`<pre${langAttr}>`);
+            .append(`<pre lang="`, language.htmlEscape(), `">`);
 
         for (const part of innerParts) {
             if (part.isEmpty()) {
@@ -234,7 +245,7 @@ export class MarkdownCodeGenerator {
             if (idx === -1) {
                 break;
             }
-            if (idx !== 0 && !content.includesAt(0x0A, idx - 1)) {
+            if (idx !== 0 && !content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, idx - 1)) {
                 pos = idx + 1;
                 continue;
             }
@@ -250,7 +261,7 @@ export class MarkdownCodeGenerator {
                 continue;
             }
 
-            const infoLineEnd = content.search(0x0A, k);
+            const infoLineEnd = content.search(ReadableContent.NEW_LINE_CHAR_CODE, k);
             if (infoLineEnd === -1) {
                 break;
             }
@@ -260,10 +271,10 @@ export class MarkdownCodeGenerator {
             if (infoLineEnd > k) {
                 let ls = k;
                 let le = infoLineEnd - 1;
-                while (ls <= le && content.includesAt(0x20, ls)) {
+                while (ls <= le && content.includesAt(ReadableContent.SPACE_CHAR_CODE, ls)) {
                     ls++;
                 }
-                while (le >= ls && (content.includesAt(0x20, le) || content.includesAt(0x0D, le))) {
+                while (le >= ls && (content.includesAt(ReadableContent.SPACE_CHAR_CODE, le) || content.includesAt(ReadableContent.CARRIAGE_RETURN_CHAR_CODE, le))) {
                     le--;
                 }
                 if (le >= ls) {
@@ -277,7 +288,7 @@ export class MarkdownCodeGenerator {
                 if (next === -1) {
                     break;
                 }
-                if (next !== 0 && !content.includesAt(0x0A, next - 1)) {
+                if (next !== 0 && !content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, next - 1)) {
                     searchPos = next + 1;
                     continue;
                 }
@@ -289,10 +300,10 @@ export class MarkdownCodeGenerator {
 
                 const closeLen = kk - next;
                 if (closeLen >= fenceLen) {
-                    const lineEnd = content.search(0x0A, kk);
+                    const lineEnd = content.search(ReadableContent.NEW_LINE_CHAR_CODE, kk);
                     const endPos = (lineEnd === -1) ? kk : (lineEnd + 1);
                     found = next;
-                    const innerEnd = next - 1 >= 0 && content.includesAt(0x0A, next - 1) ? next - 1 : next;
+                    const innerEnd = next - 1 >= 0 && content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, next - 1) ? next - 1 : next;
                     res.push({ start: idx, end: endPos, innerStart, innerEnd, lang });
                     pos = endPos;
                     break;
