@@ -201,13 +201,19 @@ describe('InputsSectionGenerator', () => {
         const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
 
         // Assert
-        // Curly braces are escaped to prevent template interpolation in MDX/Jekyll
-        expect(result.toString()).toContain('$\\{\\{ github.token }}');
+        expect(result.toString()).toEqual(`## Inputs
+
+| **Input**          | **Description**                             | **Required** | **Default**           |
+| ------------------ | ------------------------------------------- | ------------ | --------------------- |
+| **\`github-token\`** | GitHub Token for deploying to GitHub Pages. | **false**    | \`\${{ github.token }}\` |
+`);
         expect(result.toString()).toEqual(
-          '## Inputs\n\n' +
-          '| **Input**          | **Description**                             | **Required** | **Default**             |\n' +
-          '| ------------------ | ------------------------------------------- | ------------ | ----------------------- |\n' +
-          '| **`github-token`** | GitHub Token for deploying to GitHub Pages. | **false**    | `$\\{\\{ github.token }}` |\n'
+          `## Inputs
+
+| **Input**          | **Description**                             | **Required** | **Default**           |
+| ------------------ | ------------------------------------------- | ------------ | --------------------- |
+| **\`github-token\`** | GitHub Token for deploying to GitHub Pages. | **false**    | \`\${{ github.token }}\` |
+`
         );
       });
     });

@@ -9,6 +9,9 @@ import { MarkdownCodeGenerator } from './markdown-code.generator.js';
 
 @injectable()
 export class MarkdownFormatterAdapter implements FormatterAdapter {
+  static readonly ITALIC_DELIMITER = '*';
+  private static readonly BOLD_DELIMITER = '**';
+
   private options: FormatterOptions = {
     linkFormat: LinkFormat.Auto
   };
@@ -76,13 +79,17 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   bold(content: ReadableContent): ReadableContent {
-    // Enhanced: Use instance method with direct string support
-    return new ReadableContent('**').append(content.escape('**'), '**');
+    return new ReadableContent(MarkdownFormatterAdapter.BOLD_DELIMITER).append(
+      content.escape(MarkdownFormatterAdapter.BOLD_DELIMITER),
+      MarkdownFormatterAdapter.BOLD_DELIMITER
+    );
   }
 
   italic(input: ReadableContent): ReadableContent {
-    // Enhanced: Use instance method with direct string support
-    return new ReadableContent('*').append(input.escape('*'), '*');
+    return new ReadableContent(MarkdownFormatterAdapter.ITALIC_DELIMITER).append(
+      input.escape(MarkdownFormatterAdapter.ITALIC_DELIMITER),
+      MarkdownFormatterAdapter.ITALIC_DELIMITER
+    );
   }
 
   code(content: ReadableContent, language?: ReadableContent): ReadableContent {
@@ -102,7 +109,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     // If the text is already a single inline markdown link or image (e.g. "![...](...)" or "[...]()"),
     // don't escape it - callers sometimes pass pre-formatted markdown (badges) as the link text.
     const isInlineMarkdown = this.contentLooksLikeInlineMarkdown(text);
-    // Enhanced: Use instance method with direct string support
+
     return new ReadableContent('[')
       .append(
         isInlineMarkdown ? text : text.escape(['[', ']']),
@@ -151,9 +158,9 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   badge(label: ReadableContent, url: ReadableContent): ReadableContent {
     return ReadableContent.empty().append(
       '![',
-      label.escape(['*', ')']),
+      label.escape([MarkdownFormatterAdapter.ITALIC_DELIMITER, ')']),
       '](',
-      url.escape(['*', ')']),
+      url.escape([MarkdownFormatterAdapter.ITALIC_DELIMITER, ')']),
       ')'
     );
   }
