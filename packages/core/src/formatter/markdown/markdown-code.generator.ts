@@ -1,10 +1,13 @@
 import { injectable } from 'inversify';
 import { ReadableContent } from '../../reader/readable-content.js';
+import { MarkdownFormatterAdapter } from './markdown-formatter.adapter.js';
 
 @injectable()
 export class MarkdownCodeGenerator {
 
     private static readonly TICK = '`';
+    private static readonly TICK_CHAR_CODE = 0x60;
+    private static readonly TILDE_CHAR_CODE = 0x7E;
     private static readonly MIN_FENCE_LEN = 3;
     private static readonly HTML_NEWLINE_ENTITY = '&#13;';
     private static readonly DEFAULT_LANGUAGE = new ReadableContent('text');
@@ -66,7 +69,7 @@ export class MarkdownCodeGenerator {
     inlineCode(content: ReadableContent): ReadableContent {
         return ReadableContent.empty().append(
             MarkdownCodeGenerator.TICK,
-            content.escape([MarkdownCodeGenerator.TICK, '*', '{']),
+            content.escape([MarkdownCodeGenerator.TICK, MarkdownFormatterAdapter.ITALIC_DELIMITER]).htmlEscape(),
             MarkdownCodeGenerator.TICK
         );
     }
@@ -222,24 +225,24 @@ export class MarkdownCodeGenerator {
         const contentSize = content.getSize();
         let pos = 0;
         while (pos < contentSize) {
-            const backtickIdx = content.search(0x60 /* ` */, pos);
-            const tildeIdx = content.search(0x7E /* ~ */, pos);
+            const backtickIdx = content.search(MarkdownCodeGenerator.TICK_CHAR_CODE, pos);
+            const tildeIdx = content.search(MarkdownCodeGenerator.TILDE_CHAR_CODE, pos);
             let idx = -1;
             let marker = 0;
             if (backtickIdx === -1 && tildeIdx === -1) {
                 break;
             }
             else if (backtickIdx === -1) {
-                idx = tildeIdx; marker = 0x7E;
+                idx = tildeIdx; marker = MarkdownCodeGenerator.TILDE_CHAR_CODE;
             }
             else if (tildeIdx === -1) {
-                idx = backtickIdx; marker = 0x60;
+                idx = backtickIdx; marker = MarkdownCodeGenerator.TICK_CHAR_CODE;
             }
             else if (backtickIdx < tildeIdx) {
-                idx = backtickIdx; marker = 0x60;
+                idx = backtickIdx; marker = MarkdownCodeGenerator.TICK_CHAR_CODE;
             }
             else {
-                idx = tildeIdx; marker = 0x7E;
+                idx = tildeIdx; marker = MarkdownCodeGenerator.TILDE_CHAR_CODE;
             }
 
             if (idx === -1) {
