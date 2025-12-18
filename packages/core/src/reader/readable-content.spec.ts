@@ -476,6 +476,63 @@ describe('ReadableContent', () => {
         });
     });
 
+    describe('isMultiLine', () => {
+        it('returns false for empty content', () => {
+            // Arrange
+            const src = ReadableContent.empty();
+
+            // Act
+            const result = src.isMultiLine();
+
+            // Assert
+            expect(result).toEqual(false);
+        });
+
+        it('returns false for single-line content', () => {
+            // Arrange
+            const src = new ReadableContent('hello world');
+
+            // Act
+            const result = src.isMultiLine();
+
+            // Assert
+            expect(result).toEqual(false);
+        });
+
+        it('returns true when content contains LF', () => {
+            // Arrange
+            const src = new ReadableContent('a\nb');
+
+            // Act
+            const result = src.isMultiLine();
+
+            // Assert
+            expect(result).toEqual(true);
+        });
+
+        it('returns true when content contains CRLF', () => {
+            // Arrange
+            const src = new ReadableContent('a\r\nb');
+
+            // Act
+            const result = src.isMultiLine();
+
+            // Assert
+            expect(result).toEqual(true);
+        });
+
+        it('returns false when content contains CR but no LF', () => {
+            // Arrange
+            const src = new ReadableContent('a\rb');
+
+            // Act
+            const result = src.isMultiLine();
+
+            // Assert
+            expect(result).toEqual(false);
+        });
+    });
+
     describe('splitLines', () => {
         it('splits LF separated lines and handles trailing newline', () => {
             // Arrange

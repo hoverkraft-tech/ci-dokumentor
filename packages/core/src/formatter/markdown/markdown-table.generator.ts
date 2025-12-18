@@ -185,7 +185,7 @@ export class MarkdownTableGenerator {
     }
 
     private lineBreak(): ReadableContent {
-        return new ReadableContent('\n');
+        return new ReadableContent(String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE));
     }
 
     private splitMultilineCell(content: ReadableContent): ReadableContent[] {
@@ -267,17 +267,6 @@ export class MarkdownTableGenerator {
         const blocks = this.markdownCodeGenerator.findCodeBlocks(content);
         if (blocks.length > 0) {
             return true;
-        }
-
-        // Also detect inline backtick spans but only treat them as fences if
-        // they contain an inner newline. That avoids switching to <pre> mode
-        // for simple inline code spans that are single-line.
-        const spans = this.markdownCodeGenerator.findInlineCode(content, []);
-        for (const span of spans) {
-            const inner = content.slice(span.start + span.delimLen, span.end - span.delimLen);
-            if (inner.includes('\n') || inner.includes('\r')) {
-                return true;
-            }
         }
 
         return false;
