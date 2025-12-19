@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "commander": "^14.0.2",
-    "inversify": "^7.10.6",
+    "inversify": "^7.10.8",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {

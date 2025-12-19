@@ -21,7 +21,7 @@
     "@ci-dokumentor/repository-github": "workspace:*",
     "feather-icons": "^4.29.2",
     "yaml": "^2.8.2",
-    "inversify": "^7.10.6"
+    "inversify": "^7.10.8"
   },
   "devDependencies": {
     "@types/feather-icons": "^4.29.4"
