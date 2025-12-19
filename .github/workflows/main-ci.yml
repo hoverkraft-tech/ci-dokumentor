@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   clean:
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@3256ec78f48fdaa4c9691c87dc7136fa561c456e # 0.30.3
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@18c35d287eb2f66e00741c88954106b44b812ae0 # 0.30.4
     permissions:
       contents: read
       id-token: write
@@ -150,6 +150,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@44e0f1bacebf3711bf90895fc45d815e9fe582e8 # 0.18.0
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@642cdb54493d05debdc1394f4bfd7365f82e7bf1 # 0.18.2
         with:
           build-path: packages/docs/build
