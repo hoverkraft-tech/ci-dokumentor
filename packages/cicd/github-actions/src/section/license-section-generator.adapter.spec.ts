@@ -72,7 +72,7 @@ This project is licensed under the Apache License 2.0.
 
 SPDX-License-Identifier: Apache-2.0
 
-Copyright © 2025 owner
+Copyright © 2026 owner
 
 For more details, see the [license](https://api.github.com/licenses/apache-2.0).
 `
