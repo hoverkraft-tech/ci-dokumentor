@@ -137,7 +137,7 @@ jobs:
           app-id: ${{ vars.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@b17226e57c8ef31f860719766656ebb6df017218 # 0.31.6
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@f24ce3360a8abf9bf386a62ab13d0ae5de5f9d13 # 0.31.7
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           branch: docs/action-documentation-update
@@ -150,6 +150,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@84e8ace407055e7a40ba6670a8c697e1ce2dfafa # 0.20.1
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@5ff7d4c3910971ed53834becd5967271b4e228cf # 0.21.1
         with:
           build-path: packages/docs/build
