@@ -3,6 +3,9 @@
 help: ## Display help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+setup: ## Install dependencies
+	@pnpm i
+
 lint: ## Execute linting
 	$(call run_linter,)
 
@@ -27,7 +30,7 @@ test:
 	$(MAKE) docker-test
 
 ci: ## Execute all formats and checks
-	@pnpm i
+	$(MAKE) setup
 	@pnpm run all
 	$(MAKE) lint-fix
 	$(MAKE) docker-test
