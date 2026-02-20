@@ -1,5 +1,5 @@
 # Multi-stage build: build & pack then install globally in a minimal runtime image
-FROM node:24-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Use pnpm for fast installs and reproducible builds
 RUN corepack enable pnpm
@@ -32,7 +32,7 @@ RUN mkdir -p /pack && \
     npm pack --pack-destination /pack
 
 # Final runtime image: minimal, with the CLI installed globally
-FROM node:24-alpine AS production
+FROM node:25-alpine AS production
 
 # Install minimal runtime deps
 # hadolint ignore=DL3018
