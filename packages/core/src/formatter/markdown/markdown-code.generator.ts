@@ -227,8 +227,8 @@ export class MarkdownCodeGenerator {
         while (pos < contentSize) {
             const backtickIdx = content.search(MarkdownCodeGenerator.TICK_CHAR_CODE, pos);
             const tildeIdx = content.search(MarkdownCodeGenerator.TILDE_CHAR_CODE, pos);
-            let idx = -1;
-            let marker = 0;
+            let idx: number;
+            let marker: number;
             if (backtickIdx === -1 && tildeIdx === -1) {
                 break;
             }
@@ -243,10 +243,6 @@ export class MarkdownCodeGenerator {
             }
             else {
                 idx = tildeIdx; marker = MarkdownCodeGenerator.TILDE_CHAR_CODE;
-            }
-
-            if (idx === -1) {
-                break;
             }
             if (idx !== 0 && !content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, idx - 1)) {
                 pos = idx + 1;
