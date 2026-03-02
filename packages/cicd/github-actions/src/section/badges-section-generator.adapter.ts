@@ -43,7 +43,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       const message = maybeError && typeof maybeError.message === 'string'
         ? maybeError.message
         : 'Failed to parse extra badges JSON.';
-      throw new Error([message, hint].map(part => part.trim()).filter(Boolean).join('. '));
+      throw new Error([message, hint].map(part => part.trim()).filter(Boolean).join('. '), { cause: error });
     }
 
     if (!Array.isArray(parsed)) {

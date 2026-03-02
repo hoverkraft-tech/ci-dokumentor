@@ -132,7 +132,7 @@ export class MarkdownLinkGenerator {
             // Normal text until next fence or backtick
             const nextBacktick = content.search('`', idx);
             const nextFence = content.search('```', idx);
-            let next = -1;
+            let next: number;
             if (nextBacktick === -1 && nextFence === -1) {
                 next = contentLength;
             }
