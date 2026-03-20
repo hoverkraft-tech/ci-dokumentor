@@ -7,9 +7,9 @@ import { Container as InversifyContainer } from 'inversify';
 import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
 import { initContainer as gitlabInitContainer } from '@ci-dokumentor/repository-gitlab';
 import { GitLabCIParser } from './gitlab-ci-parser.js';
-import { 
-  GitLabCIGeneratorAdapter, 
-  GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER 
+import {
+  GitLabCIGeneratorAdapter,
+  GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER
 } from './gitlab-ci-generator.adapter.js';
 
 // Section generators
@@ -28,49 +28,41 @@ export function resetContainer(): void {
 export function initContainer(
   baseContainer: Container | undefined = undefined
 ): Container {
-  if (baseContainer) {
-    // When a base container is provided, always use it and set it as our singleton
-    container = baseContainer;
-  } else if (container) {
-    // Only return existing singleton if no base container is provided
-    return container;
-  } else {
-    container = new InversifyContainer() as Container;
-  }
+  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
 
-  // Return early if already bound
-  if (container.isBound(GitLabCIParser)) {
-    return container;
+  // Return early if this package has already been initialized in this container.
+  if (targetContainer.isCurrentBound(GitLabCIParser)) {
+    return targetContainer;
   }
 
   // Bind GitLab CI specific services only
   // Bind parser
-  container.bind(GitLabCIParser).toSelf().inSingletonScope();
+  targetContainer.bind(GitLabCIParser).toSelf().inSingletonScope();
 
   // Bind generator
-  container.bind(GitLabCIGeneratorAdapter).toSelf().inSingletonScope();
-  container
+  targetContainer.bind(GitLabCIGeneratorAdapter).toSelf().inSingletonScope();
+  targetContainer
     .bind(GENERATOR_ADAPTER_IDENTIFIER)
-    .to(GitLabCIGeneratorAdapter);
+    .toService(GitLabCIGeneratorAdapter);
 
   // Bind section generators
-  container
+  targetContainer
     .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(HeaderSectionGenerator);
-  container
+  targetContainer
     .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(OverviewSectionGenerator);
-  container
+  targetContainer
     .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(UsageSectionGenerator);
-  container
+  targetContainer
     .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(InputsSectionGenerator);
-  container
+  targetContainer
     .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(GeneratedSectionGenerator);
 
-  return container;
+  return targetContainer;
 }
 
 /**
@@ -78,15 +70,8 @@ export function initContainer(
  * This initializes all the proper packages needed for GitLab CI testing.
  */
 export function initTestContainer(): Container {
-  // Initialize core container first
-  const baseContainer = coreInitContainer();
-
-  // Initialize git repository package
-  gitInitContainer(baseContainer);
-
-  // Initialize gitlab repository package
-  gitlabInitContainer(baseContainer);
-
-  // Initialize this package
-  return initContainer(baseContainer);
+  let testContainer = coreInitContainer();
+  testContainer = gitInitContainer(testContainer);
+  testContainer = gitlabInitContainer(testContainer);
+  return initContainer(testContainer);
 }

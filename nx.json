@@ -75,5 +75,6 @@
       "inputs": ["default", "tests", "^default"],
       "outputs": ["{projectRoot}/coverage/**"]
     }
-  }
+  },
+  "analytics": false
 }

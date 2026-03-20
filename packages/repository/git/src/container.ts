@@ -1,4 +1,4 @@
-import { Container , REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
+import { Container, REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
 import { GitRepositoryProvider } from './git-repository-provider.js';
 
@@ -11,26 +11,18 @@ export function resetContainer(): void {
 export function initContainer(
   baseContainer: Container | undefined = undefined
 ): Container {
-  if (baseContainer) {
-    // When a base container is provided, always use it and set it as our singleton
-    container = baseContainer;
-  } else if (container) {
-    // Only return existing singleton if no base container is provided
-    return container;
-  } else {
-    container = new InversifyContainer() as Container;
-  }
+  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
 
-  // Return early if already bound
-  if (container.isBound(GitRepositoryProvider)) {
-    return container;
+  // Return early if this package has already been initialized in this container.
+  if (targetContainer.isCurrentBound(GitRepositoryProvider)) {
+    return targetContainer;
   }
 
   // Bind git repository services only
-  container.bind(GitRepositoryProvider).toSelf().inSingletonScope();
+  targetContainer.bind(GitRepositoryProvider).toSelf().inSingletonScope();
 
   // Register as repository provider
-  container.bind(REPOSITORY_PROVIDER_IDENTIFIER).to(GitRepositoryProvider);
+  targetContainer.bind(REPOSITORY_PROVIDER_IDENTIFIER).toService(GitRepositoryProvider);
 
-  return container;
+  return targetContainer;
 }
