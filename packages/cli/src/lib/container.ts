@@ -3,24 +3,24 @@ import { Container as InversifyContainer } from 'inversify';
 import { Command as CommanderCommand } from 'commander';
 import {
   COMMAND_IDENTIFIER
-  
+
 } from './commands/command.js';
-import type {Command} from './commands/command.js';
+import type { Command } from './commands/command.js';
 import {
   LOGGER_ADAPTER_IDENTIFIER
-  
+
 } from './logger/adapters/logger.adapter.js';
-import type {LoggerAdapter} from './logger/adapters/logger.adapter.js';
+import type { LoggerAdapter } from './logger/adapters/logger.adapter.js';
 import {
   PACKAGE_SERVICE_IDENTIFIER
-  
+
 } from './package/package-service.js';
-import type {PackageService} from './package/package-service.js';
+import type { PackageService } from './package/package-service.js';
 import {
   PROGRAM_IDENTIFIER
-  
+
 } from './application/program.js';
-import type {Program} from './application/program.js';
+import type { Program } from './application/program.js';
 import { CliApplication } from './application/cli-application.js';
 import { GenerateCommand } from './commands/generate-command.js';
 import { MigrateCommand } from './commands/migrate-command.js';
@@ -45,65 +45,57 @@ export function resetContainer(): void {
 export function initContainer(
   baseContainer: Container | undefined = undefined
 ): Container {
-  if (baseContainer) {
-    // When a base container is provided, always use it and set it as our singleton
-    container = baseContainer;
-  } else if (container) {
-    // Only return existing singleton if no base container is provided
-    return container;
-  } else {
-    container = new InversifyContainer() as Container;
-  }
+  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
 
-  // Return early if services are already bound
-  if (container.isBound(LOGGER_ADAPTER_IDENTIFIER)) {
-    return container;
+  // Return early if this package has already been initialized in this container.
+  if (targetContainer.isCurrentBound(LOGGER_ADAPTER_IDENTIFIER)) {
+    return targetContainer;
   }
 
   // Bind logging-specific services
-  container.bind(LoggerService).toSelf().inSingletonScope();
+  targetContainer.bind(LoggerService).toSelf().inSingletonScope();
 
-  container.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
+  targetContainer.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
     .to(TextLoggerAdapter)
     .inSingletonScope();
 
-  container.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
+  targetContainer.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
     .to(JsonLoggerAdapter)
     .inSingletonScope();
 
-  container.bind(GITHUB_OUTPUT_IDENTIFIER).toConstantValue(process.env.GITHUB_OUTPUT);
-  container.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
+  targetContainer.bind(GITHUB_OUTPUT_IDENTIFIER).toConstantValue(process.env.GITHUB_OUTPUT);
+  targetContainer.bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
     .to(GitHubActionLoggerAdapter)
     .inSingletonScope();
 
   // Bind CLI-specific services
-  container.bind(ProgramConfiguratorService).toSelf().inSingletonScope();
+  targetContainer.bind(ProgramConfiguratorService).toSelf().inSingletonScope();
 
-  container.bind<PackageService>(PACKAGE_SERVICE_IDENTIFIER)
+  targetContainer.bind<PackageService>(PACKAGE_SERVICE_IDENTIFIER)
     .to(FilePackageService)
     .inSingletonScope();
 
-  container
+  targetContainer
     .bind<Program>(PROGRAM_IDENTIFIER)
     .toConstantValue(new CommanderCommand());
 
   // Bind use cases
-  container.bind(GenerateDocumentationUseCase).toSelf().inSingletonScope();
-  container.bind(MigrateDocumentationUseCase).toSelf().inSingletonScope();
+  targetContainer.bind(GenerateDocumentationUseCase).toSelf().inSingletonScope();
+  targetContainer.bind(MigrateDocumentationUseCase).toSelf().inSingletonScope();
 
   // Bind commands (using multiInject pattern)
-  container
+  targetContainer
     .bind<Command>(COMMAND_IDENTIFIER)
     .to(GenerateCommand)
     .inSingletonScope();
 
-  container
+  targetContainer
     .bind<Command>(COMMAND_IDENTIFIER)
     .to(MigrateCommand)
     .inSingletonScope();
 
   // Bind the main application
-  container.bind(CliApplication).toSelf().inSingletonScope();
+  targetContainer.bind(CliApplication).toSelf().inSingletonScope();
 
-  return container;
+  return targetContainer;
 }
