@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   clean:
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@bcbbcaff24e053e38ebab02dd0e41442df196719 # 0.32.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@e4bf7a12228a2a4b5993d2d36b99b4dd0ec80bf5 # 0.32.1
     permissions:
       contents: read
       id-token: write
@@ -56,7 +56,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@775ce0902c528062cc94141dd7d13261083b752a # 0.22.0
+        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@9d465a03741b287db18b242e0ec46990888cc6a3 # 0.23.0
 
       - name: Download package tarball
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -131,13 +131,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           format-link: full
 
-      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         id: generate-token
         with:
           app-id: ${{ vars.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4b53189212d5810f710bed89711002626977215b # 0.33.0
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@71b85947453f32b5d147ff3ab37351439a92d840 # 0.34.2
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           branch: docs/action-documentation-update
@@ -150,6 +150,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@b56be562f38e0e3e712f09691a8fe930aae9db1b # 0.22.0
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@48e0c54489152b98d9e18f0454ccce120e9d0fd1 # 0.23.0
         with:
           build-path: packages/docs/build
