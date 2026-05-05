@@ -14,6 +14,9 @@ on:
       package-tarball-artifact-id:
         description: The artifact ID for the package tarball
         value: ${{ jobs.package-test.outputs.package-tarball-artifact-id }}
+      package-tarball-path:
+        description: The relative path to the package tarball for downstream jobs
+        value: ${{ jobs.package-test.outputs.package-tarball-path }}
       build-artifact-id:
         description: The artifact ID for the build output
         value: ${{ jobs.nodejs.outputs.build-artifact-id }}
@@ -22,7 +25,7 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@4b53189212d5810f710bed89711002626977215b # 0.33.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@4c9d51717dc04d823dac2dc9ac2857e7b3069454 # 0.35.0
     permissions:
       actions: read
       contents: read
@@ -38,7 +41,7 @@ jobs:
         VALIDATE_TSX=false
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@775ce0902c528062cc94141dd7d13261083b752a # 0.22.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@47891dc49a31209a88949e081d97a010f8cd20c4 # 0.23.2
     permissions:
       contents: read
       id-token: write
@@ -60,45 +63,23 @@ jobs:
     permissions:
       contents: read
     outputs:
-      package-tarball-artifact-id: ${{ steps.upload-package-tarball-artifact.outputs.artifact-id }}
+      package-tarball-artifact-id: ${{ steps.package.outputs.package-tarball-artifact-id }}
+      package-tarball-path: ${{ steps.package.outputs.package-tarball-path }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: package
+        name: Create package tarball
+        uses: hoverkraft-tech/ci-github-nodejs/actions/package@47891dc49a31209a88949e081d97a010f8cd20c4 # 0.23.2
         with:
-          persist-credentials: false
-
-      - name: Setup Node.js
-        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@775ce0902c528062cc94141dd7d13261083b752a # 0.22.0
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          artifact-ids: ${{ needs.nodejs.outputs.build-artifact-id }}
-          path: /
-
-      - name: Verify CLI build exists
-        run: |
-          echo "Checking if CLI binary exists..."
-          if [ ! -f "packages/cli/dist/bin/ci-dokumentor.js" ]; then
-            echo "CLI binary not found, building CLI package..."
-            exit 1
-          fi
-
-      - name: Create package tarball
-        run: |
-          cd packages/cli
-
-          # When running for tags, update package.json version to match tag name
-          if [ "${{ github.ref_type }}" == "tag" ] && [ -n "${{ github.ref_name }}" ]; then
-            echo "Updating package version to match tag name: ${{ github.ref_name }}"
-            npm version "${{ github.ref_name }}" --no-git-tag-version --no-workspaces-update
-          fi
-
-          npm pack --pack-destination ${{ runner.temp }}/
+          working-directory: .
+          package-directory: packages/cli
+          build-artifact-id: ${{ needs.nodejs.outputs.build-artifact-id }}
+          build-artifact-path: "/"
+          version: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
 
       - name: Install package globally
-        run: |
-          cd ${{ runner.temp }}
-          npm install -g ./ci-dokumentor-cli-*.tgz
+        env:
+          PACKAGE_TARBALL_PATH: ${{ steps.package.outputs.package-tarball-path }}
+        run: npm install -g "${PACKAGE_TARBALL_PATH}"
 
       # Test version command
       - name: Test version command
@@ -122,22 +103,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload package tarball
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        id: upload-package-tarball-artifact
-        with:
-          name: package-tarball
-          path: ${{ runner.temp }}/ci-dokumentor-cli-*.tgz
-
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@bcbbcaff24e053e38ebab02dd0e41442df196719 # 0.32.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@2b647ed6f11d50cb6beb6d56333e68ba2c804826 # 0.33.1
     permissions:
       contents: read
+      id-token: write
       issues: read
       packages: write
       pull-requests: read
-      id-token: write
     secrets:
       oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
     with:
