@@ -19,7 +19,7 @@
     "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/repository-git": "workspace:*",
     "@ci-dokumentor/repository-gitlab": "workspace:*",
-    "yaml": "^2.8.3",
+    "yaml": "^2.8.4",
     "inversify": "^8.1.0"
   }
 }
