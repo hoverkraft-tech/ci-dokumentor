@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-import { GeneratorAdapter } from '../src/generator/generator.adapter.js';
+import type { GeneratorAdapter } from '../src/generator/generator.adapter.js';
 
 type GeneratorAdapterDefaults = Partial<{
     getPlatformName: ReturnType<GeneratorAdapter['getPlatformName']>;

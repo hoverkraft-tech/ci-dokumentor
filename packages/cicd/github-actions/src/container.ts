@@ -1,9 +1,9 @@
 import {
-  Container,
   GENERATOR_ADAPTER_IDENTIFIER,
   MIGRATION_ADAPTER_IDENTIFIER,
   initContainer as coreInitContainer
 } from '@ci-dokumentor/core';
+import type { Container } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
 import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
 import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';

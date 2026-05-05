@@ -1,8 +1,6 @@
 import { injectable, multiInject, optional } from 'inversify';
-import {
-  RepositoryProvider,
-  REPOSITORY_PROVIDER_IDENTIFIER,
-} from './repository.provider.js';
+import { REPOSITORY_PROVIDER_IDENTIFIER } from './repository.provider.js';
+import type { RepositoryProvider } from './repository.provider.js';
 
 @injectable()
 export class RepositoryService {

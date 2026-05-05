@@ -3,10 +3,12 @@ import { join } from 'node:path';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   FileRendererAdapter,
+  MarkdownFormatterAdapter,
+} from '@ci-dokumentor/core';
+import type {
+  FormatterAdapter,
   RepositoryProvider,
   RendererAdapter,
-  MarkdownFormatterAdapter,
-  FormatterAdapter,
 } from '@ci-dokumentor/core';
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';

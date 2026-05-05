@@ -1,20 +1,23 @@
 import { inject, injectable } from 'inversify';
 import {
-  GenerateSectionsOptions,
-  GeneratorAdapter,
   GeneratorService,
-  RepositoryOptions,
-  RepositoryOptionsDescriptors,
-  RepositoryProvider,
   RepositoryService,
-  SectionOptionsDescriptors,
-  FormatterOptions,
   FileReaderAdapter,
   ConcurrencyService
 } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
+import type {
+  FormatterOptions,
+  GenerateSectionsOptions,
+  GeneratorAdapter,
+  ReaderAdapter,
+  RepositoryOptions,
+  RepositoryOptionsDescriptors,
+  RepositoryProvider,
+  SectionOptionsDescriptors,
+} from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
-import { AbstractMultiFileUseCase, FileResult, MultiFileUseCaseOutput } from './abstract-multi-file.usecase.js';
+import { AbstractMultiFileUseCase } from './abstract-multi-file.usecase.js';
+import type { FileResult, MultiFileUseCaseOutput } from './abstract-multi-file.usecase.js';
 
 export interface GenerateDocumentationUseCaseInput {
   /**

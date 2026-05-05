@@ -5,7 +5,7 @@ import { injectable, inject } from 'inversify';
 import { createPatch } from 'diff';
 import { FileReaderAdapter } from '../reader/file-reader.adapter.js';
 import type { ReaderAdapter } from '../reader/reader.adapter.js';
-import { FormatterAdapter } from '../formatter/formatter.adapter.js';
+import type { FormatterAdapter } from '../formatter/formatter.adapter.js';
 import { SectionIdentifier } from '../generator/section/section-generator.adapter.js';
 import { ReadableContent } from '../reader/readable-content.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';

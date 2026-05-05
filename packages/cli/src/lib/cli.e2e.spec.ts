@@ -6,10 +6,11 @@ import {
   vi,
   beforeEach,
   afterEach,
-  MockInstance,
 } from 'vitest';
+import type { MockInstance } from 'vitest';
 import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
-import { ConsoleMockFactory, MockedConsole } from '../../__tests__/console-mock.factory.js';
+import { ConsoleMockFactory } from '../../__tests__/console-mock.factory.js';
+import type { MockedConsole } from '../../__tests__/console-mock.factory.js';
 import { cli } from './cli.js';
 import { resetGlobalContainer } from './global-container.js';
 

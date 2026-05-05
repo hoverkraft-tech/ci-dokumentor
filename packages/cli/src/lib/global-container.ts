@@ -1,4 +1,5 @@
-import { Container, initContainer as coreInitContainer, resetContainer as resetCoreContainer } from '@ci-dokumentor/core';
+import { initContainer as coreInitContainer, resetContainer as resetCoreContainer } from '@ci-dokumentor/core';
+import type { Container } from '@ci-dokumentor/core';
 import { initContainer as gitInitContainer, resetContainer as resetGitContainer } from '@ci-dokumentor/repository-git';
 import { initContainer as githubInitContainer, resetContainer as resetGithubContainer } from '@ci-dokumentor/repository-github';
 import { initContainer as gitlabInitContainer, resetContainer as resetGitlabContainer } from '@ci-dokumentor/repository-gitlab';

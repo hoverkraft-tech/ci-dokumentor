@@ -1,5 +1,7 @@
-import { describe, it, expect, beforeEach, vi, Mocked, MockInstance } from 'vitest';
-import { simpleGit, TagResult, Response, FetchResult } from 'simple-git';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mocked, MockInstance } from 'vitest';
+import { simpleGit } from 'simple-git';
+import type { FetchResult, Response, TagResult } from 'simple-git';
 import gitUrlParse from 'git-url-parse';
 import { GitRepositoryProvider } from './git-repository-provider.js';
 

@@ -1,4 +1,4 @@
-import { Mocked } from "vitest";
+import type { Mocked } from "vitest";
 import { LicenseService } from "../src/license/license.service.js";
 
 type LicenseServiceDefaults = {

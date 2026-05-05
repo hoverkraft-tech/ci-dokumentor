@@ -1,4 +1,5 @@
-import { MockedFunction, vi } from 'vitest';
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
 const { projectsShowMock, gitlabConstructorMock } = vi.hoisted(() => ({
     projectsShowMock: vi.fn(),
@@ -10,7 +11,7 @@ vi.mock('@gitbeaker/rest', () => ({
 }));
 
 import { Gitlab } from '@gitbeaker/rest';
-import { GitlabClient } from '../src/gitlab-repository.provider.js';
+import type { GitlabClient } from '../src/gitlab-repository.provider.js';
 
 export type ProjectsShowMock = MockedFunction<GitlabClient['Projects']['show']>;
 

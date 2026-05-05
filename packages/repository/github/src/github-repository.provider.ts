@@ -1,16 +1,18 @@
 import {
   FILE_READER_ADAPTER_IDENTIFIER,
-  RepositoryInfo,
-  LicenseInfo,
-  ContributingInfo,
-  SecurityInfo,
   AbstractRepositoryProvider,
   LicenseService,
   LICENSE_SERVICE_IDENTIFIER,
-  RepositoryOptionsDescriptors,
-  ManifestVersion,
 } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
+import type {
+  ContributingInfo,
+  LicenseInfo,
+  ManifestVersion,
+  ReaderAdapter,
+  RepositoryInfo,
+  RepositoryOptionsDescriptors,
+  SecurityInfo,
+} from '@ci-dokumentor/core';
 import {
   GitRepositoryProvider,
   GIT_REPOSITORY_PROVIDER_IDENTIFIER,
@@ -18,7 +20,7 @@ import {
 import { graphql } from "@octokit/graphql";
 import { injectable, inject } from 'inversify';
 import { createTokenAuth, } from '@octokit/auth-token';
-import { RequestParameters } from '@octokit/graphql/types';
+import type { RequestParameters } from '@octokit/graphql/types';
 
 type GraphQLClient = typeof graphql;
 

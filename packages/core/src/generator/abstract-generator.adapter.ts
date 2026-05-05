@@ -1,10 +1,13 @@
-import { RepositoryInfo, RepositoryProvider } from '../repository/repository.provider.js';
-import { RendererAdapter } from '../renderer/renderer.adapter.js';
-import {
+import type {
+  RepositoryInfo,
+  RepositoryProvider,
+} from '../repository/repository.provider.js';
+import type { RendererAdapter } from '../renderer/renderer.adapter.js';
+import type {
   GeneratorAdapter,
   GenerateSectionsOptions,
 } from './generator.adapter.js';
-import {
+import type {
   SectionGeneratorAdapter,
   SectionOptionsDescriptors,
   SectionGenerationPayload,

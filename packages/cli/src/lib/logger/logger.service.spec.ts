@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { LoggerAdapterMockFactory } from '../../../__tests__/logger-adapter-mock.factory.js';
 import { LoggerService } from './logger.service.js';
 import type { LoggerAdapter } from './adapters/logger.adapter.js';

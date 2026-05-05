@@ -1,6 +1,7 @@
-import { InputsSectionMixin, FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
+import { InputsSectionMixin, ReadableContent } from '@ci-dokumentor/core';
+import type { FormatterAdapter } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
-import { GitLabCIManifest, GitLabComponentInput } from '../gitlab-ci-parser.js';
+import type { GitLabCIManifest, GitLabComponentInput } from '../gitlab-ci-parser.js';
 import { GitLabCISectionGeneratorAdapter } from './gitlab-ci-section-generator.adapter.js';
 
 @injectable()

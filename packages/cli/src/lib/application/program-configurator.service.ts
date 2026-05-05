@@ -1,6 +1,6 @@
 import { inject } from "inversify";
 import { LoggerService } from "../logger/logger.service.js";
-import { Program } from "./program.js";
+import type { Program } from "./program.js";
 
 export class ProgramConfiguratorService {
     constructor(

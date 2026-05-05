@@ -1,8 +1,9 @@
 import { inject, injectable } from 'inversify';
-import { FileReaderAdapter, MigrationAdapter, MigrationService, ConcurrencyService } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
+import { FileReaderAdapter, MigrationService, ConcurrencyService } from '@ci-dokumentor/core';
+import type { ReaderAdapter, MigrationAdapter  } from '@ci-dokumentor/core';
 import { LoggerService } from '../logger/logger.service.js';
-import { AbstractMultiFileUseCase, FileResult, MultiFileUseCaseOutput } from './abstract-multi-file.usecase.js';
+import { AbstractMultiFileUseCase } from './abstract-multi-file.usecase.js';
+import type { FileResult, MultiFileUseCaseOutput } from './abstract-multi-file.usecase.js';
 
 export interface MigrateDocumentationUseCaseInput {
   /**

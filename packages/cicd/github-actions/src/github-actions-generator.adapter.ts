@@ -1,14 +1,13 @@
 import { dirname, join } from 'node:path';
 import {
   AbstractGeneratorAdapter,
-  RepositoryInfo,
-  SectionGeneratorAdapter,
 } from '@ci-dokumentor/core';
+import type { RepositoryInfo, SectionGeneratorAdapter } from '@ci-dokumentor/core';
 import { inject, multiInject } from 'inversify';
 import {
-  GitHubActionsManifest,
   GitHubActionsParser,
 } from './github-actions-parser.js';
+import type { GitHubActionsManifest } from './github-actions-parser.js';
 
 export const GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
   'GitHubActionsSectionGeneratorAdapter'

@@ -2,17 +2,19 @@ import { basename } from 'node:path';
 import {
   VersionService,
   VERSION_SERVICE_IDENTIFIER,
+  ReadableContent,
+  SectionIdentifier,
+} from '@ci-dokumentor/core';
+import type {
+  FormatterAdapter,
   ManifestVersion,
   SectionGenerationPayload,
-  SectionOptions,
-  ReadableContent,
-  FormatterAdapter,
-  SectionIdentifier,
   SectionGeneratorAdapter,
+  SectionOptions,
 } from '@ci-dokumentor/core';
 import { Document, isScalar } from 'yaml';
 import { inject, injectable } from 'inversify';
-import {
+import type {
   GitHubAction,
   GitHubActionInput,
   GitHubActionsManifest,

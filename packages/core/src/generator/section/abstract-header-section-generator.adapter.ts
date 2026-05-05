@@ -1,8 +1,9 @@
 import { relative, dirname } from 'node:path';
-import { FormatterAdapter } from '../../formatter/formatter.adapter.js';
+import type { FormatterAdapter } from '../../formatter/formatter.adapter.js';
 import { ReadableContent } from '../../reader/readable-content.js';
-import { RepositoryInfo } from '../../repository/repository.provider.js';
-import { SectionGenerationPayload, SectionIdentifier } from './section-generator.adapter.js';
+import type { RepositoryInfo } from '../../repository/repository.provider.js';
+import { SectionIdentifier } from './section-generator.adapter.js';
+import type { SectionGenerationPayload } from './section-generator.adapter.js';
 
 /**
  * Mixin type for Header section generator.

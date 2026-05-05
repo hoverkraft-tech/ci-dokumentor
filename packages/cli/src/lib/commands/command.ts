@@ -1,4 +1,4 @@
-import { Program } from '../application/program.js';
+import type { Program } from '../application/program.js';
 
 export const COMMAND_IDENTIFIER = Symbol('Command');
 

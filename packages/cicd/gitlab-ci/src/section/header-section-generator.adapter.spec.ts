@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import {
-  FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
   ReadableContent,
 } from '@ci-dokumentor/core';
+import type { FormatterAdapter, RepositoryProvider } from '@ci-dokumentor/core';
 import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 import { GitLabComponentMockFactory } from '../../__tests__/gitlab-component-mock.factory.js';
 import { GitLabCIPipelineMockFactory } from '../../__tests__/gitlab-pipeline-mock.factory.js';

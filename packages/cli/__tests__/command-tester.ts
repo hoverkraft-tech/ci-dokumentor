@@ -1,9 +1,9 @@
 import { Command as CommanderCommand } from 'commander';
-import { Mocked } from 'vitest';
-import { Command } from '../src/lib/commands/command.js';
+import type { Mocked } from 'vitest';
+import type { Command } from '../src/lib/commands/command.js';
 import { LoggerService } from '../src/lib/logger/logger.service.js';
 import { ProgramConfiguratorService } from '../src/lib/application/program-configurator.service.js';
-import { Program } from '../src/lib/application/program.js';
+import type { Program } from '../src/lib/application/program.js';
 import { LoggerServiceMockFactory } from './logger-service-mock.factory.js';
 
 export class CommandTester {

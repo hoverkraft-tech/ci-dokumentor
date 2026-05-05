@@ -1,4 +1,5 @@
-import { Container, REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
+import { REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
+import type { Container } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
 import {
   GitRepositoryProvider,

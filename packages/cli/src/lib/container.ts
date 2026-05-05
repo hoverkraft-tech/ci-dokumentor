@@ -1,4 +1,4 @@
-import { Container } from '@ci-dokumentor/core';
+import type { Container } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
 import { Command as CommanderCommand } from 'commander';
 import {

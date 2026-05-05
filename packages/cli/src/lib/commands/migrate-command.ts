@@ -3,8 +3,8 @@ import { Command } from 'commander';
 import { MigrationService } from '@ci-dokumentor/core';
 import {
   MigrateDocumentationUseCase,
-  MigrateDocumentationUseCaseInput,
 } from '../usecases/migrate-documentation.usecase.js';
+import type { MigrateDocumentationUseCaseInput } from '../usecases/migrate-documentation.usecase.js';
 import { BaseCommand } from './base-command.js';
 
 export type MigrateCommandOptions = {

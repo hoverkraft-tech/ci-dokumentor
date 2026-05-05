@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { FormatterService } from './formatter.service.js';
-import { FormatterAdapter } from './formatter.adapter.js';
+import type { FormatterAdapter } from './formatter.adapter.js';
 import { FormatterLanguage } from './formatter-language.js';
 
 describe('FormatterService', () => {

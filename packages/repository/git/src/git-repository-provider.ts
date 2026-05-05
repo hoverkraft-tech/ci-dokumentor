@@ -1,4 +1,12 @@
-import { RepositoryOptionsDescriptors, AbstractRepositoryProvider, RepositoryInfo, LicenseInfo, ContributingInfo, SecurityInfo, ManifestVersion } from '@ci-dokumentor/core';
+import { AbstractRepositoryProvider } from '@ci-dokumentor/core';
+import type {
+  ContributingInfo,
+  LicenseInfo,
+  ManifestVersion,
+  RepositoryInfo,
+  RepositoryOptionsDescriptors,
+  SecurityInfo,
+} from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
 import gitUrlParse from 'git-url-parse';
 import { simpleGit } from 'simple-git';

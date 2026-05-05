@@ -1,4 +1,8 @@
-import { Container, REPOSITORY_PROVIDER_IDENTIFIER, initContainer as coreInitContainer } from '@ci-dokumentor/core';
+import {
+  REPOSITORY_PROVIDER_IDENTIFIER,
+  initContainer as coreInitContainer,
+} from '@ci-dokumentor/core';
+import type { Container } from '@ci-dokumentor/core';
 import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
 import { Container as InversifyContainer } from 'inversify';
 import { GitHubRepositoryProvider } from './github-repository.provider.js';

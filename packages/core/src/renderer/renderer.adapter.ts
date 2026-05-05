@@ -1,5 +1,5 @@
 import { ReadableContent } from "../reader/readable-content.js";
-import { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import type { FormatterAdapter } from "../formatter/formatter.adapter.js";
 
 /**
  * RendererAdapter is responsible for producing an OutputAdapter tied to a

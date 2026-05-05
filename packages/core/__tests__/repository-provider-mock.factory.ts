@@ -1,6 +1,9 @@
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-import { RepositoryOptions, RepositoryProvider } from '../src/repository/repository.provider.js';
+import type {
+    RepositoryOptions,
+    RepositoryProvider,
+} from '../src/repository/repository.provider.js';
 
 type RepositoryProviderDefaults<Options extends RepositoryOptions> = Partial<{
     getPlatformName: ReturnType<RepositoryProvider<Options>['getPlatformName']>;

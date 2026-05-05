@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { LinkFormat } from '@ci-dokumentor/core';
 import { GenerateDocumentationUseCase } from '../usecases/generate-documentation.usecase.js';
 import { CommandTester } from '../../../__tests__/command-tester.js';

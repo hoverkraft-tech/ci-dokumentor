@@ -1,6 +1,7 @@
-import { OverviewSectionMixin, ReadableContent, FormatterAdapter } from '@ci-dokumentor/core';
+import { OverviewSectionMixin, ReadableContent } from '@ci-dokumentor/core';
+import type { FormatterAdapter } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
-import { GitHubActionsManifest } from '../github-actions-parser.js';
+import type { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
 @injectable()
@@ -42,7 +43,7 @@ export class OverviewSectionGenerator extends OverviewSectionMixin<GitHubActions
 
     // Merge permissions from manifest.permissions and all jobs, keeping the highest level
     const mergedPermissions: Record<string, string> = { ...(manifest.permissions || {}) };
-    
+
     // Add permissions from each job, keeping the highest permission level
     if (manifest.jobs) {
       for (const job of Object.values(manifest.jobs)) {
@@ -61,7 +62,7 @@ export class OverviewSectionGenerator extends OverviewSectionMixin<GitHubActions
 
     // Sort permissions alphabetically (ascending)
     const sortedPermissions = Object.entries(mergedPermissions).sort(([a], [b]) => a.localeCompare(b));
-    
+
     const permissionsContent = formatterAdapter.list(
       sortedPermissions.map(([permission, level]) => {
         return formatterAdapter

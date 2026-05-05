@@ -23,7 +23,11 @@ import { ConcurrencyService } from './concurrency/concurrency.service.js';
 import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
 import { MarkdownLinkGenerator } from './formatter/markdown/markdown-link.generator.js';
 import { MarkdownCodeGenerator } from './formatter/markdown/markdown-code.generator.js';
-import { RENDERER_FACTORY_IDENTIFIER, containerRendererFactory, RendererFactory } from './renderer/renderer.factory.js';
+import {
+  RENDERER_FACTORY_IDENTIFIER,
+  containerRendererFactory,
+} from './renderer/renderer.factory.js';
+import type { RendererFactory } from './renderer/renderer.factory.js';
 
 export type Container = InversifyContainer;
 

@@ -1,5 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, Mocked, vi } from 'vitest';
-import { ReadableContent, ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import type { Mocked } from 'vitest';
+import { ReadableContent } from '@ci-dokumentor/core';
+import type { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
 import { ReaderAdapterMockFactory, RepositoryInfoMockFactory } from '@ci-dokumentor/core/tests';
 import {
   GitLabCIParser,

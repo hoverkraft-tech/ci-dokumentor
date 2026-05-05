@@ -1,5 +1,6 @@
 import { ReadableContent } from '../../reader/readable-content.js';
-import { SectionGenerationPayload, SectionIdentifier } from './section-generator.adapter.js';
+import { SectionIdentifier } from './section-generator.adapter.js';
+import type { SectionGenerationPayload } from './section-generator.adapter.js';
 
 /**
  * Mixin type for Generated section generator.

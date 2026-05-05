@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { ReaderAdapterMockFactory } from '../../__tests__/reader-adapter-mock.factory.js';
-import { ReaderAdapter } from '../reader/reader.adapter.js';
+import type { ReaderAdapter } from '../reader/reader.adapter.js';
 import { ReadableContent } from '../reader/readable-content.js';
 import { LicenseService } from './license.service.js';
 

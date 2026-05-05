@@ -1,7 +1,7 @@
 import { SectionIdentifier, ReadableContent } from '@ci-dokumentor/core';
 import type { SectionGenerationPayload } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
-import { GitHubActionsManifest } from '../github-actions-parser.js';
+import type { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
 @injectable()

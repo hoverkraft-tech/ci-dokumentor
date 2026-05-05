@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from 'vitest';
-import { MigrationAdapter, MigrationService, ReaderAdapter } from '@ci-dokumentor/core';
-import type { ConcurrencyService } from '@ci-dokumentor/core';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { Mocked } from 'vitest';
+import { MigrationService } from '@ci-dokumentor/core';
+import type { MigrationAdapter, ReaderAdapter, ConcurrencyService  } from '@ci-dokumentor/core';
 import { ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { LoggerService } from '../logger/logger.service.js';
 import { LoggerServiceMockFactory } from '../../../__tests__/logger-service-mock.factory.js';

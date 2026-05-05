@@ -1,6 +1,7 @@
 import { ReadableContent } from '../../reader/readable-content.js';
-import { FormatterAdapter } from '../../formatter/formatter.adapter.js';
-import { SectionGenerationPayload, SectionIdentifier } from './section-generator.adapter.js';
+import type { FormatterAdapter } from '../../formatter/formatter.adapter.js';
+import { SectionIdentifier } from './section-generator.adapter.js';
+import type { SectionGenerationPayload } from './section-generator.adapter.js';
 
 /**
  * Mixin type for Overview section generator.

@@ -1,4 +1,4 @@
-import { ResolutionContext } from 'inversify';
+import type { ResolutionContext } from 'inversify';
 import type { RendererAdapter } from './renderer.adapter.js';
 import { DiffRendererAdapter } from './diff-renderer.adapter.js';
 import { FileRendererAdapter } from './file-renderer.adapter.js';

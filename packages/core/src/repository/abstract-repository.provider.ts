@@ -1,6 +1,13 @@
-import { ManifestVersion } from '../version/version.service.js';
-import { LicenseInfo } from '../license/license.service.js';
-import { RepositoryProvider, RepositoryInfo, ContributingInfo, SecurityInfo, RepositoryOptions, RepositoryOptionsDescriptors } from './repository.provider.js';
+import type { ManifestVersion } from '../version/version.service.js';
+import type { LicenseInfo } from '../license/license.service.js';
+import type {
+  ContributingInfo,
+  RepositoryInfo,
+  RepositoryOptions,
+  RepositoryOptionsDescriptors,
+  RepositoryProvider,
+  SecurityInfo,
+} from './repository.provider.js';
 
 /**
  * Abstract base class that provides caching for repository providers

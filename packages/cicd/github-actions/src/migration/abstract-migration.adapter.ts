@@ -2,11 +2,15 @@ import { StringDecoder } from 'node:string_decoder';
 import { injectable, inject } from 'inversify';
 import {
     FILE_READER_ADAPTER_IDENTIFIER,
-    MigrationAdapter,
     SectionIdentifier,
     ReadableContent,
 } from '@ci-dokumentor/core';
-import type { FormatterAdapter, MigrateDocumentationPayload, ReaderAdapter } from '@ci-dokumentor/core';
+import type {
+    FormatterAdapter,
+    MigrationAdapter,
+    MigrateDocumentationPayload,
+    ReaderAdapter,
+} from '@ci-dokumentor/core';
 
 /**
  * Abstract base class for migration adapters in the github-actions package.

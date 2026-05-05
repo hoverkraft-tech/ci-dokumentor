@@ -1,6 +1,9 @@
-import { describe, it, expect, beforeEach, vi, Mocked } from 'vitest';
-import { GitRepositoryProvider, ParsedRemoteUrl } from '@ci-dokumentor/repository-git';
-import { LicenseService, LicenseInfo, ManifestVersion, ReaderAdapter } from '@ci-dokumentor/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mocked } from 'vitest';
+import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
+import type { ParsedRemoteUrl } from '@ci-dokumentor/repository-git';
+import { LicenseService } from '@ci-dokumentor/core';
+import type { LicenseInfo, ManifestVersion, ReaderAdapter } from '@ci-dokumentor/core';
 import { LicenseServiceMockFactory, RepositoryInfoMockFactory, ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
 import { OcktokitMockFactory } from '../__tests__/octokit-mock.factory.js';
 import { GitHubRepositoryProvider } from './github-repository.provider.js'

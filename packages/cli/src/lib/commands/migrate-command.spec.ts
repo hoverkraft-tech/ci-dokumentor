@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { MigrationService } from '@ci-dokumentor/core';
 import { MigrateDocumentationUseCase } from '../usecases/migrate-documentation.usecase.js';
 import { MigrateCommand } from './migrate-command.js';

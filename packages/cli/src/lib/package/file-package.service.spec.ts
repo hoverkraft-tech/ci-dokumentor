@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { ReaderAdapterMockFactory } from '@ci-dokumentor/core/tests';
-import { ReadableContent, ReaderAdapter } from '@ci-dokumentor/core';
+import { ReadableContent } from '@ci-dokumentor/core';
+import type { ReaderAdapter } from '@ci-dokumentor/core';
 import { FilePackageService } from './file-package.service.js';
 
 describe('FilePackageService', () => {

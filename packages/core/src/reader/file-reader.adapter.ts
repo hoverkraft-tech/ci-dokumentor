@@ -2,7 +2,7 @@ import { createReadStream, existsSync, statSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { injectable } from 'inversify';
 import fg from 'fast-glob';
-import { ReaderAdapter } from './reader.adapter.js';
+import type { ReaderAdapter } from './reader.adapter.js';
 import { ReadableContent } from './readable-content.js';
 
 export const FILE_READER_ADAPTER_IDENTIFIER = Symbol.for(

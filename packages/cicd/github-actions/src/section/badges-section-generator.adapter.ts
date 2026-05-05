@@ -1,6 +1,13 @@
-import { ReadableContent, RepositoryProvider, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions, FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { ReadableContent, SectionIdentifier } from '@ci-dokumentor/core';
+import type {
+  FormatterAdapter,
+  RepositoryProvider,
+  SectionGenerationPayload,
+  SectionGeneratorAdapter,
+  SectionOptions,
+} from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
-import { GitHubActionsManifest } from '../github-actions-parser.js';
+import type { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
 type Badge = { label: string; url: string };

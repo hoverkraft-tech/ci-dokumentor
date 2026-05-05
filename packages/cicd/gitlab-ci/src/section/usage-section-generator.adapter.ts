@@ -1,14 +1,16 @@
 import {
   SectionIdentifier,
   ReadableContent,
-  SectionGenerationPayload,
-  SectionOptions,
-  SectionGeneratorAdapter,
   VersionService,
   VERSION_SERVICE_IDENTIFIER,
 } from '@ci-dokumentor/core';
+import type {
+  SectionGenerationPayload,
+  SectionGeneratorAdapter,
+  SectionOptions,
+} from '@ci-dokumentor/core';
 import { inject, injectable } from 'inversify';
-import { GitLabCIManifest } from '../gitlab-ci-parser.js';
+import type { GitLabCIManifest } from '../gitlab-ci-parser.js';
 import { GitLabCISectionGeneratorAdapter } from './gitlab-ci-section-generator.adapter.js';
 
 export interface UsageSectionOptions extends SectionOptions {

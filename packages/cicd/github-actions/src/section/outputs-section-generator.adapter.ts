@@ -1,6 +1,7 @@
-import { ReadableContent, SectionGenerationPayload , FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
+import { ReadableContent, SectionIdentifier } from '@ci-dokumentor/core';
+import type { FormatterAdapter, SectionGenerationPayload } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
-import {
+import type {
   GitHubAction,
   GitHubActionOutput,
   GitHubActionsManifest,

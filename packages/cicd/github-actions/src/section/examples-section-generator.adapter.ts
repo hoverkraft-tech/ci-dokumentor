@@ -3,16 +3,19 @@ import { inject, injectable } from 'inversify';
 import {
   FILE_READER_ADAPTER_IDENTIFIER,
   SectionIdentifier,
-  SectionGeneratorAdapter,
   VersionService,
   VERSION_SERVICE_IDENTIFIER,
-  ManifestVersion,
-  SectionGenerationPayload,
-  SectionOptions,
   ReadableContent
 } from '@ci-dokumentor/core';
-import type { FormatterAdapter, ReaderAdapter } from '@ci-dokumentor/core';
-import { GitHubActionsManifest } from '../github-actions-parser.js';
+import type {
+  FormatterAdapter,
+  ManifestVersion,
+  ReaderAdapter,
+  SectionGenerationPayload,
+  SectionGeneratorAdapter,
+  SectionOptions,
+} from '@ci-dokumentor/core';
+import type { GitHubActionsManifest } from '../github-actions-parser.js';
 import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
 
 export type ExamplesSectionOptions = SectionOptions & {

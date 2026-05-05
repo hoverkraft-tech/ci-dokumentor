@@ -1,12 +1,18 @@
 import {
-  SectionGeneratorAdapter,
   SectionIdentifier,
-  SectionOptions,
-  SectionGenerationPayload,
-  SectionOptionsDescriptors,
   ReadableContent,
 } from '@ci-dokumentor/core';
-import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
+import type {
+  SectionGenerationPayload,
+  SectionGeneratorAdapter,
+  SectionOptions,
+  SectionOptionsDescriptors,
+} from '@ci-dokumentor/core';
+import type {
+  GitHubAction,
+  GitHubActionsManifest,
+  GitHubWorkflow,
+} from '../github-actions-parser.js';
 
 export abstract class GitHubActionsSectionGeneratorAdapter
   implements SectionGeneratorAdapter<GitHubActionsManifest> {

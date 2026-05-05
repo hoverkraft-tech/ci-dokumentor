@@ -1,13 +1,16 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import {
-  FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  SectionGenerationPayload,
+} from '@ci-dokumentor/core';
+import type {
+  FormatterAdapter,
   RepositoryProvider,
+  SectionGenerationPayload,
 } from '@ci-dokumentor/core';
 import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
+import type { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { initTestContainer } from '../container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';

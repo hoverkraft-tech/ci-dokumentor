@@ -1,6 +1,7 @@
-import { InputsSectionMixin, FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
+import { InputsSectionMixin, ReadableContent } from '@ci-dokumentor/core';
+import type { FormatterAdapter } from '@ci-dokumentor/core';
 import { injectable } from 'inversify';
-import {
+import type {
   GitHubAction,
   GitHubActionInput,
   GitHubActionsManifest,

@@ -1,12 +1,18 @@
 import {
-  SectionGeneratorAdapter,
   SectionIdentifier,
-  SectionOptions,
-  SectionGenerationPayload,
-  SectionOptionsDescriptors,
   ReadableContent,
 } from '@ci-dokumentor/core';
-import { GitLabComponent, GitLabCIManifest, GitLabCIPipeline } from '../gitlab-ci-parser.js';
+import type {
+  SectionGenerationPayload,
+  SectionGeneratorAdapter,
+  SectionOptions,
+  SectionOptionsDescriptors,
+} from '@ci-dokumentor/core';
+import type {
+  GitLabCIManifest,
+  GitLabCIPipeline,
+  GitLabComponent,
+} from '../gitlab-ci-parser.js';
 
 export abstract class GitLabCISectionGeneratorAdapter
   implements SectionGeneratorAdapter<GitLabCIManifest> {

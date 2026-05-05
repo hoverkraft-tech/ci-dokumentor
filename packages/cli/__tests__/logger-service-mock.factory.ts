@@ -1,4 +1,4 @@
-import { Mocked } from "vitest";
+import type { Mocked } from "vitest";
 import { LoggerService } from "../src/lib/logger/logger.service.js";
 
 type LoggerServiceDefaults = Partial<{

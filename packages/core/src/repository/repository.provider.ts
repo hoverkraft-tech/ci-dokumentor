@@ -1,6 +1,6 @@
-import { ManifestVersion } from '../version/version.service.js';
+import type { ManifestVersion } from '../version/version.service.js';
 import type { OptionDescriptor } from '../options/options.js';
-import { LicenseInfo } from '../license/license.service.js';
+import type { LicenseInfo } from '../license/license.service.js';
 
 export const REPOSITORY_PROVIDER_IDENTIFIER = Symbol.for('RepositoryProvider');
 

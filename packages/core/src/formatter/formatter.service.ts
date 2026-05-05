@@ -1,8 +1,6 @@
 import { injectable, multiInject } from 'inversify';
-import {
-  FORMATTER_ADAPTER_IDENTIFIER,
-  FormatterAdapter,
-} from './formatter.adapter.js';
+import { FORMATTER_ADAPTER_IDENTIFIER } from './formatter.adapter.js';
+import type { FormatterAdapter } from './formatter.adapter.js';
 import { FormatterLanguage } from './formatter-language.js';
 
 @injectable()
@@ -10,7 +8,7 @@ export class FormatterService {
   constructor(
     @multiInject(FORMATTER_ADAPTER_IDENTIFIER)
     private readonly formatterAdapters: FormatterAdapter[]
-  ) {}
+  ) { }
 
   getFormatterAdapterForFile(filePath: string): FormatterAdapter {
     const fileExtension = this.getFileLanguage(filePath);
