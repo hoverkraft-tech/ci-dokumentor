@@ -4,11 +4,20 @@ import { FormatterService } from './formatter/formatter.service.js';
 import { MarkdownFormatterAdapter } from './formatter/markdown/markdown-formatter.adapter.js';
 import { FORMATTER_ADAPTER_IDENTIFIER } from './formatter/formatter.adapter.js';
 import { RepositoryService } from './repository/repository.service.js';
-import { LicenseService } from './license/license.service.js';
+import {
+  LicenseService,
+  LICENSE_SERVICE_IDENTIFIER,
+} from './license/license.service.js';
 import { FileRendererAdapter } from './renderer/file-renderer.adapter.js';
 import { DiffRendererAdapter } from './renderer/diff-renderer.adapter.js';
-import { FileReaderAdapter } from './reader/file-reader.adapter.js';
-import { VersionService } from './version/version.service.js';
+import {
+  FileReaderAdapter,
+  FILE_READER_ADAPTER_IDENTIFIER,
+} from './reader/file-reader.adapter.js';
+import {
+  VersionService,
+  VERSION_SERVICE_IDENTIFIER,
+} from './version/version.service.js';
 import { MigrationService } from './migration/migration.service.js';
 import { ConcurrencyService } from './concurrency/concurrency.service.js';
 import { MarkdownTableGenerator } from './formatter/markdown/markdown-table.generator.js';
@@ -38,12 +47,15 @@ export function initContainer(
   targetContainer.bind(FormatterService).toSelf().inSingletonScope();
   targetContainer.bind(GeneratorService).toSelf().inSingletonScope();
   targetContainer.bind(FileReaderAdapter).toSelf().inSingletonScope();
+  targetContainer.bind(FILE_READER_ADAPTER_IDENTIFIER).toService(FileReaderAdapter);
   targetContainer.bind(FileRendererAdapter).toSelf().inTransientScope();
   targetContainer.bind(DiffRendererAdapter).toSelf().inTransientScope();
   targetContainer.bind<RendererFactory>(RENDERER_FACTORY_IDENTIFIER).toFactory(containerRendererFactory);
   targetContainer.bind(RepositoryService).toSelf().inSingletonScope();
   targetContainer.bind(LicenseService).toSelf().inSingletonScope();
+  targetContainer.bind(LICENSE_SERVICE_IDENTIFIER).toService(LicenseService);
   targetContainer.bind(VersionService).toSelf().inSingletonScope();
+  targetContainer.bind(VERSION_SERVICE_IDENTIFIER).toService(VersionService);
   targetContainer.bind(MigrationService).toSelf().inSingletonScope();
   targetContainer.bind(ConcurrencyService).toSelf().inSingletonScope();
 

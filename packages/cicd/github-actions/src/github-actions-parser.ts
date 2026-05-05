@@ -1,6 +1,9 @@
 import { basename, dirname, extname, join, relative } from 'node:path';
 import type { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
-import { FileReaderAdapter, ReadableContent } from '@ci-dokumentor/core';
+import {
+  FILE_READER_ADAPTER_IDENTIFIER,
+  ReadableContent,
+} from '@ci-dokumentor/core';
 import { inject, injectable } from 'inversify';
 import { parse } from 'yaml';
 
@@ -106,7 +109,7 @@ export type GitHubActionsManifest = GitHubAction | GitHubWorkflow;
 
 @injectable()
 export class GitHubActionsParser {
-  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
+  constructor(@inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter) { }
 
   isGitHubActionFile(source: string): boolean {
     // Check if the source is a GitHub Action by looking for action.yml or action.yaml

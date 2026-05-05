@@ -1,6 +1,9 @@
 import { basename, extname, relative, dirname } from 'node:path';
 import type { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
-import { FileReaderAdapter, ReadableContent } from '@ci-dokumentor/core';
+import {
+  FILE_READER_ADAPTER_IDENTIFIER,
+  ReadableContent,
+} from '@ci-dokumentor/core';
 import { inject, injectable } from 'inversify';
 import { parse } from 'yaml';
 
@@ -79,7 +82,7 @@ export type GitLabCIManifest = GitLabComponent | GitLabCIPipeline;
 
 @injectable()
 export class GitLabCIParser {
-  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
+  constructor(@inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter) { }
 
 
   isGitLabComponentFile(source: string): boolean {

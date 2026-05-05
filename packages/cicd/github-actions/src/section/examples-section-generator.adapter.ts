@@ -1,10 +1,11 @@
 import { join, extname } from 'node:path';
 import { inject, injectable } from 'inversify';
 import {
-  FileReaderAdapter,
+  FILE_READER_ADAPTER_IDENTIFIER,
   SectionIdentifier,
   SectionGeneratorAdapter,
   VersionService,
+  VERSION_SERVICE_IDENTIFIER,
   ManifestVersion,
   SectionGenerationPayload,
   SectionOptions,
@@ -49,8 +50,8 @@ export class ExamplesSectionGenerator extends GitHubActionsSectionGeneratorAdapt
   private version?: string;
 
   constructor(
-    @inject(VersionService) private readonly versionService: VersionService,
-    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter
+    @inject(VERSION_SERVICE_IDENTIFIER) private readonly versionService: VersionService,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter
   ) {
     super();
   }

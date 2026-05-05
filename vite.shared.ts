@@ -1,7 +1,6 @@
 /// <reference types='vitest' />
 import type { UserConfig } from 'vite';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import dts from 'vite-plugin-dts';
 import { join } from 'path';
 
@@ -18,9 +17,10 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
     return {
         root: packageDirPath,
         cacheDir: join(__dirname, 'node_modules/.vite/packages/', packageDirname),
+        resolve: {
+            tsconfigPaths: true,
+        },
         plugins: [
-            // enable TS path mapping resolution during dev/test
-            tsconfigPaths(),
             nxCopyAssetsPlugin(['*.md', 'package.json']),
             dts({
                 entryRoot: 'src',

@@ -9,6 +9,10 @@ export type LicenseInfo = {
   url?: string;
 };
 
+export const LICENSE_SERVICE_IDENTIFIER = Symbol.for(
+  '@ci-dokumentor/core/LicenseService'
+);
+
 @injectable()
 export class LicenseService {
   constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
