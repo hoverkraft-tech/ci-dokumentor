@@ -258,7 +258,6 @@ Workflow without permissions
                 // Arrange
                 const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
                     on: { push: { branches: ['main'] } },
-                    permissions: { contents: 'read' },
                 });
 
                 // Act
@@ -267,6 +266,39 @@ Workflow without permissions
                 // Assert
 
                 expect(result.toString()).toEqual('');
+            });
+
+            it('should generate permissions when GitHub Workflow description is empty', async () => {
+                // Arrange
+                const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+                    on: { push: { branches: ['main'] } },
+                    permissions: {
+                        contents: 'read',
+                    },
+                    jobs: {
+                        test: {
+                            'runs-on': 'ubuntu-latest',
+                            permissions: {
+                                'id-token': 'write',
+                            },
+                            steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
+                        },
+                    },
+                });
+
+                // Act
+                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+                // Assert
+                expect(result.toString()).toEqual(
+                    `## Overview
+
+### Permissions
+
+- **\`contents\`**: \`read\`
+- **\`id-token\`**: \`write\`
+`
+                );
             });
 
             it('should handle GitHub Workflow with complex permissions structure', async () => {
