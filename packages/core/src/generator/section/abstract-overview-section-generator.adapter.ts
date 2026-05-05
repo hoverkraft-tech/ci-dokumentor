@@ -26,22 +26,23 @@ export function OverviewSectionMixin<TManifest, TBase extends AbstractConstructo
 
     async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<TManifest>): Promise<ReadableContent> {
       const description = this.getDescription(manifest);
-      if (!description) {
+      const additionalContent = await this.generateAdditionalContent(formatterAdapter, manifest);
+
+      if (!description && additionalContent.isEmpty()) {
         return ReadableContent.empty();
       }
 
-      let overviewContent = formatterAdapter.heading(new ReadableContent('Overview'), 2).append(
-        formatterAdapter.lineBreak(),
-        formatterAdapter.paragraph(new ReadableContent(description).trim()),
-      );
+      let overviewContent = formatterAdapter.heading(new ReadableContent('Overview'), 2);
 
-      // Allow platform-specific implementations to add additional content
-      const additionalContent = await this.generateAdditionalContent(formatterAdapter, manifest);
-      if (!additionalContent.isEmpty()) {
+      if (description) {
         overviewContent = overviewContent.append(
           formatterAdapter.lineBreak(),
-          additionalContent,
+          formatterAdapter.paragraph(new ReadableContent(description).trim()),
         );
+      }
+
+      if (!additionalContent.isEmpty()) {
+        overviewContent = overviewContent.append(formatterAdapter.lineBreak(), additionalContent);
       }
 
       return overviewContent;
