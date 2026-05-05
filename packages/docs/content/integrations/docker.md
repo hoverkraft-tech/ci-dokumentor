@@ -179,6 +179,25 @@ docker-compose run --rm ci-dokumentor
 
 ## Advanced Usage
 
+### Build From Source
+
+The repository Dockerfile uses BuildKit-specific optimizations to speed up rebuilds and improve layer reuse:
+
+- `RUN --mount=type=cache` for pnpm and npm package caches
+- `COPY --link` for rebase-friendly copy layers
+
+Build locally with BuildKit enabled:
+
+```bash
+DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile --target production -t ci-dokumentor:local .
+```
+
+Or use Buildx explicitly:
+
+```bash
+docker buildx build -f docker/Dockerfile --target production -t ci-dokumentor:local .
+```
+
 ### Multi-Stage Build Integration
 
 For integrating into your own Docker builds:

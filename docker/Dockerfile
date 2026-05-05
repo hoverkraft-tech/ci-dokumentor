@@ -1,29 +1,36 @@
+# syntax=docker/dockerfile:1.10
+
 # Multi-stage build: build & pack then install globally in a minimal runtime image
-FROM node:24-alpine AS builder
+FROM node:25-alpine AS builder
+
+ARG TARGETPLATFORM
+ARG PNPM_VERSION=10.32.1
 
 # Use pnpm for fast installs and reproducible builds
-RUN corepack enable pnpm
+RUN npm install --global pnpm@${PNPM_VERSION} && pnpm config set store-dir /pnpm/store
 
 WORKDIR /build
 
 # Copy package manager files and package manifests needed for install
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
-COPY packages/cicd/gitlab-ci/package.json ./packages/cicd/gitlab-ci/
-COPY packages/cli/package.json ./packages/cli/
-COPY packages/core/package.json ./packages/core/
-COPY packages/docs/package.json ./packages/docs/
-COPY packages/repository/git/package.json ./packages/repository/git/
-COPY packages/repository/github/package.json ./packages/repository/github/
-COPY packages/repository/gitlab/package.json ./packages/repository/gitlab/
+COPY --link package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY --link packages/cicd/github-actions/package.json ./packages/cicd/github-actions/
+COPY --link packages/cicd/gitlab-ci/package.json ./packages/cicd/gitlab-ci/
+COPY --link packages/cli/package.json ./packages/cli/
+COPY --link packages/core/package.json ./packages/core/
+COPY --link packages/docs/package.json ./packages/docs/
+COPY --link packages/repository/git/package.json ./packages/repository/git/
+COPY --link packages/repository/github/package.json ./packages/repository/github/
+COPY --link packages/repository/gitlab/package.json ./packages/repository/gitlab/
 
 # Install all deps (including dev) for building
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm-${TARGETPLATFORM},target=/pnpm/store,sharing=locked \
+    pnpm install --frozen-lockfile
 
 # Copy source and build configs
-COPY ./packages ./packages
-COPY ./nx.json ./tsconfig.base.json ./tsconfig.json ./vite.shared.ts ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build --exclude=docs --verbose
+COPY --link ./packages ./packages
+COPY --link ./nx.json ./tsconfig.base.json ./tsconfig.json ./vite.shared.ts ./
+RUN --mount=type=cache,id=pnpm-${TARGETPLATFORM},target=/pnpm/store,sharing=locked \
+    pnpm build --exclude=docs --verbose
 
 # Pack the CLI package to a single tarball for an efficient, cache-friendly install
 WORKDIR /build/packages/cli
@@ -32,7 +39,9 @@ RUN mkdir -p /pack && \
     npm pack --pack-destination /pack
 
 # Final runtime image: minimal, with the CLI installed globally
-FROM node:24-alpine AS production
+FROM node:25-alpine AS production
+
+ARG TARGETPLATFORM
 
 # Install minimal runtime deps
 # hadolint ignore=DL3018
@@ -46,13 +55,14 @@ RUN addgroup -g 1001 -S nodejs && \
 WORKDIR /home/ci-dokumentor
 
 # Copy packed CLI tarball from builder and install it globally
-COPY --from=builder /pack/*.tgz /tmp/ci-dokumentor.tgz
-RUN npm set progress=false && \
+COPY --link --from=builder /pack/*.tgz /tmp/ci-dokumentor.tgz
+RUN --mount=type=cache,id=npm-${TARGETPLATFORM},target=/root/.npm,sharing=locked \
+    npm set progress=false && \
     npm i -g /tmp/ci-dokumentor.tgz --no-audit --no-fund && \
-    rm -rf /tmp/ci-dokumentor.tgz /root/.npm/_cacache /var/cache/apk/*
+    rm -f /tmp/ci-dokumentor.tgz
 
 # Copy entrypoint script
-COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint
+COPY --link ./docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
 # Run as non-root for better security
