@@ -13,6 +13,19 @@ describe('ReadableContent', () => {
             // Assert
             expect(str).toEqual('hello');
         });
+
+        it('accepts readable-content-like instances from another bundle', () => {
+            // Arrange
+            const foreignReadableContent = {
+                buffer: Buffer.from('hello'),
+            } as unknown as ReadableContent;
+
+            // Act
+            const content = new ReadableContent(foreignReadableContent);
+
+            // Assert
+            expect(content.toString()).toEqual('hello');
+        });
     });
 
     describe('empty', () => {
@@ -275,6 +288,20 @@ describe('ReadableContent', () => {
             // Assert
             expect(b.toString()).toEqual('onetwothree');
             expect(a.toString()).toEqual('one');
+        });
+
+        it('appends readable-content-like instances from another bundle', () => {
+            // Arrange
+            const content = new ReadableContent('one');
+            const foreignReadableContent = {
+                buffer: Buffer.from('two'),
+            } as unknown as ReadableContent;
+
+            // Act
+            const result = content.append(foreignReadableContent);
+
+            // Assert
+            expect(result.toString()).toEqual('onetwo');
         });
     });
 

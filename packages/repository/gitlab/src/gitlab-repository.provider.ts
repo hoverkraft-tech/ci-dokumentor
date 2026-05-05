@@ -1,16 +1,20 @@
 import {
+  FILE_READER_ADAPTER_IDENTIFIER,
   RepositoryInfo,
   LicenseInfo,
   ContributingInfo,
   SecurityInfo,
   AbstractRepositoryProvider,
   LicenseService,
+  LICENSE_SERVICE_IDENTIFIER,
   RepositoryOptionsDescriptors,
   ManifestVersion,
-  FileReaderAdapter,
 } from '@ci-dokumentor/core';
 import type { ReaderAdapter } from '@ci-dokumentor/core';
-import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
+import {
+  GitRepositoryProvider,
+  GIT_REPOSITORY_PROVIDER_IDENTIFIER,
+} from '@ci-dokumentor/repository-git';
 import { Gitlab, ProjectLicenseSchema, SimpleProjectSchema } from '@gitbeaker/rest';
 import { injectable, inject } from 'inversify';
 
@@ -28,10 +32,10 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
   private gitlabClient?: GitlabClient;
 
   constructor(
-    @inject(GitRepositoryProvider)
+    @inject(GIT_REPOSITORY_PROVIDER_IDENTIFIER)
     private gitRepositoryProvider: GitRepositoryProvider,
-    @inject(LicenseService) private licenseService: LicenseService,
-    @inject(FileReaderAdapter) private readerAdapter: ReaderAdapter,
+    @inject(LICENSE_SERVICE_IDENTIFIER) private licenseService: LicenseService,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readerAdapter: ReaderAdapter,
   ) {
     super();
   }

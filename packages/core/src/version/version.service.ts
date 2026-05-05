@@ -1,5 +1,9 @@
 import { RepositoryProvider } from "../repository/repository.provider.js";
 
+export const VERSION_SERVICE_IDENTIFIER = Symbol.for(
+  '@ci-dokumentor/core/VersionService'
+);
+
 export type ManifestVersion = {
   ref?: string; // Branch, tag, or custom ref (e.g., 'v1.0.0', 'main')
   sha?: string; // Commit SHA (e.g., '08c6903cd8c0fde910a37f88322edcfb5dd907a8')

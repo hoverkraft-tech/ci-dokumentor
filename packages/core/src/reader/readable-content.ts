@@ -14,6 +14,12 @@ export class ReadableContent {
   // inputs. The value is conservative; adjust if you have a measured need.
   private static readonly REGEX_SAFE_MAX_BYTES = 24 * 1024; // 24 KB
 
+  static [Symbol.hasInstance](instance: unknown): boolean {
+    return typeof instance === 'object'
+      && instance !== null
+      && Buffer.isBuffer((instance as { buffer?: unknown }).buffer);
+  }
+
   private buffer: Buffer;
 
   /**

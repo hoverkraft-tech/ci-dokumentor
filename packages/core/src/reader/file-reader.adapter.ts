@@ -5,6 +5,10 @@ import fg from 'fast-glob';
 import { ReaderAdapter } from './reader.adapter.js';
 import { ReadableContent } from './readable-content.js';
 
+export const FILE_READER_ADAPTER_IDENTIFIER = Symbol.for(
+    '@ci-dokumentor/core/FileReaderAdapter'
+);
+
 @injectable()
 export class FileReaderAdapter implements ReaderAdapter {
 
@@ -70,7 +74,7 @@ export class FileReaderAdapter implements ReaderAdapter {
         // Check if pattern contains glob characters
         if (pattern.includes('*') || pattern.includes('?') || pattern.includes('[')) {
             // Use fast-glob to resolve pattern
-            const files = await fg(pattern, { 
+            const files = await fg(pattern, {
                 onlyFiles: true,
                 absolute: false,
             });

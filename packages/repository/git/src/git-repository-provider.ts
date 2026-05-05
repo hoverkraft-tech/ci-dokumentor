@@ -11,6 +11,10 @@ export type ParsedRemoteUrl = {
   toString: (format?: string) => string;
 };
 
+export const GIT_REPOSITORY_PROVIDER_IDENTIFIER = Symbol.for(
+  '@ci-dokumentor/repository-git/GitRepositoryProvider'
+);
+
 type GitRepositoryProviderOptions = Record<string, never>;
 
 @injectable()

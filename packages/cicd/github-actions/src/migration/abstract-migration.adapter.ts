@@ -1,6 +1,11 @@
 import { StringDecoder } from 'node:string_decoder';
 import { injectable, inject } from 'inversify';
-import { MigrationAdapter, SectionIdentifier, FileReaderAdapter, ReadableContent } from '@ci-dokumentor/core';
+import {
+    FILE_READER_ADAPTER_IDENTIFIER,
+    MigrationAdapter,
+    SectionIdentifier,
+    ReadableContent,
+} from '@ci-dokumentor/core';
 import type { FormatterAdapter, MigrateDocumentationPayload, ReaderAdapter } from '@ci-dokumentor/core';
 
 /**
@@ -22,7 +27,7 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         return this.name;
     }
 
-    constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
+    constructor(@inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter) { }
 
     async supportsDestination(destination: string): Promise<boolean> {
         if (!this.readerAdapter.resourceExists(destination)) {

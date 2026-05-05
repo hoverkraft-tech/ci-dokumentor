@@ -1,5 +1,15 @@
 import { basename } from 'node:path';
-import { VersionService, ManifestVersion, SectionGenerationPayload, SectionOptions, ReadableContent, FormatterAdapter, SectionIdentifier, SectionGeneratorAdapter } from '@ci-dokumentor/core';
+import {
+  VersionService,
+  VERSION_SERVICE_IDENTIFIER,
+  ManifestVersion,
+  SectionGenerationPayload,
+  SectionOptions,
+  ReadableContent,
+  FormatterAdapter,
+  SectionIdentifier,
+  SectionGeneratorAdapter,
+} from '@ci-dokumentor/core';
 import { Document, isScalar } from 'yaml';
 import { inject, injectable } from 'inversify';
 import {
@@ -26,7 +36,7 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
   private version?: string;
 
   constructor(
-    @inject(VersionService) private readonly versionService: VersionService
+    @inject(VERSION_SERVICE_IDENTIFIER) private readonly versionService: VersionService
   ) {
     super();
   }
