@@ -296,6 +296,52 @@ jobs:
         );
       });
 
+      it('should generate usage section with permissions required by workflow jobs', async () => {
+        // Arrange
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          usesName: 'owner/repo/.github/workflows/release.yml',
+          name: 'Release Workflow',
+          on: { push: { branches: ['main'] }, workflow_call: {} },
+          permissions: { contents: 'read' },
+          jobs: {
+            release: {
+              'runs-on': 'ubuntu-latest',
+              permissions: { contents: 'write', 'id-token': 'write' },
+            },
+            publish: {
+              'runs-on': 'ubuntu-latest',
+              permissions: { packages: 'read' },
+            },
+          },
+        });
+
+        // Act
+        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+
+        // Assert
+
+        expect(result.toString()).toBe(
+          `## Usage
+
+\`\`\`yaml
+name: Release Workflow
+on:
+  push:
+    branches:
+      - main
+permissions: {}
+jobs:
+  release:
+    uses: owner/repo/.github/workflows/release.yml
+    permissions:
+      contents: write
+      id-token: write
+      packages: read
+\`\`\`
+`
+        );
+      });
+
       it('should generate usage section for workflow with only push trigger', async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({

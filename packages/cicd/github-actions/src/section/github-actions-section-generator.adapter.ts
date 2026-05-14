@@ -57,4 +57,42 @@ export abstract class GitHubActionsSectionGeneratorAdapter
         typeof (parsed as GitHubWorkflow).on === 'string')
     );
   }
+
+  protected getWorkflowPermissions(workflow: GitHubWorkflow): Record<string, string> {
+    const permissions: Record<string, string> = { ...(workflow.permissions || {}) };
+
+    for (const job of Object.values(workflow.jobs || {})) {
+      if (!job.permissions) {
+        continue;
+      }
+
+      for (const [permission, level] of Object.entries(job.permissions)) {
+        permissions[permission] = this.getHigherPermissionLevel(permissions[permission], level);
+      }
+    }
+
+    return Object.fromEntries(
+      Object.entries(permissions).sort(([permissionA], [permissionB]) => permissionA.localeCompare(permissionB))
+    );
+  }
+
+  private getHigherPermissionLevel(currentLevel: string | undefined, candidateLevel: string): string {
+    if (!currentLevel) {
+      return candidateLevel;
+    }
+
+    return this.getPermissionPriority(currentLevel) >= this.getPermissionPriority(candidateLevel)
+      ? currentLevel
+      : candidateLevel;
+  }
+
+  private getPermissionPriority(level: string): number {
+    const priorities: Record<string, number> = {
+      none: 0,
+      read: 1,
+      write: 2,
+    };
+
+    return priorities[level] ?? 0;
+  }
 }
