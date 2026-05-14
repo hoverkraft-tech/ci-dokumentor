@@ -139,7 +139,8 @@ export class UsageSectionGenerator extends GitHubActionsSectionGeneratorAdapter 
         ? filteredOn
         : { push: { branches: ['main'] } };
 
-    const permissions = workflow.permissions || undefined;
+    const requiredPermissions = this.getWorkflowPermissions(workflow);
+    const permissions = Object.keys(requiredPermissions).length > 0 ? requiredPermissions : undefined;
 
     const secrets = workflow.on?.workflow_call?.secrets || {};
     const secretsUsage = this.generateWithSection(secrets);
