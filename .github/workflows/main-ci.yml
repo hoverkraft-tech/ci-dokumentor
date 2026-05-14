@@ -43,45 +43,18 @@ jobs:
       sign-images: true
 
   npm-publish:
+    name: Publish package to npm
     needs: ci
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@main
     permissions:
       contents: read
+      packages: write
       id-token: write
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Setup Node.js
-        uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@47891dc49a31209a88949e081d97a010f8cd20c4 # 0.23.2
-
-      - id: download-package-tarball
-        name: Download package tarball
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          artifact-ids: ${{ needs.ci.outputs.package-tarball-artifact-id }}
-          path: ${{ runner.temp }}/${{ github.run_id }}
-          skip-decompress: true
-
-      - name: Publish CLI to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PACKAGE_TARBALL_DOWNLOAD_PATH: ${{ steps.download-package-tarball.outputs.download-path }}
-          TAG: ${{ format('@ci-dokumentor/cli@{0}', github.ref_name) }}
-        run: |
-          PACKAGE_TARBALL_PATH="$(find "${PACKAGE_TARBALL_DOWNLOAD_PATH}" -maxdepth 2 -type f -name '*.tgz' | head -n 1)"
-
-          if [ -z "${PACKAGE_TARBALL_PATH}" ]; then
-            echo "Package tarball not found in ${PACKAGE_TARBALL_DOWNLOAD_PATH}" >&2
-            exit 1
-          fi
-
-          # Write .npmrc file
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-
-          npm publish "${PACKAGE_TARBALL_PATH}" --provenance --access public --tag "${TAG}"
+    secrets:
+      registry-token: ${{ secrets.NPM_TOKEN }}
+    with:
+      package-tarball-artifact-id: ${{ needs.ci.outputs.package-tarball-artifact-id }}
 
   docs:
     if: github.event_name != 'schedule'

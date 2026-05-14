@@ -135,6 +135,7 @@ To pass CI, your PR must:
 
 - **Tag-triggered** - Only runs on Git tag pushes
 - **Artifact reuse** - Publishes tested package tarball
+- **Shared workflow** - Delegates npm publishing to the reusable Node.js release workflow
 - **Provenance** - Includes npm provenance for security
 - **Scoped package** - Published as `@ci-dokumentor/cli`
 - **Public access** - Available for global installation
@@ -191,6 +192,7 @@ The release process is triggered by:
 
 - **Tag Trigger** - Automatically triggered on Git tag pushes
 - **Artifact Reuse** - Publishes the exact tarball that was tested
+- **Reusable Release** - Uses the shared Node.js release workflow for tarball download and `npm publish`
 - **Provenance** - Includes npm provenance for supply chain security
 - **Public Access** - Published as public scoped package `@ci-dokumentor/cli`
 
