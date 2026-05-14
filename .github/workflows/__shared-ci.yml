@@ -41,7 +41,7 @@ jobs:
         VALIDATE_TSX=false
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@47891dc49a31209a88949e081d97a010f8cd20c4 # 0.23.2
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@a10d5e32daef8e060c49fe617833fb0d53476f22 # 0.24.0
     permissions:
       contents: read
       id-token: write
@@ -68,7 +68,7 @@ jobs:
     steps:
       - id: package
         name: Create package tarball
-        uses: hoverkraft-tech/ci-github-nodejs/actions/package@47891dc49a31209a88949e081d97a010f8cd20c4 # 0.23.2
+        uses: hoverkraft-tech/ci-github-nodejs/actions/package@a10d5e32daef8e060c49fe617833fb0d53476f22 # 0.24.0
         with:
           working-directory: .
           package-directory: packages/cli
