@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   clean:
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@2b647ed6f11d50cb6beb6d56333e68ba2c804826 # 0.33.1
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/prune-pull-requests-images-tags.yml@260358ba1fd405c57bc669823d89c625971a3431 # 0.34.2
     permissions:
       contents: read
       packages: write
@@ -46,7 +46,7 @@ jobs:
     name: Publish package to npm
     needs: ci
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@a10d5e32daef8e060c49fe617833fb0d53476f22 # 0.24.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@6b74a8f070140f5c120f78026d58e4c00d1b1e37 # 0.24.2
     permissions:
       contents: read
       packages: write
@@ -124,7 +124,7 @@ jobs:
           client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4c9d51717dc04d823dac2dc9ac2857e7b3069454 # 0.35.0
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@b553a696531fbd36743ccbb0c76c717971b8acdb # 0.35.4
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           branch: docs/action-documentation-update
@@ -137,6 +137,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@2c8e24b416226074aea1e240468f043edefc5760 # 0.23.2
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@b27c38015a8265780329d229c841d057a18b8fae # 0.25.0
         with:
           build-path: packages/docs/build

@@ -25,7 +25,7 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@4c9d51717dc04d823dac2dc9ac2857e7b3069454 # 0.35.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@b553a696531fbd36743ccbb0c76c717971b8acdb # 0.35.4
     permissions:
       actions: read
       contents: read
@@ -41,7 +41,7 @@ jobs:
         VALIDATE_TSX=false
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@a10d5e32daef8e060c49fe617833fb0d53476f22 # 0.24.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@6b74a8f070140f5c120f78026d58e4c00d1b1e37 # 0.24.2
     permissions:
       contents: read
       id-token: write
@@ -68,7 +68,7 @@ jobs:
     steps:
       - id: package
         name: Create package tarball
-        uses: hoverkraft-tech/ci-github-nodejs/actions/package@a10d5e32daef8e060c49fe617833fb0d53476f22 # 0.24.0
+        uses: hoverkraft-tech/ci-github-nodejs/actions/package@6b74a8f070140f5c120f78026d58e4c00d1b1e37 # 0.24.2
         with:
           working-directory: .
           package-directory: packages/cli
@@ -105,7 +105,7 @@ jobs:
 
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@2b647ed6f11d50cb6beb6d56333e68ba2c804826 # 0.33.1
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@260358ba1fd405c57bc669823d89c625971a3431 # 0.34.2
     permissions:
       contents: read
       id-token: write
