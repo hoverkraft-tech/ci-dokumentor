@@ -8,7 +8,7 @@ import {
 import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import { initTestContainer } from '../container.js';
+import { initTestContainer } from '../../__tests__/test-container.js';
 import { HeaderSectionGenerator } from './header-section-generator.adapter.js';
 
 describe('HeaderSectionGenerator', () => {

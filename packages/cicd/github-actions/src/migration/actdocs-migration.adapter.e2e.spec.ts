@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
 import mockFs, { restore } from 'mock-fs';
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { initTestContainer } from '../container.js';
+import { initTestContainer } from '../../__tests__/test-container.js';
 import { ActdocsMigrationAdapter } from './actdocs-migration.adapter.js';
 
 describe('ActdocsMigrationAdapter', () => {

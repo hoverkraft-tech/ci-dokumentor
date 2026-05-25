@@ -17,13 +17,12 @@
   },
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
-    "@ci-dokumentor/repository-git": "workspace:*",
-    "@ci-dokumentor/repository-github": "workspace:*",
     "feather-icons": "^4.29.2",
     "yaml": "^2.9.0",
     "inversify": "^8.1.0"
   },
   "devDependencies": {
+    "@ci-dokumentor/repository-github": "workspace:*",
     "@types/feather-icons": "^4.29.4"
   }
 }

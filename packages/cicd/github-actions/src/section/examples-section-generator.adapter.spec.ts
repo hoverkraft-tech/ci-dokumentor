@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest'
 import { VersionService, SectionIdentifier, ManifestVersion, ReadableContent, FormatterAdapter, RepositoryProvider, ReaderAdapter, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
 import { ReaderAdapterMockFactory, RepositoryInfoMockFactory, RepositoryProviderMockFactory, VersionServiceMockFactory } from '@ci-dokumentor/core/tests';
 import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
-import { initTestContainer } from '../container.js';
+import { initTestContainer } from '../../__tests__/test-container.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
 import { ExamplesSectionGenerator } from './examples-section-generator.adapter.js';

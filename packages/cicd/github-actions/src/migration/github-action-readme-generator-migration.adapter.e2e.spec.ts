@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { FileRendererAdapter, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
 import mockFs, { restore } from 'mock-fs';
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { initTestContainer } from '../container.js';
+import { initTestContainer } from '../../__tests__/test-container.js';
 import { GitHubActionReadmeGeneratorMigrationAdapter } from './github-action-readme-generator-migration.adapter.js';
 
 describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {

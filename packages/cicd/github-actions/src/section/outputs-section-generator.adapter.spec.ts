@@ -13,7 +13,7 @@ import {
   GitHubActionsManifest,
 } from '../github-actions-parser.js';
 import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import { initTestContainer } from '../container.js';
+import { initTestContainer } from '../../__tests__/test-container.js';
 import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
 import { OutputsSectionGenerator } from './outputs-section-generator.adapter.js';
 

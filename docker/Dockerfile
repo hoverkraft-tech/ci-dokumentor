@@ -23,13 +23,15 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 # Copy source and build configs
 COPY ./packages ./packages
 COPY ./nx.json ./tsconfig.base.json ./tsconfig.json ./vite.shared.ts ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build --exclude=docs --verbose
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm nx sync --verbose && \
+    pnpm build --exclude=docs --verbose
 
 # Pack the CLI package to a single tarball for an efficient, cache-friendly install
 WORKDIR /build/packages/cli
-RUN mkdir -p /pack && \
-    # npm pack produces a single .tgz we can move to /pack
-    npm pack --pack-destination /pack
+RUN mkdir -p /tmp/cli-package /pack && \
+    cp -R dist/. /tmp/cli-package/ && \
+    node -e "const fs = require('node:fs'); const pkgPath = '/tmp/cli-package/package.json'; const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')); pkg.main = './index.js'; pkg.module = './index.js'; pkg.types = './index.d.ts'; if (pkg.bin && pkg.bin['ci-dokumentor']) pkg.bin['ci-dokumentor'] = './bin/ci-dokumentor.js'; if (pkg.exports && pkg.exports['.']) { delete pkg.exports['.'].development; pkg.exports['.'].types = './index.d.ts'; pkg.exports['.'].import = './index.js'; pkg.exports['.'].default = './index.js'; } delete pkg.devDependencies; delete pkg.files; fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');" && \
+    npm pack /tmp/cli-package --pack-destination /pack
 
 # Final runtime image: minimal, with the CLI installed globally
 FROM node:24-alpine AS production

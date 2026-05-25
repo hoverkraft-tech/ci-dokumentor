@@ -1,12 +1,9 @@
 import {
   Container,
   GENERATOR_ADAPTER_IDENTIFIER,
-  MIGRATION_ADAPTER_IDENTIFIER,
-  initContainer as coreInitContainer
+  MIGRATION_ADAPTER_IDENTIFIER
 } from '@ci-dokumentor/core';
 import { Container as InversifyContainer } from 'inversify';
-import { initContainer as gitInitContainer } from '@ci-dokumentor/repository-git';
-import { initContainer as githubInitContainer } from '@ci-dokumentor/repository-github';
 import { GitHubActionsParser } from './github-actions-parser.js';
 import {
   GitHubActionsGeneratorAdapter,
@@ -119,15 +116,4 @@ export function initContainer(
     .toService(GitHubActionReadmeGeneratorMigrationAdapter);
 
   return targetContainer;
-}
-
-/**
- * Initialize a test container for GitHub Actions package.
- * This initializes all the proper packages needed for GitHub Actions testing.
- */
-export function initTestContainer(): Container {
-  let testContainer = coreInitContainer();
-  testContainer = gitInitContainer(testContainer);
-  testContainer = githubInitContainer(testContainer);
-  return initContainer(testContainer);
 }

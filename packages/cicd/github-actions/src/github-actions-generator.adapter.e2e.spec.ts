@@ -11,7 +11,7 @@ import {
 import { GitRepositoryProvider } from '@ci-dokumentor/repository-git';
 import { sanitizeSnapshotContent } from '@ci-dokumentor/core/tests';
 import mockFs, { restore } from 'mock-fs';
-import { initTestContainer } from './container.js';
+import { initTestContainer } from '../__tests__/test-container.js';
 import { GitHubActionsGeneratorAdapter } from './github-actions-generator.adapter.js';
 
 const rootPath = join(__dirname, '../../../..');

@@ -23,6 +23,9 @@
     },
     {
       "path": "./packages/repository/gitlab"
+    },
+    {
+      "path": "./packages/docs"
     }
   ]
 }

@@ -1,7 +1,3 @@
-# Docs package
-packages/docs/
-!packages/docs/package.json
-
 .git/
 # See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
