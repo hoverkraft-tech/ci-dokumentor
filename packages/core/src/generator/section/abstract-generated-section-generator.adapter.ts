@@ -1,5 +1,8 @@
 import { ReadableContent } from "../../reader/readable-content.js";
-import { SectionGenerationPayload, SectionIdentifier } from "./section-generator.adapter.js";
+import {
+  type SectionGenerationPayload,
+  SectionIdentifier,
+} from "./section-generator.adapter.js";
 
 /**
  * Mixin type for Generated section generator.
@@ -12,13 +15,11 @@ type AbstractConstructor<T = object> = abstract new (...args: any[]) => T;
  * This section adds attribution to CI Dokumentor at the end of documentation.
  * The implementation is platform-agnostic.
  */
-export function GeneratedSectionMixin<TManifest, TBase extends AbstractConstructor>(Base: TBase) {
+export function GeneratedSectionMixin<
+  TManifest,
+  TBase extends AbstractConstructor,
+>(Base: TBase) {
   abstract class GeneratedSection extends Base {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
-      super(...args);
-    }
-
     getSectionIdentifier(): SectionIdentifier {
       return SectionIdentifier.Generated;
     }

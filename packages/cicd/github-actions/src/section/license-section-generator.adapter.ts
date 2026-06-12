@@ -1,7 +1,7 @@
 import { ReadableContent, SectionIdentifier } from "@ci-dokumentor/core";
 import type { SectionGenerationPayload } from "@ci-dokumentor/core";
 import { injectable } from "inversify";
-import { GitHubActionsManifest } from "../github-actions-parser.js";
+import type { GitHubActionsManifest } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 @injectable()
@@ -23,7 +23,9 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     ]);
 
     const authorName =
-      "author" in manifest && manifest.author ? manifest.author : repositoryInfo.owner;
+      "author" in manifest && manifest.author
+        ? manifest.author
+        : repositoryInfo.owner;
 
     // Only generate license section if license information is available
     if (!licenseInfo) {
@@ -33,7 +35,9 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     // Generate license section
     const licenseText = `This project is licensed under the ${licenseInfo.name}.`;
 
-    const spdxText = licenseInfo.spdxId ? `SPDX-License-Identifier: ${licenseInfo.spdxId}` : "";
+    const spdxText = licenseInfo.spdxId
+      ? `SPDX-License-Identifier: ${licenseInfo.spdxId}`
+      : "";
 
     const licenseLink = licenseInfo.url
       ? `For more details, see the [license](${licenseInfo.url}).`
@@ -55,7 +59,9 @@ export class LicenseSectionGenerator extends GitHubActionsSectionGeneratorAdapte
 
     licenceContent = licenceContent.append(
       formatterAdapter.lineBreak(),
-      formatterAdapter.paragraph(new ReadableContent(`Copyright © ${currentYear} ${authorName}`)),
+      formatterAdapter.paragraph(
+        new ReadableContent(`Copyright © ${currentYear} ${authorName}`),
+      ),
     );
 
     if (licenseLink) {

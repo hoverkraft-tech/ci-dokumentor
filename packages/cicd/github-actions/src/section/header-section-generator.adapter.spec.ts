@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
 } from "@ci-dokumentor/core";
 import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
 } from "@ci-dokumentor/core/tests";
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import type { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
 import { initTestContainer } from "../container.js";
 import { HeaderSectionGenerator } from "./header-section-generator.adapter.js";
@@ -73,7 +73,9 @@ describe("HeaderSectionGenerator", () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
-        mockRepositoryProvider.getLogo.mockResolvedValue("https://example.com/logo.png");
+        mockRepositoryProvider.getLogo.mockResolvedValue(
+          "https://example.com/logo.png",
+        );
 
         // Act
         const result = await generator.generateSection({
@@ -102,7 +104,9 @@ describe("HeaderSectionGenerator", () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
-        mockRepositoryProvider.getLogo.mockResolvedValue("file://.github/logo.png");
+        mockRepositoryProvider.getLogo.mockResolvedValue(
+          "file://.github/logo.png",
+        );
 
         // Act
         const result = await generator.generateSection({
@@ -131,7 +135,9 @@ describe("HeaderSectionGenerator", () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
-        mockRepositoryProvider.getLogo.mockResolvedValue("file://.github/logo.png");
+        mockRepositoryProvider.getLogo.mockResolvedValue(
+          "file://.github/logo.png",
+        );
 
         // Act
         const result = await generator.generateSection({
@@ -248,7 +254,9 @@ describe("HeaderSectionGenerator", () => {
           },
         };
 
-        mockRepositoryProvider.getLogo.mockResolvedValue("https://example.com/logo.png");
+        mockRepositoryProvider.getLogo.mockResolvedValue(
+          "https://example.com/logo.png",
+        );
 
         // Act
         const result = await generator.generateSection({
@@ -307,7 +315,9 @@ describe("HeaderSectionGenerator", () => {
           jobs: {},
         };
 
-        mockRepositoryProvider.getLogo.mockResolvedValue("https://example.com/logo.png");
+        mockRepositoryProvider.getLogo.mockResolvedValue(
+          "https://example.com/logo.png",
+        );
 
         // Act
         const result = await generator.generateSection({
@@ -339,7 +349,9 @@ describe("HeaderSectionGenerator", () => {
           jobs: {},
         };
 
-        mockRepositoryProvider.getLogo.mockResolvedValue("file://.github/logo.png");
+        mockRepositoryProvider.getLogo.mockResolvedValue(
+          "file://.github/logo.png",
+        );
 
         // Act
         const result = await generator.generateSection({
@@ -465,7 +477,9 @@ describe("HeaderSectionGenerator", () => {
       // Arrange
       const manifest: GitHubAction = GitHubActionMockFactory.create();
 
-      mockRepositoryProvider.getLogo.mockResolvedValue("https://example.com/logo.png");
+      mockRepositoryProvider.getLogo.mockResolvedValue(
+        "https://example.com/logo.png",
+      );
 
       // Act
       const result = await generator.generateSection({

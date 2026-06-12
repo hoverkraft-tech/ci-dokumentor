@@ -1,14 +1,14 @@
 import {
   ReadableContent,
-  RepositoryProvider,
-  SectionGenerationPayload,
-  SectionGeneratorAdapter,
-  SectionOptions,
-  FormatterAdapter,
+  type RepositoryProvider,
+  type SectionGenerationPayload,
+  type SectionGeneratorAdapter,
+  type SectionOptions,
+  type FormatterAdapter,
   SectionIdentifier,
 } from "@ci-dokumentor/core";
 import { injectable } from "inversify";
-import { GitHubActionsManifest } from "../github-actions-parser.js";
+import type { GitHubActionsManifest } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 type Badge = { label: string; url: string };
@@ -21,7 +21,8 @@ export interface BadgesSectionOptions extends SectionOptions {
 @injectable()
 export class BadgesSectionGenerator
   extends GitHubActionsSectionGeneratorAdapter
-  implements SectionGeneratorAdapter<GitHubActionsManifest, BadgesSectionOptions>
+  implements
+    SectionGeneratorAdapter<GitHubActionsManifest, BadgesSectionOptions>
 {
   private extraBadges?: LinkedBadge[];
 
@@ -39,7 +40,9 @@ export class BadgesSectionGenerator
     };
   }
 
-  override setSectionOptions({ extraBadges }: Partial<BadgesSectionOptions>): void {
+  override setSectionOptions({
+    extraBadges,
+  }: Partial<BadgesSectionOptions>): void {
     if (!extraBadges) {
       return;
     }
@@ -66,20 +69,26 @@ export class BadgesSectionGenerator
     }
 
     if (!Array.isArray(parsed)) {
-      throw new Error("The extra badges option must be a JSON array of badge objects.");
+      throw new Error(
+        "The extra badges option must be a JSON array of badge objects.",
+      );
     }
 
     this.extraBadges = parsed.map((badge) => {
       // Determine the badge label
       const badgeLabel = badge.label;
       if (!badgeLabel || typeof badgeLabel !== "string") {
-        throw new Error("Badge must have a label property for the badge label.");
+        throw new Error(
+          "Badge must have a label property for the badge label.",
+        );
       }
 
       // Determine the badge image URL (shields.io URL)
       const badgeImageUrl = badge.url;
       if (!badgeImageUrl || typeof badgeImageUrl !== "string") {
-        throw new Error("Badge must have a url property for the badge image URL.");
+        throw new Error(
+          "Badge must have a url property for the badge image URL.",
+        );
       }
 
       // Determine the link URL (where clicking the badge should go)
@@ -178,7 +187,9 @@ export class BadgesSectionGenerator
     ];
   }
 
-  private async getCommunityBadges(repositoryProvider: RepositoryProvider): Promise<LinkedBadge[]> {
+  private async getCommunityBadges(
+    repositoryProvider: RepositoryProvider,
+  ): Promise<LinkedBadge[]> {
     const repositoryInfo = await repositoryProvider.getRepositoryInfo();
 
     const badges: LinkedBadge[] = [
@@ -221,7 +232,10 @@ export class BadgesSectionGenerator
         new ReadableContent(linkedBadge.badge.url),
       );
       if (linkedBadge.url) {
-        badgeContent = formatterAdapter.link(badgeContent, new ReadableContent(linkedBadge.url));
+        badgeContent = formatterAdapter.link(
+          badgeContent,
+          new ReadableContent(linkedBadge.url),
+        );
       }
       badgesCollectionContent = badgesCollectionContent.append(
         badgeContent,

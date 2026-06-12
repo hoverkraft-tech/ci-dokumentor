@@ -3,16 +3,16 @@ import { inject, injectable } from "inversify";
 import {
   FILE_READER_ADAPTER_IDENTIFIER,
   SectionIdentifier,
-  SectionGeneratorAdapter,
-  VersionService,
+  type SectionGeneratorAdapter,
+  type VersionService,
   VERSION_SERVICE_IDENTIFIER,
-  ManifestVersion,
-  SectionGenerationPayload,
-  SectionOptions,
+  type ManifestVersion,
+  type SectionGenerationPayload,
+  type SectionOptions,
   ReadableContent,
 } from "@ci-dokumentor/core";
 import type { FormatterAdapter, ReaderAdapter } from "@ci-dokumentor/core";
-import { GitHubActionsManifest } from "../github-actions-parser.js";
+import type { GitHubActionsManifest } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 export type ExamplesSectionOptions = SectionOptions & {
@@ -48,13 +48,16 @@ type Example = {
 @injectable()
 export class ExamplesSectionGenerator
   extends GitHubActionsSectionGeneratorAdapter
-  implements SectionGeneratorAdapter<GitHubActionsManifest, ExamplesSectionOptions>
+  implements
+    SectionGeneratorAdapter<GitHubActionsManifest, ExamplesSectionOptions>
 {
   private version?: string;
 
   constructor(
-    @inject(VERSION_SERVICE_IDENTIFIER) private readonly versionService: VersionService,
-    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter,
+    @inject(VERSION_SERVICE_IDENTIFIER)
+    private readonly versionService: VersionService,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER)
+    private readonly readerAdapter: ReaderAdapter,
   ) {
     super();
   }
@@ -67,12 +70,15 @@ export class ExamplesSectionGenerator
     return {
       version: {
         flags: "--version <version>",
-        description: "Version identifier of the manifest (tag, branch, commit SHA, etc.)",
+        description:
+          "Version identifier of the manifest (tag, branch, commit SHA, etc.)",
       },
     };
   }
 
-  override setSectionOptions({ version }: Partial<ExamplesSectionOptions>): void {
+  override setSectionOptions({
+    version,
+  }: Partial<ExamplesSectionOptions>): void {
     this.version = version;
   }
 
@@ -82,22 +88,36 @@ export class ExamplesSectionGenerator
     repositoryProvider,
     destination,
   }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
-    const version = await this.versionService.getVersion(this.version, repositoryProvider);
+    const version = await this.versionService.getVersion(
+      this.version,
+      repositoryProvider,
+    );
     const repositoryInfo = await repositoryProvider.getRepositoryInfo();
 
-    const examples = await this.findExamples(repositoryInfo.rootDir, destination, formatterAdapter);
+    const examples = await this.findExamples(
+      repositoryInfo.rootDir,
+      destination,
+      formatterAdapter,
+    );
 
     if (examples.length === 0) {
       return ReadableContent.empty();
     }
 
-    const sectionTitle = formatterAdapter.heading(new ReadableContent("Examples"), 2).trim();
+    const sectionTitle = formatterAdapter
+      .heading(new ReadableContent("Examples"), 2)
+      .trim();
 
     const blocks: ReadableContent[] = examples.map((ex) =>
       this.renderExampleBlock(ex, formatterAdapter, manifest, version),
     );
 
-    return this.assembleExamplesContent(sectionTitle, blocks, formatterAdapter, examples);
+    return this.assembleExamplesContent(
+      sectionTitle,
+      blocks,
+      formatterAdapter,
+      examples,
+    );
   }
 
   /**
@@ -108,14 +128,24 @@ export class ExamplesSectionGenerator
     destination: string,
     formatterAdapter: FormatterAdapter,
   ): Promise<Example[]> {
-    const dirs = [join(rootDir, "examples"), join(rootDir, ".github", "examples")];
+    const dirs = [
+      join(rootDir, "examples"),
+      join(rootDir, ".github", "examples"),
+    ];
 
     const examples: Example[] = [];
 
-    examples.push(...(await this.findExamplesInDirectories(dirs, formatterAdapter)));
+    examples.push(
+      ...(await this.findExamplesInDirectories(dirs, formatterAdapter)),
+    );
 
     if (destination && this.readerAdapter.resourceExists(destination)) {
-      examples.push(...(await this.findExamplesFromDestination(destination, formatterAdapter)));
+      examples.push(
+        ...(await this.findExamplesFromDestination(
+          destination,
+          formatterAdapter,
+        )),
+      );
     }
 
     return examples;
@@ -132,7 +162,9 @@ export class ExamplesSectionGenerator
 
     for (const dir of dirs) {
       if (!this.readerAdapter.containerExists(dir)) continue;
-      out.push(...(await this.findExamplesFromDirectory(dir, formatterAdapter)));
+      out.push(
+        ...(await this.findExamplesFromDirectory(dir, formatterAdapter)),
+      );
     }
 
     return out;
@@ -158,7 +190,9 @@ export class ExamplesSectionGenerator
         // Add a heading derived from the filename and a YAML code block
         examples.push({
           type: ExampleType.Heading,
-          content: new ReadableContent(file.replace(/\.(yml|yaml)$/, "")).trim(),
+          content: new ReadableContent(
+            file.replace(/\.(yml|yaml)$/, ""),
+          ).trim(),
           level: 3,
         });
 
@@ -170,7 +204,9 @@ export class ExamplesSectionGenerator
         });
       } else if (this.isMarkdownExt(ext)) {
         const content = await this.readerAdapter.readResource(filePath);
-        examples.push(...this.parseMarkdownContent(content, formatterAdapter, 2, false));
+        examples.push(
+          ...this.parseMarkdownContent(content, formatterAdapter, 2, false),
+        );
       }
     }
 
@@ -196,7 +232,9 @@ export class ExamplesSectionGenerator
     const content = await this.readerAdapter.readResource(destination);
     const lines = content.splitLines();
 
-    const startMarker = formatterAdapter.sectionStart(SectionIdentifier.Examples);
+    const startMarker = formatterAdapter.sectionStart(
+      SectionIdentifier.Examples,
+    );
     const endMarker = formatterAdapter.sectionEnd(SectionIdentifier.Examples);
 
     let inExamplesSection = false;
@@ -234,7 +272,12 @@ export class ExamplesSectionGenerator
     }
 
     // Skip an inner 'Examples' heading if present at the top of the section.
-    const parsed = this.parseMarkdownContent(sectionContent, formatterAdapter, 0, true);
+    const parsed = this.parseMarkdownContent(
+      sectionContent,
+      formatterAdapter,
+      0,
+      true,
+    );
     return parsed;
   }
 
@@ -293,12 +336,18 @@ export class ExamplesSectionGenerator
         }
 
         // If different fence while in block, treat the line as content
-        codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
+        codeBlockContent = codeBlockContent.append(
+          line,
+          formatterAdapter.lineBreak(),
+        );
         continue;
       }
 
       if (inCodeBlock) {
-        codeBlockContent = codeBlockContent.append(line, formatterAdapter.lineBreak());
+        codeBlockContent = codeBlockContent.append(
+          line,
+          formatterAdapter.lineBreak(),
+        );
         continue;
       }
 
@@ -333,7 +382,9 @@ export class ExamplesSectionGenerator
     version?: ManifestVersion,
   ): ReadableContent {
     if (example.type === ExampleType.Heading) {
-      return formatterAdapter.heading(example.content, example.level || 3).trim();
+      return formatterAdapter
+        .heading(example.content, example.level || 3)
+        .trim();
     }
 
     if (example.type === ExampleType.Text) {
@@ -398,7 +449,7 @@ export class ExamplesSectionGenerator
     usesName: string,
     version?: ManifestVersion,
   ): ReadableContent {
-    if (!version || !version.sha) {
+    if (!version?.sha) {
       return code;
     }
 
@@ -411,7 +462,11 @@ export class ExamplesSectionGenerator
         const [, prefix, actionRef] = usesMatch;
 
         // Check if this is referencing the current action
-        if (actionRef.includes(usesName) || actionRef === "./" || actionRef === ".") {
+        if (
+          actionRef.includes(usesName) ||
+          actionRef === "./" ||
+          actionRef === "."
+        ) {
           // Replace or add version information
           const baseActionRef = actionRef.split("@")[0];
           const versionComment = version.ref ? ` # ${version.ref}` : "";
@@ -423,7 +478,10 @@ export class ExamplesSectionGenerator
         }
       }
 
-      codeSnippetContent = codeSnippetContent.append(line, formatterAdapter.lineBreak());
+      codeSnippetContent = codeSnippetContent.append(
+        line,
+        formatterAdapter.lineBreak(),
+      );
     });
 
     return codeSnippetContent.trim();

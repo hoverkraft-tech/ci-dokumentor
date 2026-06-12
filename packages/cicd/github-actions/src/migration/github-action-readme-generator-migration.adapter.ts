@@ -1,5 +1,5 @@
 import { injectable, injectFromBase } from "inversify";
-import { SectionIdentifier, ReadableContent } from "@ci-dokumentor/core";
+import { SectionIdentifier, type ReadableContent } from "@ci-dokumentor/core";
 import type { FormatterAdapter } from "@ci-dokumentor/core";
 import { AbstractMigrationAdapter } from "./abstract-migration.adapter.js";
 
@@ -48,8 +48,10 @@ export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrati
     // Normalize example paths inside the fragment to the 'examples' token
     const working = content.replace(
       /(<!--\s*(?:start|end)\s+)([\w[\]/.]+)(\s*-->)/gi,
-      (m, p1, p2, p3) => {
-        const normalized = p2.toLowerCase().includes(".github/ghadocs/examples") ? "examples" : p2;
+      (_m, p1, p2, p3) => {
+        const normalized = p2.toLowerCase().includes(".github/ghadocs/examples")
+          ? "examples"
+          : p2;
         return `${p1}${normalized}${p3}`;
       },
     );

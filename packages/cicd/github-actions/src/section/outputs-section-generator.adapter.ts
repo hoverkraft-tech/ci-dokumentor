@@ -1,11 +1,11 @@
 import {
   ReadableContent,
-  SectionGenerationPayload,
-  FormatterAdapter,
+  type SectionGenerationPayload,
+  type FormatterAdapter,
   SectionIdentifier,
 } from "@ci-dokumentor/core";
 import { injectable } from "inversify";
-import {
+import type {
   GitHubAction,
   GitHubActionOutput,
   GitHubActionsManifest,
@@ -26,9 +26,15 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
   }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     let manifestOutputsContent: ReadableContent;
     if (this.isGitHubAction(manifest)) {
-      manifestOutputsContent = this.generateActionOutputsTable(formatterAdapter, manifest);
+      manifestOutputsContent = this.generateActionOutputsTable(
+        formatterAdapter,
+        manifest,
+      );
     } else if (this.isGitHubWorkflow(manifest)) {
-      manifestOutputsContent = this.generateWorkflowOutputsTable(formatterAdapter, manifest);
+      manifestOutputsContent = this.generateWorkflowOutputsTable(
+        formatterAdapter,
+        manifest,
+      );
     } else {
       throw new Error("Unsupported manifest type for OutputsSectionGenerator");
     }
@@ -46,7 +52,10 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     formatterAdapter: FormatterAdapter,
     manifest: GitHubAction,
   ): ReadableContent {
-    return this.generateOutputsTable(formatterAdapter, Object.entries(manifest.outputs || {}));
+    return this.generateOutputsTable(
+      formatterAdapter,
+      Object.entries(manifest.outputs || {}),
+    );
   }
 
   private generateWorkflowOutputsTable(
@@ -86,14 +95,21 @@ export class OutputsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     ];
   }
 
-  private getOutputName(name: string, formatterAdapter: FormatterAdapter): ReadableContent {
-    return formatterAdapter.bold(formatterAdapter.inlineCode(new ReadableContent(name)));
+  private getOutputName(
+    name: string,
+    formatterAdapter: FormatterAdapter,
+  ): ReadableContent {
+    return formatterAdapter.bold(
+      formatterAdapter.inlineCode(new ReadableContent(name)),
+    );
   }
 
   private getOutputDescription(
     output: GitHubActionOutput | GitHubWorkflowOutput,
     formatterAdapter: FormatterAdapter,
   ): ReadableContent {
-    return formatterAdapter.paragraph(new ReadableContent((output.description || "").trim()));
+    return formatterAdapter.paragraph(
+      new ReadableContent((output.description || "").trim()),
+    );
   }
 }

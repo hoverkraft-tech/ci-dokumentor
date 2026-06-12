@@ -1,6 +1,9 @@
 import { basename, dirname, extname, join, relative } from "node:path";
 import type { ReaderAdapter, RepositoryInfo } from "@ci-dokumentor/core";
-import { FILE_READER_ADAPTER_IDENTIFIER, ReadableContent } from "@ci-dokumentor/core";
+import {
+  FILE_READER_ADAPTER_IDENTIFIER,
+  ReadableContent,
+} from "@ci-dokumentor/core";
 import { inject, injectable } from "inversify";
 import { parse } from "yaml";
 
@@ -107,7 +110,8 @@ export type GitHubActionsManifest = GitHubAction | GitHubWorkflow;
 @injectable()
 export class GitHubActionsParser {
   constructor(
-    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER)
+    private readonly readerAdapter: ReaderAdapter,
   ) {}
 
   isGitHubActionFile(source: string): boolean {
@@ -120,7 +124,10 @@ export class GitHubActionsParser {
     return source.includes(".github/workflows/");
   }
 
-  async parseFile(source: string, repositoryInfo: RepositoryInfo): Promise<GitHubActionsManifest> {
+  async parseFile(
+    source: string,
+    repositoryInfo: RepositoryInfo,
+  ): Promise<GitHubActionsManifest> {
     if (!this.readerAdapter.resourceExists(source)) {
       throw new Error(`Source file does not exist: "${source}"`);
     }
@@ -140,7 +147,9 @@ export class GitHubActionsParser {
       const fileName = basename(source, extname(source));
       const pascalCaseName = fileName
         .split(/[-_\s]/)
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
         .join(" ");
       parsed.name = pascalCaseName;
     }
@@ -164,7 +173,11 @@ export class GitHubActionsParser {
         if (existingDescription) {
           // Combine: description field + newline + comments
           (parsed as GitHubAction).description = ReadableContent.empty()
-            .append(existingDescription.trim(), `\n\n`, commentsDescription.trim())
+            .append(
+              existingDescription.trim(),
+              `\n\n`,
+              commentsDescription.trim(),
+            )
             .toString();
         } else {
           // Only comments available
@@ -185,18 +198,28 @@ export class GitHubActionsParser {
     // For GitHub Actions, the usesName is typically the repository name
     const sourceRelativePath = relative(repositoryInfo.rootDir, source);
     if (this.isGitHubActionFile(source)) {
-      return join(repositoryInfo.owner, repositoryInfo.name, dirname(sourceRelativePath));
+      return join(
+        repositoryInfo.owner,
+        repositoryInfo.name,
+        dirname(sourceRelativePath),
+      );
     }
 
     // For GitHub Workflows, the usesName is the workflow file path
     if (this.isGitHubWorkflowFile(source)) {
-      return join(repositoryInfo.owner, repositoryInfo.name, sourceRelativePath);
+      return join(
+        repositoryInfo.owner,
+        repositoryInfo.name,
+        sourceRelativePath,
+      );
     }
 
     throw new Error(`Unsupported source file: ${source}`);
   }
 
-  private extractDescriptionFromComments(content: ReadableContent): ReadableContent | undefined {
+  private extractDescriptionFromComments(
+    content: ReadableContent,
+  ): ReadableContent | undefined {
     const lines = content.splitLines();
     const commentLines: ReadableContent[] = [];
     let inCodeFence = false;
@@ -253,7 +276,10 @@ export class GitHubActionsParser {
       commentLines.shift();
     }
     // Remove trailing empty comment lines
-    while (commentLines.length > 0 && commentLines[commentLines.length - 1].trim().isEmpty()) {
+    while (
+      commentLines.length > 0 &&
+      commentLines[commentLines.length - 1].trim().isEmpty()
+    ) {
       commentLines.pop();
     }
 
@@ -303,7 +329,9 @@ export class GitHubActionsParser {
       "name" in parsed &&
       typeof parsed.name === "string" &&
       "on" in parsed &&
-      (typeof parsed.on === "object" || Array.isArray(parsed.on) || typeof parsed.on === "string")
+      (typeof parsed.on === "object" ||
+        Array.isArray(parsed.on) ||
+        typeof parsed.on === "string")
     );
   }
 }

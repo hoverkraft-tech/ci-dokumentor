@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import {
   FileReaderAdapter,
-  MigrationAdapter,
+  type MigrationAdapter,
   MigrationService,
   ConcurrencyService,
 } from "@ci-dokumentor/core";
@@ -9,8 +9,8 @@ import type { ReaderAdapter } from "@ci-dokumentor/core";
 import { LoggerService } from "../logger/logger.service.js";
 import {
   AbstractMultiFileUseCase,
-  FileResult,
-  MultiFileUseCaseOutput,
+  type FileResult,
+  type MultiFileUseCaseOutput,
 } from "./abstract-multi-file.usecase.js";
 
 export interface MigrateDocumentationUseCaseInput {
@@ -55,7 +55,8 @@ type MigrateDocumentationUseCaseOutput = MultiFileUseCaseOutput;
 export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
   constructor(
     @inject(LoggerService) loggerService: LoggerService,
-    @inject(MigrationService) private readonly migrationService: MigrationService,
+    @inject(MigrationService)
+    private readonly migrationService: MigrationService,
     @inject(FileReaderAdapter) readerAdapter: ReaderAdapter,
     @inject(ConcurrencyService) concurrencyService: ConcurrencyService,
   ) {
@@ -76,7 +77,9 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     const resolvedFiles = await this.resolveFiles(input.destination);
 
     if (resolvedFiles.length === 0) {
-      throw new Error("No destination files found matching the provided pattern(s)");
+      throw new Error(
+        "No destination files found matching the provided pattern(s)",
+      );
     }
 
     const executionContext = this.initializeExecutionContext(
@@ -95,13 +98,17 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     this.logExecutionStart(input);
 
     const migrationAdapter = await this.resolveMigrationAdapter(input);
-    this.loggerService.info(`Migration tool: ${migrationAdapter.getName()}`, input.outputFormat);
+    this.loggerService.info(
+      `Migration tool: ${migrationAdapter.getName()}`,
+      input.outputFormat,
+    );
 
-    const { destination, data } = await this.migrationService.migrateDocumentationFromTool({
-      destination: input.file,
-      migrationAdapter,
-      dryRun: input.dryRun,
-    });
+    const { destination, data } =
+      await this.migrationService.migrateDocumentationFromTool({
+        destination: input.file,
+        migrationAdapter,
+        dryRun: input.dryRun,
+      });
 
     this.logExecutionSuccess({ ...input, destination });
 
@@ -115,9 +122,14 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
   /**
    * Log execution start information
    */
-  private logExecutionStart(input: MigrateDocumentationUseCaseInput & { file: string }): void {
+  private logExecutionStart(
+    input: MigrateDocumentationUseCaseInput & { file: string },
+  ): void {
     const prefix = input.dryRun ? "[DRY RUN] " : "";
-    this.loggerService.info(`${prefix}Starting documentation migration...`, input.outputFormat);
+    this.loggerService.info(
+      `${prefix}Starting documentation migration...`,
+      input.outputFormat,
+    );
     this.loggerService.info(`Target file: ${input.file}`, input.outputFormat);
   }
 
@@ -127,7 +139,10 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
   private logExecutionSuccess(
     input: MigrateDocumentationUseCaseInput & { destination: string },
   ): void {
-    this.loggerService.info("Migration completed successfully!", input.outputFormat);
+    this.loggerService.info(
+      "Migration completed successfully!",
+      input.outputFormat,
+    );
 
     const message = input.dryRun
       ? `(Dry-run) Documentation would be migrated in: ${input.destination}`
@@ -136,14 +151,18 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     this.loggerService.info(message, input.outputFormat);
   }
 
-  private validateInput(input: MigrateDocumentationUseCaseInput & { file: string }): void {
+  private validateInput(
+    input: MigrateDocumentationUseCaseInput & { file: string },
+  ): void {
     if (!input.file) {
       throw new Error("Destination file is required");
     }
 
     // Validate that the destination exists and is a file
     if (!this.readerAdapter.resourceExists(input.file)) {
-      throw new Error(`Destination file does not exist or is not a file: ${input.file}`);
+      throw new Error(
+        `Destination file does not exist or is not a file: ${input.file}`,
+      );
     }
 
     // Validate migration tool (must be present now after potential auto-detect)
@@ -161,16 +180,17 @@ export class MigrateDocumentationUseCase extends AbstractMultiFileUseCase {
     input: MigrateDocumentationUseCaseInput & { file: string },
   ): Promise<MigrationAdapter> {
     if (input.tool) {
-      const migrationAdapter = this.migrationService.getMigrationAdapterByTool(input.tool);
+      const migrationAdapter = this.migrationService.getMigrationAdapterByTool(
+        input.tool,
+      );
       if (migrationAdapter) {
         return migrationAdapter;
       }
       throw new Error(`Migration adapter not found for tool: ${input.tool}`);
     }
 
-    const detectedMigrationAdapter = await this.migrationService.autoDetectMigrationAdapter(
-      input.file,
-    );
+    const detectedMigrationAdapter =
+      await this.migrationService.autoDetectMigrationAdapter(input.file);
     if (detectedMigrationAdapter) {
       return detectedMigrationAdapter;
     }

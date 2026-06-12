@@ -1,21 +1,25 @@
 import {
   FILE_READER_ADAPTER_IDENTIFIER,
-  RepositoryInfo,
-  LicenseInfo,
-  ContributingInfo,
-  SecurityInfo,
+  type RepositoryInfo,
+  type LicenseInfo,
+  type ContributingInfo,
+  type SecurityInfo,
   AbstractRepositoryProvider,
-  LicenseService,
+  type LicenseService,
   LICENSE_SERVICE_IDENTIFIER,
-  RepositoryOptionsDescriptors,
-  ManifestVersion,
+  type RepositoryOptionsDescriptors,
+  type ManifestVersion,
 } from "@ci-dokumentor/core";
 import type { ReaderAdapter } from "@ci-dokumentor/core";
 import {
-  GitRepositoryProvider,
+  type GitRepositoryProvider,
   GIT_REPOSITORY_PROVIDER_IDENTIFIER,
 } from "@ci-dokumentor/repository-git";
-import { Gitlab, ProjectLicenseSchema, SimpleProjectSchema } from "@gitbeaker/rest";
+import {
+  Gitlab,
+  type ProjectLicenseSchema,
+  type SimpleProjectSchema,
+} from "@gitbeaker/rest";
 import { injectable, inject } from "inversify";
 
 export type GitLabRepositoryProviderOptions = {
@@ -35,7 +39,8 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
     @inject(GIT_REPOSITORY_PROVIDER_IDENTIFIER)
     private gitRepositoryProvider: GitRepositoryProvider,
     @inject(LICENSE_SERVICE_IDENTIFIER) private licenseService: LicenseService,
-    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readerAdapter: ReaderAdapter,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER)
+    private readerAdapter: ReaderAdapter,
   ) {
     super();
   }
@@ -84,7 +89,8 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
     }
 
     const shouldResetClient =
-      options.gitlabToken !== this.gitlabToken || options.gitlabUrl !== this.gitlabUrl;
+      options.gitlabToken !== this.gitlabToken ||
+      options.gitlabUrl !== this.gitlabUrl;
 
     this.gitlabToken = options.gitlabToken;
     this.gitlabUrl = options.gitlabUrl;
@@ -109,7 +115,8 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
     return (
       parsedUrl.source === "gitlab.com" ||
       parsedUrl.source.includes("gitlab") ||
-      (!!this.gitlabUrl && parsedUrl.source === new URL(this.gitlabUrl).hostname)
+      (!!this.gitlabUrl &&
+        parsedUrl.source === new URL(this.gitlabUrl).hostname)
     );
   }
 
@@ -195,7 +202,9 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
     return undefined;
   }
 
-  protected override async fetchLatestVersion(): Promise<ManifestVersion | undefined> {
+  protected override async fetchLatestVersion(): Promise<
+    ManifestVersion | undefined
+  > {
     return this.gitRepositoryProvider.getLatestVersion();
   }
 
@@ -204,7 +213,9 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
       const repositoryInfo = await this.getRepositoryInfo();
       const client = this.getGitLabClient();
 
-      const project = await client.Projects.show(`${repositoryInfo.owner}/${repositoryInfo.name}`);
+      const project = await client.Projects.show(
+        `${repositoryInfo.owner}/${repositoryInfo.name}`,
+      );
       return project as SimpleProjectSchema;
     });
   }
@@ -217,7 +228,9 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
       return this.gitlabClient;
     }
 
-    const options: ConstructorParameters<typeof Gitlab>[0] & { token?: string } = {
+    const options: ConstructorParameters<typeof Gitlab>[0] & {
+      token?: string;
+    } = {
       camelize: false,
     };
 

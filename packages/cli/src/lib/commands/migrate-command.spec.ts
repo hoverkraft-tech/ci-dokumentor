@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, Mocked } from "vitest";
-import { MigrationService } from "@ci-dokumentor/core";
-import { MigrateDocumentationUseCase } from "../usecases/migrate-documentation.usecase.js";
+import { describe, it, expect, vi, beforeEach, type Mocked } from "vitest";
+import type { MigrationService } from "@ci-dokumentor/core";
+import type { MigrateDocumentationUseCase } from "../usecases/migrate-documentation.usecase.js";
 import { MigrateCommand } from "./migrate-command.js";
 
 describe("MigrateCommand", () => {
@@ -19,12 +19,20 @@ describe("MigrateCommand", () => {
     mockMigrationService = {
       getSupportedTools: vi
         .fn()
-        .mockReturnValue(["action-docs", "auto-doc", "actdocs", "github-action-readme-generator"]),
+        .mockReturnValue([
+          "action-docs",
+          "auto-doc",
+          "actdocs",
+          "github-action-readme-generator",
+        ]),
       migrate: vi.fn(),
       autoMigrate: vi.fn(),
     } as Partial<MigrationService> as Mocked<MigrationService>;
 
-    command = new MigrateCommand(mockMigrateDocumentationUseCase, mockMigrationService);
+    command = new MigrateCommand(
+      mockMigrateDocumentationUseCase,
+      mockMigrationService,
+    );
   });
 
   describe("configure", () => {
@@ -41,12 +49,16 @@ describe("MigrateCommand", () => {
       const configuredCommand = command.configure();
       const options = configuredCommand.options;
 
-      const toolOption = options.find((opt) => opt.flags === "-t, --tool <tool>");
+      const toolOption = options.find(
+        (opt) => opt.flags === "-t, --tool <tool>",
+      );
       expect(toolOption).toBeDefined();
       // Note: Commander marks options with angle brackets as having required values,
       // but the option itself is optional (can be auto-detected)
 
-      const destinationOption = options.find((opt) => opt.flags === "-d, --destination <file...>");
+      const destinationOption = options.find(
+        (opt) => opt.flags === "-d, --destination <file...>",
+      );
       expect(destinationOption).toBeDefined();
       expect(destinationOption?.required).toBe(true);
 
@@ -54,7 +66,9 @@ describe("MigrateCommand", () => {
       expect(dryRunOption).toBeDefined();
       expect(dryRunOption?.required).toBe(false);
 
-      const concurrencyOption = options.find((opt) => opt.flags === "--concurrency [number]");
+      const concurrencyOption = options.find(
+        (opt) => opt.flags === "--concurrency [number]",
+      );
       expect(concurrencyOption).toBeDefined();
       expect(concurrencyOption?.required).toBe(false);
     });
@@ -63,11 +77,15 @@ describe("MigrateCommand", () => {
       const configuredCommand = command.configure();
       const options = configuredCommand.options;
 
-      const toolOption = options.find((opt) => opt.flags === "-t, --tool <tool>");
+      const toolOption = options.find(
+        (opt) => opt.flags === "-t, --tool <tool>",
+      );
       expect(toolOption?.description).toContain("action-docs");
       expect(toolOption?.description).toContain("auto-doc");
       expect(toolOption?.description).toContain("actdocs");
-      expect(toolOption?.description).toContain("github-action-readme-generator");
+      expect(toolOption?.description).toContain(
+        "github-action-readme-generator",
+      );
     });
   });
 });

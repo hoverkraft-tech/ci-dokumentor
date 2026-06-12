@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
-  VersionService,
+  type RepositoryProvider,
+  type VersionService,
 } from "@ci-dokumentor/core";
 import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
   VersionServiceMockFactory,
 } from "@ci-dokumentor/core/tests";
-import {
+import type {
   GitHubAction,
   GitHubWorkflow,
   GitHubActionInput,
@@ -81,8 +81,14 @@ describe("UsageSectionGenerator", () => {
         {
           title: "GitHub Action with simple inputs",
           inputs: {
-            "api-key": { description: "API key for authentication", required: true },
-            timeout: { description: "Request timeout in seconds", default: "30" },
+            "api-key": {
+              description: "API key for authentication",
+              required: true,
+            },
+            timeout: {
+              description: "Request timeout in seconds",
+              default: "30",
+            },
           },
           version: undefined,
           expected: `## Usage
@@ -103,7 +109,11 @@ describe("UsageSectionGenerator", () => {
         {
           title: "GitHub Action with complex inputs",
           inputs: {
-            "boolean-input": { description: "A boolean input", default: "true", required: false },
+            "boolean-input": {
+              description: "A boolean input",
+              default: "true",
+              required: false,
+            },
             "number-input": { description: "A number input", required: true },
             "optional-input": { description: "An optional input" },
             "input-with-multiline-description": {
@@ -157,7 +167,10 @@ End of description.
         {
           title: "usage with version information when available",
           inputs: undefined,
-          version: { ref: "1.0.0", sha: "08c6903cd8c0fde910a37f88322edcfb5dd907a8" },
+          version: {
+            ref: "1.0.0",
+            sha: "08c6903cd8c0fde910a37f88322edcfb5dd907a8",
+          },
           expected: `## Usage
 
 \`\`\`yaml
@@ -275,7 +288,10 @@ jobs:
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           usesName: "owner/repo/.github/workflows/deploy.yml",
           name: "Deploy Workflow",
-          on: { push: { branches: ["main"] }, workflow_call: { inputs, secrets } },
+          on: {
+            push: { branches: ["main"] },
+            workflow_call: { inputs, secrets },
+          },
           permissions: { contents: "read", deployments: "write" },
         });
 

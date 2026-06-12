@@ -1,15 +1,15 @@
 import { inject, injectable, injectFromBase } from "inversify";
-import { Command, Option } from "commander";
+import { type Command, Option } from "commander";
 import {
-  GenerateSectionsOptions,
-  RepositoryOptions,
-  SectionOptions,
+  type GenerateSectionsOptions,
+  type RepositoryOptions,
+  type SectionOptions,
   LinkFormat,
-  FormatterOptions,
+  type FormatterOptions,
 } from "@ci-dokumentor/core";
 import {
   GenerateDocumentationUseCase,
-  GenerateDocumentationUseCaseInput,
+  type GenerateDocumentationUseCaseInput,
 } from "../usecases/generate-documentation.usecase.js";
 import { BaseCommand } from "./base-command.js";
 
@@ -50,7 +50,8 @@ export class GenerateCommand extends BaseCommand {
     // Get supported platforms from the use case
     const supportedRepositoryPlatforms =
       this.generateDocumentationUseCase.getSupportedRepositoryPlatforms();
-    const supportedCicdPlatforms = this.generateDocumentationUseCase.getSupportedCicdPlatforms();
+    const supportedCicdPlatforms =
+      this.generateDocumentationUseCase.getSupportedCicdPlatforms();
 
     return this.name("generate")
       .alias("gen")
@@ -75,15 +76,29 @@ export class GenerateCommand extends BaseCommand {
           "CI/CD platform (auto-detected if not specified)",
         ).choices(supportedCicdPlatforms),
       )
-      .option("-i, --include-sections <sections>", "Comma-separated list of sections to include")
-      .option("-e, --exclude-sections <sections>", "Comma-separated list of sections to exclude")
-      .option("--dry-run", "Preview what would be generated without writing files", false)
+      .option(
+        "-i, --include-sections <sections>",
+        "Comma-separated list of sections to include",
+      )
+      .option(
+        "-e, --exclude-sections <sections>",
+        "Comma-separated list of sections to exclude",
+      )
+      .option(
+        "--dry-run",
+        "Preview what would be generated without writing files",
+        false,
+      )
       .option(
         "--format-link [type]",
         "Transform bare URLs to links. Types: auto (default autolinks <url>), full ([url](url)), false (disabled)",
         LinkFormat.Auto,
       )
-      .option("--concurrency [number]", "Maximum number of files to process concurrently", "5")
+      .option(
+        "--concurrency [number]",
+        "Maximum number of files to process concurrently",
+        "5",
+      )
       .hook("preAction", async (thisCommand) => {
         await this.populateSupportedOptions(thisCommand);
 
@@ -91,17 +106,22 @@ export class GenerateCommand extends BaseCommand {
         thisCommand.allowUnknownOption(false);
         const parsed = thisCommand.parseOptions(thisCommand.args);
 
-        (thisCommand as Command & { _parseOptionsEnv: () => void })._parseOptionsEnv();
-        (thisCommand as Command & { _parseOptionsImplied: () => void })._parseOptionsImplied();
+        (
+          thisCommand as Command & { _parseOptionsEnv: () => void }
+        )._parseOptionsEnv();
+        (
+          thisCommand as Command & { _parseOptionsImplied: () => void }
+        )._parseOptionsImplied();
 
         if (parsed.unknown.length > 0) {
-          (thisCommand as Command & { unknownOption: (arg: string) => void }).unknownOption(
-            parsed.unknown[0],
-          );
+          (
+            thisCommand as Command & { unknownOption: (arg: string) => void }
+          ).unknownOption(parsed.unknown[0]);
         }
       })
       .action(async (options: GenerateCommandOptions) => {
-        const input: GenerateDocumentationUseCaseInput = this.mapGenerateCommandOptions(options);
+        const input: GenerateDocumentationUseCaseInput =
+          this.mapGenerateCommandOptions(options);
 
         await this.mapSupportedOptions(input, options);
 
@@ -121,8 +141,13 @@ export class GenerateCommand extends BaseCommand {
 
     for (const optionKey of Object.keys(repositorySupportedOptions)) {
       const optionDescription = repositorySupportedOptions[optionKey];
-      if (!thisCommand.options.find((o) => o.flags === optionDescription.flags)) {
-        const option = new Option(optionDescription.flags, optionDescription.description || "");
+      if (
+        !thisCommand.options.find((o) => o.flags === optionDescription.flags)
+      ) {
+        const option = new Option(
+          optionDescription.flags,
+          optionDescription.description || "",
+        );
         if (optionDescription.env) {
           option.env(optionDescription.env);
         }
@@ -139,8 +164,13 @@ export class GenerateCommand extends BaseCommand {
 
     for (const [, sectionOptions] of Object.entries(sectionSupportedOptions)) {
       for (const [, optionDescription] of Object.entries(sectionOptions)) {
-        if (!thisCommand.options.find((o) => o.flags === optionDescription.flags)) {
-          const option = new Option(optionDescription.flags, optionDescription.description || "");
+        if (
+          !thisCommand.options.find((o) => o.flags === optionDescription.flags)
+        ) {
+          const option = new Option(
+            optionDescription.flags,
+            optionDescription.description || "",
+          );
           if (optionDescription.env) {
             option.env(optionDescription.env);
           }
@@ -149,14 +179,19 @@ export class GenerateCommand extends BaseCommand {
       }
     }
 
-    const supportedSections = await this.generateDocumentationUseCase.getSupportedSections({
-      cicdPlatform: thisCommand.getOptionValue("cicd"),
-      source: thisCommand.getOptionValue("source"),
-    });
+    const supportedSections =
+      await this.generateDocumentationUseCase.getSupportedSections({
+        cicdPlatform: thisCommand.getOptionValue("cicd"),
+        source: thisCommand.getOptionValue("source"),
+      });
 
     if (supportedSections) {
-      thisCommand.options.find((o) => o.flags === "--include-sections")?.choices(supportedSections);
-      thisCommand.options.find((o) => o.flags === "--exclude-sections")?.choices(supportedSections);
+      thisCommand.options
+        .find((o) => o.flags === "--include-sections")
+        ?.choices(supportedSections);
+      thisCommand.options
+        .find((o) => o.flags === "--exclude-sections")
+        ?.choices(supportedSections);
     }
   }
 
@@ -170,7 +205,9 @@ export class GenerateCommand extends BaseCommand {
       dryRun: options.dryRun,
       sections: this.getSectionsOptions(options),
       formatterOptions: this.getFormatterOptions(options),
-      concurrency: options.concurrency ? parseInt(String(options.concurrency), 10) : undefined,
+      concurrency: options.concurrency
+        ? parseInt(String(options.concurrency), 10)
+        : undefined,
     };
 
     // Handle repository platform options
@@ -189,7 +226,9 @@ export class GenerateCommand extends BaseCommand {
     return generateOptions;
   }
 
-  private getSectionsOptions(options: GenerateCommandOptions): GenerateSectionsOptions {
+  private getSectionsOptions(
+    options: GenerateCommandOptions,
+  ): GenerateSectionsOptions {
     const sectionsOptions: GenerateSectionsOptions = {};
 
     // Handle standard section options (include/exclude sections)
@@ -210,27 +249,36 @@ export class GenerateCommand extends BaseCommand {
     }
 
     // Handle section-specific options
-    const sectionSupportedOptions = this.generateDocumentationUseCase.getSectionSupportedOptions({
-      cicdPlatform: options.cicd,
-      source: options.source,
-    });
+    const sectionSupportedOptions =
+      this.generateDocumentationUseCase.getSectionSupportedOptions({
+        cicdPlatform: options.cicd,
+        source: options.source,
+      });
 
     const sectionConfig: Record<string, SectionOptions> = {};
 
-    for (const [sectionId, sectionOptions] of Object.entries(sectionSupportedOptions)) {
+    for (const [sectionId, sectionOptions] of Object.entries(
+      sectionSupportedOptions,
+    )) {
       const sectionSpecificOptions: SectionOptions = {};
 
-      for (const [optionKey, optionDescriptor] of Object.entries(sectionOptions)) {
+      for (const [optionKey, optionDescriptor] of Object.entries(
+        sectionOptions,
+      )) {
         const longFlag =
-          optionDescriptor.flags.split(/[ ,|]+/).find((f) => f.startsWith("--")) ||
-          optionDescriptor.flags;
+          optionDescriptor.flags
+            .split(/[ ,|]+/)
+            .find((f) => f.startsWith("--")) || optionDescriptor.flags;
         const key = this.sanitizeFlagName(longFlag);
         const targetKey = key
           .split("-")
-          .map((part, idx) => (idx === 0 ? part : part[0].toUpperCase() + part.slice(1)))
+          .map((part, idx) =>
+            idx === 0 ? part : part[0].toUpperCase() + part.slice(1),
+          )
           .join("");
 
-        const value = options[targetKey as keyof GenerateCommandOptions] ?? undefined;
+        const value =
+          options[targetKey as keyof GenerateCommandOptions] ?? undefined;
         if (value !== undefined) {
           sectionSpecificOptions[optionKey] = value;
         }
@@ -263,7 +311,9 @@ export class GenerateCommand extends BaseCommand {
     return undefined;
   }
 
-  private getFormatterOptions(options: GenerateCommandOptions): FormatterOptions {
+  private getFormatterOptions(
+    options: GenerateCommandOptions,
+  ): FormatterOptions {
     let formatLink: LinkFormat;
     switch (options.formatLink) {
       case "false":
@@ -293,20 +343,27 @@ export class GenerateCommand extends BaseCommand {
     options: GenerateCommandOptions,
   ): Promise<void> {
     const repositorySupportedOptions =
-      await this.generateDocumentationUseCase.getRepositorySupportedOptions(options.repository);
+      await this.generateDocumentationUseCase.getRepositorySupportedOptions(
+        options.repository,
+      );
 
     const repositoryOptions: RepositoryOptions = {};
     for (const optionKey of Object.keys(repositorySupportedOptions)) {
       const option = repositorySupportedOptions[optionKey];
 
-      const longFlag = option.flags.split(/[ ,|]+/).find((f) => f.startsWith("--")) || option.flags;
+      const longFlag =
+        option.flags.split(/[ ,|]+/).find((f) => f.startsWith("--")) ||
+        option.flags;
       const key = this.sanitizeFlagName(longFlag);
       const targetKey = key
         .split("-")
-        .map((part, idx) => (idx === 0 ? part : part[0].toUpperCase() + part.slice(1)))
+        .map((part, idx) =>
+          idx === 0 ? part : part[0].toUpperCase() + part.slice(1),
+        )
         .join("");
 
-      const value = options[targetKey as keyof GenerateCommandOptions] ?? undefined;
+      const value =
+        options[targetKey as keyof GenerateCommandOptions] ?? undefined;
       if (value !== undefined) {
         repositoryOptions[optionKey] = value;
       }
@@ -326,7 +383,7 @@ export class GenerateCommand extends BaseCommand {
    */
   private sanitizeFlagName(flag: string): string {
     flag = flag.replace(/^--/, "").trim();
-    let prev;
+    let prev: string;
     do {
       prev = flag;
       flag = flag.replace(/<.*?>|\[.*?\]/g, "");

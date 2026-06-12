@@ -1,6 +1,10 @@
-import { OverviewSectionMixin, ReadableContent, FormatterAdapter } from "@ci-dokumentor/core";
+import {
+  OverviewSectionMixin,
+  ReadableContent,
+  type FormatterAdapter,
+} from "@ci-dokumentor/core";
 import { injectable } from "inversify";
-import { GitHubActionsManifest } from "../github-actions-parser.js";
+import type { GitHubActionsManifest } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 @injectable()
@@ -8,7 +12,9 @@ export class OverviewSectionGenerator extends OverviewSectionMixin<
   GitHubActionsManifest,
   typeof GitHubActionsSectionGeneratorAdapter
 >(GitHubActionsSectionGeneratorAdapter) {
-  public override getDescription(manifest: GitHubActionsManifest): string | undefined {
+  public override getDescription(
+    manifest: GitHubActionsManifest,
+  ): string | undefined {
     return "description" in manifest ? manifest.description : undefined;
   }
 
@@ -20,13 +26,18 @@ export class OverviewSectionGenerator extends OverviewSectionMixin<
       return ReadableContent.empty();
     }
 
-    const sortedPermissions = Object.entries(this.getWorkflowPermissions(manifest));
+    const sortedPermissions = Object.entries(
+      this.getWorkflowPermissions(manifest),
+    );
 
     const permissionsContent = formatterAdapter.list(
       sortedPermissions.map(([permission, level]) => {
         return formatterAdapter
           .bold(formatterAdapter.inlineCode(new ReadableContent(permission)))
-          .append(`: `, formatterAdapter.inlineCode(new ReadableContent(level)));
+          .append(
+            `: `,
+            formatterAdapter.inlineCode(new ReadableContent(level)),
+          );
       }),
     );
 

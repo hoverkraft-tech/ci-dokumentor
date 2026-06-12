@@ -1,13 +1,24 @@
-import { describe, it, expect, beforeEach, vi, Mocked } from "vitest";
-import { ProjectSchema } from "@gitbeaker/rest";
-import { GitRepositoryProvider, ParsedRemoteUrl } from "@ci-dokumentor/repository-git";
-import { LicenseService, LicenseInfo, ManifestVersion, ReaderAdapter } from "@ci-dokumentor/core";
+import { describe, it, expect, beforeEach, vi, type Mocked } from "vitest";
+import type { ProjectSchema } from "@gitbeaker/rest";
+import type {
+  GitRepositoryProvider,
+  ParsedRemoteUrl,
+} from "@ci-dokumentor/repository-git";
+import type {
+  LicenseService,
+  LicenseInfo,
+  ManifestVersion,
+  ReaderAdapter,
+} from "@ci-dokumentor/core";
 import {
   LicenseServiceMockFactory,
   RepositoryInfoMockFactory,
   ReaderAdapterMockFactory,
 } from "@ci-dokumentor/core/tests";
-import { GitBeakerMockFactory, ProjectsShowMock } from "../__tests__/gitbeaker-mock.factory.js";
+import {
+  GitBeakerMockFactory,
+  type ProjectsShowMock,
+} from "../__tests__/gitbeaker-mock.factory.js";
 import { GitLabRepositoryProvider } from "./gitlab-repository.provider.js";
 import type { GitLabRepositoryProviderOptions } from "./gitlab-repository.provider.js";
 
@@ -26,11 +37,19 @@ describe("GitLabRepositoryProvider", () => {
 
     // Create a mock git repository service
     mockGitRepositoryService = {
-      getPlatformName: vi.fn() as Mocked<GitRepositoryProvider["getPlatformName"]>,
+      getPlatformName: vi.fn() as Mocked<
+        GitRepositoryProvider["getPlatformName"]
+      >,
       supports: vi.fn() as Mocked<GitRepositoryProvider["supports"]>,
-      getRepositoryInfo: vi.fn() as Mocked<GitRepositoryProvider["getRepositoryInfo"]>,
-      getRemoteParsedUrl: vi.fn() as Mocked<GitRepositoryProvider["getRemoteParsedUrl"]>,
-      getLatestVersion: vi.fn() as Mocked<GitRepositoryProvider["getLatestVersion"]>,
+      getRepositoryInfo: vi.fn() as Mocked<
+        GitRepositoryProvider["getRepositoryInfo"]
+      >,
+      getRemoteParsedUrl: vi.fn() as Mocked<
+        GitRepositoryProvider["getRemoteParsedUrl"]
+      >,
+      getLatestVersion: vi.fn() as Mocked<
+        GitRepositoryProvider["getLatestVersion"]
+      >,
     } as Mocked<GitRepositoryProvider>;
 
     // Create a mock license service
@@ -195,10 +214,14 @@ describe("GitLabRepositoryProvider", () => {
 
     it("should return false when exception occurs", async () => {
       // Arrange
-      mockGitRepositoryService.supports.mockRejectedValue(new Error("Git error"));
+      mockGitRepositoryService.supports.mockRejectedValue(
+        new Error("Git error"),
+      );
 
       // Act & Assert
-      await expect(gitLabRepositoryProvider.supports()).rejects.toThrow("Git error");
+      await expect(gitLabRepositoryProvider.supports()).rejects.toThrow(
+        "Git error",
+      );
     });
   });
 
@@ -206,7 +229,9 @@ describe("GitLabRepositoryProvider", () => {
     it("should delegate to git repository provider", async () => {
       // Arrange
       const expectedInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(expectedInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        expectedInfo,
+      );
 
       // Act
       const result = await gitLabRepositoryProvider.getRepositoryInfo();
@@ -227,7 +252,9 @@ describe("GitLabRepositoryProvider", () => {
 
       // Assert
       expect(result).toBe("file://.gitlab/logo.png");
-      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith(".gitlab/logo.png");
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith(
+        ".gitlab/logo.png",
+      );
     });
 
     it("should try GitLab API when no local logo exists", async () => {
@@ -267,7 +294,9 @@ describe("GitLabRepositoryProvider", () => {
       projectsShowMock.mockRejectedValue(new Error("API error"));
 
       // Act & Assert
-      await expect(gitLabRepositoryProvider.getLogo()).rejects.toThrow("API error");
+      await expect(gitLabRepositoryProvider.getLogo()).rejects.toThrow(
+        "API error",
+      );
     });
   });
 
@@ -321,10 +350,14 @@ describe("GitLabRepositoryProvider", () => {
         spdxId: "MIT",
         url: "https://opensource.org/licenses/MIT",
       };
-      mockLicenseService.detectLicenseFromFile.mockResolvedValue(expectedLicense);
+      mockLicenseService.detectLicenseFromFile.mockResolvedValue(
+        expectedLicense,
+      );
 
       // Act & assert
-      await expect(gitLabRepositoryProvider.getLicense()).rejects.toThrow("API error");
+      await expect(gitLabRepositoryProvider.getLicense()).rejects.toThrow(
+        "API error",
+      );
     });
   });
 
@@ -347,7 +380,9 @@ describe("GitLabRepositoryProvider", () => {
       expect(result).toEqual({
         url: "https://gitlab.com/test-owner/test-repo/-/blob/main/CONTRIBUTING.md",
       });
-      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith("CONTRIBUTING.md");
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith(
+        "CONTRIBUTING.md",
+      );
     });
 
     it("should return undefined when no contributing file exists", async () => {
@@ -381,7 +416,9 @@ describe("GitLabRepositoryProvider", () => {
       expect(result).toEqual({
         url: "https://gitlab.com/test-owner/test-repo/-/blob/main/SECURITY.md",
       });
-      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith("SECURITY.md");
+      expect(mockReaderAdapter.resourceExists).toHaveBeenCalledWith(
+        "SECURITY.md",
+      );
     });
 
     it("should return undefined when no security file exists", async () => {
@@ -400,7 +437,9 @@ describe("GitLabRepositoryProvider", () => {
     it("should delegate to git repository provider", async () => {
       // Arrange
       const expectedVersion: ManifestVersion = { ref: "v1.0.0", sha: "abc123" };
-      mockGitRepositoryService.getLatestVersion.mockResolvedValue(expectedVersion);
+      mockGitRepositoryService.getLatestVersion.mockResolvedValue(
+        expectedVersion,
+      );
 
       // Act
       const result = await gitLabRepositoryProvider.getLatestVersion();

@@ -1,11 +1,11 @@
 import {
-  RepositoryOptionsDescriptors,
+  type RepositoryOptionsDescriptors,
   AbstractRepositoryProvider,
-  RepositoryInfo,
-  LicenseInfo,
-  ContributingInfo,
-  SecurityInfo,
-  ManifestVersion,
+  type RepositoryInfo,
+  type LicenseInfo,
+  type ContributingInfo,
+  type SecurityInfo,
+  type ManifestVersion,
 } from "@ci-dokumentor/core";
 import { injectable } from "inversify";
 import gitUrlParse from "git-url-parse";
@@ -88,7 +88,8 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
       url = url.slice(0, -4);
     }
 
-    const fullName = parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
+    const fullName =
+      parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
 
     return {
       rootDir: await this.getRootDir(),
@@ -127,7 +128,9 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
     return await this.getCurrentBranchVersion();
   }
 
-  private async getLastStableTagVersion(): Promise<ManifestVersion | undefined> {
+  private async getLastStableTagVersion(): Promise<
+    ManifestVersion | undefined
+  > {
     try {
       const git = simpleGit();
 
@@ -159,7 +162,9 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
     }
   }
 
-  private async getCurrentBranchVersion(): Promise<ManifestVersion | undefined> {
+  private async getCurrentBranchVersion(): Promise<
+    ManifestVersion | undefined
+  > {
     try {
       const git = simpleGit();
       const detectedSha = await git.revparse("HEAD");
@@ -186,7 +191,7 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
     const remotes = await git.getRemotes(true);
     const originRemote = remotes.find((remote) => remote.name === "origin");
 
-    if (!originRemote || !originRemote.refs.fetch) {
+    if (!originRemote?.refs.fetch) {
       throw new Error('No remote "origin" found');
     }
 

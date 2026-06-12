@@ -8,6 +8,7 @@
     "**/.nx/cache**/",
     "**/.nx/workspace-data/**",
     "**/dist/**",
+    "**/packages/docs/build/**",
     "**/out-tsc/**",
     "**/packages/**/vite.config.ts",
     "**/packages/**/tsconfig.spec.json",

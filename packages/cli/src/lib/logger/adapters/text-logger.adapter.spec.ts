@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ConsoleMockFactory, MockedConsole } from "../../../../__tests__/console-mock.factory.js";
+import {
+  ConsoleMockFactory,
+  type MockedConsole,
+} from "../../../../__tests__/console-mock.factory.js";
 import { TextLoggerAdapter } from "./text-logger.adapter.js";
 
 describe("TextLoggerAdapter", () => {

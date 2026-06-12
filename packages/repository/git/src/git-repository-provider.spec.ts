@@ -1,5 +1,18 @@
-import { describe, it, expect, beforeEach, vi, Mocked, MockInstance } from "vitest";
-import { simpleGit, TagResult, Response, FetchResult } from "simple-git";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  type Mocked,
+  type MockInstance,
+} from "vitest";
+import {
+  simpleGit,
+  type TagResult,
+  type Response,
+  type FetchResult,
+} from "simple-git";
 import gitUrlParse from "git-url-parse";
 import { GitRepositoryProvider } from "./git-repository-provider.js";
 
@@ -28,7 +41,9 @@ describe("GitRepositoryProvider", () => {
     vi.mocked(simpleGit).mockReturnValue(mockGit);
 
     // Mock gitUrlParse
-    mockGitUrlParse = gitUrlParse as unknown as MockInstance<typeof gitUrlParse>;
+    mockGitUrlParse = gitUrlParse as unknown as MockInstance<
+      typeof gitUrlParse
+    >;
   });
 
   describe("getPlatformName", () => {
@@ -141,7 +156,9 @@ describe("GitRepositoryProvider", () => {
 
       // Assert
       expect(result).toEqual(mockParsedUrl);
-      expect(mockGitUrlParse).toHaveBeenCalledWith("https://github.com/test-owner/test-repo.git");
+      expect(mockGitUrlParse).toHaveBeenCalledWith(
+        "https://github.com/test-owner/test-repo.git",
+      );
     });
 
     it("should throw error when no origin remote found", async () => {
@@ -149,7 +166,9 @@ describe("GitRepositoryProvider", () => {
       mockGit.getRemotes.mockResolvedValue([]);
 
       // Act & Assert
-      await expect(provider.getRemoteParsedUrl()).rejects.toThrow('No remote "origin" found');
+      await expect(provider.getRemoteParsedUrl()).rejects.toThrow(
+        'No remote "origin" found',
+      );
     });
   });
 
@@ -218,7 +237,9 @@ describe("GitRepositoryProvider", () => {
       // Arrange
       const mockSha = "abcdef1234567890abcdef1234567890abcdef12";
       mockGit.revparse.mockImplementation((arg: unknown) => {
-        return Promise.resolve(arg === "HEAD" ? mockSha : "feature/x") as Response<string>;
+        return Promise.resolve(
+          arg === "HEAD" ? mockSha : "feature/x",
+        ) as Response<string>;
       });
       mockGit.tags.mockResolvedValue({ latest: undefined } as TagResult);
 
@@ -232,7 +253,8 @@ describe("GitRepositoryProvider", () => {
     it("should return undefined when nothing can be detected", async () => {
       // Arrange: revparse for HEAD fails, tags empty, branch is HEAD
       mockGit.revparse.mockImplementation((arg: unknown) => {
-        if (arg === "HEAD") return Promise.reject(new Error("no sha")) as Response<string>;
+        if (arg === "HEAD")
+          return Promise.reject(new Error("no sha")) as Response<string>;
         return Promise.resolve("HEAD") as Response<string>;
       });
       mockGit.tags.mockResolvedValue({ latest: undefined } as TagResult);

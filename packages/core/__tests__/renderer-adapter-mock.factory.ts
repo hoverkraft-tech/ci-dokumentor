@@ -12,10 +12,14 @@ export interface RendererAdapterDefaults {
 }
 
 export class RendererAdapterMockFactory {
-  static create(defaults?: Partial<RendererAdapterDefaults>): Mocked<RendererAdapter> {
+  static create(
+    defaults?: Partial<RendererAdapterDefaults>,
+  ): Mocked<RendererAdapter> {
     const mock = {
       initialize: vi.fn() as Mocked<RendererAdapter["initialize"]>,
-      getFormatterAdapter: vi.fn() as Mocked<RendererAdapter["getFormatterAdapter"]>,
+      getFormatterAdapter: vi.fn() as Mocked<
+        RendererAdapter["getFormatterAdapter"]
+      >,
       getDestination: vi.fn() as Mocked<RendererAdapter["getDestination"]>,
       writeSection: vi.fn() as Mocked<RendererAdapter["writeSection"]>,
       replaceContent: vi.fn() as Mocked<RendererAdapter["replaceContent"]>,

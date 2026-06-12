@@ -1,17 +1,17 @@
-import { describe, it, expect, Mocked } from "vitest";
+import { describe, it, expect, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   MarkdownFormatterAdapter,
   SectionIdentifier,
-  SectionGenerationPayload,
-  RepositoryProvider,
+  type SectionGenerationPayload,
+  type RepositoryProvider,
 } from "@ci-dokumentor/core";
 import { initTestContainer } from "@ci-dokumentor/repository-github";
 import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
 } from "@ci-dokumentor/core/tests";
-import { GitHubAction } from "../github-actions-parser.js";
+import type { GitHubAction } from "../github-actions-parser.js";
 import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
 import { LicenseSectionGenerator } from "./license-section-generator.adapter.js";
 

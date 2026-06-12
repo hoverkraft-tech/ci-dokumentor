@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
   SectionIdentifier,
 } from "@ci-dokumentor/core";
 import { initTestContainer } from "@ci-dokumentor/repository-github";
@@ -10,7 +10,7 @@ import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
 } from "@ci-dokumentor/core/tests";
-import { GitHubAction } from "../github-actions-parser.js";
+import type { GitHubAction } from "../github-actions-parser.js";
 import { ContributingSectionGenerator } from "./contributing-section-generator.adapter.js";
 
 describe("ContributingSectionGenerator", () => {
@@ -89,7 +89,9 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
 
     it("should return empty buffer when repository contributing object exists but has no url", async () => {
       // Arrange
-      mockRepositoryProvider.getContributing.mockResolvedValue({} as { url: string });
+      mockRepositoryProvider.getContributing.mockResolvedValue(
+        {} as { url: string },
+      );
 
       // Act
       const result = await generator.generateSection({
@@ -140,7 +142,9 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
         name: "External documentation URL",
         url: "https://docs.example.com/contributing",
       },
-    ])("should handle different contributing URL formats correctly: $name", async ({ url }) => {
+    ])("should handle different contributing URL formats correctly: $name", async ({
+      url,
+    }) => {
       // Arrange
       mockRepositoryProvider.getContributing.mockResolvedValue({ url });
 
@@ -199,7 +203,9 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
           inputs: { input1: { description: "Test input" } },
         },
       },
-    ])("should generate consistent output regardless of manifest content", async ({ manifest }) => {
+    ])("should generate consistent output regardless of manifest content", async ({
+      manifest,
+    }) => {
       // Arrange
       mockRepositoryProvider.getContributing.mockResolvedValue({
         url: "https://github.com/owner/repo/blob/main/CONTRIBUTING.md",

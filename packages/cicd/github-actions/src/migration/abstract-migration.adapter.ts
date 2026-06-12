@@ -2,7 +2,7 @@ import { StringDecoder } from "node:string_decoder";
 import { injectable, inject } from "inversify";
 import {
   FILE_READER_ADAPTER_IDENTIFIER,
-  MigrationAdapter,
+  type MigrationAdapter,
   SectionIdentifier,
   ReadableContent,
 } from "@ci-dokumentor/core";
@@ -19,7 +19,10 @@ import type {
 export abstract class AbstractMigrationAdapter implements MigrationAdapter {
   protected abstract readonly name: string;
 
-  protected abstract readonly sectionMappings: Record<string, SectionIdentifier>;
+  protected abstract readonly sectionMappings: Record<
+    string,
+    SectionIdentifier
+  >;
 
   protected abstract readonly patterns: {
     startMarkerPattern?: RegExp;
@@ -32,7 +35,8 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
   }
 
   constructor(
-    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER)
+    private readonly readerAdapter: ReaderAdapter,
   ) {}
 
   async supportsDestination(destination: string): Promise<boolean> {
@@ -45,10 +49,14 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     return content.test(this.patterns.detectionPattern);
   }
 
-  async migrateDocumentation({ rendererAdapter }: MigrateDocumentationPayload): Promise<void> {
+  async migrateDocumentation({
+    rendererAdapter,
+  }: MigrateDocumentationPayload): Promise<void> {
     const formatterAdapter = rendererAdapter.getFormatterAdapter();
 
-    let content = await this.readerAdapter.readResource(rendererAdapter.getDestination());
+    let content = await this.readerAdapter.readResource(
+      rendererAdapter.getDestination(),
+    );
 
     if (content.isEmpty()) {
       // No existing content to migrate
@@ -108,58 +116,81 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     const processLine = (line: ReadableContent, addNewline: boolean) => {
       let out = line;
       if (patternsIdentical && startPattern) {
-        out = out.replace(startPattern, (match: string, sectionName: string) => {
-          const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
-          if (!standardSection) {
-            return "";
-          }
-          // Alternate between start and end on successive matches
-          seenToggle = !seenToggle;
-          if (seenToggle) {
+        out = out.replace(
+          startPattern,
+          (_match: string, sectionName: string) => {
+            const standardSection = this.mapToStandardSection(
+              sectionName.toLowerCase(),
+            );
+            if (!standardSection) {
+              return "";
+            }
+            // Alternate between start and end on successive matches
+            seenToggle = !seenToggle;
+            if (seenToggle) {
+              return formatterAdapter
+                .sectionStart(standardSection)
+                .append(formatterAdapter.lineBreak())
+                .toString();
+            }
             return formatterAdapter
-              .sectionStart(standardSection)
-              .append(formatterAdapter.lineBreak())
+              .lineBreak()
+              .append(
+                formatterAdapter.sectionEnd(standardSection),
+                formatterAdapter.lineBreak(),
+              )
               .toString();
-          }
-          return formatterAdapter
-            .lineBreak()
-            .append(formatterAdapter.sectionEnd(standardSection), formatterAdapter.lineBreak())
-            .toString();
-        });
+          },
+        );
       } else {
         // Replace end then start to avoid nested replacement issues when
         // patterns differ.
         if (endPattern) {
-          out = out.replace(endPattern, (match: string, sectionName: string) => {
-            const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
-            if (!standardSection) {
-              return "";
-            }
-            return formatterAdapter
-              .lineBreak()
-              .append(formatterAdapter.sectionEnd(standardSection), formatterAdapter.lineBreak())
-              .toString();
-          });
+          out = out.replace(
+            endPattern,
+            (_match: string, sectionName: string) => {
+              const standardSection = this.mapToStandardSection(
+                sectionName.toLowerCase(),
+              );
+              if (!standardSection) {
+                return "";
+              }
+              return formatterAdapter
+                .lineBreak()
+                .append(
+                  formatterAdapter.sectionEnd(standardSection),
+                  formatterAdapter.lineBreak(),
+                )
+                .toString();
+            },
+          );
         }
 
         if (startPattern) {
-          out = out.replace(startPattern, (match: string, sectionName: string) => {
-            const standardSection = this.mapToStandardSection(sectionName.toLowerCase());
-            if (!standardSection) {
-              return "";
-            }
-            return formatterAdapter
-              .sectionStart(standardSection)
-              .append(formatterAdapter.lineBreak())
-              .toString();
-          });
+          out = out.replace(
+            startPattern,
+            (_match: string, sectionName: string) => {
+              const standardSection = this.mapToStandardSection(
+                sectionName.toLowerCase(),
+              );
+              if (!standardSection) {
+                return "";
+              }
+              return formatterAdapter
+                .sectionStart(standardSection)
+                .append(formatterAdapter.lineBreak())
+                .toString();
+            },
+          );
         }
       }
 
       markerMappingsContent = markerMappingsContent.append(out);
 
       if (addNewline) {
-        markerMappingsContent = markerMappingsContent.append(formatterAdapter.lineBreak());
+        markerMappingsContent = markerMappingsContent.append(
+          formatterAdapter.lineBreak(),
+        );
       }
     };
 
@@ -167,13 +198,16 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
       const end = Math.min(offset + chunkSize, content.getSize());
       const chunk = content.slice(offset, end);
       offset = end;
-      remainingContent = remainingContent.append(decoder.write(chunk.toString()));
+      remainingContent = remainingContent.append(
+        decoder.write(chunk.toString()),
+      );
 
-      let idx;
-      while ((idx = remainingContent.search(formatterAdapter.lineBreak())) !== -1) {
+      let idx = remainingContent.search(formatterAdapter.lineBreak());
+      while (idx !== -1) {
         const line = remainingContent.slice(0, idx);
         processLine(line, true);
         remainingContent = remainingContent.slice(idx + 1);
+        idx = remainingContent.search(formatterAdapter.lineBreak());
       }
     }
 
@@ -188,7 +222,11 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
 
   protected mapToStandardSection(sectionName: string) {
     const normalizedName = sectionName.toLowerCase().trim();
-    return (this.sectionMappings as Record<string, SectionIdentifier>)[normalizedName] || null;
+    return (
+      (this.sectionMappings as Record<string, SectionIdentifier>)[
+        normalizedName
+      ] || null
+    );
   }
 
   /**
@@ -201,7 +239,8 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     let result = content;
 
     // Pattern to match section start and end markers
-    const sectionPattern = /<!--\s*(\w+):start\s*-->\s*\n([\s\S]*?)<!--\s*\1:end\s*-->/g;
+    const sectionPattern =
+      /<!--\s*(\w+):start\s*-->\s*\n([\s\S]*?)<!--\s*\1:end\s*-->/g;
 
     // Find all sections and group consecutive ones by type
     const sections: Array<{
@@ -210,8 +249,8 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
       start: number;
       end: number;
     }> = [];
-    let match;
-
+    let match: RegExpExecArray | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: assignment within loop condition
     while ((match = result.execRegExp(sectionPattern)) !== null) {
       sections.push({
         type: match[1] as SectionIdentifier,
@@ -240,7 +279,9 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
 
       if (currentGroup && currentGroup.type === section.type) {
         // Check if sections are consecutive (only whitespace between them)
-        const betweenContent = result.slice(currentGroup.end, section.start).trim();
+        const betweenContent = result
+          .slice(currentGroup.end, section.start)
+          .trim();
         if (betweenContent.isEmpty()) {
           // Merge this section with the current group
           currentGroup.content = currentGroup.content.append(section.content);
@@ -271,13 +312,17 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     mergedSections.reverse().forEach((group) => {
       if (!group.content.isEmpty()) {
         // Merge the contents
-        const mergedContent = group.content.replace(/^\s*\n|\n\s*$/g, "").trim();
+        const mergedContent = group.content
+          .replace(/^\s*\n|\n\s*$/g, "")
+          .trim();
         const replacement = formatterAdapter.section(
           group.type,
           new ReadableContent(mergedContent),
         );
 
-        result = result.slice(0, group.start).append(replacement.trim(), result.slice(group.end));
+        result = result
+          .slice(0, group.start)
+          .append(replacement.trim(), result.slice(group.end));
       }
     });
 
@@ -291,13 +336,15 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
     content: ReadableContent,
     formatterAdapter: FormatterAdapter,
   ): ReadableContent {
-    const expectedSections: SectionIdentifier[] = Object.values(SectionIdentifier);
+    const expectedSections: SectionIdentifier[] =
+      Object.values(SectionIdentifier);
 
     // Determine which sections are already present
     const presentSections = new Set<string>();
     const sectionPattern = /<!--\s*(\w+):start\s*-->/g;
 
-    let match;
+    let match: RegExpExecArray | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: assignment within loop condition
     while ((match = content.execRegExp(sectionPattern)) !== null) {
       presentSections.add(match[1]);
     }
@@ -352,7 +399,10 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
         }
       }
 
-      const sectionContent = formatterAdapter.section(missingSection, ReadableContent.empty());
+      const sectionContent = formatterAdapter.section(
+        missingSection,
+        ReadableContent.empty(),
+      );
 
       if (anchorIndex !== -1) {
         // Insert after anchorIndex, ensure there's a newline separation
@@ -375,7 +425,11 @@ export abstract class AbstractMigrationAdapter implements MigrationAdapter {
           ? ReadableContent.empty()
           : formatterAdapter.lineBreak();
 
-        content = content.append(separator, formatterAdapter.lineBreak(), sectionContent);
+        content = content.append(
+          separator,
+          formatterAdapter.lineBreak(),
+          sectionContent,
+        );
       }
 
       // Mark inserted section as present so subsequent missing sections can

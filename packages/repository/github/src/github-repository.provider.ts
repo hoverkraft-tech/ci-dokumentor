@@ -1,24 +1,24 @@
 import {
   FILE_READER_ADAPTER_IDENTIFIER,
-  RepositoryInfo,
-  LicenseInfo,
-  ContributingInfo,
-  SecurityInfo,
+  type RepositoryInfo,
+  type LicenseInfo,
+  type ContributingInfo,
+  type SecurityInfo,
   AbstractRepositoryProvider,
-  LicenseService,
+  type LicenseService,
   LICENSE_SERVICE_IDENTIFIER,
-  RepositoryOptionsDescriptors,
-  ManifestVersion,
+  type RepositoryOptionsDescriptors,
+  type ManifestVersion,
 } from "@ci-dokumentor/core";
 import type { ReaderAdapter } from "@ci-dokumentor/core";
 import {
-  GitRepositoryProvider,
+  type GitRepositoryProvider,
   GIT_REPOSITORY_PROVIDER_IDENTIFIER,
 } from "@ci-dokumentor/repository-git";
 import { graphql } from "@octokit/graphql";
 import { injectable, inject } from "inversify";
 import { createTokenAuth } from "@octokit/auth-token";
-import { RequestParameters } from "@octokit/graphql/types";
+import type { RequestParameters } from "@octokit/graphql/types";
 
 type GraphQLClient = typeof graphql;
 
@@ -36,7 +36,8 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
     @inject(GIT_REPOSITORY_PROVIDER_IDENTIFIER)
     private gitRepositoryProvider: GitRepositoryProvider,
     @inject(LICENSE_SERVICE_IDENTIFIER) private licenseService: LicenseService,
-    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readerAdapter: ReaderAdapter,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER)
+    private readerAdapter: ReaderAdapter,
   ) {
     super();
   }
@@ -222,7 +223,9 @@ export class GitHubRepositoryProvider extends AbstractRepositoryProvider<GitHubR
     return undefined;
   }
 
-  protected override async fetchLatestVersion(): Promise<ManifestVersion | undefined> {
+  protected override async fetchLatestVersion(): Promise<
+    ManifestVersion | undefined
+  > {
     return this.gitRepositoryProvider.getLatestVersion();
   }
 

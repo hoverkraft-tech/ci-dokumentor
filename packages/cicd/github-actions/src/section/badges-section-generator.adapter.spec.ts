@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  SectionGenerationPayload,
-  RepositoryProvider,
+  type SectionGenerationPayload,
+  type RepositoryProvider,
 } from "@ci-dokumentor/core";
 import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
 } from "@ci-dokumentor/core/tests";
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import type { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
 import { initTestContainer } from "../container.js";
 import { GitHubWorkflowMockFactory } from "../../__tests__/github-workflow-mock.factory.js";
@@ -100,7 +100,9 @@ describe("BadgesSectionGenerator", () => {
       const invalidJson = "invalid json";
 
       // Act & Assert - should not throw
-      expect(() => generator.setSectionOptions({ extraBadges: invalidJson })).toThrow(
+      expect(() =>
+        generator.setSectionOptions({ extraBadges: invalidJson }),
+      ).toThrow(
         `Unexpected token 'i', "invalid json" is not valid JSON. When using this option in GitHub Actions, ensure the JSON is passed as a single argument or encode it (e.g. base64).`,
       );
     });
@@ -110,14 +112,18 @@ describe("BadgesSectionGenerator", () => {
       const nonArrayJson = JSON.stringify({ notAnArray: true });
 
       // Act & Assert - should not throw
-      expect(() => generator.setSectionOptions({ extraBadges: nonArrayJson })).toThrow(
+      expect(() =>
+        generator.setSectionOptions({ extraBadges: nonArrayJson }),
+      ).toThrow(
         "The extra badges option must be a JSON array of badge objects.",
       );
     });
 
     it("should handle undefined extraBadges", () => {
       // Act & Assert - should not throw
-      expect(() => generator.setSectionOptions({ extraBadges: undefined })).not.toThrow();
+      expect(() =>
+        generator.setSectionOptions({ extraBadges: undefined }),
+      ).not.toThrow();
     });
   });
 
@@ -248,7 +254,10 @@ describe("BadgesSectionGenerator", () => {
         };
 
         const extraBadgesJson = JSON.stringify([
-          { label: "Badge without linkUrl", url: "https://img.shields.io/badge/badge-url-orange" },
+          {
+            label: "Badge without linkUrl",
+            url: "https://img.shields.io/badge/badge-url-orange",
+          },
         ]);
 
         generator.setSectionOptions({ extraBadges: extraBadgesJson });

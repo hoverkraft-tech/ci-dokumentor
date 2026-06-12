@@ -1,5 +1,8 @@
 import { injectable, multiInject, optional } from "inversify";
-import { RepositoryProvider, REPOSITORY_PROVIDER_IDENTIFIER } from "./repository.provider.js";
+import {
+  type RepositoryProvider,
+  REPOSITORY_PROVIDER_IDENTIFIER,
+} from "./repository.provider.js";
 
 @injectable()
 export class RepositoryService {
@@ -9,7 +12,9 @@ export class RepositoryService {
     private providers: RepositoryProvider[] = [],
   ) {
     // Sort providers by priority in descending order (highest priority first)
-    this.providers = this.providers.sort((a, b) => b.getPriority() - a.getPriority());
+    this.providers = this.providers.sort(
+      (a, b) => b.getPriority() - a.getPriority(),
+    );
   }
 
   /**
@@ -22,7 +27,9 @@ export class RepositoryService {
   /**
    * Auto-detect the appropriate repository provider for the current context
    */
-  async autoDetectRepositoryProvider(): Promise<RepositoryProvider | undefined> {
+  async autoDetectRepositoryProvider(): Promise<
+    RepositoryProvider | undefined
+  > {
     for (const provider of this.providers) {
       if (await provider.supports()) {
         return provider;
@@ -34,7 +41,11 @@ export class RepositoryService {
   /**
    * Get the repository provider by platform name
    */
-  getRepositoryProviderByPlatform(platform: string): RepositoryProvider | undefined {
-    return this.providers.find((provider) => provider.getPlatformName() === platform);
+  getRepositoryProviderByPlatform(
+    platform: string,
+  ): RepositoryProvider | undefined {
+    return this.providers.find(
+      (provider) => provider.getPlatformName() === platform,
+    );
   }
 }

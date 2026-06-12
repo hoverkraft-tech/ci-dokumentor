@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, vi, type Mocked } from "vitest";
 import { FormatterService } from "./formatter.service.js";
-import { FormatterAdapter } from "./formatter.adapter.js";
+import type { FormatterAdapter } from "./formatter.adapter.js";
 import { FormatterLanguage } from "./formatter-language.js";
 
 describe("FormatterService", () => {
@@ -11,13 +11,15 @@ describe("FormatterService", () => {
     // Create mock formatter adapters
     const mockMarkdownAdapter: Mocked<FormatterAdapter> = {
       supportsLanguage: vi.fn(
-        (language: FormatterLanguage) => language === FormatterLanguage.Markdown,
+        (language: FormatterLanguage) =>
+          language === FormatterLanguage.Markdown,
       ) as Mocked<FormatterAdapter>["supportsLanguage"],
     } as Mocked<FormatterAdapter>;
 
     const mockGenericAdapter: Mocked<FormatterAdapter> = {
       supportsLanguage: vi.fn(
-        (language: FormatterLanguage) => language !== FormatterLanguage.Markdown,
+        (language: FormatterLanguage) =>
+          language !== FormatterLanguage.Markdown,
       ) as Mocked<FormatterAdapter>["supportsLanguage"],
     } as Mocked<FormatterAdapter>;
 
@@ -74,9 +76,9 @@ describe("FormatterService", () => {
       mockFormatterAdapters[1].supportsLanguage.mockReturnValue(false);
 
       // Act & Assert
-      expect(() => formatterService.getFormatterAdapterForFile(filePath)).toThrow(
-        "No formatter adapter found for file: test.md",
-      );
+      expect(() =>
+        formatterService.getFormatterAdapterForFile(filePath),
+      ).toThrow("No formatter adapter found for file: test.md");
     });
 
     it("should throw error for unsupported file extension", () => {
@@ -84,9 +86,9 @@ describe("FormatterService", () => {
       const filePath = "test.txt";
 
       // Act & Assert
-      expect(() => formatterService.getFormatterAdapterForFile(filePath)).toThrow(
-        "Unsupported language for file: test.txt",
-      );
+      expect(() =>
+        formatterService.getFormatterAdapterForFile(filePath),
+      ).toThrow("Unsupported language for file: test.txt");
     });
 
     it("should handle file path with multiple dots correctly", () => {
@@ -105,9 +107,9 @@ describe("FormatterService", () => {
       const filePath = "README";
 
       // Act & Assert
-      expect(() => formatterService.getFormatterAdapterForFile(filePath)).toThrow(
-        "Unsupported language for file: README",
-      );
+      expect(() =>
+        formatterService.getFormatterAdapterForFile(filePath),
+      ).toThrow("Unsupported language for file: README");
     });
 
     it("should handle uppercase file extensions", () => {

@@ -2,10 +2,12 @@ import { createReadStream, existsSync, statSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { injectable } from "inversify";
 import fg from "fast-glob";
-import { ReaderAdapter } from "./reader.adapter.js";
+import type { ReaderAdapter } from "./reader.adapter.js";
 import { ReadableContent } from "./readable-content.js";
 
-export const FILE_READER_ADAPTER_IDENTIFIER = Symbol.for("@ci-dokumentor/core/FileReaderAdapter");
+export const FILE_READER_ADAPTER_IDENTIFIER = Symbol.for(
+  "@ci-dokumentor/core/FileReaderAdapter",
+);
 
 @injectable()
 export class FileReaderAdapter implements ReaderAdapter {
@@ -69,7 +71,11 @@ export class FileReaderAdapter implements ReaderAdapter {
 
   async findResources(pattern: string): Promise<string[]> {
     // Check if pattern contains glob characters
-    if (pattern.includes("*") || pattern.includes("?") || pattern.includes("[")) {
+    if (
+      pattern.includes("*") ||
+      pattern.includes("?") ||
+      pattern.includes("[")
+    ) {
       // Use fast-glob to resolve pattern
       const files = await fg(pattern, {
         onlyFiles: true,
@@ -85,7 +91,9 @@ export class FileReaderAdapter implements ReaderAdapter {
     }
   }
 
-  private getStat(path: string): { isFile: () => boolean; isDirectory: () => boolean } | undefined {
+  private getStat(
+    path: string,
+  ): { isFile: () => boolean; isDirectory: () => boolean } | undefined {
     if (!existsSync(path)) {
       return undefined;
     }

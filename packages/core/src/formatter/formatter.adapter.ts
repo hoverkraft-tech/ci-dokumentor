@@ -1,6 +1,6 @@
-import { ReadableContent } from "../reader/readable-content.js";
-import { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
-import { FormatterLanguage } from "./formatter-language.js";
+import type { ReadableContent } from "../reader/readable-content.js";
+import type { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
+import type { FormatterLanguage } from "./formatter-language.js";
 
 export const FORMATTER_ADAPTER_IDENTIFIER = Symbol("FormatterAdapter");
 
@@ -49,7 +49,11 @@ export interface FormatterAdapter {
 
   table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent;
 
-  badge(label: ReadableContent, message: ReadableContent, color?: ReadableContent): ReadableContent;
+  badge(
+    label: ReadableContent,
+    message: ReadableContent,
+    color?: ReadableContent,
+  ): ReadableContent;
 
   list(items: ReadableContent[], ordered?: boolean): ReadableContent;
 
@@ -60,7 +64,10 @@ export interface FormatterAdapter {
   /**
    * Wrap content in section markers
    */
-  section(section: SectionIdentifier, content: ReadableContent): ReadableContent;
+  section(
+    section: SectionIdentifier,
+    content: ReadableContent,
+  ): ReadableContent;
 
   sectionStart(section: SectionIdentifier): ReadableContent;
 

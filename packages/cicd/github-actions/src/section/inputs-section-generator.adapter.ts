@@ -1,6 +1,10 @@
-import { InputsSectionMixin, FormatterAdapter, ReadableContent } from "@ci-dokumentor/core";
-import { injectable } from "inversify";
 import {
+  InputsSectionMixin,
+  type FormatterAdapter,
+  ReadableContent,
+} from "@ci-dokumentor/core";
+import { injectable } from "inversify";
+import type {
   GitHubAction,
   GitHubActionInput,
   GitHubActionsManifest,
@@ -56,26 +60,36 @@ export class InputsSectionGenerator extends InputsSectionMixin<
   ): ReadableContent {
     let content: ReadableContent = ReadableContent.empty();
 
-    const workflowDispatchInputs = Object.entries(manifest.on?.workflow_dispatch?.inputs || {});
+    const workflowDispatchInputs = Object.entries(
+      manifest.on?.workflow_dispatch?.inputs || {},
+    );
     if (workflowDispatchInputs.length) {
       if (!content.isEmpty()) {
         content = content.append(formatterAdapter.lineBreak());
       }
       content = content.append(
-        formatterAdapter.heading(new ReadableContent("Workflow Dispatch Inputs"), 3),
+        formatterAdapter.heading(
+          new ReadableContent("Workflow Dispatch Inputs"),
+          3,
+        ),
         formatterAdapter.lineBreak(),
         this.getWorkflowInputsTable(formatterAdapter, workflowDispatchInputs),
       );
     }
 
-    const workflowCallInputs = Object.entries(manifest.on?.workflow_call?.inputs || {});
+    const workflowCallInputs = Object.entries(
+      manifest.on?.workflow_call?.inputs || {},
+    );
     if (workflowCallInputs.length) {
       if (!content.isEmpty()) {
         content = content.append(formatterAdapter.lineBreak());
       }
 
       content = content.append(
-        formatterAdapter.heading(new ReadableContent("Workflow Call Inputs"), 3),
+        formatterAdapter.heading(
+          new ReadableContent("Workflow Call Inputs"),
+          3,
+        ),
         formatterAdapter.lineBreak(),
         this.getWorkflowInputsTable(formatterAdapter, workflowCallInputs),
       );
@@ -110,10 +124,16 @@ export class InputsSectionGenerator extends InputsSectionMixin<
   }
 
   private getInputDescription(
-    input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
+    input:
+      | GitHubActionInput
+      | GitHubWorkflowDispatchInput
+      | GitHubWorkflowCallInput,
     formatterAdapter: FormatterAdapter,
   ): ReadableContent {
-    let description = this.formatInputDescription(input.description, formatterAdapter);
+    let description = this.formatInputDescription(
+      input.description,
+      formatterAdapter,
+    );
 
     const deprecationMessage = this.getInputDeprecationMessage(input);
     if (deprecationMessage) {
@@ -123,7 +143,9 @@ export class InputsSectionGenerator extends InputsSectionMixin<
       description = ReadableContent.empty().append(
         ...[
           description,
-          formatterAdapter.bold(new ReadableContent("Deprecated:")).append(deprecationMessage),
+          formatterAdapter
+            .bold(new ReadableContent("Deprecated:"))
+            .append(deprecationMessage),
         ]
           .map((line) => line.trim())
           .filter((line) => !line.isEmpty()),
@@ -138,11 +160,16 @@ export class InputsSectionGenerator extends InputsSectionMixin<
           if (!optionsContent.isEmpty()) {
             optionsContent.append(formatterAdapter.lineBreak());
           }
-          optionsContent.append(formatterAdapter.inlineCode(new ReadableContent(option)));
+          optionsContent.append(
+            formatterAdapter.inlineCode(new ReadableContent(option)),
+          );
         }
 
         if (!optionsContent.isEmpty()) {
-          description = description.append(formatterAdapter.lineBreak(), optionsContent);
+          description = description.append(
+            formatterAdapter.lineBreak(),
+            optionsContent,
+          );
         }
       }
     }
@@ -151,7 +178,10 @@ export class InputsSectionGenerator extends InputsSectionMixin<
   }
 
   private getInputDeprecationMessage(
-    input: GitHubActionInput | GitHubWorkflowDispatchInput | GitHubWorkflowCallInput,
+    input:
+      | GitHubActionInput
+      | GitHubWorkflowDispatchInput
+      | GitHubWorkflowCallInput,
   ): string | null {
     return (input as GitHubWorkflowDispatchInput).deprecationMessage || null;
   }

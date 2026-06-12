@@ -9,20 +9,33 @@ import { MarkdownCodeGenerator } from "./markdown-code.generator.js";
 @injectable()
 export class MarkdownTableGenerator {
   constructor(
-    @inject(MarkdownCodeGenerator) private readonly markdownCodeGenerator: MarkdownCodeGenerator,
+    @inject(MarkdownCodeGenerator)
+    private readonly markdownCodeGenerator: MarkdownCodeGenerator,
   ) {}
 
-  table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent {
-    const isEmptyTable = (!headers || headers.length === 0) && (!rows || rows.length === 0);
+  table(
+    headers: ReadableContent[],
+    rows: ReadableContent[][],
+  ): ReadableContent {
+    const isEmptyTable =
+      (!headers || headers.length === 0) && (!rows || rows.length === 0);
     if (isEmptyTable) {
       return ReadableContent.empty();
     }
 
     const headerLines = headers.map((h) => this.splitMultilineCell(h));
-    const maxHeaderLines = Math.max(...headerLines.map((lines) => lines.length));
+    const maxHeaderLines = Math.max(
+      ...headerLines.map((lines) => lines.length),
+    );
 
     const colWidths = this.computeColWidths(headers, rows, headerLines);
-    return this.renderTable(headers, rows, headerLines, colWidths, maxHeaderLines);
+    return this.renderTable(
+      headers,
+      rows,
+      headerLines,
+      colWidths,
+      maxHeaderLines,
+    );
   }
 
   /**
@@ -44,14 +57,18 @@ export class MarkdownTableGenerator {
       for (const hl of hLines) {
         const line = hl || ReadableContent.empty();
         const tb = this.transformTableCellLine(line);
-        const normalizedCell = this.normalizeCell(tb || ReadableContent.empty());
+        const normalizedCell = this.normalizeCell(
+          tb || ReadableContent.empty(),
+        );
         colWidths[c] = Math.max(colWidths[c], normalizedCell.getSize());
       }
     }
 
     for (const row of rows) {
       for (let c = 0; c < numCols; c++) {
-        const clines = this.splitMultilineCell(row[c] || ReadableContent.empty());
+        const clines = this.splitMultilineCell(
+          row[c] || ReadableContent.empty(),
+        );
         for (const ln of clines) {
           const line = ln || ReadableContent.empty();
           const tb = this.transformTableCellLine(line);
@@ -77,7 +94,7 @@ export class MarkdownTableGenerator {
 
     // main header (first header line)
     for (let c = 0; c < numCols; c++) {
-      const first = (headerLines[c] && headerLines[c][0]) || ReadableContent.empty();
+      const first = headerLines[c]?.[0] || ReadableContent.empty();
       const tb = this.transformTableCellLine(first);
 
       const cell = this.padCell(tb, colWidths[c]);
@@ -100,7 +117,7 @@ export class MarkdownTableGenerator {
       content = content.append("| ");
 
       for (let c = 0; c < numCols; c++) {
-        const hl = (headerLines[c] && headerLines[c][lineIndex]) || ReadableContent.empty();
+        const hl = headerLines[c]?.[lineIndex] || ReadableContent.empty();
         const tb = this.transformTableCellLine(hl);
 
         const cell = this.padCell(tb, colWidths[c]);
@@ -142,7 +159,7 @@ export class MarkdownTableGenerator {
 
       for (let c = 0; c < numCols; c++) {
         const lines = cellLines[c];
-        const tb = (lines && lines[li]) || ReadableContent.empty();
+        const tb = lines?.[li] || ReadableContent.empty();
         const cell = this.padCell(tb, colWidths[c]);
 
         if (c > 0) {
@@ -179,7 +196,9 @@ export class MarkdownTableGenerator {
   }
 
   private lineBreak(): ReadableContent {
-    return new ReadableContent(String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE));
+    return new ReadableContent(
+      String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE),
+    );
   }
 
   private splitMultilineCell(content: ReadableContent): ReadableContent[] {
@@ -191,9 +210,13 @@ export class MarkdownTableGenerator {
     // Use the buffer-based fenced block finder first (safe, linear scan).
     const fenced = this.markdownCodeGenerator.findCodeBlocks(content);
     // Find inline backtick spans (one or more backticks) outside fenced blocks.
-    const inlineSpans = this.markdownCodeGenerator.findInlineCode(content, fenced);
+    const inlineSpans = this.markdownCodeGenerator.findInlineCode(
+      content,
+      fenced,
+    );
 
-    const codeBlocks: { start: number; end: number; replacement: string }[] = [];
+    const codeBlocks: { start: number; end: number; replacement: string }[] =
+      [];
     for (const b of fenced) {
       codeBlocks.push({
         start: b.start,
@@ -203,7 +226,8 @@ export class MarkdownTableGenerator {
     }
     for (const s of inlineSpans) {
       // skip inline spans that are inside already collected blocks
-      if (codeBlocks.some((b) => s.start >= b.start && s.start < b.end)) continue;
+      if (codeBlocks.some((b) => s.start >= b.start && s.start < b.end))
+        continue;
       codeBlocks.push({
         start: s.start,
         end: s.end,
@@ -235,7 +259,10 @@ export class MarkdownTableGenerator {
       for (let i = 0; i < codeBlocks.length; i++) {
         const placeholder = codeBlocks[i].replacement;
         if (restoredLine.includes(placeholder)) {
-          const originalCodeBlock = content.slice(codeBlocks[i].start, codeBlocks[i].end);
+          const originalCodeBlock = content.slice(
+            codeBlocks[i].start,
+            codeBlocks[i].end,
+          );
           restoredLine = restoredLine.replace(placeholder, originalCodeBlock);
         }
       }
@@ -259,14 +286,18 @@ export class MarkdownTableGenerator {
           result = result.append(trimmedContent.htmlEscape());
         }
       } else {
-        result = result.append(this.markdownCodeGenerator.codeBlock(seg.content, seg.lang, true));
+        result = result.append(
+          this.markdownCodeGenerator.codeBlock(seg.content, seg.lang, true),
+        );
       }
     }
 
     return result;
   }
 
-  private shouldRenderHtmlPreForMultilineCode(content: ReadableContent): boolean {
+  private shouldRenderHtmlPreForMultilineCode(
+    content: ReadableContent,
+  ): boolean {
     if (content.isEmpty()) {
       return false;
     }
@@ -279,11 +310,16 @@ export class MarkdownTableGenerator {
     return false;
   }
 
-  private splitCellIntoSegments(
-    cell: ReadableContent,
-  ): Array<{ type: "text" | "code"; content: ReadableContent; lang?: ReadableContent }> {
-    const out: Array<{ type: "text" | "code"; content: ReadableContent; lang?: ReadableContent }> =
-      [];
+  private splitCellIntoSegments(cell: ReadableContent): Array<{
+    type: "text" | "code";
+    content: ReadableContent;
+    lang?: ReadableContent;
+  }> {
+    const out: Array<{
+      type: "text" | "code";
+      content: ReadableContent;
+      lang?: ReadableContent;
+    }> = [];
 
     if (cell.isEmpty()) {
       return out;
@@ -322,7 +358,11 @@ export class MarkdownTableGenerator {
         out.push({ type: "text", content: cell.slice(last, block.start) });
       }
 
-      const seg: { type: "code"; content: ReadableContent; lang?: ReadableContent } = {
+      const seg: {
+        type: "code";
+        content: ReadableContent;
+        lang?: ReadableContent;
+      } = {
         type: "code",
         content: cell.slice(block.innerStart, block.innerEnd),
       };

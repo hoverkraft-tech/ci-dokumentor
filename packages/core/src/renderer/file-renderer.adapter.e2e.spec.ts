@@ -90,11 +90,19 @@ New section content
 
     it("should replace existing section content when section already exists", async () => {
       // Arrange
-      const adapterWithExistingSection = new FileRendererAdapter(new FileReaderAdapter());
+      const adapterWithExistingSection = new FileRendererAdapter(
+        new FileReaderAdapter(),
+      );
 
       // Act
-      await adapterWithExistingSection.initialize("/test/existing-section.md", formatterAdapter);
-      await adapterWithExistingSection.writeSection(testSectionIdentifier, testData);
+      await adapterWithExistingSection.initialize(
+        "/test/existing-section.md",
+        formatterAdapter,
+      );
+      await adapterWithExistingSection.writeSection(
+        testSectionIdentifier,
+        testData,
+      );
 
       // Assert
       const fileContent = readFileSync("/test/existing-section.md", "utf-8");
@@ -129,18 +137,31 @@ New section content
 
     it("should handle multiple sections without affecting other sections", async () => {
       // Arrange
-      const multipleSectionsAdapter = new FileRendererAdapter(new FileReaderAdapter());
+      const multipleSectionsAdapter = new FileRendererAdapter(
+        new FileReaderAdapter(),
+      );
       const newUsageContent = new ReadableContent("Updated usage section\n");
-      const newLicenseContent = new ReadableContent("Updated license section\n");
+      const newLicenseContent = new ReadableContent(
+        "Updated license section\n",
+      );
 
       // Act
-      await multipleSectionsAdapter.initialize("/test/multiple-sections.md", formatterAdapter);
-      await multipleSectionsAdapter.writeSection(SectionIdentifier.Usage, newUsageContent);
+      await multipleSectionsAdapter.initialize(
+        "/test/multiple-sections.md",
+        formatterAdapter,
+      );
+      await multipleSectionsAdapter.writeSection(
+        SectionIdentifier.Usage,
+        newUsageContent,
+      );
       await multipleSectionsAdapter.writeSection(
         SectionIdentifier.Security,
         ReadableContent.empty(),
       ); // Empty content for security section
-      await multipleSectionsAdapter.writeSection(SectionIdentifier.License, newLicenseContent);
+      await multipleSectionsAdapter.writeSection(
+        SectionIdentifier.License,
+        newLicenseContent,
+      );
 
       // Assert
       const fileContent = readFileSync("/test/multiple-sections.md", "utf-8");
@@ -176,7 +197,10 @@ Updated license section
 
       // Act
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
-      await fileRendererAdapter.writeSection(testSectionIdentifier, complexData);
+      await fileRendererAdapter.writeSection(
+        testSectionIdentifier,
+        complexData,
+      );
 
       // Assert
       const fileContent = readFileSync(testFilePath, "utf-8");
@@ -199,8 +223,12 @@ Updated license section
       expect(fileContent).toContain(`<!-- ${testSectionIdentifier}:end -->`);
 
       // Check that the section is empty
-      const sectionStart = fileContent.indexOf(`<!-- ${testSectionIdentifier}:start -->`);
-      const sectionEnd = fileContent.indexOf(`<!-- ${testSectionIdentifier}:end -->`);
+      const sectionStart = fileContent.indexOf(
+        `<!-- ${testSectionIdentifier}:start -->`,
+      );
+      const sectionEnd = fileContent.indexOf(
+        `<!-- ${testSectionIdentifier}:end -->`,
+      );
       expect(sectionStart).toBeGreaterThan(-1);
       expect(sectionEnd).toBeGreaterThan(sectionStart);
 
@@ -282,20 +310,27 @@ Updated license section
 
       // Act & Assert
       await readOnlyAdapter.initialize(testFilePath, formatterAdapter);
-      await expect(readOnlyAdapter.writeSection(testSectionIdentifier, testData)).rejects.toThrow(
-        "test",
-      );
+      await expect(
+        readOnlyAdapter.writeSection(testSectionIdentifier, testData),
+      ).rejects.toThrow("test");
     });
 
     it("should handle invalid file paths", async () => {
       // Arrange
-      const invalidPathAdapter = new FileRendererAdapter(new FileReaderAdapter());
+      const invalidPathAdapter = new FileRendererAdapter(
+        new FileReaderAdapter(),
+      );
 
       // Act & Assert
-      await invalidPathAdapter.initialize("/nonexistent/path/file.md", formatterAdapter);
+      await invalidPathAdapter.initialize(
+        "/nonexistent/path/file.md",
+        formatterAdapter,
+      );
       await expect(
         invalidPathAdapter.writeSection(testSectionIdentifier, testData),
-      ).rejects.toThrow("ENOENT, no such file or directory '/nonexistent/path/file.md'");
+      ).rejects.toThrow(
+        "ENOENT, no such file or directory '/nonexistent/path/file.md'",
+      );
     });
   });
 
@@ -320,10 +355,14 @@ Updated license section
 
       // Should only have one instance of each marker
       const startMarkers = (
-        fileContent.match(new RegExp(`<!-- ${testSectionIdentifier}:start -->`, "g")) || []
+        fileContent.match(
+          new RegExp(`<!-- ${testSectionIdentifier}:start -->`, "g"),
+        ) || []
       ).length;
       const endMarkers = (
-        fileContent.match(new RegExp(`<!-- ${testSectionIdentifier}:end -->`, "g")) || []
+        fileContent.match(
+          new RegExp(`<!-- ${testSectionIdentifier}:end -->`, "g"),
+        ) || []
       ).length;
       expect(startMarkers).toBe(1);
       expect(endMarkers).toBe(1);
@@ -337,7 +376,10 @@ Updated license section
       // Act - Simulate concurrent writes to different sections
       await fileRendererAdapter.initialize(testFilePath, formatterAdapter);
       await Promise.all([
-        fileRendererAdapter.writeSection(SectionIdentifier.Examples, section1Data),
+        fileRendererAdapter.writeSection(
+          SectionIdentifier.Examples,
+          section1Data,
+        ),
         fileRendererAdapter.writeSection(SectionIdentifier.Usage, section2Data),
       ]);
 
@@ -371,7 +413,9 @@ Section 2 content
 
     it("should throw error when trying to get destination before initialization", () => {
       // Act & Assert
-      expect(() => fileRendererAdapter.getDestination()).toThrow("Destination not initialized");
+      expect(() => fileRendererAdapter.getDestination()).toThrow(
+        "Destination not initialized",
+      );
     });
 
     it("should return correct destination for different file paths", async () => {

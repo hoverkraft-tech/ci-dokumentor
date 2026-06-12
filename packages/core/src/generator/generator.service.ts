@@ -1,13 +1,13 @@
 import { inject, injectable, multiInject } from "inversify";
 import { FormatterService } from "../formatter/formatter.service.js";
-import { RepositoryProvider } from "../repository/repository.provider.js";
-import { FormatterOptions } from "../formatter/formatter.adapter.js";
+import type { RepositoryProvider } from "../repository/repository.provider.js";
+import type { FormatterOptions } from "../formatter/formatter.adapter.js";
 import { RENDERER_FACTORY_IDENTIFIER } from "../renderer/renderer.factory.js";
 import type { RendererFactory } from "../renderer/renderer.factory.js";
 import {
-  GenerateSectionsOptions,
+  type GenerateSectionsOptions,
   GENERATOR_ADAPTER_IDENTIFIER,
-  GeneratorAdapter,
+  type GeneratorAdapter,
 } from "./generator.adapter.js";
 
 @injectable()
@@ -31,8 +31,12 @@ export class GeneratorService {
   /**
    * Get generator adapter for a specific platform
    */
-  getGeneratorAdapterByPlatform(platform: string): GeneratorAdapter | undefined {
-    return this.generatorAdapters.find((adapter) => adapter.getPlatformName() === platform);
+  getGeneratorAdapterByPlatform(
+    platform: string,
+  ): GeneratorAdapter | undefined {
+    return this.generatorAdapters.find(
+      (adapter) => adapter.getPlatformName() === platform,
+    );
   }
 
   /**
@@ -86,8 +90,10 @@ export class GeneratorService {
       );
     }
 
-    const destinationPath = destination ?? generatorAdapter.getDocumentationPath(source);
-    const formatterAdapter = this.formatterService.getFormatterAdapterForFile(destinationPath);
+    const destinationPath =
+      destination ?? generatorAdapter.getDocumentationPath(source);
+    const formatterAdapter =
+      this.formatterService.getFormatterAdapterForFile(destinationPath);
 
     // Set formatter options before initializing renderer
     formatterAdapter.setOptions(formatterOptions);

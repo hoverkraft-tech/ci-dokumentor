@@ -1,9 +1,9 @@
 import { inject, injectable, injectFromBase } from "inversify";
-import { Command } from "commander";
+import type { Command } from "commander";
 import { MigrationService } from "@ci-dokumentor/core";
 import {
   MigrateDocumentationUseCase,
-  MigrateDocumentationUseCaseInput,
+  type MigrateDocumentationUseCaseInput,
 } from "../usecases/migrate-documentation.usecase.js";
 import { BaseCommand } from "./base-command.js";
 
@@ -45,15 +45,27 @@ export class MigrateCommand extends BaseCommand {
       .description(
         "Migrate existing documentation markers from various tools to ci-dokumentor format",
       )
-      .option("-t, --tool <tool>", `Migration tool to convert from (${availableTools.join(", ")})`)
+      .option(
+        "-t, --tool <tool>",
+        `Migration tool to convert from (${availableTools.join(", ")})`,
+      )
       .requiredOption(
         "-d, --destination <file...>",
         "Destination file(s) containing documentation markers to migrate. Supports glob patterns and multiple files.",
       )
-      .option("--dry-run", "Preview what would be migrated without writing files", false)
-      .option("--concurrency [number]", "Maximum number of files to process concurrently", "5")
+      .option(
+        "--dry-run",
+        "Preview what would be migrated without writing files",
+        false,
+      )
+      .option(
+        "--concurrency [number]",
+        "Maximum number of files to process concurrently",
+        "5",
+      )
       .action(async (options: MigrateCommandOptions) => {
-        const input: MigrateDocumentationUseCaseInput = this.mapMigrateCommandOptions(options);
+        const input: MigrateDocumentationUseCaseInput =
+          this.mapMigrateCommandOptions(options);
         await this.migrateDocumentationUseCase.execute(input);
       })
       .helpCommand(true);
@@ -67,7 +79,9 @@ export class MigrateCommand extends BaseCommand {
       destination: options.destination,
       outputFormat: this.getOutputFormatOption(this),
       dryRun: options.dryRun,
-      concurrency: options.concurrency ? parseInt(String(options.concurrency), 10) : undefined,
+      concurrency: options.concurrency
+        ? parseInt(String(options.concurrency), 10)
+        : undefined,
     };
   }
 

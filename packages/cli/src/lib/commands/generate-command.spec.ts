@@ -1,6 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type Mocked,
+} from "vitest";
 import { LinkFormat } from "@ci-dokumentor/core";
-import { GenerateDocumentationUseCase } from "../usecases/generate-documentation.usecase.js";
+import type { GenerateDocumentationUseCase } from "../usecases/generate-documentation.usecase.js";
 import { CommandTester } from "../../../__tests__/command-tester.js";
 import { GenerateCommand } from "./generate-command.js";
 
@@ -19,17 +27,25 @@ describe("GenerateCommand", () => {
         message: "Documentation generated successfully",
         destination: "./README.md",
       }) as Mocked<GenerateDocumentationUseCase["execute"]>,
-      getSupportedRepositoryPlatforms: vi.fn().mockReturnValue(["git", "github"]) as Mocked<
+      getSupportedRepositoryPlatforms: vi
+        .fn()
+        .mockReturnValue(["git", "github"]) as Mocked<
         GenerateDocumentationUseCase["getSupportedRepositoryPlatforms"]
       >,
-      getSupportedCicdPlatforms: vi.fn().mockReturnValue(["github-actions"]) as Mocked<
+      getSupportedCicdPlatforms: vi
+        .fn()
+        .mockReturnValue(["github-actions"]) as Mocked<
         GenerateDocumentationUseCase["getSupportedCicdPlatforms"]
       >,
       getSupportedSections: vi
         .fn()
-        .mockReturnValue(["header", "overview", "usage", "inputs", "outputs"]) as Mocked<
-        GenerateDocumentationUseCase["getSupportedSections"]
-      >,
+        .mockReturnValue([
+          "header",
+          "overview",
+          "usage",
+          "inputs",
+          "outputs",
+        ]) as Mocked<GenerateDocumentationUseCase["getSupportedSections"]>,
       getRepositorySupportedOptions: vi.fn().mockResolvedValue([]) as Mocked<
         GenerateDocumentationUseCase["getRepositorySupportedOptions"]
       >,
@@ -39,7 +55,7 @@ describe("GenerateCommand", () => {
     } as Mocked<GenerateDocumentationUseCase>;
 
     const processExitMock = ((code?: number | string | null | undefined) => {
-      throw new Error("process.exit: " + code);
+      throw new Error(`process.exit: ${code}`);
     }) as unknown as typeof process.exit;
 
     // Bind mocks to container
@@ -83,7 +99,12 @@ describe("GenerateCommand", () => {
   describe("option parsing", () => {
     it("should parse basic options correctly", async () => {
       // Arrange
-      const args = ["--source", "./test-source", "--destination", "./test-destination"];
+      const args = [
+        "--source",
+        "./test-source",
+        "--destination",
+        "./test-destination",
+      ];
 
       // Act
       await commandTester.test(args);
@@ -337,15 +358,24 @@ describe("GenerateCommand", () => {
 
     it("preAction should add provider options", async () => {
       // Arrange - mock a provider option
-      mockGenerateDocumentationUseCase.getRepositorySupportedOptions.mockResolvedValue({
-        foo: {
-          flags: "--foo <value>",
-          description: "Foo description",
+      mockGenerateDocumentationUseCase.getRepositorySupportedOptions.mockResolvedValue(
+        {
+          foo: {
+            flags: "--foo <value>",
+            description: "Foo description",
+          },
         },
-      });
+      );
 
       // Act - parse with the dynamically added option
-      const args = ["--source", "./test-source", "--repository", "github", "--foo", "bar"];
+      const args = [
+        "--source",
+        "./test-source",
+        "--repository",
+        "github",
+        "--foo",
+        "bar",
+      ];
 
       await commandTester.test(args);
 
@@ -354,9 +384,9 @@ describe("GenerateCommand", () => {
       expect(commandTester.getLoggerService().warn).not.toHaveBeenCalled();
 
       // Assert - dynamic option was added and use case executed
-      expect(mockGenerateDocumentationUseCase.getRepositorySupportedOptions).toHaveBeenCalledWith(
-        "github",
-      );
+      expect(
+        mockGenerateDocumentationUseCase.getRepositorySupportedOptions,
+      ).toHaveBeenCalledWith("github");
 
       const optionFlags = generateCommand.options.map((opt) => opt.flags);
       expect(optionFlags).toContain("--foo <value>");
@@ -377,13 +407,15 @@ describe("GenerateCommand", () => {
 
     it("preAction should set handle provider options with env", async () => {
       // Arrange - mock a provider option
-      mockGenerateDocumentationUseCase.getRepositorySupportedOptions.mockResolvedValue({
-        foo: {
-          flags: "--foo <value>",
-          description: "Foo description",
-          env: "FOO_ENV",
+      mockGenerateDocumentationUseCase.getRepositorySupportedOptions.mockResolvedValue(
+        {
+          foo: {
+            flags: "--foo <value>",
+            description: "Foo description",
+            env: "FOO_ENV",
+          },
         },
-      });
+      );
 
       // Act - parse with the dynamically added option and a valid section
       const args = ["--source", "./test-source", "--repository", "github"];
@@ -393,9 +425,9 @@ describe("GenerateCommand", () => {
       await commandTester.test(args);
 
       // Assert - dynamic option was added and use case executed
-      expect(mockGenerateDocumentationUseCase.getRepositorySupportedOptions).toHaveBeenCalledWith(
-        "github",
-      );
+      expect(
+        mockGenerateDocumentationUseCase.getRepositorySupportedOptions,
+      ).toHaveBeenCalledWith("github");
 
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: ["./test-source"],
@@ -416,10 +448,18 @@ describe("GenerateCommand", () => {
 
     it("preAction should set section choices", async () => {
       // Arrange - mock supported sections via service mocks
-      mockGenerateDocumentationUseCase.getSupportedSections.mockReturnValue(["header", "overview"]);
+      mockGenerateDocumentationUseCase.getSupportedSections.mockReturnValue([
+        "header",
+        "overview",
+      ]);
 
       // Act - parse with the dynamically added option and a valid section
-      const args = ["--source", "./test-source", "--include-sections", "header"];
+      const args = [
+        "--source",
+        "./test-source",
+        "--include-sections",
+        "header",
+      ];
 
       await commandTester.test(args);
 
@@ -428,7 +468,9 @@ describe("GenerateCommand", () => {
       expect(commandTester.getLoggerService().warn).not.toHaveBeenCalled();
 
       // Assert - dynamic option was added and use case executed
-      expect(mockGenerateDocumentationUseCase.getSupportedSections).toHaveBeenCalled();
+      expect(
+        mockGenerateDocumentationUseCase.getSupportedSections,
+      ).toHaveBeenCalled();
 
       expect(mockGenerateDocumentationUseCase.execute).toHaveBeenCalledWith({
         source: ["./test-source"],
@@ -469,7 +511,13 @@ describe("GenerateCommand", () => {
 
     it("should handle dry-run option correctly", async () => {
       // Arrange
-      const args = ["--source", "./test-source", "--destination", "./test-output", "--dry-run"];
+      const args = [
+        "--source",
+        "./test-source",
+        "--destination",
+        "./test-output",
+        "--dry-run",
+      ];
 
       // Act
       await commandTester.test(args);

@@ -1,9 +1,9 @@
 import { Command as CommanderCommand } from "commander";
-import { Mocked } from "vitest";
-import { Command } from "../src/lib/commands/command.js";
-import { LoggerService } from "../src/lib/logger/logger.service.js";
+import type { Mocked } from "vitest";
+import type { Command } from "../src/lib/commands/command.js";
+import type { LoggerService } from "../src/lib/logger/logger.service.js";
 import { ProgramConfiguratorService } from "../src/lib/application/program-configurator.service.js";
-import { Program } from "../src/lib/application/program.js";
+import type { Program } from "../src/lib/application/program.js";
 import { LoggerServiceMockFactory } from "./logger-service-mock.factory.js";
 
 export class CommandTester {
@@ -15,7 +15,9 @@ export class CommandTester {
     this.loggerService = LoggerServiceMockFactory.create({
       getSupportedFormats: ["test"],
     });
-    const programConfiguratorService = new ProgramConfiguratorService(this.loggerService);
+    const programConfiguratorService = new ProgramConfiguratorService(
+      this.loggerService,
+    );
 
     this.program = new CommanderCommand();
     programConfiguratorService.configureOutput(this.program);
@@ -27,7 +29,9 @@ export class CommandTester {
   }
 
   test(args: string[]) {
-    return this.program.parseAsync([this.command.name(), ...args], { from: "user" });
+    return this.program.parseAsync([this.command.name(), ...args], {
+      from: "user",
+    });
   }
 
   getLoggerService() {

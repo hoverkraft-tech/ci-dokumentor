@@ -1,4 +1,4 @@
-import { Mock, vi } from "vitest";
+import { type Mock, vi } from "vitest";
 
 const graphqlMock: Mock = vi.fn();
 

@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import type { ReaderAdapter } from "../reader/reader.adapter.js";
 import { FileReaderAdapter } from "../reader/file-reader.adapter.js";
-import { ReadableContent } from "../reader/readable-content.js";
+import type { ReadableContent } from "../reader/readable-content.js";
 
 export type LicenseInfo = {
   name: string;
@@ -9,11 +9,15 @@ export type LicenseInfo = {
   url?: string;
 };
 
-export const LICENSE_SERVICE_IDENTIFIER = Symbol.for("@ci-dokumentor/core/LicenseService");
+export const LICENSE_SERVICE_IDENTIFIER = Symbol.for(
+  "@ci-dokumentor/core/LicenseService",
+);
 
 @injectable()
 export class LicenseService {
-  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) {}
+  constructor(
+    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter,
+  ) {}
 
   /**
    * Detect license information from local license files
@@ -56,16 +60,28 @@ export class LicenseService {
   private detectLicenseType(content: ReadableContent): string {
     const upperContent = content.toUpperCase();
 
-    if (upperContent.includes("MIT LICENSE") || upperContent.includes("MIT LICENCE")) {
+    if (
+      upperContent.includes("MIT LICENSE") ||
+      upperContent.includes("MIT LICENCE")
+    ) {
       return "MIT License";
     }
-    if (upperContent.includes("APACHE LICENSE") && upperContent.includes("VERSION 2.0")) {
+    if (
+      upperContent.includes("APACHE LICENSE") &&
+      upperContent.includes("VERSION 2.0")
+    ) {
       return "Apache License 2.0";
     }
-    if (upperContent.includes("GNU GENERAL PUBLIC LICENSE") && upperContent.includes("VERSION 3")) {
+    if (
+      upperContent.includes("GNU GENERAL PUBLIC LICENSE") &&
+      upperContent.includes("VERSION 3")
+    ) {
       return "GNU General Public License v3.0";
     }
-    if (upperContent.includes("GNU GENERAL PUBLIC LICENSE") && upperContent.includes("VERSION 2")) {
+    if (
+      upperContent.includes("GNU GENERAL PUBLIC LICENSE") &&
+      upperContent.includes("VERSION 2")
+    ) {
       return "GNU General Public License v2.0";
     }
     if (

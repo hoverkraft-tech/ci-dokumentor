@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ConsoleMockFactory, MockedConsole } from "../../../../__tests__/console-mock.factory.js";
+import {
+  ConsoleMockFactory,
+  type MockedConsole,
+} from "../../../../__tests__/console-mock.factory.js";
 import { JsonLoggerAdapter } from "./json-logger.adapter.js";
 
 describe("JsonLoggerAdapter", () => {
@@ -26,7 +29,9 @@ describe("JsonLoggerAdapter", () => {
       const message = "Debug message";
       jsonLoggerAdapter.debug(message);
 
-      expect(consoleMock.error).toHaveBeenCalledWith('{"level":"debug","message":"Debug message"}');
+      expect(consoleMock.error).toHaveBeenCalledWith(
+        '{"level":"debug","message":"Debug message"}',
+      );
     });
   });
 
@@ -35,7 +40,9 @@ describe("JsonLoggerAdapter", () => {
       const message = "Info message";
       jsonLoggerAdapter.info(message);
 
-      expect(consoleMock.info).toHaveBeenCalledWith('{"level":"info","message":"Info message"}');
+      expect(consoleMock.info).toHaveBeenCalledWith(
+        '{"level":"info","message":"Info message"}',
+      );
     });
   });
 
@@ -55,7 +62,9 @@ describe("JsonLoggerAdapter", () => {
       const message = "Error message";
       jsonLoggerAdapter.error(message);
 
-      expect(consoleMock.error).toHaveBeenCalledWith('{"level":"error","message":"Error message"}');
+      expect(consoleMock.error).toHaveBeenCalledWith(
+        '{"level":"error","message":"Error message"}',
+      );
     });
   });
 
@@ -73,28 +82,36 @@ describe("JsonLoggerAdapter", () => {
       const data = "Simple result";
       jsonLoggerAdapter.result(data);
 
-      expect(consoleMock.log).toHaveBeenCalledWith('{"level":"result","data":"Simple result"}');
+      expect(consoleMock.log).toHaveBeenCalledWith(
+        '{"level":"result","data":"Simple result"}',
+      );
     });
 
     it("should log number result as JSON object", () => {
       const data = 123;
       jsonLoggerAdapter.result(data);
 
-      expect(consoleMock.log).toHaveBeenCalledWith('{"level":"result","data":123}');
+      expect(consoleMock.log).toHaveBeenCalledWith(
+        '{"level":"result","data":123}',
+      );
     });
 
     it("should log null result as JSON object", () => {
       const data = null;
       jsonLoggerAdapter.result(data);
 
-      expect(consoleMock.log).toHaveBeenCalledWith('{"level":"result","data":null}');
+      expect(consoleMock.log).toHaveBeenCalledWith(
+        '{"level":"result","data":null}',
+      );
     });
 
     it("should log array result as JSON object", () => {
       const data = [1, 2, 3];
       jsonLoggerAdapter.result(data);
 
-      expect(consoleMock.log).toHaveBeenCalledWith('{"level":"result","data":[1,2,3]}');
+      expect(consoleMock.log).toHaveBeenCalledWith(
+        '{"level":"result","data":[1,2,3]}',
+      );
     });
   });
 });

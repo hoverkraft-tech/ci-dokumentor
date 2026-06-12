@@ -1,5 +1,5 @@
-import { Mocked } from "vitest";
-import { LoggerService } from "../src/lib/logger/logger.service.js";
+import type { Mocked } from "vitest";
+import type { LoggerService } from "../src/lib/logger/logger.service.js";
 
 type LoggerServiceDefaults = Partial<{
   getSupportedFormats: ReturnType<LoggerService["getSupportedFormats"]>;
@@ -13,7 +13,9 @@ type LoggerServiceDefaults = Partial<{
 export class LoggerServiceMockFactory {
   static create(defaults?: LoggerServiceDefaults): Mocked<LoggerService> {
     const mock = {
-      getSupportedFormats: vi.fn() as Mocked<LoggerService["getSupportedFormats"]>,
+      getSupportedFormats: vi.fn() as Mocked<
+        LoggerService["getSupportedFormats"]
+      >,
       info: vi.fn() as Mocked<LoggerService["info"]>,
       debug: vi.fn() as Mocked<LoggerService["debug"]>,
       warn: vi.fn() as Mocked<LoggerService["warn"]>,
@@ -22,7 +24,9 @@ export class LoggerServiceMockFactory {
     } as Mocked<LoggerService>;
 
     if (defaults?.getSupportedFormats) {
-      mock.getSupportedFormats = vi.fn().mockReturnValue(defaults.getSupportedFormats);
+      mock.getSupportedFormats = vi
+        .fn()
+        .mockReturnValue(defaults.getSupportedFormats);
     }
 
     if (defaults?.info) {

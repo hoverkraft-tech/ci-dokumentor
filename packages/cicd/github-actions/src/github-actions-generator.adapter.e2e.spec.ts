@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   FileRendererAdapter,
-  RepositoryProvider,
-  RendererAdapter,
+  type RepositoryProvider,
+  type RendererAdapter,
   MarkdownFormatterAdapter,
-  FormatterAdapter,
+  type FormatterAdapter,
 } from "@ci-dokumentor/core";
 import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { sanitizeSnapshotContent } from "@ci-dokumentor/core/tests";
@@ -30,7 +30,9 @@ describe("GitHubActionsGeneratorAdapter - Integration Tests", () => {
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
 
-    gitHubActionsGeneratorAdapter = container.get(GitHubActionsGeneratorAdapter);
+    gitHubActionsGeneratorAdapter = container.get(
+      GitHubActionsGeneratorAdapter,
+    );
   });
 
   afterEach(() => {
@@ -311,7 +313,9 @@ jobs:
       ];
 
       testCases.forEach(({ input, expected }) => {
-        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(expected);
+        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(
+          expected,
+        );
       });
     });
 
@@ -332,7 +336,9 @@ jobs:
       ];
 
       testCases.forEach(({ input, expected }) => {
-        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(expected);
+        expect(gitHubActionsGeneratorAdapter.getDocumentationPath(input)).toBe(
+          expected,
+        );
       });
     });
   });

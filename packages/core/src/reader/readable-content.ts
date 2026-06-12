@@ -37,7 +37,7 @@ export class ReadableContent {
       this.buffer = content;
     } else {
       throw new Error(
-        "Invalid content type; must be string, Buffer, or ReadableContent, got " + typeof content,
+        `Invalid content type; must be string, Buffer, or ReadableContent, got ${typeof content}`,
       );
     }
   }
@@ -77,18 +77,23 @@ export class ReadableContent {
    */
   startsWith(searchValue: string | ReadableContent, position = 0): boolean {
     const searchBuffer =
-      searchValue instanceof ReadableContent ? searchValue.buffer : Buffer.from(searchValue);
+      searchValue instanceof ReadableContent
+        ? searchValue.buffer
+        : Buffer.from(searchValue);
 
     if (searchBuffer.length > this.buffer.length) {
       return false;
     }
 
     // Ensure the end index is position + searchBuffer.length (end exclusive)
-    return this.buffer.subarray(position, position + searchBuffer.length).equals(searchBuffer);
+    return this.buffer
+      .subarray(position, position + searchBuffer.length)
+      .equals(searchBuffer);
   }
 
   equals(other: string | ReadableContent): boolean {
-    const otherBuffer = other instanceof ReadableContent ? other.buffer : Buffer.from(other);
+    const otherBuffer =
+      other instanceof ReadableContent ? other.buffer : Buffer.from(other);
 
     if (this.buffer.length !== otherBuffer.length) {
       return false;
@@ -154,13 +159,19 @@ export class ReadableContent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replace(
     searchValue: string | ReadableContent | RegExp,
-    replaceValue: string | ReadableContent | ((substring: string, ...args: any[]) => string),
+    replaceValue:
+      | string
+      | ReadableContent
+      | ((substring: string, ...args: any[]) => string),
   ): ReadableContent {
     if (this.isEmpty()) {
       return this;
     }
 
-    const search = searchValue instanceof ReadableContent ? searchValue.toString() : searchValue;
+    const search =
+      searchValue instanceof ReadableContent
+        ? searchValue.toString()
+        : searchValue;
 
     if (typeof replaceValue === "function") {
       return new ReadableContent(this.toString().replace(search, replaceValue));
@@ -169,7 +180,9 @@ export class ReadableContent {
     return new ReadableContent(
       this.toString().replace(
         search,
-        replaceValue instanceof ReadableContent ? replaceValue.toString() : replaceValue,
+        replaceValue instanceof ReadableContent
+          ? replaceValue.toString()
+          : replaceValue,
       ),
     );
   }
@@ -182,17 +195,24 @@ export class ReadableContent {
       return this.buffer.indexOf(searchValue, offset);
     }
     const searchBuffer =
-      searchValue instanceof ReadableContent ? searchValue.buffer : Buffer.from(searchValue);
+      searchValue instanceof ReadableContent
+        ? searchValue.buffer
+        : Buffer.from(searchValue);
 
     return this.buffer.indexOf(searchBuffer, offset);
   }
 
-  searchLast(searchValue: string | ReadableContent | number, offset?: number): number {
+  searchLast(
+    searchValue: string | ReadableContent | number,
+    offset?: number,
+  ): number {
     if (typeof searchValue === "number") {
       return this.buffer.lastIndexOf(searchValue, offset);
     }
     const searchBuffer =
-      searchValue instanceof ReadableContent ? searchValue.buffer : Buffer.from(searchValue);
+      searchValue instanceof ReadableContent
+        ? searchValue.buffer
+        : Buffer.from(searchValue);
 
     return this.buffer.lastIndexOf(searchBuffer, offset);
   }
@@ -210,7 +230,11 @@ export class ReadableContent {
     }
 
     if (typeof searchValue === "number") {
-      if (!Number.isInteger(searchValue) || searchValue < 0 || searchValue > 0xff) {
+      if (
+        !Number.isInteger(searchValue) ||
+        searchValue < 0 ||
+        searchValue > 0xff
+      ) {
         return false;
       }
       return this.buffer[position] === searchValue;
@@ -320,7 +344,10 @@ export class ReadableContent {
 
     let start = 0;
 
-    while (start < this.buffer.length && this.isWhitespace(this.buffer[start])) {
+    while (
+      start < this.buffer.length &&
+      this.isWhitespace(this.buffer[start])
+    ) {
       start++;
     }
 
@@ -385,7 +412,9 @@ export class ReadableContent {
     let found = this.buffer.indexOf(searchBuf, idx);
     while (found !== -1) {
       if (found > idx) {
-        result = result.append(new ReadableContent(this.buffer.subarray(idx, found)));
+        result = result.append(
+          new ReadableContent(this.buffer.subarray(idx, found)),
+        );
       }
       result = result.append(new ReadableContent(replaceBuf));
       idx = found + searchBuf.length;
@@ -448,7 +477,10 @@ export class ReadableContent {
     const codepoints = Array.from(str);
     const length = codepoints.length;
 
-    const normalizeIndex = (index: number | undefined, defaultValue: number): number => {
+    const normalizeIndex = (
+      index: number | undefined,
+      defaultValue: number,
+    ): number => {
       if (index === undefined) {
         return defaultValue;
       }
@@ -531,7 +563,10 @@ export class ReadableContent {
     }
     if (lineStart <= this.buffer.length - 1) {
       let line = this.buffer.subarray(lineStart, this.buffer.length);
-      if (line.length > 0 && line[line.length - 1] === ReadableContent.CARRIAGE_RETURN_CHAR_CODE) {
+      if (
+        line.length > 0 &&
+        line[line.length - 1] === ReadableContent.CARRIAGE_RETURN_CHAR_CODE
+      ) {
         line = line.subarray(0, line.length - 1);
       }
       lines.push(new ReadableContent(line));

@@ -22,8 +22,16 @@ describe("MarkdownFormatterAdapter", () => {
 
   describe("supportsLanguage", () => {
     it.each([
-      { name: "markdown", language: FormatterLanguage.Markdown, expected: true },
-      { name: "unsupported", language: "html" as FormatterLanguage, expected: false },
+      {
+        name: "markdown",
+        language: FormatterLanguage.Markdown,
+        expected: true,
+      },
+      {
+        name: "unsupported",
+        language: "html" as FormatterLanguage,
+        expected: false,
+      },
     ])("should return %s for $name", ({ language, expected }) => {
       // Act
       const result = adapter.supportsLanguage(language);
@@ -35,11 +43,17 @@ describe("MarkdownFormatterAdapter", () => {
 
   describe("heading", () => {
     it.each([
-      { desc: "basic", content: new ReadableContent("Test Heading"), expected: "# Test Heading\n" },
+      {
+        desc: "basic",
+        content: new ReadableContent("Test Heading"),
+        expected: "# Test Heading\n",
+      },
       { desc: "empty", content: ReadableContent.empty(), expected: "# \n" },
       {
         desc: "multi-word",
-        content: new ReadableContent("This is a Long Heading with Multiple Words"),
+        content: new ReadableContent(
+          "This is a Long Heading with Multiple Words",
+        ),
         expected: "# This is a Long Heading with Multiple Words\n",
       },
       {
@@ -62,12 +76,24 @@ describe("MarkdownFormatterAdapter", () => {
       const content = new ReadableContent("Test Heading");
 
       // Act & Assert
-      expect(adapter.heading(content, 1).toString()).toEqual("# Test Heading\n");
-      expect(adapter.heading(content, 2).toString()).toEqual("## Test Heading\n");
-      expect(adapter.heading(content, 3).toString()).toEqual("### Test Heading\n");
-      expect(adapter.heading(content, 4).toString()).toEqual("#### Test Heading\n");
-      expect(adapter.heading(content, 5).toString()).toEqual("##### Test Heading\n");
-      expect(adapter.heading(content, 6).toString()).toEqual("###### Test Heading\n");
+      expect(adapter.heading(content, 1).toString()).toEqual(
+        "# Test Heading\n",
+      );
+      expect(adapter.heading(content, 2).toString()).toEqual(
+        "## Test Heading\n",
+      );
+      expect(adapter.heading(content, 3).toString()).toEqual(
+        "### Test Heading\n",
+      );
+      expect(adapter.heading(content, 4).toString()).toEqual(
+        "#### Test Heading\n",
+      );
+      expect(adapter.heading(content, 5).toString()).toEqual(
+        "##### Test Heading\n",
+      );
+      expect(adapter.heading(content, 6).toString()).toEqual(
+        "###### Test Heading\n",
+      );
     });
 
     it("should clamp heading levels to valid range (1-6)", () => {
@@ -75,10 +101,18 @@ describe("MarkdownFormatterAdapter", () => {
       const content = new ReadableContent("Test Heading");
 
       // Act & Assert
-      expect(adapter.heading(content, 0).toString()).toEqual("# Test Heading\n"); // Should be clamped to 1
-      expect(adapter.heading(content, 7).toString()).toEqual("###### Test Heading\n"); // Should be clamped to 6
-      expect(adapter.heading(content, -1).toString()).toEqual("# Test Heading\n"); // Should be clamped to 1
-      expect(adapter.heading(content, 10).toString()).toEqual("###### Test Heading\n"); // Should be clamped to 6
+      expect(adapter.heading(content, 0).toString()).toEqual(
+        "# Test Heading\n",
+      ); // Should be clamped to 1
+      expect(adapter.heading(content, 7).toString()).toEqual(
+        "###### Test Heading\n",
+      ); // Should be clamped to 6
+      expect(adapter.heading(content, -1).toString()).toEqual(
+        "# Test Heading\n",
+      ); // Should be clamped to 1
+      expect(adapter.heading(content, 10).toString()).toEqual(
+        "###### Test Heading\n",
+      ); // Should be clamped to 6
     });
   });
 
@@ -89,7 +123,11 @@ describe("MarkdownFormatterAdapter", () => {
         content: new ReadableContent("Centered Text"),
         expected: `<div align="center">\n  Centered Text\n</div>\n`,
       },
-      { desc: "empty", content: ReadableContent.empty(), expected: `<div align="center"></div>\n` },
+      {
+        desc: "empty",
+        content: ReadableContent.empty(),
+        expected: `<div align="center"></div>\n`,
+      },
       {
         desc: "multi-line",
         content: new ReadableContent("Line 1\nLine 2"),
@@ -189,7 +227,8 @@ console.log(x);
           {
             desc: "transform multiple URLs to autolinks",
             input: "Check https://github.com and https://stackoverflow.com",
-            expected: "Check <https://github.com> and <https://stackoverflow.com>\n",
+            expected:
+              "Check <https://github.com> and <https://stackoverflow.com>\n",
           },
           {
             desc: "handle URLs with query parameters and fragments",
@@ -204,7 +243,8 @@ console.log(x);
           {
             desc: "transform standalone URLs but preserve existing markdown links",
             input: "Visit [Example](https://example.com) or https://github.com",
-            expected: "Visit [Example](https://example.com) or <https://github.com>\n",
+            expected:
+              "Visit [Example](https://example.com) or <https://github.com>\n",
           },
           {
             desc: "transform URLs within blockquotes",
@@ -246,7 +286,9 @@ console.log(x);
       describe("full link format", () => {
         it("should transform URLs to full links when linkFormat is Full", () => {
           // Arrange
-          const content = new ReadableContent("Visit https://example.com for more information");
+          const content = new ReadableContent(
+            "Visit https://example.com for more information",
+          );
           adapter.setOptions({ linkFormat: LinkFormat.Full });
 
           // Act
@@ -294,14 +336,18 @@ console.log(x);
       describe("no URL transformation", () => {
         it("should not transform URLs when linkFormat is None", () => {
           // Arrange
-          const content = new ReadableContent("Visit https://example.com for more information");
+          const content = new ReadableContent(
+            "Visit https://example.com for more information",
+          );
           adapter.setOptions({ linkFormat: LinkFormat.None });
 
           // Act
           const result = adapter.paragraph(content);
 
           // Assert
-          expect(result.toString()).toEqual("Visit https://example.com for more information\n");
+          expect(result.toString()).toEqual(
+            "Visit https://example.com for more information\n",
+          );
         });
       });
 
@@ -320,26 +366,34 @@ console.log(x);
 
         it("should handle text with no URLs", () => {
           // Arrange
-          const content = new ReadableContent("This is just regular text without any URLs");
+          const content = new ReadableContent(
+            "This is just regular text without any URLs",
+          );
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
           const result = adapter.paragraph(content);
 
           // Assert
-          expect(result.toString()).toEqual("This is just regular text without any URLs\n");
+          expect(result.toString()).toEqual(
+            "This is just regular text without any URLs\n",
+          );
         });
 
         it("should handle URLs at the beginning and end of text", () => {
           // Arrange
-          const content = new ReadableContent("https://start.com middle text https://end.com");
+          const content = new ReadableContent(
+            "https://start.com middle text https://end.com",
+          );
           adapter.setOptions({ linkFormat: LinkFormat.Auto });
 
           // Act
           const result = adapter.paragraph(content);
 
           // Assert
-          expect(result.toString()).toEqual("<https://start.com> middle text <https://end.com>\n");
+          expect(result.toString()).toEqual(
+            "<https://start.com> middle text <https://end.com>\n",
+          );
         });
 
         it("should only transform http and https URLs", () => {
@@ -379,7 +433,11 @@ console.log(x);
 
   describe("bold", () => {
     it.each([
-      { desc: "basic", content: new ReadableContent("Bold Text"), expected: "**Bold Text**" },
+      {
+        desc: "basic",
+        content: new ReadableContent("Bold Text"),
+        expected: "**Bold Text**",
+      },
       {
         desc: "escape asterisks",
         content: new ReadableContent("test ** test"),
@@ -400,7 +458,9 @@ console.log(x);
       const text = new ReadableContent("Click [here]");
       const url = new ReadableContent("https://example.com/foo)bar");
       const result = adapter.link(text, url);
-      expect(result.toString()).toEqual("[Click \\[here\\]](https://example.com/foo\\)bar)");
+      expect(result.toString()).toEqual(
+        "[Click \\[here\\]](https://example.com/foo\\)bar)",
+      );
     });
   });
 
@@ -408,7 +468,11 @@ console.log(x);
 
   describe("italic", () => {
     it.each([
-      { desc: "basic", content: new ReadableContent("Italic Text"), expected: "*Italic Text*" },
+      {
+        desc: "basic",
+        content: new ReadableContent("Italic Text"),
+        expected: "*Italic Text*",
+      },
       {
         desc: "escape asterisk",
         content: new ReadableContent("test * test"),
@@ -435,7 +499,9 @@ console.log(x);
       const result = adapter.code(content);
 
       // Assert
-      expect(result.toString()).toEqual('```text\nconsole.log("Hello World");\n```\n');
+      expect(result.toString()).toEqual(
+        '```text\nconsole.log("Hello World");\n```\n',
+      );
     });
 
     it("should format text as code block with language", () => {
@@ -447,7 +513,9 @@ console.log(x);
       const result = adapter.code(content, language);
 
       // Assert
-      expect(result.toString()).toEqual('```javascript\nconsole.log("Hello World");\n```\n');
+      expect(result.toString()).toEqual(
+        '```javascript\nconsole.log("Hello World");\n```\n',
+      );
     });
 
     it("should handle empty string input", () => {
@@ -463,7 +531,9 @@ console.log(x);
 
     it("should handle multi-line code", () => {
       // Arrange
-      const content = new ReadableContent("function test() {\n  return true;\n}");
+      const content = new ReadableContent(
+        "function test() {\n  return true;\n}",
+      );
       const language = new ReadableContent("typescript");
 
       // Act
@@ -477,7 +547,9 @@ console.log(x);
 
     it("should handle empty ending line code", () => {
       // Arrange
-      const content = new ReadableContent("function test() {\n  return true;\n}\n\n");
+      const content = new ReadableContent(
+        "function test() {\n  return true;\n}\n\n",
+      );
       const language = new ReadableContent("typescript");
 
       // Act
@@ -517,14 +589,22 @@ end
 
   describe("inlineCode", () => {
     it.each([
-      { desc: "basic", content: new ReadableContent("console.log()"), expected: "`console.log()`" },
+      {
+        desc: "basic",
+        content: new ReadableContent("console.log()"),
+        expected: "`console.log()`",
+      },
       { desc: "empty", content: ReadableContent.empty(), expected: "``" },
       {
         desc: "special",
         content: new ReadableContent('getValue("key")'),
         expected: '`getValue("key")`',
       },
-      { desc: "escape backtick", content: new ReadableContent("a ` b"), expected: "`a \\` b`" },
+      {
+        desc: "escape backtick",
+        content: new ReadableContent("a ` b"),
+        expected: "`a \\` b`",
+      },
       {
         desc: "escape markers",
         content: new ReadableContent("a ** b * c"),
@@ -559,7 +639,8 @@ end
         desc: "special chars",
         text: new ReadableContent('Link with "quotes" & symbols!'),
         url: new ReadableContent("https://example.com/path?query=value"),
-        expected: '[Link with "quotes" & symbols!](https://example.com/path?query=value)',
+        expected:
+          '[Link with "quotes" & symbols!](https://example.com/path?query=value)',
       },
     ])("should format link ($desc)", ({ text, url, expected }) => {
       const result = adapter.link(text, url);
@@ -601,7 +682,11 @@ end
           '<img src="https://example.com/image.png" width="300px" align="center" alt="Alternative Text" />',
       },
     ])("should format image ($desc)", ({ alt, url, options, expected }) => {
-      const result = adapter.image(url, alt, options as Record<string, string> | undefined);
+      const result = adapter.image(
+        url,
+        alt,
+        options as Record<string, string> | undefined,
+      );
       expect(result.toString()).toEqual(expected);
     });
 
@@ -621,7 +706,9 @@ end
       const alt = new ReadableContent("Alt [text]");
       const url = new ReadableContent("https://example.com/img.png");
       const result = adapter.image(url, alt);
-      expect(result.toString()).toEqual("![Alt \\[text\\]](https://example.com/img.png)");
+      expect(result.toString()).toEqual(
+        "![Alt \\[text\\]](https://example.com/img.png)",
+      );
     });
   });
 
@@ -634,8 +721,16 @@ end
         new ReadableContent("City"),
       ];
       const rows = [
-        [new ReadableContent("John"), new ReadableContent("25"), new ReadableContent("New York")],
-        [new ReadableContent("Jane"), new ReadableContent("30"), new ReadableContent("Paris")],
+        [
+          new ReadableContent("John"),
+          new ReadableContent("25"),
+          new ReadableContent("New York"),
+        ],
+        [
+          new ReadableContent("Jane"),
+          new ReadableContent("30"),
+          new ReadableContent("Paris"),
+        ],
       ];
 
       // Act
@@ -656,7 +751,9 @@ end
     it("should format as badge image", () => {
       // Arrange
       const label = new ReadableContent("build");
-      const url = new ReadableContent("https://img.shields.io/badge/build-passing-brightgreen");
+      const url = new ReadableContent(
+        "https://img.shields.io/badge/build-passing-brightgreen",
+      );
 
       // Act
       const result = adapter.badge(label, url);
@@ -688,7 +785,9 @@ end
       const result = adapter.badge(label, url);
 
       // Assert
-      expect(result.toString()).toEqual("![coverage-90%](https://example.com/coverage.svg)");
+      expect(result.toString()).toEqual(
+        "![coverage-90%](https://example.com/coverage.svg)",
+      );
     });
 
     it("should escape badge label and url", () => {
@@ -696,7 +795,9 @@ end
       const url = new ReadableContent("https://example.com/ba)dge.svg");
       const result = adapter.badge(label, url);
       // badge uses label and url raw - after escapeForContext it should escape url paren and label asterisk
-      expect(result.toString()).toEqual("![cov\\*er](https://example.com/ba\\)dge.svg)");
+      expect(result.toString()).toEqual(
+        "![cov\\*er](https://example.com/ba\\)dge.svg)",
+      );
     });
   });
 
@@ -792,7 +893,10 @@ Section Content
 
     it("should handle empty content", () => {
       // Act
-      const result = adapter.section(SectionIdentifier.Examples, ReadableContent.empty());
+      const result = adapter.section(
+        SectionIdentifier.Examples,
+        ReadableContent.empty(),
+      );
 
       // Assert
       expect(result.toString()).toEqual(`<!-- examples:start -->

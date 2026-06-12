@@ -5,9 +5,9 @@ import { injectable, inject } from "inversify";
 import { createPatch } from "diff";
 import { FileReaderAdapter } from "../reader/file-reader.adapter.js";
 import type { ReaderAdapter } from "../reader/reader.adapter.js";
-import { FormatterAdapter } from "../formatter/formatter.adapter.js";
-import { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
-import { ReadableContent } from "../reader/readable-content.js";
+import type { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import type { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
+import type { ReadableContent } from "../reader/readable-content.js";
 import { FileRendererAdapter } from "./file-renderer.adapter.js";
 import { AbstractRendererAdapter } from "./abstract-renderer.adapter.js";
 
@@ -16,7 +16,8 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
   private tempFilePath?: string;
 
   constructor(
-    @inject(FileRendererAdapter) private readonly fileRenderer: FileRendererAdapter,
+    @inject(FileRendererAdapter)
+    private readonly fileRenderer: FileRendererAdapter,
     @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter,
   ) {
     super();
@@ -34,7 +35,10 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
     await this.fileRenderer.initialize(tempFilePath, formatterAdapter);
   }
 
-  async writeSection(sectionIdentifier: SectionIdentifier, data: ReadableContent): Promise<void> {
+  async writeSection(
+    sectionIdentifier: SectionIdentifier,
+    data: ReadableContent,
+  ): Promise<void> {
     await this.fileRenderer.writeSection(sectionIdentifier, data);
   }
 
@@ -75,6 +79,7 @@ export class DiffRendererAdapter extends AbstractRendererAdapter {
 
     const base = basename(this.getDestination());
     const name = `${base}.${Date.now()}.tmp`;
-    return (this.tempFilePath = join(tmpdir(), name));
+    this.tempFilePath = join(tmpdir(), name);
+    return this.tempFilePath;
   }
 }

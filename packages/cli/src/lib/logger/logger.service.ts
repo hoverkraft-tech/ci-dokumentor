@@ -7,7 +7,8 @@ import type { LoggerAdapter } from "./adapters/logger.adapter.js";
 @injectable()
 export class LoggerService {
   constructor(
-    @multiInject(LOGGER_ADAPTER_IDENTIFIER) private readonly loggerAdapters: LoggerAdapter[],
+    @multiInject(LOGGER_ADAPTER_IDENTIFIER)
+    private readonly loggerAdapters: LoggerAdapter[],
   ) {}
 
   /**
@@ -64,7 +65,9 @@ export class LoggerService {
       return this.loggerAdapters[0];
     }
 
-    const logger = this.loggerAdapters.find((adapter) => adapter.getFormat() === format);
+    const logger = this.loggerAdapters.find(
+      (adapter) => adapter.getFormat() === format,
+    );
     if (!logger) {
       throw new Error(`Unsupported output format: ${format}`);
     }

@@ -1,7 +1,9 @@
 import { vi } from "vitest";
 import type { Mocked } from "vitest";
 
-export type MockedConsole = Mocked<Pick<Console, "info" | "debug" | "error" | "log" | "warn">>;
+export type MockedConsole = Mocked<
+  Pick<Console, "info" | "debug" | "error" | "log" | "warn">
+>;
 
 export class ConsoleMockFactory {
   static create(): MockedConsole {
@@ -9,13 +11,17 @@ export class ConsoleMockFactory {
       // Mock implementation - intentionally empty
     });
 
-    const consoleDebugSpy = vi.spyOn(console, "debug").mockImplementation(() => {
-      // Mock implementation - intentionally empty
-    });
+    const consoleDebugSpy = vi
+      .spyOn(console, "debug")
+      .mockImplementation(() => {
+        // Mock implementation - intentionally empty
+      });
 
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
-      // Mock implementation - intentionally empty
-    });
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {
+        // Mock implementation - intentionally empty
+      });
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {
       // Mock implementation - intentionally empty

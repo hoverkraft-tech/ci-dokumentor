@@ -1,6 +1,9 @@
-import { FormatterAdapter } from "../../formatter/formatter.adapter.js";
+import type { FormatterAdapter } from "../../formatter/formatter.adapter.js";
 import { ReadableContent } from "../../reader/readable-content.js";
-import { SectionGenerationPayload, SectionIdentifier } from "./section-generator.adapter.js";
+import {
+  type SectionGenerationPayload,
+  SectionIdentifier,
+} from "./section-generator.adapter.js";
 
 /**
  * Input entry with name and properties.
@@ -25,13 +28,11 @@ type AbstractConstructor<T = object> = abstract new (...args: any[]) => T;
  * This section displays input parameters in a table format.
  * Platform-specific implementations provide the input extraction and table generation logic.
  */
-export function InputsSectionMixin<TManifest, TBase extends AbstractConstructor>(Base: TBase) {
+export function InputsSectionMixin<
+  TManifest,
+  TBase extends AbstractConstructor,
+>(Base: TBase) {
   abstract class InputsSection extends Base {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
-      super(...args);
-    }
-
     getSectionIdentifier(): SectionIdentifier {
       return SectionIdentifier.Inputs;
     }
@@ -40,7 +41,10 @@ export function InputsSectionMixin<TManifest, TBase extends AbstractConstructor>
       formatterAdapter,
       manifest,
     }: SectionGenerationPayload<TManifest>): Promise<ReadableContent> {
-      const inputsContent = await this.generateInputsContent(formatterAdapter, manifest);
+      const inputsContent = await this.generateInputsContent(
+        formatterAdapter,
+        manifest,
+      );
 
       if (inputsContent.isEmpty()) {
         return ReadableContent.empty();
@@ -63,8 +67,13 @@ export function InputsSectionMixin<TManifest, TBase extends AbstractConstructor>
     /**
      * Helper method to format input name with bold and inline code.
      */
-    public formatInputName(name: string, formatterAdapter: FormatterAdapter): ReadableContent {
-      return formatterAdapter.bold(formatterAdapter.inlineCode(new ReadableContent(name)));
+    public formatInputName(
+      name: string,
+      formatterAdapter: FormatterAdapter,
+    ): ReadableContent {
+      return formatterAdapter.bold(
+        formatterAdapter.inlineCode(new ReadableContent(name)),
+      );
     }
 
     /**
@@ -89,7 +98,9 @@ export function InputsSectionMixin<TManifest, TBase extends AbstractConstructor>
       formatterAdapter: FormatterAdapter,
     ): ReadableContent {
       const hasNotDefault =
-        defaultValue === null || defaultValue === undefined || defaultValue === "";
+        defaultValue === null ||
+        defaultValue === undefined ||
+        defaultValue === "";
       if (hasNotDefault) {
         return new ReadableContent("-");
       }
@@ -111,7 +122,9 @@ export function InputsSectionMixin<TManifest, TBase extends AbstractConstructor>
       required: boolean | undefined,
       formatterAdapter: FormatterAdapter,
     ): ReadableContent {
-      return formatterAdapter.bold(new ReadableContent(required ? "true" : "false"));
+      return formatterAdapter.bold(
+        new ReadableContent(required ? "true" : "false"),
+      );
     }
 
     /**

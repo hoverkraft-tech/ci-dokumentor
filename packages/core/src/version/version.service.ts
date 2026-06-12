@@ -1,6 +1,8 @@
-import { RepositoryProvider } from "../repository/repository.provider.js";
+import type { RepositoryProvider } from "../repository/repository.provider.js";
 
-export const VERSION_SERVICE_IDENTIFIER = Symbol.for("@ci-dokumentor/core/VersionService");
+export const VERSION_SERVICE_IDENTIFIER = Symbol.for(
+  "@ci-dokumentor/core/VersionService",
+);
 
 export type ManifestVersion = {
   ref?: string; // Branch, tag, or custom ref (e.g., 'v1.0.0', 'main')

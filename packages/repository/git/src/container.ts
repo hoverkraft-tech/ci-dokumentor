@@ -1,4 +1,7 @@
-import { Container, REPOSITORY_PROVIDER_IDENTIFIER } from "@ci-dokumentor/core";
+import {
+  type Container,
+  REPOSITORY_PROVIDER_IDENTIFIER,
+} from "@ci-dokumentor/core";
 import { Container as InversifyContainer } from "inversify";
 import {
   GitRepositoryProvider,
@@ -11,8 +14,14 @@ export function resetContainer(): void {
   container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
+export function initContainer(
+  baseContainer: Container | undefined = undefined,
+): Container {
+  let targetContainer = baseContainer ?? container;
+  if (!targetContainer) {
+    targetContainer = new InversifyContainer() as Container;
+    container = targetContainer;
+  }
 
   // Return early if this package has already been initialized in this container.
   if (targetContainer.isCurrentBound(GitRepositoryProvider)) {
@@ -21,10 +30,14 @@ export function initContainer(baseContainer: Container | undefined = undefined):
 
   // Bind git repository services only
   targetContainer.bind(GitRepositoryProvider).toSelf().inSingletonScope();
-  targetContainer.bind(GIT_REPOSITORY_PROVIDER_IDENTIFIER).toService(GitRepositoryProvider);
+  targetContainer
+    .bind(GIT_REPOSITORY_PROVIDER_IDENTIFIER)
+    .toService(GitRepositoryProvider);
 
   // Register as repository provider
-  targetContainer.bind(REPOSITORY_PROVIDER_IDENTIFIER).toService(GitRepositoryProvider);
+  targetContainer
+    .bind(REPOSITORY_PROVIDER_IDENTIFIER)
+    .toService(GitRepositoryProvider);
 
   return targetContainer;
 }

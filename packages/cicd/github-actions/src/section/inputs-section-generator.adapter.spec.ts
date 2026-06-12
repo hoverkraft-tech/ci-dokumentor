@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
 } from "@ci-dokumentor/core";
 import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
 } from "@ci-dokumentor/core/tests";
-import {
+import type {
   GitHubAction,
   GitHubWorkflow,
   GitHubActionInput,
@@ -167,7 +167,9 @@ describe("InputsSectionGenerator", () => {
 
       it("should generate inputs section for GitHub Action with empty inputs object", async () => {
         // Arrange
-        const manifest: GitHubAction = GitHubActionMockFactory.create({ inputs: {} });
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          inputs: {},
+        });
 
         // Act
         const result = await generator.generateSection({
@@ -425,7 +427,9 @@ describe("InputsSectionGenerator", () => {
             repositoryProvider: mockRepositoryProvider,
             destination: "README.md",
           }),
-        ).rejects.toThrow("Unsupported manifest type for InputsSectionGenerator");
+        ).rejects.toThrow(
+          "Unsupported manifest type for InputsSectionGenerator",
+        );
       });
     });
   });

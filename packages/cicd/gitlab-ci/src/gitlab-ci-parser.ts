@@ -1,6 +1,9 @@
 import { basename, extname, relative, dirname } from "node:path";
 import type { ReaderAdapter, RepositoryInfo } from "@ci-dokumentor/core";
-import { FILE_READER_ADAPTER_IDENTIFIER, ReadableContent } from "@ci-dokumentor/core";
+import {
+  FILE_READER_ADAPTER_IDENTIFIER,
+  ReadableContent,
+} from "@ci-dokumentor/core";
 import { inject, injectable } from "inversify";
 import { parse } from "yaml";
 
@@ -80,7 +83,8 @@ export type GitLabCIManifest = GitLabComponent | GitLabCIPipeline;
 @injectable()
 export class GitLabCIParser {
   constructor(
-    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter,
+    @inject(FILE_READER_ADAPTER_IDENTIFIER)
+    private readonly readerAdapter: ReaderAdapter,
   ) {}
 
   isGitLabComponentFile(source: string): boolean {
@@ -111,10 +115,16 @@ export class GitLabCIParser {
 
   isGitLabCIFile(source: string): boolean {
     // Check if the source is a GitLab CI file by looking for .gitlab-ci.yml or .gitlab-ci.yaml
-    return /\.gitlab-ci\.ya?ml$/i.test(source) || !!basename(source).match(/^\.gitlab-ci\.ya?ml$/i);
+    return (
+      /\.gitlab-ci\.ya?ml$/i.test(source) ||
+      !!basename(source).match(/^\.gitlab-ci\.ya?ml$/i)
+    );
   }
 
-  async parseFile(source: string, repositoryInfo: RepositoryInfo): Promise<GitLabCIManifest> {
+  async parseFile(
+    source: string,
+    repositoryInfo: RepositoryInfo,
+  ): Promise<GitLabCIManifest> {
     if (!this.readerAdapter.resourceExists(source)) {
       throw new Error(`Source file does not exist: "${source}"`);
     }
@@ -133,7 +143,9 @@ export class GitLabCIParser {
     if (!parsed.name) {
       // Extract filename without extension and convert to readable name
       const fileName = basename(source, extname(source));
-      const readableName = fileName.replace(/[-_]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+      const readableName = fileName
+        .replace(/[-_]/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase());
       parsed.name = readableName;
     }
 
@@ -164,7 +176,11 @@ export class GitLabCIParser {
       ];
 
       for (const [key, value] of Object.entries(parsed)) {
-        if (!reservedKeys.includes(key) && typeof value === "object" && value !== null) {
+        if (
+          !reservedKeys.includes(key) &&
+          typeof value === "object" &&
+          value !== null
+        ) {
           // This looks like a job definition
           jobs[key] = value as GitLabCIJob;
         }
@@ -193,7 +209,9 @@ export class GitLabCIParser {
     throw new Error(`Unsupported source file: ${source}`);
   }
 
-  private extractDescriptionFromComments(content: ReadableContent): ReadableContent | undefined {
+  private extractDescriptionFromComments(
+    content: ReadableContent,
+  ): ReadableContent | undefined {
     const lines = content.splitLines();
     const commentLines: ReadableContent[] = [];
 
@@ -237,7 +255,10 @@ export class GitLabCIParser {
     while (commentLines.length > 0 && commentLines[0].trim().isEmpty()) {
       commentLines.shift();
     }
-    while (commentLines.length > 0 && commentLines[commentLines.length - 1].trim().isEmpty()) {
+    while (
+      commentLines.length > 0 &&
+      commentLines[commentLines.length - 1].trim().isEmpty()
+    ) {
       commentLines.pop();
     }
 

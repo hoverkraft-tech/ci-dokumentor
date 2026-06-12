@@ -1,7 +1,18 @@
 import { join } from "node:path";
-import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type MockInstance,
+} from "vitest";
 import { sanitizeSnapshotContent } from "@ci-dokumentor/core/tests";
-import { ConsoleMockFactory, MockedConsole } from "../../__tests__/console-mock.factory.js";
+import {
+  ConsoleMockFactory,
+  type MockedConsole,
+} from "../../__tests__/console-mock.factory.js";
 import { cli } from "./cli.js";
 import { resetGlobalContainer } from "./global-container.js";
 
@@ -20,10 +31,12 @@ describe("CLI", () => {
     consoleMock = ConsoleMockFactory.create();
 
     const processExitMock = ((code?: number | string | null | undefined) => {
-      throw new Error("process.exit: " + code);
+      throw new Error(`process.exit: ${code}`);
     }) as unknown as typeof process.exit;
 
-    processExitSpy = vi.spyOn(process, "exit").mockImplementation(processExitMock);
+    processExitSpy = vi
+      .spyOn(process, "exit")
+      .mockImplementation(processExitMock);
   });
 
   afterEach(() => {
@@ -46,7 +59,9 @@ describe("CLI", () => {
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
       expect(consoleMock.info).toBeCalledTimes(1);
-      expect(sanitizeSnapshotContent(consoleMock.info.mock.calls)).toMatchSnapshot();
+      expect(
+        sanitizeSnapshotContent(consoleMock.info.mock.calls),
+      ).toMatchSnapshot();
 
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
@@ -63,7 +78,9 @@ describe("CLI", () => {
       expect(consoleMock.error).not.toHaveBeenCalled();
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(sanitizeSnapshotContent(consoleMock.info.mock.calls)).toMatchSnapshot();
+      expect(
+        sanitizeSnapshotContent(consoleMock.info.mock.calls),
+      ).toMatchSnapshot();
 
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
@@ -96,7 +113,9 @@ describe("CLI", () => {
       expect(consoleMock.error).not.toHaveBeenCalled();
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(sanitizeSnapshotContent(consoleMock.info.mock.calls)).toMatchSnapshot();
+      expect(
+        sanitizeSnapshotContent(consoleMock.info.mock.calls),
+      ).toMatchSnapshot();
 
       expect(processExitSpy).not.toHaveBeenCalled();
     });

@@ -1,4 +1,4 @@
-import { ReadableContent } from "./readable-content.js";
+import type { ReadableContent } from "./readable-content.js";
 
 export interface ReaderAdapter {
   /**

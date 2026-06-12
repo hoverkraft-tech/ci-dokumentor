@@ -1,5 +1,5 @@
 import {
-  Container,
+  type Container,
   REPOSITORY_PROVIDER_IDENTIFIER,
   initContainer as coreInitContainer,
 } from "@ci-dokumentor/core";
@@ -13,8 +13,14 @@ export function resetContainer(): void {
   container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
+export function initContainer(
+  baseContainer: Container | undefined = undefined,
+): Container {
+  let targetContainer = baseContainer ?? container;
+  if (!targetContainer) {
+    targetContainer = new InversifyContainer() as Container;
+    container = targetContainer;
+  }
 
   // Return early if this package has already been initialized in this container.
   if (targetContainer.isCurrentBound(GitLabRepositoryProvider)) {
@@ -25,7 +31,9 @@ export function initContainer(baseContainer: Container | undefined = undefined):
   targetContainer.bind(GitLabRepositoryProvider).toSelf().inSingletonScope();
 
   // Register as repository provider
-  targetContainer.bind(REPOSITORY_PROVIDER_IDENTIFIER).toService(GitLabRepositoryProvider);
+  targetContainer
+    .bind(REPOSITORY_PROVIDER_IDENTIFIER)
+    .toService(GitLabRepositoryProvider);
 
   return targetContainer;
 }

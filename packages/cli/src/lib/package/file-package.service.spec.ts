@@ -1,6 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, Mocked } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mocked,
+} from "vitest";
 import { ReaderAdapterMockFactory } from "@ci-dokumentor/core/tests";
-import { ReadableContent, ReaderAdapter } from "@ci-dokumentor/core";
+import { ReadableContent, type ReaderAdapter } from "@ci-dokumentor/core";
 import { FilePackageService } from "./file-package.service.js";
 
 describe("FilePackageService", () => {
@@ -147,7 +154,9 @@ describe("FilePackageService", () => {
 
     it("should throw error when package.json contains invalid JSON", async () => {
       // Arrange
-      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent("invalid json content"));
+      mockReaderAdapter.readResource.mockResolvedValue(
+        new ReadableContent("invalid json content"),
+      );
       mockReaderAdapter.resourceExists.mockReturnValue(true);
 
       // Act & Assert

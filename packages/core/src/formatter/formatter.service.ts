@@ -1,5 +1,8 @@
 import { injectable, multiInject } from "inversify";
-import { FORMATTER_ADAPTER_IDENTIFIER, FormatterAdapter } from "./formatter.adapter.js";
+import {
+  FORMATTER_ADAPTER_IDENTIFIER,
+  type FormatterAdapter,
+} from "./formatter.adapter.js";
 import { FormatterLanguage } from "./formatter-language.js";
 
 @injectable()

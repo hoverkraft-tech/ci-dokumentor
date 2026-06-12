@@ -1,14 +1,14 @@
 import { inject, injectable } from "inversify";
 import {
-  GenerateSectionsOptions,
-  GeneratorAdapter,
+  type GenerateSectionsOptions,
+  type GeneratorAdapter,
   GeneratorService,
-  RepositoryOptions,
-  RepositoryOptionsDescriptors,
-  RepositoryProvider,
+  type RepositoryOptions,
+  type RepositoryOptionsDescriptors,
+  type RepositoryProvider,
   RepositoryService,
-  SectionOptionsDescriptors,
-  FormatterOptions,
+  type SectionOptionsDescriptors,
+  type FormatterOptions,
   FileReaderAdapter,
   ConcurrencyService,
 } from "@ci-dokumentor/core";
@@ -16,8 +16,8 @@ import type { ReaderAdapter } from "@ci-dokumentor/core";
 import { LoggerService } from "../logger/logger.service.js";
 import {
   AbstractMultiFileUseCase,
-  FileResult,
-  MultiFileUseCaseOutput,
+  type FileResult,
+  type MultiFileUseCaseOutput,
 } from "./abstract-multi-file.usecase.js";
 
 export interface GenerateDocumentationUseCaseInput {
@@ -95,7 +95,8 @@ type GenerateFileResult = FileResult & {
   source: string;
 };
 
-export type GenerateDocumentationUseCaseOutput = MultiFileUseCaseOutput<GenerateFileResult>;
+export type GenerateDocumentationUseCaseOutput =
+  MultiFileUseCaseOutput<GenerateFileResult>;
 
 /**
  * Use case for generating documentation from CI/CD manifest files
@@ -140,9 +141,12 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
     let repositoryProvider: RepositoryProvider | undefined;
     if (repositoryPlatform) {
       repositoryProvider =
-        this.repositoryService.getRepositoryProviderByPlatform(repositoryPlatform);
+        this.repositoryService.getRepositoryProviderByPlatform(
+          repositoryPlatform,
+        );
     } else {
-      repositoryProvider = await this.repositoryService.autoDetectRepositoryProvider();
+      repositoryProvider =
+        await this.repositoryService.autoDetectRepositoryProvider();
     }
 
     if (repositoryProvider) {
@@ -181,9 +185,11 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
 
     let generatorAdapter: GeneratorAdapter | undefined;
     if (cicdPlatform) {
-      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
+      generatorAdapter =
+        this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
     } else if (sourceForDetection) {
-      generatorAdapter = this.generatorService.autoDetectCicdAdapter(sourceForDetection);
+      generatorAdapter =
+        this.generatorService.autoDetectCicdAdapter(sourceForDetection);
     }
 
     if (generatorAdapter) {
@@ -208,9 +214,11 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
 
     let generatorAdapter: GeneratorAdapter | undefined;
     if (cicdPlatform) {
-      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
+      generatorAdapter =
+        this.generatorService.getGeneratorAdapterByPlatform(cicdPlatform);
     } else if (sourceForDetection) {
-      generatorAdapter = this.generatorService.autoDetectCicdAdapter(sourceForDetection);
+      generatorAdapter =
+        this.generatorService.autoDetectCicdAdapter(sourceForDetection);
     }
 
     if (generatorAdapter) {
@@ -257,15 +265,16 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
     const generatorAdapter = await this.resolveGeneratorAdapter(input);
     const repositoryProvider = await this.resolveRepositoryProvider(input);
 
-    const { destination, data } = await this.generatorService.generateDocumentationForPlatform({
-      source: input.file,
-      destination: input.destination,
-      dryRun: input.dryRun,
-      sections: input.sections,
-      generatorAdapter,
-      repositoryProvider,
-      formatterOptions: input.formatterOptions,
-    });
+    const { destination, data } =
+      await this.generatorService.generateDocumentationForPlatform({
+        source: input.file,
+        destination: input.destination,
+        dryRun: input.dryRun,
+        sections: input.sections,
+        generatorAdapter,
+        repositoryProvider,
+        formatterOptions: input.formatterOptions,
+      });
 
     this.logExecutionSuccess(input, destination);
 
@@ -280,13 +289,24 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
   /**
    * Log execution start information
    */
-  private logExecutionStart(input: GenerateDocumentationUseCaseInput & { file: string }): void {
+  private logExecutionStart(
+    input: GenerateDocumentationUseCaseInput & { file: string },
+  ): void {
     const prefix = input.dryRun ? "[DRY RUN] " : "";
-    this.loggerService.info(`${prefix}Starting documentation generation...`, input.outputFormat);
-    this.loggerService.info(`Source manifest: ${input.file}`, input.outputFormat);
+    this.loggerService.info(
+      `${prefix}Starting documentation generation...`,
+      input.outputFormat,
+    );
+    this.loggerService.info(
+      `Source manifest: ${input.file}`,
+      input.outputFormat,
+    );
 
     if (input.destination) {
-      this.loggerService.info(`Destination path: ${input.destination}`, input.outputFormat);
+      this.loggerService.info(
+        `Destination path: ${input.destination}`,
+        input.outputFormat,
+      );
     }
 
     this.logSectionOptions(input);
@@ -316,8 +336,14 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
   /**
    * Log successful execution completion
    */
-  private logExecutionSuccess(input: GenerateDocumentationUseCaseInput, destination: string): void {
-    this.loggerService.info("Documentation generated successfully!", input.outputFormat);
+  private logExecutionSuccess(
+    input: GenerateDocumentationUseCaseInput,
+    destination: string,
+  ): void {
+    this.loggerService.info(
+      "Documentation generated successfully!",
+      input.outputFormat,
+    );
 
     const message = input.dryRun
       ? `(Dry-run) Documentation would be saved to: ${destination}`
@@ -326,14 +352,18 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
     this.loggerService.info(message, input.outputFormat);
   }
 
-  private validateInput(input: GenerateDocumentationUseCaseInput & { file: string }): void {
+  private validateInput(
+    input: GenerateDocumentationUseCaseInput & { file: string },
+  ): void {
     if (!input.file) {
       throw new Error("Source manifest file path is required");
     }
 
     // Validate that the source exists
     if (!this.readerAdapter.resourceExists(input.file)) {
-      throw new Error(`Source manifest file does not exist or is not a file: ${input.file}`);
+      throw new Error(
+        `Source manifest file does not exist or is not a file: ${input.file}`,
+      );
     }
 
     // Validate repository platform if provided
@@ -373,16 +403,18 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
         `Repository platform: ${input.repository.platform}`,
         input.outputFormat,
       );
-      repositoryProviderAdapter = this.repositoryService.getRepositoryProviderByPlatform(
-        input.repository.platform,
-      );
+      repositoryProviderAdapter =
+        this.repositoryService.getRepositoryProviderByPlatform(
+          input.repository.platform,
+        );
       if (!repositoryProviderAdapter) {
         throw new Error(
           `No repository platform found for '${input.repository.platform}'. Please specify a valid one.`,
         );
       }
     } else {
-      repositoryProviderAdapter = await this.repositoryService.autoDetectRepositoryProvider();
+      repositoryProviderAdapter =
+        await this.repositoryService.autoDetectRepositoryProvider();
       if (!repositoryProviderAdapter) {
         throw new Error(
           `No repository platform could be auto-detected. Please specify one using --repository option.`,
@@ -411,13 +443,22 @@ export class GenerateDocumentationUseCase extends AbstractMultiFileUseCase<Gener
   ): Promise<GeneratorAdapter> {
     let generatorAdapter: GeneratorAdapter | undefined;
     if (input.cicd?.platform) {
-      this.loggerService.info(`CI/CD platform: ${input.cicd.platform}`, input.outputFormat);
-      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(input.cicd.platform);
+      this.loggerService.info(
+        `CI/CD platform: ${input.cicd.platform}`,
+        input.outputFormat,
+      );
+      generatorAdapter = this.generatorService.getGeneratorAdapterByPlatform(
+        input.cicd.platform,
+      );
       if (!generatorAdapter) {
-        throw new Error(`No generator adapter found for CI/CD platform '${input.cicd.platform}'`);
+        throw new Error(
+          `No generator adapter found for CI/CD platform '${input.cicd.platform}'`,
+        );
       }
     } else {
-      generatorAdapter = this.generatorService.autoDetectCicdAdapter(input.file);
+      generatorAdapter = this.generatorService.autoDetectCicdAdapter(
+        input.file,
+      );
       if (!generatorAdapter) {
         throw new Error(
           `No CI/CD platform could be auto-detected for source '${input.file}'. Please specify one using --cicd option.`,

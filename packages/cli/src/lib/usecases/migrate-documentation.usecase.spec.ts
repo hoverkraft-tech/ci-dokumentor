@@ -1,8 +1,20 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mocked } from "vitest";
-import { MigrationAdapter, MigrationService, ReaderAdapter } from "@ci-dokumentor/core";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type Mocked,
+} from "vitest";
+import type {
+  MigrationAdapter,
+  MigrationService,
+  ReaderAdapter,
+} from "@ci-dokumentor/core";
 import type { ConcurrencyService } from "@ci-dokumentor/core";
 import { ReaderAdapterMockFactory } from "@ci-dokumentor/core/tests";
-import { LoggerService } from "../logger/logger.service.js";
+import type { LoggerService } from "../logger/logger.service.js";
 import { LoggerServiceMockFactory } from "../../../__tests__/logger-service-mock.factory.js";
 import { MigrateDocumentationUseCase } from "./migrate-documentation.usecase.js";
 
@@ -31,10 +43,14 @@ describe("MigrateDocumentationUseCase", () => {
         ]) as Mocked<MigrationService>["getSupportedTools"],
       getMigrationAdapterByTool: vi
         .fn()
-        .mockReturnValue(migrationAdapter) as Mocked<MigrationService>["getMigrationAdapterByTool"],
+        .mockReturnValue(
+          migrationAdapter,
+        ) as Mocked<MigrationService>["getMigrationAdapterByTool"],
       autoDetectMigrationAdapter: vi
         .fn()
-        .mockReturnValue(undefined) as Mocked<MigrationService>["autoDetectMigrationAdapter"],
+        .mockReturnValue(
+          undefined,
+        ) as Mocked<MigrationService>["autoDetectMigrationAdapter"],
       migrateDocumentationFromTool: vi.fn().mockResolvedValue({
         destination: "./README.md",
         data: "migration result",
@@ -47,9 +63,11 @@ describe("MigrateDocumentationUseCase", () => {
     });
 
     const mockConcurrencyService = {
-      executeWithLimit: vi.fn().mockImplementation(async <T>(tasks: Array<() => Promise<T>>) => {
-        return Promise.allSettled(tasks.map((task) => task()));
-      }),
+      executeWithLimit: vi
+        .fn()
+        .mockImplementation(async <T>(tasks: Array<() => Promise<T>>) => {
+          return Promise.allSettled(tasks.map((task) => task()));
+        }),
     } satisfies Pick<ConcurrencyService, "executeWithLimit">;
 
     migrateDocumentationUseCase = new MigrateDocumentationUseCase(
@@ -94,9 +112,12 @@ describe("MigrateDocumentationUseCase", () => {
           success: true,
         },
       ]);
-      expect(mockMigrationService.migrateDocumentationFromTool).toHaveBeenCalledWith({
+      expect(
+        mockMigrationService.migrateDocumentationFromTool,
+      ).toHaveBeenCalledWith({
         destination: "./README.md",
-        migrationAdapter: mockMigrationService.getMigrationAdapterByTool("action-docs"),
+        migrationAdapter:
+          mockMigrationService.getMigrationAdapterByTool("action-docs"),
         dryRun: false,
       });
     });

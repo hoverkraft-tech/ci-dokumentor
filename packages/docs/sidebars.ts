@@ -60,7 +60,10 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Repository",
-          items: ["packages/repository/git/index", "packages/repository/github/index"],
+          items: [
+            "packages/repository/git/index",
+            "packages/repository/github/index",
+          ],
         },
       ],
     },

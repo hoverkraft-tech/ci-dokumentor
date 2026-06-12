@@ -1,4 +1,4 @@
-import { Container } from "@ci-dokumentor/core";
+import type { Container } from "@ci-dokumentor/core";
 import { Container as InversifyContainer } from "inversify";
 import { Command as CommanderCommand } from "commander";
 import { COMMAND_IDENTIFIER } from "./commands/command.js";
@@ -33,8 +33,14 @@ export function resetContainer(): void {
   container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
+export function initContainer(
+  baseContainer: Container | undefined = undefined,
+): Container {
+  let targetContainer = baseContainer ?? container;
+  if (!targetContainer) {
+    targetContainer = new InversifyContainer() as Container;
+    container = targetContainer;
+  }
 
   // Return early if this package has already been initialized in this container.
   if (targetContainer.isCurrentBound(LOGGER_ADAPTER_IDENTIFIER)) {
@@ -54,7 +60,9 @@ export function initContainer(baseContainer: Container | undefined = undefined):
     .to(JsonLoggerAdapter)
     .inSingletonScope();
 
-  targetContainer.bind(GITHUB_OUTPUT_IDENTIFIER).toConstantValue(process.env.GITHUB_OUTPUT);
+  targetContainer
+    .bind(GITHUB_OUTPUT_IDENTIFIER)
+    .toConstantValue(process.env.GITHUB_OUTPUT);
   targetContainer
     .bind<LoggerAdapter>(LOGGER_ADAPTER_IDENTIFIER)
     .to(GitHubActionLoggerAdapter)
@@ -68,16 +76,27 @@ export function initContainer(baseContainer: Container | undefined = undefined):
     .to(FilePackageService)
     .inSingletonScope();
 
-  targetContainer.bind<Program>(PROGRAM_IDENTIFIER).toConstantValue(new CommanderCommand());
+  targetContainer
+    .bind<Program>(PROGRAM_IDENTIFIER)
+    .toConstantValue(new CommanderCommand());
 
   // Bind use cases
-  targetContainer.bind(GenerateDocumentationUseCase).toSelf().inSingletonScope();
+  targetContainer
+    .bind(GenerateDocumentationUseCase)
+    .toSelf()
+    .inSingletonScope();
   targetContainer.bind(MigrateDocumentationUseCase).toSelf().inSingletonScope();
 
   // Bind commands (using multiInject pattern)
-  targetContainer.bind<Command>(COMMAND_IDENTIFIER).to(GenerateCommand).inSingletonScope();
+  targetContainer
+    .bind<Command>(COMMAND_IDENTIFIER)
+    .to(GenerateCommand)
+    .inSingletonScope();
 
-  targetContainer.bind<Command>(COMMAND_IDENTIFIER).to(MigrateCommand).inSingletonScope();
+  targetContainer
+    .bind<Command>(COMMAND_IDENTIFIER)
+    .to(MigrateCommand)
+    .inSingletonScope();
 
   // Bind the main application
   targetContainer.bind(CliApplication).toSelf().inSingletonScope();

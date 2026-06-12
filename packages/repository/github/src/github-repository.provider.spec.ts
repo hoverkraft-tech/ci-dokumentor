@@ -1,6 +1,14 @@
-import { describe, it, expect, beforeEach, vi, Mocked } from "vitest";
-import { GitRepositoryProvider, ParsedRemoteUrl } from "@ci-dokumentor/repository-git";
-import { LicenseService, LicenseInfo, ManifestVersion, ReaderAdapter } from "@ci-dokumentor/core";
+import { describe, it, expect, beforeEach, vi, type Mocked } from "vitest";
+import type {
+  GitRepositoryProvider,
+  ParsedRemoteUrl,
+} from "@ci-dokumentor/repository-git";
+import type {
+  LicenseService,
+  LicenseInfo,
+  ManifestVersion,
+  ReaderAdapter,
+} from "@ci-dokumentor/core";
 import {
   LicenseServiceMockFactory,
   RepositoryInfoMockFactory,
@@ -23,10 +31,16 @@ describe("GitHubRepositoryProvider", () => {
 
     // Create a mock git repository service
     mockGitRepositoryService = {
-      getPlatformName: vi.fn() as Mocked<GitRepositoryProvider["getPlatformName"]>,
+      getPlatformName: vi.fn() as Mocked<
+        GitRepositoryProvider["getPlatformName"]
+      >,
       supports: vi.fn() as Mocked<GitRepositoryProvider["supports"]>,
-      getRepositoryInfo: vi.fn() as Mocked<GitRepositoryProvider["getRepositoryInfo"]>,
-      getRemoteParsedUrl: vi.fn() as Mocked<GitRepositoryProvider["getRemoteParsedUrl"]>,
+      getRepositoryInfo: vi.fn() as Mocked<
+        GitRepositoryProvider["getRepositoryInfo"]
+      >,
+      getRemoteParsedUrl: vi.fn() as Mocked<
+        GitRepositoryProvider["getRemoteParsedUrl"]
+      >,
     } as Mocked<GitRepositoryProvider>;
 
     // Create a mock license service
@@ -65,7 +79,9 @@ describe("GitHubRepositoryProvider", () => {
         owner: "owner",
         name: "repo",
       } as ParsedRemoteUrl;
-      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
+      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
+        mockParsedUrl,
+      );
 
       // Act
       const result = await gitHubRepositoryProvider.supports();
@@ -82,7 +98,9 @@ describe("GitHubRepositoryProvider", () => {
         owner: "owner",
         name: "repo",
       } as ParsedRemoteUrl;
-      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
+      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
+        mockParsedUrl,
+      );
 
       // Act
       const result = await gitHubRepositoryProvider.supports();
@@ -99,7 +117,9 @@ describe("GitHubRepositoryProvider", () => {
         owner: "owner",
         name: "repo",
       } as ParsedRemoteUrl;
-      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
+      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
+        mockParsedUrl,
+      );
 
       // Act
       const result = await gitHubRepositoryProvider.supports();
@@ -116,7 +136,9 @@ describe("GitHubRepositoryProvider", () => {
         owner: "owner",
         name: "repo",
       } as ParsedRemoteUrl;
-      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(mockParsedUrl);
+      mockGitRepositoryService.getRemoteParsedUrl.mockResolvedValue(
+        mockParsedUrl,
+      );
 
       // Act
       const result = await gitHubRepositoryProvider.supports();
@@ -128,7 +150,9 @@ describe("GitHubRepositoryProvider", () => {
     it("should return false when getRemoteParsedUrl throws an error", async () => {
       // Arrange
       mockGitRepositoryService.supports.mockResolvedValue(true);
-      mockGitRepositoryService.getRemoteParsedUrl.mockRejectedValue(new Error("Git error"));
+      mockGitRepositoryService.getRemoteParsedUrl.mockRejectedValue(
+        new Error("Git error"),
+      );
 
       // Act
       const result = await gitHubRepositoryProvider.supports();
@@ -146,7 +170,9 @@ describe("GitHubRepositoryProvider", () => {
 
       // Assert
       expect(result).toBe(false);
-      expect(mockGitRepositoryService.getRemoteParsedUrl).not.toHaveBeenCalled();
+      expect(
+        mockGitRepositoryService.getRemoteParsedUrl,
+      ).not.toHaveBeenCalled();
     });
   });
 
@@ -154,7 +180,9 @@ describe("GitHubRepositoryProvider", () => {
     it("should return repository info from git provider", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
 
       // Act
       const result = await gitHubRepositoryProvider.getRepositoryInfo();
@@ -168,7 +196,9 @@ describe("GitHubRepositoryProvider", () => {
     it("should return file uri when logo exists in .github", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
       mockReaderAdapter.resourceExists.mockImplementation((path: string) => {
         return path === ".github/logo.png";
       });
@@ -183,7 +213,9 @@ describe("GitHubRepositoryProvider", () => {
     it("should fallback to openGraph image when no local logo", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
       // Ensure no local files
       mockReaderAdapter.resourceExists.mockReturnValue(false);
 
@@ -204,27 +236,41 @@ describe("GitHubRepositoryProvider", () => {
     it("should return license info from graphql when present", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
 
       graphqlMock.mockResolvedValue({
-        repository: { licenseInfo: { name: "MIT", spdxId: "MIT", url: "https://license" } },
+        repository: {
+          licenseInfo: { name: "MIT", spdxId: "MIT", url: "https://license" },
+        },
       });
 
       // Act
       const license = await gitHubRepositoryProvider.getLicense();
 
       // Assert
-      expect(license).toEqual({ name: "MIT", spdxId: "MIT", url: "https://license" });
+      expect(license).toEqual({
+        name: "MIT",
+        spdxId: "MIT",
+        url: "https://license",
+      });
     });
 
     it("should fallback to licenseService when graphql has no licenseInfo", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
 
       graphqlMock.mockResolvedValue({ repository: {} });
 
-      const expected: LicenseInfo = { name: "MIT", spdxId: "MIT", url: "https://license" };
+      const expected: LicenseInfo = {
+        name: "MIT",
+        spdxId: "MIT",
+        url: "https://license",
+      };
       mockLicenseService.detectLicenseFromFile.mockResolvedValue(expected);
 
       // Act
@@ -239,11 +285,15 @@ describe("GitHubRepositoryProvider", () => {
     it("should return contributing url when available via graphql", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
 
       graphqlMock.mockResolvedValue({
         repository: {
-          contributingGuidelines: { url: "https://github.com/owner/repo/CONTRIBUTING" },
+          contributingGuidelines: {
+            url: "https://github.com/owner/repo/CONTRIBUTING",
+          },
         },
       });
 
@@ -251,7 +301,9 @@ describe("GitHubRepositoryProvider", () => {
       const contributing = await gitHubRepositoryProvider.getContributing();
 
       // Assert
-      expect(contributing).toEqual({ url: "https://github.com/owner/repo/CONTRIBUTING" });
+      expect(contributing).toEqual({
+        url: "https://github.com/owner/repo/CONTRIBUTING",
+      });
     });
   });
 
@@ -259,23 +311,31 @@ describe("GitHubRepositoryProvider", () => {
     it("should return security policy url when available via graphql", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
 
       graphqlMock.mockResolvedValue({
-        repository: { securityPolicyUrl: "https://github.com/owner/repo/security/policy" },
+        repository: {
+          securityPolicyUrl: "https://github.com/owner/repo/security/policy",
+        },
       });
 
       // Act
       const security = await gitHubRepositoryProvider.getSecurity();
 
       // Assert
-      expect(security).toEqual({ url: "https://github.com/owner/repo/security/policy" });
+      expect(security).toEqual({
+        url: "https://github.com/owner/repo/security/policy",
+      });
     });
 
     it("should return undefined when no security policy is available", async () => {
       // Arrange
       const repositoryInfo = RepositoryInfoMockFactory.create();
-      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+      mockGitRepositoryService.getRepositoryInfo.mockResolvedValue(
+        repositoryInfo,
+      );
 
       graphqlMock.mockResolvedValue({ repository: {} });
 
@@ -292,7 +352,9 @@ describe("GitHubRepositoryProvider", () => {
       // Arrange
       const expected: ManifestVersion = { version: "1.2.3" } as ManifestVersion;
       (
-        mockGitRepositoryService as unknown as { getLatestVersion?: () => Promise<ManifestVersion> }
+        mockGitRepositoryService as unknown as {
+          getLatestVersion?: () => Promise<ManifestVersion>;
+        }
       ).getLatestVersion = vi.fn().mockResolvedValue(expected);
 
       // Act

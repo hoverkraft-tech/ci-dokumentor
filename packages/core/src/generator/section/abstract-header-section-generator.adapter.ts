@@ -1,8 +1,11 @@
 import { relative, dirname } from "node:path";
-import { FormatterAdapter } from "../../formatter/formatter.adapter.js";
+import type { FormatterAdapter } from "../../formatter/formatter.adapter.js";
 import { ReadableContent } from "../../reader/readable-content.js";
-import { RepositoryInfo } from "../../repository/repository.provider.js";
-import { SectionGenerationPayload, SectionIdentifier } from "./section-generator.adapter.js";
+import type { RepositoryInfo } from "../../repository/repository.provider.js";
+import {
+  type SectionGenerationPayload,
+  SectionIdentifier,
+} from "./section-generator.adapter.js";
 
 /**
  * Mixin type for Header section generator.
@@ -15,12 +18,10 @@ type Constructor<T = object> = abstract new (...args: any[]) => T;
  * This section displays the title and logo at the top of documentation.
  * Platform-specific implementations provide title generation logic.
  */
-export function HeaderSectionMixin<TManifest, TBase extends Constructor>(Base: TBase) {
+export function HeaderSectionMixin<TManifest, TBase extends Constructor>(
+  Base: TBase,
+) {
   abstract class HeaderSectionGeneratorBase extends Base {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
-      super(...args);
-    }
     getSectionIdentifier(): SectionIdentifier {
       return SectionIdentifier.Header;
     }
@@ -36,9 +37,18 @@ export function HeaderSectionMixin<TManifest, TBase extends Constructor>(Base: T
         repositoryProvider.getLogo(),
       ]);
 
-      let sectionContent = this.generateTitle(formatterAdapter, manifest, repositoryInfo);
+      let sectionContent = this.generateTitle(
+        formatterAdapter,
+        manifest,
+        repositoryInfo,
+      );
 
-      const logoContent = this.generateLogoImpl(formatterAdapter, manifest, logo, destination);
+      const logoContent = this.generateLogoImpl(
+        formatterAdapter,
+        manifest,
+        logo,
+        destination,
+      );
 
       if (!logoContent.isEmpty()) {
         // Ensure the heading (H1) is the very first content in the file so
@@ -69,7 +79,9 @@ export function HeaderSectionMixin<TManifest, TBase extends Constructor>(Base: T
       void _formatterAdapter;
       void _manifest;
       void _repositoryInfo;
-      throw new Error("generateTitle() must be implemented by platform-specific class");
+      throw new Error(
+        "generateTitle() must be implemented by platform-specific class",
+      );
     }
 
     /**
@@ -99,10 +111,14 @@ export function HeaderSectionMixin<TManifest, TBase extends Constructor>(Base: T
       }
 
       const logoAltText = this.getLogoAltText(manifest);
-      const logoImage = formatterAdapter.image(new ReadableContent(resolvedLogoPath), logoAltText, {
-        width: "60px",
-        align: "center",
-      });
+      const logoImage = formatterAdapter.image(
+        new ReadableContent(resolvedLogoPath),
+        logoAltText,
+        {
+          width: "60px",
+          align: "center",
+        },
+      );
 
       return formatterAdapter.center(logoImage);
     }
@@ -113,7 +129,9 @@ export function HeaderSectionMixin<TManifest, TBase extends Constructor>(Base: T
      */
     public getLogoAltText(_manifest: TManifest): ReadableContent {
       void _manifest;
-      throw new Error("getLogoAltText() must be implemented by platform-specific class");
+      throw new Error(
+        "getLogoAltText() must be implemented by platform-specific class",
+      );
     }
   }
 

@@ -2,7 +2,7 @@
 import type { UserConfig } from "vite";
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import dts from "vite-plugin-dts";
-import { join } from "path";
+import { join } from "node:path";
 
 // Common shared Vite configuration for all packages. Keep this file limited to
 // settings that are identical across packages (build/test defaults).
@@ -54,7 +54,9 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
       watch: false,
       globals: true,
       environment: "node",
-      include: ["{src,__tests__}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+      include: [
+        "{src,__tests__}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      ],
       reporters: ["default"],
       coverage: {
         provider: "v8" as const,

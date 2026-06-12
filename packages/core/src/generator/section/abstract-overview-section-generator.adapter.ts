@@ -1,6 +1,9 @@
 import { ReadableContent } from "../../reader/readable-content.js";
-import { FormatterAdapter } from "../../formatter/formatter.adapter.js";
-import { SectionGenerationPayload, SectionIdentifier } from "./section-generator.adapter.js";
+import type { FormatterAdapter } from "../../formatter/formatter.adapter.js";
+import {
+  type SectionGenerationPayload,
+  SectionIdentifier,
+} from "./section-generator.adapter.js";
 
 /**
  * Mixin type for Overview section generator.
@@ -13,13 +16,11 @@ type AbstractConstructor<T = object> = abstract new (...args: any[]) => T;
  * This section displays the description of the manifest.
  * Platform-specific implementations can extend this to add additional content.
  */
-export function OverviewSectionMixin<TManifest, TBase extends AbstractConstructor>(Base: TBase) {
+export function OverviewSectionMixin<
+  TManifest,
+  TBase extends AbstractConstructor,
+>(Base: TBase) {
   abstract class OverviewSection extends Base {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
-      super(...args);
-    }
-
     getSectionIdentifier(): SectionIdentifier {
       return SectionIdentifier.Overview;
     }
@@ -29,13 +30,19 @@ export function OverviewSectionMixin<TManifest, TBase extends AbstractConstructo
       manifest,
     }: SectionGenerationPayload<TManifest>): Promise<ReadableContent> {
       const description = this.getDescription(manifest);
-      const additionalContent = await this.generateAdditionalContent(formatterAdapter, manifest);
+      const additionalContent = await this.generateAdditionalContent(
+        formatterAdapter,
+        manifest,
+      );
 
       if (!description && additionalContent.isEmpty()) {
         return ReadableContent.empty();
       }
 
-      let overviewContent = formatterAdapter.heading(new ReadableContent("Overview"), 2);
+      let overviewContent = formatterAdapter.heading(
+        new ReadableContent("Overview"),
+        2,
+      );
 
       if (description) {
         overviewContent = overviewContent.append(
@@ -45,7 +52,10 @@ export function OverviewSectionMixin<TManifest, TBase extends AbstractConstructo
       }
 
       if (!additionalContent.isEmpty()) {
-        overviewContent = overviewContent.append(formatterAdapter.lineBreak(), additionalContent);
+        overviewContent = overviewContent.append(
+          formatterAdapter.lineBreak(),
+          additionalContent,
+        );
       }
 
       return overviewContent;
