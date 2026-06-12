@@ -59,8 +59,7 @@ graph TD
 #### Linting Stage
 
 - **Super-Linter** - Multi-language linting
-- **ESLint** - TypeScript/JavaScript code quality
-- **Prettier** - Code formatting validation
+- **Biome** - TypeScript/JavaScript linting and formatting validation
 - **Markdownlint** - Documentation quality
 - **YAML Lint** - Configuration file validation
 
@@ -106,7 +105,7 @@ graph TD
 
 To pass CI, your PR must:
 
-- ✅ **Pass all linting** - No ESLint or Prettier errors
+- ✅ **Pass all linting** - No Biome lint or format errors
 - ✅ **Pass all tests** - 100% test success rate
 - ✅ **Meet coverage thresholds** - Maintain or improve coverage
 - ✅ **Build successfully** - All packages compile

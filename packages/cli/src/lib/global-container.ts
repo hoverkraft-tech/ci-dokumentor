@@ -1,10 +1,29 @@
-import { Container, initContainer as coreInitContainer, resetContainer as resetCoreContainer } from '@ci-dokumentor/core';
-import { initContainer as gitInitContainer, resetContainer as resetGitContainer } from '@ci-dokumentor/repository-git';
-import { initContainer as githubInitContainer, resetContainer as resetGithubContainer } from '@ci-dokumentor/repository-github';
-import { initContainer as gitlabInitContainer, resetContainer as resetGitlabContainer } from '@ci-dokumentor/repository-gitlab';
-import { initContainer as githubActionsInitContainer, resetContainer as resetGithubActionsContainer } from '@ci-dokumentor/cicd-github-actions';
-import { initContainer as gitlabCIInitContainer, resetContainer as resetGitlabCIContainer } from '@ci-dokumentor/cicd-gitlab-ci';
-import { initContainer, resetContainer } from './container.js';
+import {
+  Container,
+  initContainer as coreInitContainer,
+  resetContainer as resetCoreContainer,
+} from "@ci-dokumentor/core";
+import {
+  initContainer as gitInitContainer,
+  resetContainer as resetGitContainer,
+} from "@ci-dokumentor/repository-git";
+import {
+  initContainer as githubInitContainer,
+  resetContainer as resetGithubContainer,
+} from "@ci-dokumentor/repository-github";
+import {
+  initContainer as gitlabInitContainer,
+  resetContainer as resetGitlabContainer,
+} from "@ci-dokumentor/repository-gitlab";
+import {
+  initContainer as githubActionsInitContainer,
+  resetContainer as resetGithubActionsContainer,
+} from "@ci-dokumentor/cicd-github-actions";
+import {
+  initContainer as gitlabCIInitContainer,
+  resetContainer as resetGitlabCIContainer,
+} from "@ci-dokumentor/cicd-gitlab-ci";
+import { initContainer, resetContainer } from "./container.js";
 
 let globalContainer: Container | null = null;
 

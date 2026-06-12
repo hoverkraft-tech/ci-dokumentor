@@ -1,23 +1,26 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, Mocked } from "vitest";
 import {
   FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
   RepositoryProvider,
-} from '@ci-dokumentor/core';
-import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
+} from "@ci-dokumentor/core";
+import {
+  RepositoryInfoMockFactory,
+  RepositoryProviderMockFactory,
+} from "@ci-dokumentor/core/tests";
 import {
   GitHubAction,
   GitHubWorkflow,
   GitHubActionOutput,
   GitHubActionsManifest,
-} from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import { initTestContainer } from '../container.js';
-import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { OutputsSectionGenerator } from './outputs-section-generator.adapter.js';
+} from "../github-actions-parser.js";
+import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
+import { initTestContainer } from "../container.js";
+import { GitHubWorkflowMockFactory } from "../../__tests__/github-workflow-mock.factory.js";
+import { OutputsSectionGenerator } from "./outputs-section-generator.adapter.js";
 
-describe('OutputsSectionGenerator', () => {
+describe("OutputsSectionGenerator", () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
 
@@ -40,8 +43,8 @@ describe('OutputsSectionGenerator', () => {
     vi.resetAllMocks();
   });
 
-  describe('getSectionIdentifier', () => {
-    it('should return Outputs section identifier', () => {
+  describe("getSectionIdentifier", () => {
+    it("should return Outputs section identifier", () => {
       // Act
       const result = generator.getSectionIdentifier();
 
@@ -50,25 +53,30 @@ describe('OutputsSectionGenerator', () => {
     });
   });
 
-  describe('generateSection', () => {
-    describe('with GitHub Action manifest', () => {
-      it('should generate outputs section for GitHub Action with outputs', async () => {
+  describe("generateSection", () => {
+    describe("with GitHub Action manifest", () => {
+      it("should generate outputs section for GitHub Action with outputs", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
           outputs: {
-            'output-name': {
-              description: 'Test output description',
-              value: '${{ steps.test.outputs.result }}',
+            "output-name": {
+              description: "Test output description",
+              value: "${{ steps.test.outputs.result }}",
             },
-            'another-output': {
-              description: 'Another output description',
-              value: 'static-value',
+            "another-output": {
+              description: "Another output description",
+              value: "static-value",
             },
           },
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
@@ -79,44 +87,57 @@ describe('OutputsSectionGenerator', () => {
 | -------------------- | -------------------------- |
 | **\`output-name\`**    | Test output description    |
 | **\`another-output\`** | Another output description |
-`
+`,
         );
       });
 
-      it('should generate outputs section for GitHub Action without outputs', async () => {
+      it("should generate outputs section for GitHub Action without outputs", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
-        expect(result.toString()).toEqual(
-          ``
-        );
+        expect(result.toString()).toEqual(``);
       });
 
-      it('should generate outputs section for GitHub Action with empty outputs object', async () => {
+      it("should generate outputs section for GitHub Action with empty outputs object", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({ outputs: {} });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
         expect(result.toString()).toBe("");
       });
 
-      it('should handle outputs with missing optional properties', async () => {
+      it("should handle outputs with missing optional properties", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
-          outputs: { 'minimal-output': {} as GitHubActionOutput },
+          outputs: { "minimal-output": {} as GitHubActionOutput },
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
@@ -126,18 +147,23 @@ describe('OutputsSectionGenerator', () => {
 | **Output**           | **Description** |
 | -------------------- | --------------- |
 | **\`minimal-output\`** |                 |
-`
+`,
         );
       });
 
-      it('should handle outputs with only description', async () => {
+      it("should handle outputs with only description", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
-          outputs: { 'description-only': { description: 'Output with description only' } },
+          outputs: { "description-only": { description: "Output with description only" } },
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
@@ -147,18 +173,23 @@ describe('OutputsSectionGenerator', () => {
 | **Output**             | **Description**              |
 | ---------------------- | ---------------------------- |
 | **\`description-only\`** | Output with description only |
-`
+`,
         );
       });
 
-      it('should handle outputs with no description', async () => {
+      it("should handle outputs with no description", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
-          outputs: { 'no-description': { value: '${{ steps.build.outputs.version }}' } },
+          outputs: { "no-description": { value: "${{ steps.build.outputs.version }}" } },
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
@@ -168,20 +199,34 @@ describe('OutputsSectionGenerator', () => {
 | **Output**           | **Description** |
 | -------------------- | --------------- |
 | **\`no-description\`** |                 |
-`
+`,
         );
       });
     });
 
-    describe('with GitHub Workflow manifest', () => {
-      it('should generate outputs section for GitHub Workflow with outputs', async () => {
+    describe("with GitHub Workflow manifest", () => {
+      it("should generate outputs section for GitHub Workflow with outputs", async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
-          on: { workflow_call: { outputs: { 'workflow-output': { description: 'A workflow output', value: '${{ steps.build.outputs.version }}' } } } },
+          on: {
+            workflow_call: {
+              outputs: {
+                "workflow-output": {
+                  description: "A workflow output",
+                  value: "${{ steps.build.outputs.version }}",
+                },
+              },
+            },
+          },
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
@@ -191,31 +236,34 @@ describe('OutputsSectionGenerator', () => {
 | **Output**            | **Description**   |
 | --------------------- | ----------------- |
 | **\`workflow-output\`** | A workflow output |
-`
+`,
         );
       });
 
-      it('should generate empty outputs section for GitHub Workflow', async () => {
+      it("should generate empty outputs section for GitHub Workflow", async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
           on: { workflow_call: { outputs: {} } },
         });
 
         // Act
-        const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
         // Assert
 
-        expect(result.toString()).toBe(
-          ``
-        );
+        expect(result.toString()).toBe(``);
       });
 
-      it('should generate empty outputs section for GitHub Workflow with push trigger', async () => {
+      it("should generate empty outputs section for GitHub Workflow with push trigger", async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
-          usesName: 'owner/repo/.github/workflows/ci.yml',
-          name: 'CI Workflow',
+          usesName: "owner/repo/.github/workflows/ci.yml",
+          name: "CI Workflow",
           on: { push: {} },
         });
 
@@ -223,30 +271,32 @@ describe('OutputsSectionGenerator', () => {
         const result = await generator.generateSection({
           formatterAdapter,
           manifest,
-          repositoryProvider: mockRepositoryProvider
-          , destination: 'README.md'
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
         });
 
         // Assert
 
-        expect(result.toString()).toBe(
-          ``
-        );
+        expect(result.toString()).toBe(``);
       });
     });
 
-    describe('error handling', () => {
-      it('should throw error for unsupported manifest type', async () => {
+    describe("error handling", () => {
+      it("should throw error for unsupported manifest type", async () => {
         // Arrange
         const invalidManifest = {
           unsupportedType: true,
         } as unknown as GitHubActionsManifest;
 
         // Act & Assert
-        await expect(generator.generateSection({
-          formatterAdapter, manifest: invalidManifest, repositoryProvider: mockRepositoryProvider
-          , destination: 'README.md'
-        })).rejects.toThrow('Unsupported manifest type for OutputsSectionGenerator');
+        await expect(
+          generator.generateSection({
+            formatterAdapter,
+            manifest: invalidManifest,
+            repositoryProvider: mockRepositoryProvider,
+            destination: "README.md",
+          }),
+        ).rejects.toThrow("Unsupported manifest type for OutputsSectionGenerator");
       });
     });
   });

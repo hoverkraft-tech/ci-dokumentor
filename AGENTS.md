@@ -43,7 +43,7 @@ When opening a PR:
 ## Quality gates (required)
 
 - Build: TypeScript compiles without errors in the modified packages.
-- Lint: ESLint/Prettier rules pass for modified files.
+- Lint: Biome lint/format checks pass for modified files.
 - Tests: Vitest unit tests for modified packages pass; new code is covered by tests.
 
 ## Allowed agent actions (examples)

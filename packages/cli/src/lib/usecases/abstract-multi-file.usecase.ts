@@ -1,7 +1,7 @@
-import { inject, injectable } from 'inversify';
-import { FileReaderAdapter, ConcurrencyService } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
-import { LoggerService } from '../logger/logger.service.js';
+import { inject, injectable } from "inversify";
+import { FileReaderAdapter, ConcurrencyService } from "@ci-dokumentor/core";
+import type { ReaderAdapter } from "@ci-dokumentor/core";
+import { LoggerService } from "../logger/logger.service.js";
 
 /**
  * Base input interface for multi-file use cases
@@ -10,7 +10,7 @@ export type MultiFileUseCaseInput = {
   outputFormat: string | undefined;
   dryRun: boolean;
   concurrency?: number;
-}
+};
 
 type MultiFileExecutionContext = {
   files: string[];
@@ -30,7 +30,7 @@ export type FileResult = {
  */
 export type MultiFileUseCaseOutput<Result extends FileResult = FileResult> = FileResult & {
   results: Result[];
-}
+};
 
 /**
  * Abstract base class for use cases that process multiple files concurrently
@@ -43,8 +43,8 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   constructor(
     @inject(LoggerService) protected readonly loggerService: LoggerService,
     @inject(FileReaderAdapter) protected readonly readerAdapter: ReaderAdapter,
-    @inject(ConcurrencyService) protected readonly concurrencyService: ConcurrencyService
-  ) { }
+    @inject(ConcurrencyService) protected readonly concurrencyService: ConcurrencyService,
+  ) {}
 
   /**
    * Resolve files from patterns using ReaderAdapter
@@ -55,7 +55,7 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
 
     for (const pattern of patternArray) {
       const files = await this.readerAdapter.findResources(pattern);
-      files.forEach(file => resolvedFiles.add(file));
+      files.forEach((file) => resolvedFiles.add(file));
     }
 
     return Array.from(resolvedFiles).sort();
@@ -67,18 +67,13 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   protected initializeExecutionContext(
     operation: string,
     input: MultiFileUseCaseInput,
-    files: string[]
+    files: string[],
   ): MultiFileExecutionContext {
     const fileList = [...files];
     const isMultiFile = fileList.length > 1;
 
     if (isMultiFile) {
-      this.logMultiFileExecutionStart(
-        operation,
-        fileList.length,
-        input.dryRun,
-        input.outputFormat
-      );
+      this.logMultiFileExecutionStart(operation, fileList.length, input.dryRun, input.outputFormat);
     }
 
     return {
@@ -95,12 +90,12 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
     operation: string,
     fileCount: number,
     dryRun: boolean,
-    outputFormat: string | undefined
+    outputFormat: string | undefined,
   ): void {
-    const prefix = dryRun ? '[DRY RUN] ' : '';
+    const prefix = dryRun ? "[DRY RUN] " : "";
     this.loggerService.info(
       `${prefix}Starting ${operation} for ${fileCount} files...`,
-      outputFormat
+      outputFormat,
     );
   }
 
@@ -109,24 +104,16 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
     executionContext: MultiFileExecutionContext,
   ) {
     const results = await this.executeConcurrently(
-      executionContext.files.map((file: string) => () =>
-        this.processFile({ ...input, file })
-      ),
-      executionContext.concurrency
+      executionContext.files.map((file: string) => () => this.processFile({ ...input, file })),
+      executionContext.concurrency,
     );
 
-    const fileResults = this.collectFileResults(
-      results,
-      executionContext.files,
-    );
+    const fileResults = this.collectFileResults(results, executionContext.files);
 
-    this.validateFileResults(
-      fileResults,
-      executionContext.files,
-    );
+    this.validateFileResults(fileResults, executionContext.files);
 
     const output = {
-      success: fileResults.every(result => result.success),
+      success: fileResults.every((result) => result.success),
       destination: this.buildDestinationSummary(fileResults),
       data: this.buildDataSummary(fileResults),
       results: fileResults,
@@ -142,36 +129,26 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
    */
   private async executeConcurrently(
     tasks: Array<() => Promise<Result>>,
-    concurrency: number
+    concurrency: number,
   ): Promise<PromiseSettledResult<Result>[]> {
     return this.concurrencyService.executeWithLimit(tasks, concurrency);
   }
 
-  protected abstract processFile(
-    input: MultiFileUseCaseInput & { file: string }
-  ): Promise<Result>;
+  protected abstract processFile(input: MultiFileUseCaseInput & { file: string }): Promise<Result>;
 
   /**
    * Log successful multi-file processing completion
    */
-  private logMultiFileExecutionSuccess(
-    fileCount: number,
-    outputFormat: string | undefined
-  ): void {
-    this.loggerService.info(
-      `Successfully processed ${fileCount} files!`,
-      outputFormat
-    );
+  private logMultiFileExecutionSuccess(fileCount: number, outputFormat: string | undefined): void {
+    this.loggerService.info(`Successfully processed ${fileCount} files!`, outputFormat);
   }
 
   /**
    * Build destination summary for aggregated outputs
    */
-  private buildDestinationSummary(
-    fileResults: Result[],
-  ): string | undefined {
+  private buildDestinationSummary(fileResults: Result[]): string | undefined {
     if (fileResults.length === 0) {
-      throw new Error('No results available.');
+      throw new Error("No results available.");
     }
 
     const successfulDestinations = fileResults
@@ -183,14 +160,12 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
     }
 
     const uniqueDestinations = Array.from(new Set(successfulDestinations));
-    return uniqueDestinations.join('\n');
+    return uniqueDestinations.join("\n");
   }
 
-  private buildDataSummary(
-    fileResults: Result[],
-  ): string | undefined {
+  private buildDataSummary(fileResults: Result[]): string | undefined {
     if (fileResults.length === 0) {
-      throw new Error('No results available.');
+      throw new Error("No results available.");
     }
 
     const successfulData = fileResults
@@ -202,7 +177,7 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
     }
 
     const uniqueData = Array.from(new Set(successfulData));
-    return uniqueData.join('\n');
+    return uniqueData.join("\n");
   }
 
   /**
@@ -211,7 +186,7 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   private finalizeExecution(
     output: MultiFileUseCaseOutput<Result>,
     context: MultiFileExecutionContext,
-    format: string | undefined
+    format: string | undefined,
   ): void {
     if (context.isMultiFile) {
       this.logMultiFileExecutionSuccess(context.files.length, format);
@@ -223,16 +198,11 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   /**
    * Collect file processing results from promise settled results
    */
-  private collectFileResults(
-    results: PromiseSettledResult<Result>[],
-    files: string[],
-  ): Result[] {
-
+  private collectFileResults(results: PromiseSettledResult<Result>[], files: string[]): Result[] {
     const resultMapper = (file: string, fileResult: Result) => ({
       ...fileResult,
       success: true,
       destination: fileResult.destination ?? file,
-
     });
     const errorMapper = (file: string, error: unknown) => ({
       destination: file,
@@ -242,7 +212,7 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
 
     return results.map((result, index) => {
       const file = files[index];
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         return resultMapper(file, result.value);
       } else {
         return errorMapper(file, result.reason);
@@ -253,17 +223,11 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   /**
    * Validate file results and throw if any failed
    */
-  private validateFileResults(
-    fileResults: Result[],
-    files: string[],
-  ): void {
-    const failures = fileResults.filter(r => !r.success);
+  private validateFileResults(fileResults: Result[], files: string[]): void {
+    const failures = fileResults.filter((r) => !r.success);
 
     if (failures.length > 0) {
-      const errorMessage = this.formatFailureMessages(
-        fileResults,
-        files,
-      );
+      const errorMessage = this.formatFailureMessages(fileResults, files);
       throw new Error(errorMessage);
     }
   }
@@ -271,20 +235,19 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   /**
    * Collect and format error messages from failed results
    */
-  private formatFailureMessages(
-    fileResults: Result[],
-    files: string[],
-  ): string {
-    const failures = fileResults.filter(r => !r.success);
+  private formatFailureMessages(fileResults: Result[], files: string[]): string {
+    const failures = fileResults.filter((r) => !r.success);
 
     if (failures.length === 0) {
-      return '';
+      return "";
     }
 
-    const errorMessages = failures.map((failure, index) => {
-      const file = files[index];
-      return `  - ${file}: ${failure.error}`;
-    }).join('\n');
+    const errorMessages = failures
+      .map((failure, index) => {
+        const file = files[index];
+        return `  - ${file}: ${failure.error}`;
+      })
+      .join("\n");
 
     return `Failed to process ${failures.length} of ${files.length} files:\n${errorMessages}`;
   }

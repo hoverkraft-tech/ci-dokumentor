@@ -1,24 +1,26 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, Mocked } from "vitest";
 import {
   FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
   SectionGenerationPayload,
   RepositoryProvider,
-} from '@ci-dokumentor/core';
-import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
-import { GitHubAction, GitHubWorkflow } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import { initTestContainer } from '../container.js';
-import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { BadgesSectionGenerator } from './badges-section-generator.adapter.js';
+} from "@ci-dokumentor/core";
+import {
+  RepositoryInfoMockFactory,
+  RepositoryProviderMockFactory,
+} from "@ci-dokumentor/core/tests";
+import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
+import { initTestContainer } from "../container.js";
+import { GitHubWorkflowMockFactory } from "../../__tests__/github-workflow-mock.factory.js";
+import { BadgesSectionGenerator } from "./badges-section-generator.adapter.js";
 
-describe('BadgesSectionGenerator', () => {
+describe("BadgesSectionGenerator", () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
 
   let generator: BadgesSectionGenerator;
-
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -26,13 +28,13 @@ describe('BadgesSectionGenerator', () => {
     mockRepositoryProvider = RepositoryProviderMockFactory.create({
       getRepositoryInfo: RepositoryInfoMockFactory.create(),
       getLicense: {
-        name: 'MIT',
-        spdxId: 'MIT',
-        url: 'https://opensource.org/licenses/MIT',
+        name: "MIT",
+        spdxId: "MIT",
+        url: "https://opensource.org/licenses/MIT",
       },
       getContributing: {
-        url: 'https://github.com/owner/repo/blob/main/CONTRIBUTING.md',
-      }
+        url: "https://github.com/owner/repo/blob/main/CONTRIBUTING.md",
+      },
     });
 
     const container = initTestContainer();
@@ -45,8 +47,8 @@ describe('BadgesSectionGenerator', () => {
     vi.resetAllMocks();
   });
 
-  describe('getSectionIdentifier', () => {
-    it('should return Badges section identifier', () => {
+  describe("getSectionIdentifier", () => {
+    it("should return Badges section identifier", () => {
       // Act
       const result = generator.getSectionIdentifier();
 
@@ -55,27 +57,36 @@ describe('BadgesSectionGenerator', () => {
     });
   });
 
-  describe('getSectionOptions', () => {
-    it('should return extraBadges option descriptor', () => {
+  describe("getSectionOptions", () => {
+    it("should return extraBadges option descriptor", () => {
       // Act
       const result = generator.getSectionOptions();
 
       // Assert
       expect(result).toEqual({
         extraBadges: {
-          flags: '--extra-badges <badges>',
-          description: 'Additional badges to include as JSON array of objects with label, url, and linkUrl properties',
+          flags: "--extra-badges <badges>",
+          description:
+            "Additional badges to include as JSON array of objects with label, url, and linkUrl properties",
         },
       });
     });
   });
 
-  describe('setSectionOptions', () => {
-    it('should parse and set extra badges from valid JSON', () => {
+  describe("setSectionOptions", () => {
+    it("should parse and set extra badges from valid JSON", () => {
       // Arrange
       const extraBadgesJson = JSON.stringify([
-        { label: 'Custom Badge', url: 'https://img.shields.io/badge/custom-badge-green', linkUrl: 'https://example.com' },
-        { label: 'Another Badge', badgeUrl: 'https://img.shields.io/badge/another-badge-blue', url: 'https://another.com' }
+        {
+          label: "Custom Badge",
+          url: "https://img.shields.io/badge/custom-badge-green",
+          linkUrl: "https://example.com",
+        },
+        {
+          label: "Another Badge",
+          badgeUrl: "https://img.shields.io/badge/another-badge-blue",
+          url: "https://another.com",
+        },
       ]);
 
       // Act
@@ -84,33 +95,35 @@ describe('BadgesSectionGenerator', () => {
       // Assert - we'll verify this works by testing generateSection output
     });
 
-    it('should handle invalid JSON', () => {
+    it("should handle invalid JSON", () => {
       // Arrange
-      const invalidJson = 'invalid json';
+      const invalidJson = "invalid json";
 
       // Act & Assert - should not throw
       expect(() => generator.setSectionOptions({ extraBadges: invalidJson })).toThrow(
-        `Unexpected token 'i', "invalid json" is not valid JSON. When using this option in GitHub Actions, ensure the JSON is passed as a single argument or encode it (e.g. base64).`
+        `Unexpected token 'i', "invalid json" is not valid JSON. When using this option in GitHub Actions, ensure the JSON is passed as a single argument or encode it (e.g. base64).`,
       );
     });
 
-    it('should handle non-array JSON', () => {
+    it("should handle non-array JSON", () => {
       // Arrange
       const nonArrayJson = JSON.stringify({ notAnArray: true });
 
       // Act & Assert - should not throw
-      expect(() => generator.setSectionOptions({ extraBadges: nonArrayJson })).toThrow('The extra badges option must be a JSON array of badge objects.');
+      expect(() => generator.setSectionOptions({ extraBadges: nonArrayJson })).toThrow(
+        "The extra badges option must be a JSON array of badge objects.",
+      );
     });
 
-    it('should handle undefined extraBadges', () => {
+    it("should handle undefined extraBadges", () => {
       // Act & Assert - should not throw
       expect(() => generator.setSectionOptions({ extraBadges: undefined })).not.toThrow();
     });
   });
 
-  describe('generateSection', () => {
-    describe('with GitHub Action manifest', () => {
-      it('should generate badges section for GitHub Action', async () => {
+  describe("generateSection", () => {
+    describe("with GitHub Action manifest", () => {
+      it("should generate badges section for GitHub Action", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const payload: SectionGenerationPayload<GitHubAction> = {
@@ -118,8 +131,7 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         // Act
@@ -132,11 +144,11 @@ describe('BadgesSectionGenerator', () => {
 [![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
-`
+`,
         );
       });
 
-      it('should not generate license badge if not present', async () => {
+      it("should not generate license badge if not present", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
@@ -146,8 +158,7 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         // Act
@@ -159,11 +170,11 @@ describe('BadgesSectionGenerator', () => {
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
-`
+`,
         );
       });
 
-      it('should not generate contributing badge if not present', async () => {
+      it("should not generate contributing badge if not present", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
 
@@ -173,8 +184,7 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         // Act
@@ -186,11 +196,11 @@ describe('BadgesSectionGenerator', () => {
 [![Release](https://img.shields.io/github/v/release/owner/repo)](https://github.com/owner/repo/releases)
 [![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
-`
+`,
         );
       });
 
-      it('should include extra badges when provided', async () => {
+      it("should include extra badges when provided", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const payload: SectionGenerationPayload<GitHubAction> = {
@@ -198,12 +208,15 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         const extraBadgesJson = JSON.stringify([
-          { label: 'Custom Badge', url: 'https://img.shields.io/badge/custom-badge-green', linkUrl: 'https://example.com' }
+          {
+            label: "Custom Badge",
+            url: "https://img.shields.io/badge/custom-badge-green",
+            linkUrl: "https://example.com",
+          },
         ]);
 
         generator.setSectionOptions({ extraBadges: extraBadgesJson });
@@ -219,11 +232,11 @@ describe('BadgesSectionGenerator', () => {
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 [![Custom Badge](https://img.shields.io/badge/custom-badge-green)](https://example.com)
-`
+`,
         );
       });
 
-      it('should handle badges without linkUrl', async () => {
+      it("should handle badges without linkUrl", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const payload: SectionGenerationPayload<GitHubAction> = {
@@ -231,12 +244,11 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         const extraBadgesJson = JSON.stringify([
-          { label: 'Badge without linkUrl', url: 'https://img.shields.io/badge/badge-url-orange' }
+          { label: "Badge without linkUrl", url: "https://img.shields.io/badge/badge-url-orange" },
         ]);
 
         generator.setSectionOptions({ extraBadges: extraBadgesJson });
@@ -252,12 +264,13 @@ describe('BadgesSectionGenerator', () => {
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 ![Badge without linkUrl](https://img.shields.io/badge/badge-url-orange)
-`);
+`,
+        );
       });
     });
 
-    describe('with GitHub Workflow manifest', () => {
-      it('should generate badges section for GitHub Workflow', async () => {
+    describe("with GitHub Workflow manifest", () => {
+      it("should generate badges section for GitHub Workflow", async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create();
         const payload: SectionGenerationPayload<GitHubWorkflow> = {
@@ -265,8 +278,7 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         // Act
@@ -278,11 +290,11 @@ describe('BadgesSectionGenerator', () => {
 [![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
-`
+`,
         );
       });
 
-      it('should include extra badges for GitHub Workflow', async () => {
+      it("should include extra badges for GitHub Workflow", async () => {
         // Arrange
         const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create();
         const payload: SectionGenerationPayload<GitHubWorkflow> = {
@@ -290,12 +302,15 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         const extraBadgesJson = JSON.stringify([
-          { label: 'Workflow Badge', url: 'https://img.shields.io/badge/workflow-badge-red', linkUrl: 'https://workflow.com' }
+          {
+            label: "Workflow Badge",
+            url: "https://img.shields.io/badge/workflow-badge-red",
+            linkUrl: "https://workflow.com",
+          },
         ]);
 
         generator.setSectionOptions({ extraBadges: extraBadgesJson });
@@ -310,13 +325,13 @@ describe('BadgesSectionGenerator', () => {
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
 [![Workflow Badge](https://img.shields.io/badge/workflow-badge-red)](https://workflow.com)
-`
+`,
         );
       });
     });
 
-    describe('edge cases', () => {
-      it('should work when no extra badges are set', async () => {
+    describe("edge cases", () => {
+      it("should work when no extra badges are set", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const payload: SectionGenerationPayload<GitHubAction> = {
@@ -324,8 +339,7 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         // Don't set any extra badges
@@ -340,11 +354,11 @@ describe('BadgesSectionGenerator', () => {
 [![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
-`
+`,
         );
       });
 
-      it('should work with empty extra badges array', async () => {
+      it("should work with empty extra badges array", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create();
         const payload: SectionGenerationPayload<GitHubAction> = {
@@ -352,8 +366,7 @@ describe('BadgesSectionGenerator', () => {
           manifest,
           repositoryProvider: mockRepositoryProvider,
 
-          destination: 'README.md',
-
+          destination: "README.md",
         };
 
         generator.setSectionOptions({ extraBadges: JSON.stringify([]) });
@@ -368,7 +381,7 @@ describe('BadgesSectionGenerator', () => {
 [![License](https://img.shields.io/github/license/owner/repo)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://img.shields.io/github/stars/owner/repo?style=social)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/owner/repo/blob/main/CONTRIBUTING.md)
-`
+`,
         );
       });
     });

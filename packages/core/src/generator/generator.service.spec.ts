@@ -1,22 +1,22 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Mocked } from 'vitest';
-import { LinkFormat } from '../formatter/formatter.adapter.js';
-import type { FormatterAdapter, FormatterOptions } from '../formatter/formatter.adapter.js';
-import type { FormatterService } from '../formatter/formatter.service.js';
-import type { RendererFactory } from '../renderer/renderer.factory.js';
-import { DiffRendererAdapter } from '../renderer/diff-renderer.adapter.js';
-import { FileRendererAdapter } from '../renderer/file-renderer.adapter.js';
-import type { RepositoryProvider } from '../repository/repository.provider.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mocked } from "vitest";
+import { LinkFormat } from "../formatter/formatter.adapter.js";
+import type { FormatterAdapter, FormatterOptions } from "../formatter/formatter.adapter.js";
+import type { FormatterService } from "../formatter/formatter.service.js";
+import type { RendererFactory } from "../renderer/renderer.factory.js";
+import { DiffRendererAdapter } from "../renderer/diff-renderer.adapter.js";
+import { FileRendererAdapter } from "../renderer/file-renderer.adapter.js";
+import type { RepositoryProvider } from "../repository/repository.provider.js";
 import {
   FormatterServiceMockFactory,
   GeneratorAdapterMockFactory,
   RendererAdapterMockFactory,
   RepositoryProviderMockFactory,
-} from '../../__tests__/index.js';
-import { GeneratorService } from './generator.service.js';
-import type { GeneratorAdapter, GenerateSectionsOptions } from './generator.adapter.js';
+} from "../../__tests__/index.js";
+import { GeneratorService } from "./generator.service.js";
+import type { GeneratorAdapter, GenerateSectionsOptions } from "./generator.adapter.js";
 
-describe('GeneratorService', () => {
+describe("GeneratorService", () => {
   let generatorService: GeneratorService;
   let formatterService: Mocked<FormatterService>;
   let rendererFactory: RendererFactory;
@@ -28,8 +28,8 @@ describe('GeneratorService', () => {
   let formatterAdapter: FormatterAdapter;
 
   const formatterOptions: FormatterOptions = { linkFormat: LinkFormat.Auto };
-  const sections: GenerateSectionsOptions = { includeSections: ['summary'] };
-  const source = '/tmp/source.yml';
+  const sections: GenerateSectionsOptions = { includeSections: ["summary"] };
+  const source = "/tmp/source.yml";
 
   beforeEach(() => {
     formatterAdapter = {
@@ -43,67 +43,66 @@ describe('GeneratorService', () => {
     mockFileRenderer = RendererAdapterMockFactory.create() as Mocked<FileRendererAdapter>;
     mockDiffRenderer = RendererAdapterMockFactory.create() as Mocked<DiffRendererAdapter>;
 
-    rendererFactory = vi.fn().mockImplementation(
-      (dryRun: boolean) => dryRun ? mockDiffRenderer : mockFileRenderer
-    );
+    rendererFactory = vi
+      .fn()
+      .mockImplementation((dryRun: boolean) => (dryRun ? mockDiffRenderer : mockFileRenderer));
 
     githubAdapter = GeneratorAdapterMockFactory.create({
-      getPlatformName: 'github-actions',
-      getDocumentationPath: '/tmp/README.md',
+      getPlatformName: "github-actions",
+      getDocumentationPath: "/tmp/README.md",
       supportsSource: false,
     });
 
     gitlabAdapter = GeneratorAdapterMockFactory.create({
-      getPlatformName: 'gitlab-ci',
-      getDocumentationPath: '/tmp/GITLAB.md',
+      getPlatformName: "gitlab-ci",
+      getDocumentationPath: "/tmp/GITLAB.md",
       supportsSource: false,
     });
 
     repositoryProvider = RepositoryProviderMockFactory.create();
 
-    generatorService = new GeneratorService(
-      formatterService,
-      rendererFactory,
-      [githubAdapter, gitlabAdapter]
-    );
+    generatorService = new GeneratorService(formatterService, rendererFactory, [
+      githubAdapter,
+      gitlabAdapter,
+    ]);
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('getSupportedCicdPlatforms', () => {
-    it('returns supported CI/CD platforms from registered adapters', () => {
+  describe("getSupportedCicdPlatforms", () => {
+    it("returns supported CI/CD platforms from registered adapters", () => {
       // Act
       const result = generatorService.getSupportedCicdPlatforms();
 
       // Assert
-      expect(result).toEqual(['github-actions', 'gitlab-ci']);
+      expect(result).toEqual(["github-actions", "gitlab-ci"]);
       expect(githubAdapter.getPlatformName).toHaveBeenCalled();
       expect(gitlabAdapter.getPlatformName).toHaveBeenCalled();
     });
   });
 
-  describe('getGeneratorAdapterByPlatform', () => {
-    it('returns generator adapter by platform name when it exists', () => {
+  describe("getGeneratorAdapterByPlatform", () => {
+    it("returns generator adapter by platform name when it exists", () => {
       // Act
-      const adapter = generatorService.getGeneratorAdapterByPlatform('gitlab-ci');
+      const adapter = generatorService.getGeneratorAdapterByPlatform("gitlab-ci");
 
       // Assert
       expect(adapter).toBe(gitlabAdapter);
     });
 
-    it('returns undefined when generator adapter for platform does not exist', () => {
+    it("returns undefined when generator adapter for platform does not exist", () => {
       // Act
-      const adapter = generatorService.getGeneratorAdapterByPlatform('bitbucket');
+      const adapter = generatorService.getGeneratorAdapterByPlatform("bitbucket");
 
       // Assert
       expect(adapter).toBeUndefined();
     });
   });
 
-  describe('autoDetectCicdPlatform', () => {
-    it('auto-detects CI/CD platform when adapter supports the source', () => {
+  describe("autoDetectCicdPlatform", () => {
+    it("auto-detects CI/CD platform when adapter supports the source", () => {
       // Arrange
       githubAdapter.supportsSource.mockReturnValueOnce(true);
 
@@ -111,12 +110,12 @@ describe('GeneratorService', () => {
       const platform = generatorService.autoDetectCicdPlatform(source);
 
       // Assert
-      expect(platform).toBe('github-actions');
+      expect(platform).toBe("github-actions");
       expect(githubAdapter.supportsSource).toHaveBeenCalledWith(source);
       expect(gitlabAdapter.supportsSource).not.toHaveBeenCalled();
     });
 
-    it('returns null when no adapter supports auto-detected platform', () => {
+    it("returns null when no adapter supports auto-detected platform", () => {
       // Act
       const platform = generatorService.autoDetectCicdPlatform(source);
 
@@ -126,7 +125,7 @@ describe('GeneratorService', () => {
       expect(gitlabAdapter.supportsSource).toHaveBeenCalledWith(source);
     });
 
-    it('auto-detects CI/CD adapter instance when it supports the source', () => {
+    it("auto-detects CI/CD adapter instance when it supports the source", () => {
       // Arrange
       gitlabAdapter.supportsSource.mockReturnValueOnce(true);
 
@@ -139,7 +138,7 @@ describe('GeneratorService', () => {
       expect(gitlabAdapter.supportsSource).toHaveBeenCalledWith(source);
     });
 
-    it('returns undefined when no adapter supports the source', () => {
+    it("returns undefined when no adapter supports the source", () => {
       // Act
       const adapter = generatorService.autoDetectCicdAdapter(source);
 
@@ -150,11 +149,11 @@ describe('GeneratorService', () => {
     });
   });
 
-  describe('generateDocumentationForPlatform', () => {
-    it('generates documentation using adapter default destination when supported', async () => {
+  describe("generateDocumentationForPlatform", () => {
+    it("generates documentation using adapter default destination when supported", async () => {
       // Arrange
       githubAdapter.supportsSource.mockReturnValue(true);
-      mockDiffRenderer.finalize.mockResolvedValueOnce('diff-output');
+      mockDiffRenderer.finalize.mockResolvedValueOnce("diff-output");
 
       // Act
       const result = await generatorService.generateDocumentationForPlatform({
@@ -168,10 +167,10 @@ describe('GeneratorService', () => {
 
       // Assert
       expect(githubAdapter.getDocumentationPath).toHaveBeenCalledWith(source);
-      expect(formatterService.getFormatterAdapterForFile).toHaveBeenCalledWith('/tmp/README.md');
+      expect(formatterService.getFormatterAdapterForFile).toHaveBeenCalledWith("/tmp/README.md");
       expect(formatterAdapter.setOptions).toHaveBeenCalledWith(formatterOptions);
       expect(rendererFactory).toHaveBeenCalledWith(true);
-      expect(mockDiffRenderer.initialize).toHaveBeenCalledWith('/tmp/README.md', formatterAdapter);
+      expect(mockDiffRenderer.initialize).toHaveBeenCalledWith("/tmp/README.md", formatterAdapter);
       expect(githubAdapter.generateDocumentation).toHaveBeenCalledWith({
         source,
         sections,
@@ -179,14 +178,14 @@ describe('GeneratorService', () => {
         repositoryProvider,
       });
       expect(mockDiffRenderer.finalize).toHaveBeenCalled();
-      expect(result).toEqual({ destination: '/tmp/README.md', data: 'diff-output' });
+      expect(result).toEqual({ destination: "/tmp/README.md", data: "diff-output" });
     });
 
-    it('generates documentation using provided destination', async () => {
+    it("generates documentation using provided destination", async () => {
       // Arrange
-      const customDestination = '/tmp/custom.md';
+      const customDestination = "/tmp/custom.md";
       githubAdapter.supportsSource.mockReturnValue(true);
-      mockFileRenderer.finalize.mockResolvedValueOnce('final-content');
+      mockFileRenderer.finalize.mockResolvedValueOnce("final-content");
 
       // Act
       const result = await generatorService.generateDocumentationForPlatform({
@@ -212,10 +211,10 @@ describe('GeneratorService', () => {
         repositoryProvider,
       });
       expect(mockFileRenderer.finalize).toHaveBeenCalled();
-      expect(result).toEqual({ destination: customDestination, data: 'final-content' });
+      expect(result).toEqual({ destination: customDestination, data: "final-content" });
     });
 
-    it('throws when adapter does not support the provided source', async () => {
+    it("throws when adapter does not support the provided source", async () => {
       // Act & Assert
       await expect(
         generatorService.generateDocumentationForPlatform({
@@ -226,9 +225,9 @@ describe('GeneratorService', () => {
           generatorAdapter: githubAdapter,
           repositoryProvider,
           formatterOptions,
-        })
+        }),
       ).rejects.toThrow(
-        "CI/CD platform 'github-actions' does not support source '/tmp/source.yml'"
+        "CI/CD platform 'github-actions' does not support source '/tmp/source.yml'",
       );
 
       expect(githubAdapter.getDocumentationPath).not.toHaveBeenCalled();

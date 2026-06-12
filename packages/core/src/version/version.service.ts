@@ -1,8 +1,6 @@
 import { RepositoryProvider } from "../repository/repository.provider.js";
 
-export const VERSION_SERVICE_IDENTIFIER = Symbol.for(
-  '@ci-dokumentor/core/VersionService'
-);
+export const VERSION_SERVICE_IDENTIFIER = Symbol.for("@ci-dokumentor/core/VersionService");
 
 export type ManifestVersion = {
   ref?: string; // Branch, tag, or custom ref (e.g., 'v1.0.0', 'main')
@@ -13,12 +11,13 @@ export type ManifestVersion = {
  * Service for handling manifest version detection and processing
  */
 export class VersionService {
-
-
   /**
    * Get version information, either from user input or auto-detection
    */
-  async getVersion(userVersion?: string, repositoryProvider?: RepositoryProvider): Promise<ManifestVersion | undefined> {
+  async getVersion(
+    userVersion?: string,
+    repositoryProvider?: RepositoryProvider,
+  ): Promise<ManifestVersion | undefined> {
     // If user provided a version, use it
     if (userVersion) {
       return this.parseUserVersion(userVersion);

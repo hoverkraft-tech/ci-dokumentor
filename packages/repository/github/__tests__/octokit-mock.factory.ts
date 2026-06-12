@@ -1,20 +1,20 @@
-import { Mock, vi } from 'vitest';
+import { Mock, vi } from "vitest";
 
 const graphqlMock: Mock = vi.fn();
 
 export class OcktokitMockFactory {
-    static create() {
-        vi.mock("@octokit/graphql", () => {
-            return {
-                graphql: Object.assign(
-                    vi.fn(() => graphqlMock), // called by .defaults(...) -> returns a function
-                    { defaults: vi.fn(() => graphqlMock) }
-                ),
-            };
-        });
+  static create() {
+    vi.mock("@octokit/graphql", () => {
+      return {
+        graphql: Object.assign(
+          vi.fn(() => graphqlMock), // called by .defaults(...) -> returns a function
+          { defaults: vi.fn(() => graphqlMock) },
+        ),
+      };
+    });
 
-        return {
-            graphqlMock
-        }
-    }
+    return {
+      graphqlMock,
+    };
+  }
 }

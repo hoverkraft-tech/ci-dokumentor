@@ -1,7 +1,7 @@
-import { injectable, injectFromBase } from 'inversify';
-import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
-import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
+import { injectable, injectFromBase } from "inversify";
+import { SectionIdentifier } from "@ci-dokumentor/core";
+import type { FormatterAdapter, ReadableContent } from "@ci-dokumentor/core";
+import { AbstractMigrationAdapter } from "./abstract-migration.adapter.js";
 
 /**
  * Migration adapter for action-docs tool
@@ -17,14 +17,14 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
   extendConstructorArguments: true,
 })
 export class ActionDocsMigrationAdapter extends AbstractMigrationAdapter {
-  protected readonly name = 'action-docs';
+  protected readonly name = "action-docs";
 
   protected readonly sectionMappings: Record<string, SectionIdentifier> = {
-    'header': SectionIdentifier.Header,
-    'description': SectionIdentifier.Overview,
-    'inputs': SectionIdentifier.Inputs,
-    'outputs': SectionIdentifier.Outputs,
-    'runs': SectionIdentifier.Usage,
+    header: SectionIdentifier.Header,
+    description: SectionIdentifier.Overview,
+    inputs: SectionIdentifier.Inputs,
+    outputs: SectionIdentifier.Outputs,
+    runs: SectionIdentifier.Usage,
   };
 
   protected readonly patterns = {
@@ -33,7 +33,10 @@ export class ActionDocsMigrationAdapter extends AbstractMigrationAdapter {
     detectionPattern: /<!--\s*action-docs-\w+\s+source=["'][^"']+["']\s*-->/,
   };
 
-  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
+  protected migrateContent(
+    content: ReadableContent,
+    formatterAdapter: FormatterAdapter,
+  ): ReadableContent {
     // Delegate marker replacement and mapping to the base class helper which
     // operates on the provided content fragment to avoid allocating large
     // intermediate strings here.

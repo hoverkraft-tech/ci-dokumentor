@@ -1,19 +1,19 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from "vitest";
 import {
   FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
   RepositoryProvider,
   ReadableContent,
-} from '@ci-dokumentor/core';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
-import { GitLabComponentInput } from '../gitlab-ci-parser.js';
-import { GitLabComponentMockFactory } from '../../__tests__/gitlab-component-mock.factory.js';
-import { GitLabCIPipelineMockFactory } from '../../__tests__/gitlab-pipeline-mock.factory.js';
-import { initTestContainer } from '../container.js';
-import { InputsSectionGenerator } from './inputs-section-generator.adapter.js';
+} from "@ci-dokumentor/core";
+import { RepositoryProviderMockFactory } from "@ci-dokumentor/core/tests";
+import { GitLabComponentInput } from "../gitlab-ci-parser.js";
+import { GitLabComponentMockFactory } from "../../__tests__/gitlab-component-mock.factory.js";
+import { GitLabCIPipelineMockFactory } from "../../__tests__/gitlab-pipeline-mock.factory.js";
+import { initTestContainer } from "../container.js";
+import { InputsSectionGenerator } from "./inputs-section-generator.adapter.js";
 
-describe('InputsSectionGenerator', () => {
+describe("InputsSectionGenerator", () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
   let generator: InputsSectionGenerator;
@@ -33,8 +33,8 @@ describe('InputsSectionGenerator', () => {
     vi.resetAllMocks();
   });
 
-  describe('getSectionIdentifier', () => {
-    it('should return Inputs section identifier', () => {
+  describe("getSectionIdentifier", () => {
+    it("should return Inputs section identifier", () => {
       // Act
       const result = generator.getSectionIdentifier();
 
@@ -43,31 +43,31 @@ describe('InputsSectionGenerator', () => {
     });
   });
 
-  describe('generateSection', () => {
-    describe('with GitLab Component manifest', () => {
-      it('should generate inputs table for component with inputs', async () => {
+  describe("generateSection", () => {
+    describe("with GitLab Component manifest", () => {
+      it("should generate inputs table for component with inputs", async () => {
         // Arrange
         const manifest = GitLabComponentMockFactory.create({
           spec: {
             inputs: {
-              'image-name': {
-                description: 'Name of the Docker image',
-                type: 'string',
-                required: true
+              "image-name": {
+                description: "Name of the Docker image",
+                type: "string",
+                required: true,
               },
-              'image-tag': {
-                description: 'Tag for the Docker image',
-                type: 'string',
-                default: 'latest'
+              "image-tag": {
+                description: "Tag for the Docker image",
+                type: "string",
+                default: "latest",
               },
-              'push-enabled': {
-                description: 'Whether to push the image',
-                type: 'boolean',
-                default: 'true',
-                required: false
-              }
-            }
-          }
+              "push-enabled": {
+                description: "Whether to push the image",
+                type: "boolean",
+                default: "true",
+                required: false,
+              },
+            },
+          },
         });
 
         // Act
@@ -75,7 +75,7 @@ describe('InputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'docs.md'
+          destination: "docs.md",
         });
 
         // Assert
@@ -91,12 +91,12 @@ describe('InputsSectionGenerator', () => {
 `);
       });
 
-      it('should return empty content when component has no inputs', async () => {
+      it("should return empty content when component has no inputs", async () => {
         // Arrange
         const manifest = GitLabComponentMockFactory.create({
           spec: {
-            inputs: {}
-          }
+            inputs: {},
+          },
         });
 
         // Act
@@ -104,17 +104,17 @@ describe('InputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'docs.md'
+          destination: "docs.md",
         });
 
         // Assert
         expect(result.isEmpty()).toBe(true);
       });
 
-      it('should return empty content when component has no spec', async () => {
+      it("should return empty content when component has no spec", async () => {
         // Arrange
         const manifest = GitLabComponentMockFactory.create({
-          spec: undefined
+          spec: undefined,
         });
 
         // Act
@@ -122,21 +122,21 @@ describe('InputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'docs.md'
+          destination: "docs.md",
         });
 
         // Assert
         expect(result.isEmpty()).toBe(true);
       });
 
-      it('should handle inputs with minimal information', async () => {
+      it("should handle inputs with minimal information", async () => {
         // Arrange
         const manifest = GitLabComponentMockFactory.create({
           spec: {
             inputs: {
-              'minimal-input': {}
-            }
-          }
+              "minimal-input": {},
+            },
+          },
         });
 
         // Act
@@ -144,7 +144,7 @@ describe('InputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'docs.md'
+          destination: "docs.md",
         });
 
         // Assert
@@ -158,18 +158,18 @@ describe('InputsSectionGenerator', () => {
 `);
       });
 
-      it('should use inputs from root level if spec.inputs is not available', async () => {
+      it("should use inputs from root level if spec.inputs is not available", async () => {
         // Arrange
         const manifest = GitLabComponentMockFactory.create({
           inputs: {
-            'root-input': {
-              description: 'Input at root level',
-              type: 'string'
-            }
+            "root-input": {
+              description: "Input at root level",
+              type: "string",
+            },
           },
           spec: {
-            inputs: undefined as unknown as Record<string, GitLabComponentInput>
-          }
+            inputs: undefined as unknown as Record<string, GitLabComponentInput>,
+          },
         });
 
         // Act
@@ -177,7 +177,7 @@ describe('InputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'docs.md'
+          destination: "docs.md",
         });
 
         // Assert
@@ -192,8 +192,8 @@ describe('InputsSectionGenerator', () => {
       });
     });
 
-    describe('with GitLab CI Pipeline manifest', () => {
-      it('should return empty content for pipelines', async () => {
+    describe("with GitLab CI Pipeline manifest", () => {
+      it("should return empty content for pipelines", async () => {
         // Arrange
         const manifest = GitLabCIPipelineMockFactory.create();
 
@@ -202,7 +202,7 @@ describe('InputsSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'README.md'
+          destination: "README.md",
         });
 
         // Assert

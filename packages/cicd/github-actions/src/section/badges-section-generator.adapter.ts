@@ -1,7 +1,15 @@
-import { ReadableContent, RepositoryProvider, SectionGenerationPayload, SectionGeneratorAdapter, SectionOptions, FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
-import { GitHubActionsManifest } from '../github-actions-parser.js';
-import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
+import {
+  ReadableContent,
+  RepositoryProvider,
+  SectionGenerationPayload,
+  SectionGeneratorAdapter,
+  SectionOptions,
+  FormatterAdapter,
+  SectionIdentifier,
+} from "@ci-dokumentor/core";
+import { injectable } from "inversify";
+import { GitHubActionsManifest } from "../github-actions-parser.js";
+import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 type Badge = { label: string; url: string };
 type LinkedBadge = { url?: string; badge: Badge };
@@ -11,8 +19,10 @@ export interface BadgesSectionOptions extends SectionOptions {
 }
 
 @injectable()
-export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter implements SectionGeneratorAdapter<GitHubActionsManifest, BadgesSectionOptions> {
-
+export class BadgesSectionGenerator
+  extends GitHubActionsSectionGeneratorAdapter
+  implements SectionGeneratorAdapter<GitHubActionsManifest, BadgesSectionOptions>
+{
   private extraBadges?: LinkedBadge[];
 
   getSectionIdentifier(): SectionIdentifier {
@@ -22,8 +32,9 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   override getSectionOptions() {
     return {
       extraBadges: {
-        flags: '--extra-badges <badges>',
-        description: 'Additional badges to include as JSON array of objects with label, url, and linkUrl properties',
+        flags: "--extra-badges <badges>",
+        description:
+          "Additional badges to include as JSON array of objects with label, url, and linkUrl properties",
       },
     };
   }
@@ -38,35 +49,43 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       parsed = JSON.parse(extraBadges);
     } catch (error: unknown) {
       // Improve the error message to help users who pass multiline JSON through GitHub Actions inputs
-      const hint = 'When using this option in GitHub Actions, ensure the JSON is passed as a single argument or encode it (e.g. base64).';
+      const hint =
+        "When using this option in GitHub Actions, ensure the JSON is passed as a single argument or encode it (e.g. base64).";
       const maybeError = error as { message?: unknown } | undefined;
-      const message = maybeError && typeof maybeError.message === 'string'
-        ? maybeError.message
-        : 'Failed to parse extra badges JSON.';
-      throw new Error([message, hint].map(part => part.trim()).filter(Boolean).join('. '), { cause: error });
+      const message =
+        maybeError && typeof maybeError.message === "string"
+          ? maybeError.message
+          : "Failed to parse extra badges JSON.";
+      throw new Error(
+        [message, hint]
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .join(". "),
+        { cause: error },
+      );
     }
 
     if (!Array.isArray(parsed)) {
-      throw new Error('The extra badges option must be a JSON array of badge objects.');
+      throw new Error("The extra badges option must be a JSON array of badge objects.");
     }
 
-    this.extraBadges = parsed.map(badge => {
+    this.extraBadges = parsed.map((badge) => {
       // Determine the badge label
       const badgeLabel = badge.label;
-      if (!badgeLabel || typeof badgeLabel !== 'string') {
-        throw new Error('Badge must have a label property for the badge label.');
+      if (!badgeLabel || typeof badgeLabel !== "string") {
+        throw new Error("Badge must have a label property for the badge label.");
       }
 
       // Determine the badge image URL (shields.io URL)
       const badgeImageUrl = badge.url;
-      if (!badgeImageUrl || typeof badgeImageUrl !== 'string') {
-        throw new Error('Badge must have a url property for the badge image URL.');
+      if (!badgeImageUrl || typeof badgeImageUrl !== "string") {
+        throw new Error("Badge must have a url property for the badge image URL.");
       }
 
       // Determine the link URL (where clicking the badge should go)
       const linkUrl = badge.linkUrl;
-      if (linkUrl !== undefined && typeof linkUrl !== 'string') {
-        throw new Error('Badge linkUrl property must be a string if provided.');
+      if (linkUrl !== undefined && typeof linkUrl !== "string") {
+        throw new Error("Badge linkUrl property must be a string if provided.");
       }
 
       return {
@@ -79,19 +98,23 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     });
   }
 
-  async generateSection({ formatterAdapter, manifest, repositoryProvider }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
+  async generateSection({
+    formatterAdapter,
+    manifest,
+    repositoryProvider,
+  }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     const linkedBadges = await this.getAllBadges(manifest, repositoryProvider);
     return this.formatBadgeCollection(linkedBadges, formatterAdapter);
   }
 
   private async getAllBadges(
     manifest: GitHubActionsManifest,
-    repositoryProvider: RepositoryProvider
+    repositoryProvider: RepositoryProvider,
   ): Promise<LinkedBadge[]> {
     const badges = [
-      ...await this.getDistributionBadges(manifest, repositoryProvider),
-      ...await this.getComplianceBadges(repositoryProvider),
-      ...await this.getCommunityBadges(repositoryProvider),
+      ...(await this.getDistributionBadges(manifest, repositoryProvider)),
+      ...(await this.getComplianceBadges(repositoryProvider)),
+      ...(await this.getCommunityBadges(repositoryProvider)),
     ];
 
     // Add extra badges if provided
@@ -104,27 +127,27 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   private async getDistributionBadges(
     manifest: GitHubActionsManifest,
-    repositoryProvider: RepositoryProvider
+    repositoryProvider: RepositoryProvider,
   ): Promise<LinkedBadge[]> {
     const repositoryInfo = await repositoryProvider.getRepositoryInfo();
 
-    const actionName = manifest.name.toLowerCase().replace(/[\s()]+/g, '-');
+    const actionName = manifest.name.toLowerCase().replace(/[\s()]+/g, "-");
     const badges = [
       {
         url: `${repositoryInfo.url}/releases`,
         badge: {
-          label: 'Release',
+          label: "Release",
           url: `https://img.shields.io/github/v/release/${repositoryInfo.fullName}`,
         },
       },
     ];
 
     if (this.isGitHubAction(manifest)) {
-      const badgeName = `Marketplace-${actionName.replace(/-/g, '--')}`;
+      const badgeName = `Marketplace-${actionName.replace(/-/g, "--")}`;
       badges.unshift({
         url: `https://github.com/marketplace/actions/${actionName}`,
         badge: {
-          label: 'Marketplace',
+          label: "Marketplace",
           url: `https://img.shields.io/badge/${badgeName}-blue?logo=github-actions`,
         },
       });
@@ -134,7 +157,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
   }
 
   private async getComplianceBadges(
-    repositoryProvider: RepositoryProvider
+    repositoryProvider: RepositoryProvider,
   ): Promise<LinkedBadge[]> {
     const license = await repositoryProvider.getLicense();
     if (!license) {
@@ -148,23 +171,21 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       {
         url: license.url ?? badgeUrl,
         badge: {
-          label: 'License',
+          label: "License",
           url: badgeUrl,
         },
       },
     ];
   }
 
-  private async getCommunityBadges(
-    repositoryProvider: RepositoryProvider
-  ): Promise<LinkedBadge[]> {
+  private async getCommunityBadges(repositoryProvider: RepositoryProvider): Promise<LinkedBadge[]> {
     const repositoryInfo = await repositoryProvider.getRepositoryInfo();
 
     const badges: LinkedBadge[] = [
       {
         url: `https://img.shields.io/github/stars/${repositoryInfo.fullName}?style=social`,
         badge: {
-          label: 'Stars',
+          label: "Stars",
           url: `https://img.shields.io/github/stars/${repositoryInfo.fullName}?style=social`,
         },
       },
@@ -175,8 +196,8 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
       badges.push({
         url: contributing.url,
         badge: {
-          label: 'PRs Welcome',
-          url: 'https://img.shields.io/badge/PRs-welcome-brightgreen.svg',
+          label: "PRs Welcome",
+          url: "https://img.shields.io/badge/PRs-welcome-brightgreen.svg",
         },
       });
     }
@@ -186,7 +207,7 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
 
   private formatBadgeCollection(
     linkedBadges: LinkedBadge[],
-    formatterAdapter: FormatterAdapter
+    formatterAdapter: FormatterAdapter,
   ): ReadableContent {
     if (linkedBadges.length === 0) {
       return ReadableContent.empty();
@@ -195,14 +216,17 @@ export class BadgesSectionGenerator extends GitHubActionsSectionGeneratorAdapter
     let badgesCollectionContent = ReadableContent.empty();
 
     linkedBadges.forEach((linkedBadge) => {
-      let badgeContent = formatterAdapter.badge(new ReadableContent(linkedBadge.badge.label), new ReadableContent(linkedBadge.badge.url));
+      let badgeContent = formatterAdapter.badge(
+        new ReadableContent(linkedBadge.badge.label),
+        new ReadableContent(linkedBadge.badge.url),
+      );
       if (linkedBadge.url) {
-        badgeContent = formatterAdapter.link(
-          badgeContent,
-          new ReadableContent(linkedBadge.url)
-        );
+        badgeContent = formatterAdapter.link(badgeContent, new ReadableContent(linkedBadge.url));
       }
-      badgesCollectionContent = badgesCollectionContent.append(badgeContent, formatterAdapter.lineBreak());
+      badgesCollectionContent = badgesCollectionContent.append(
+        badgeContent,
+        formatterAdapter.lineBreak(),
+      );
     });
 
     return badgesCollectionContent;

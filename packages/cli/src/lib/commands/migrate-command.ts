@@ -1,11 +1,11 @@
-import { inject, injectable, injectFromBase } from 'inversify';
-import { Command } from 'commander';
-import { MigrationService } from '@ci-dokumentor/core';
+import { inject, injectable, injectFromBase } from "inversify";
+import { Command } from "commander";
+import { MigrationService } from "@ci-dokumentor/core";
 import {
   MigrateDocumentationUseCase,
   MigrateDocumentationUseCaseInput,
-} from '../usecases/migrate-documentation.usecase.js';
-import { BaseCommand } from './base-command.js';
+} from "../usecases/migrate-documentation.usecase.js";
+import { BaseCommand } from "./base-command.js";
 
 export type MigrateCommandOptions = {
   outputFormat: string;
@@ -41,26 +41,17 @@ export class MigrateCommand extends BaseCommand {
     // Get available migration tools
     const availableTools = this.migrationService.getSupportedTools();
 
-    return this.name('migrate')
-      .description('Migrate existing documentation markers from various tools to ci-dokumentor format')
-      .option(
-        '-t, --tool <tool>',
-        `Migration tool to convert from (${availableTools.join(', ')})`,
+    return this.name("migrate")
+      .description(
+        "Migrate existing documentation markers from various tools to ci-dokumentor format",
       )
+      .option("-t, --tool <tool>", `Migration tool to convert from (${availableTools.join(", ")})`)
       .requiredOption(
-        '-d, --destination <file...>',
-        'Destination file(s) containing documentation markers to migrate. Supports glob patterns and multiple files.'
+        "-d, --destination <file...>",
+        "Destination file(s) containing documentation markers to migrate. Supports glob patterns and multiple files.",
       )
-      .option(
-        '--dry-run',
-        'Preview what would be migrated without writing files',
-        false
-      )
-      .option(
-        '--concurrency [number]',
-        'Maximum number of files to process concurrently',
-        '5'
-      )
+      .option("--dry-run", "Preview what would be migrated without writing files", false)
+      .option("--concurrency [number]", "Maximum number of files to process concurrently", "5")
       .action(async (options: MigrateCommandOptions) => {
         const input: MigrateDocumentationUseCaseInput = this.mapMigrateCommandOptions(options);
         await this.migrateDocumentationUseCase.execute(input);
@@ -68,7 +59,9 @@ export class MigrateCommand extends BaseCommand {
       .helpCommand(true);
   }
 
-  private mapMigrateCommandOptions(options: MigrateCommandOptions): MigrateDocumentationUseCaseInput {
+  private mapMigrateCommandOptions(
+    options: MigrateCommandOptions,
+  ): MigrateDocumentationUseCaseInput {
     return {
       tool: options.tool,
       destination: options.destination,

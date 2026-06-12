@@ -1,22 +1,17 @@
-import { RepositoryInfo, RepositoryProvider } from '../repository/repository.provider.js';
-import { RendererAdapter } from '../renderer/renderer.adapter.js';
-import {
-  GeneratorAdapter,
-  GenerateSectionsOptions,
-} from './generator.adapter.js';
+import { RepositoryInfo, RepositoryProvider } from "../repository/repository.provider.js";
+import { RendererAdapter } from "../renderer/renderer.adapter.js";
+import { GeneratorAdapter, GenerateSectionsOptions } from "./generator.adapter.js";
 import {
   SectionGeneratorAdapter,
   SectionOptionsDescriptors,
   SectionGenerationPayload,
-} from './section/section-generator.adapter.js';
+} from "./section/section-generator.adapter.js";
 
 /**
  * Abstract base class for generator adapters to avoid code duplication
  */
 export abstract class AbstractGeneratorAdapter<TManifest> implements GeneratorAdapter {
-  constructor(
-    protected readonly sectionGeneratorAdapters: SectionGeneratorAdapter<TManifest>[]
-  ) { }
+  constructor(protected readonly sectionGeneratorAdapters: SectionGeneratorAdapter<TManifest>[]) {}
 
   /**
    * Get the platform name identifier for this adapter
@@ -27,9 +22,7 @@ export abstract class AbstractGeneratorAdapter<TManifest> implements GeneratorAd
    * Get the list of supported section identifiers for this adapter
    */
   getSupportedSections(): string[] {
-    return this.sectionGeneratorAdapters.map((adapter) =>
-      adapter.getSectionIdentifier()
-    );
+    return this.sectionGeneratorAdapters.map((adapter) => adapter.getSectionIdentifier());
   }
 
   /**
@@ -113,7 +106,7 @@ export abstract class AbstractGeneratorAdapter<TManifest> implements GeneratorAd
    */
   protected shouldGenerateSection(
     sectionGeneratorAdapter: SectionGeneratorAdapter<TManifest>,
-    options: GenerateSectionsOptions
+    options: GenerateSectionsOptions,
   ): boolean {
     const sectionId = sectionGeneratorAdapter.getSectionIdentifier();
 

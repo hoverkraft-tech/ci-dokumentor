@@ -1,7 +1,7 @@
-import { injectable, injectFromBase } from 'inversify';
-import { SectionIdentifier } from '@ci-dokumentor/core';
-import type { FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
-import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
+import { injectable, injectFromBase } from "inversify";
+import { SectionIdentifier } from "@ci-dokumentor/core";
+import type { FormatterAdapter, ReadableContent } from "@ci-dokumentor/core";
+import { AbstractMigrationAdapter } from "./abstract-migration.adapter.js";
 
 /**
  * Migration adapter for actdocs tool
@@ -17,14 +17,14 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
   extendConstructorArguments: true,
 })
 export class ActdocsMigrationAdapter extends AbstractMigrationAdapter {
-  protected readonly name = 'actdocs';
+  protected readonly name = "actdocs";
 
   protected readonly sectionMappings: Record<string, SectionIdentifier> = {
-    'description': SectionIdentifier.Overview,
-    'inputs': SectionIdentifier.Inputs,
-    'secrets': SectionIdentifier.Secrets,
-    'outputs': SectionIdentifier.Outputs,
-    'permissions': SectionIdentifier.Security,
+    description: SectionIdentifier.Overview,
+    inputs: SectionIdentifier.Inputs,
+    secrets: SectionIdentifier.Secrets,
+    outputs: SectionIdentifier.Outputs,
+    permissions: SectionIdentifier.Security,
   };
 
   protected readonly patterns = {
@@ -33,7 +33,10 @@ export class ActdocsMigrationAdapter extends AbstractMigrationAdapter {
     detectionPattern: /<!--\s*actdocs\s+\w+\s+(start|end)\s*-->/i,
   };
 
-  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
+  protected migrateContent(
+    content: ReadableContent,
+    formatterAdapter: FormatterAdapter,
+  ): ReadableContent {
     // Delegate the replacement logic to the shared helper in the abstract class.
     return this.processMarkerMappings(content, formatterAdapter);
   }

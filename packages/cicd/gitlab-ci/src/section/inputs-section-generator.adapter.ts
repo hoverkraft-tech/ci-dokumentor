@@ -1,13 +1,16 @@
-import { InputsSectionMixin, FormatterAdapter, ReadableContent } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
-import { GitLabCIManifest, GitLabComponentInput } from '../gitlab-ci-parser.js';
-import { GitLabCISectionGeneratorAdapter } from './gitlab-ci-section-generator.adapter.js';
+import { InputsSectionMixin, FormatterAdapter, ReadableContent } from "@ci-dokumentor/core";
+import { injectable } from "inversify";
+import { GitLabCIManifest, GitLabComponentInput } from "../gitlab-ci-parser.js";
+import { GitLabCISectionGeneratorAdapter } from "./gitlab-ci-section-generator.adapter.js";
 
 @injectable()
-export class InputsSectionGenerator extends InputsSectionMixin<GitLabCIManifest, typeof GitLabCISectionGeneratorAdapter>(GitLabCISectionGeneratorAdapter) {
+export class InputsSectionGenerator extends InputsSectionMixin<
+  GitLabCIManifest,
+  typeof GitLabCISectionGeneratorAdapter
+>(GitLabCISectionGeneratorAdapter) {
   public override async generateInputsContent(
     formatterAdapter: FormatterAdapter,
-    manifest: GitLabCIManifest
+    manifest: GitLabCIManifest,
   ): Promise<ReadableContent> {
     let inputs: Record<string, GitLabComponentInput> | undefined;
 
@@ -27,14 +30,14 @@ export class InputsSectionGenerator extends InputsSectionMixin<GitLabCIManifest,
 
   private generateInputsTable(
     formatterAdapter: FormatterAdapter,
-    inputs: Record<string, GitLabComponentInput>
+    inputs: Record<string, GitLabComponentInput>,
   ): ReadableContent {
     const headers = [
-      formatterAdapter.bold(new ReadableContent('Input')),
-      formatterAdapter.bold(new ReadableContent('Description')),
-      formatterAdapter.bold(new ReadableContent('Required')),
-      formatterAdapter.bold(new ReadableContent('Type')),
-      formatterAdapter.bold(new ReadableContent('Default')),
+      formatterAdapter.bold(new ReadableContent("Input")),
+      formatterAdapter.bold(new ReadableContent("Description")),
+      formatterAdapter.bold(new ReadableContent("Required")),
+      formatterAdapter.bold(new ReadableContent("Type")),
+      formatterAdapter.bold(new ReadableContent("Default")),
     ];
 
     const rows = Object.entries(inputs).map(([name, input]) => {

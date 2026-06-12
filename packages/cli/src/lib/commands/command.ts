@@ -1,6 +1,6 @@
-import { Program } from '../application/program.js';
+import { Program } from "../application/program.js";
 
-export const COMMAND_IDENTIFIER = Symbol('Command');
+export const COMMAND_IDENTIFIER = Symbol("Command");
 
 /**
  * Command interface

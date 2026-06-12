@@ -1,22 +1,13 @@
-import { inject, injectable, multiInject } from 'inversify';
-import { Option } from 'commander';
-import {
-  COMMAND_IDENTIFIER
-  
-} from '../commands/command.js';
-import type {Command} from '../commands/command.js';
-import {
-  PACKAGE_SERVICE_IDENTIFIER
-  
-} from '../package/package-service.js';
-import type {PackageService} from '../package/package-service.js';
-import { LoggerService } from '../logger/logger.service.js';
-import {
-  PROGRAM_IDENTIFIER
-  
-} from './program.js';
-import type {Program} from './program.js';
-import { ProgramConfiguratorService } from './program-configurator.service.js';
+import { inject, injectable, multiInject } from "inversify";
+import { Option } from "commander";
+import { COMMAND_IDENTIFIER } from "../commands/command.js";
+import type { Command } from "../commands/command.js";
+import { PACKAGE_SERVICE_IDENTIFIER } from "../package/package-service.js";
+import type { PackageService } from "../package/package-service.js";
+import { LoggerService } from "../logger/logger.service.js";
+import { PROGRAM_IDENTIFIER } from "./program.js";
+import type { Program } from "./program.js";
+import { ProgramConfiguratorService } from "./program-configurator.service.js";
 
 /**
  * Main CLI application class that orchestrates command execution
@@ -30,9 +21,9 @@ export class CliApplication {
     @inject(PACKAGE_SERVICE_IDENTIFIER)
     private readonly packageService: PackageService,
     @inject(LoggerService) private readonly loggerService: LoggerService,
-    @inject(ProgramConfiguratorService) private readonly programConfiguratorService: ProgramConfiguratorService
-  ) {
-  }
+    @inject(ProgramConfiguratorService)
+    private readonly programConfiguratorService: ProgramConfiguratorService,
+  ) {}
 
   async setup() {
     await this.setupProgram();
@@ -59,8 +50,8 @@ export class CliApplication {
 
     const supportedFormats = this.loggerService.getSupportedFormats();
     const outputFormatOption = new Option(
-      '-o, --output-format <format>',
-      'Output format for the CLI'
+      "-o, --output-format <format>",
+      "Output format for the CLI",
     ).choices(supportedFormats);
     // Default is the first supported format
     outputFormatOption.default(supportedFormats[0]);

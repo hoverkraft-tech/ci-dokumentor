@@ -1,6 +1,6 @@
-import { injectable } from 'inversify';
-import { Command as CommanderCommand } from 'commander';
-import { Command } from './command.js';
+import { injectable } from "inversify";
+import { Command as CommanderCommand } from "commander";
+import { Command } from "./command.js";
 
 /**
  * Abstract base class for commands that extends Commander Command

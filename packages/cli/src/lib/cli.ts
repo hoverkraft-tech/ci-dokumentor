@@ -1,5 +1,5 @@
-import { CliApplication } from './application/cli-application.js';
-import { initGlobalContainer } from './global-container.js';
+import { CliApplication } from "./application/cli-application.js";
+import { initGlobalContainer } from "./global-container.js";
 
 /**
  * Main CLI function that creates and runs the CLI application

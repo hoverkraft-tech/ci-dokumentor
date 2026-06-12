@@ -1,12 +1,22 @@
-import { ManifestVersion } from '../version/version.service.js';
-import { LicenseInfo } from '../license/license.service.js';
-import { RepositoryProvider, RepositoryInfo, ContributingInfo, SecurityInfo, RepositoryOptions, RepositoryOptionsDescriptors } from './repository.provider.js';
+import { ManifestVersion } from "../version/version.service.js";
+import { LicenseInfo } from "../license/license.service.js";
+import {
+  RepositoryProvider,
+  RepositoryInfo,
+  ContributingInfo,
+  SecurityInfo,
+  RepositoryOptions,
+  RepositoryOptionsDescriptors,
+} from "./repository.provider.js";
 
 /**
  * Abstract base class that provides caching for repository providers
  * Subclasses should implement the fetch* methods to retrieve data
  */
-export abstract class AbstractRepositoryProvider<Options extends RepositoryOptions = RepositoryOptions> implements RepositoryProvider<Options> {
+export abstract class AbstractRepositoryProvider<
+  Options extends RepositoryOptions = RepositoryOptions,
+> implements RepositoryProvider<Options>
+{
   private cache = new Map<string, unknown>();
 
   abstract getPlatformName(): string;
@@ -49,42 +59,42 @@ export abstract class AbstractRepositoryProvider<Options extends RepositoryOptio
    * Get basic repository information with caching
    */
   async getRepositoryInfo(): Promise<RepositoryInfo> {
-    return this.getCached('repositoryInfo', () => this.fetchRepositoryInfo());
+    return this.getCached("repositoryInfo", () => this.fetchRepositoryInfo());
   }
 
   /**
    * Get repository logo URI with caching
    */
   async getLogo(): Promise<string | undefined> {
-    return this.getCached('logo', () => this.fetchLogo());
+    return this.getCached("logo", () => this.fetchLogo());
   }
 
   /**
    * Get license information with caching
    */
   async getLicense(): Promise<LicenseInfo | undefined> {
-    return this.getCached('license', () => this.fetchLicense());
+    return this.getCached("license", () => this.fetchLicense());
   }
 
   /**
    * Get contributing guidelines information with caching
    */
   async getContributing(): Promise<ContributingInfo | undefined> {
-    return this.getCached('contributing', () => this.fetchContributing());
+    return this.getCached("contributing", () => this.fetchContributing());
   }
 
   /**
    * Get security policy information with caching
    */
   async getSecurity(): Promise<SecurityInfo | undefined> {
-    return this.getCached('security', () => this.fetchSecurity());
+    return this.getCached("security", () => this.fetchSecurity());
   }
 
   /**
    * Get the latest version information with caching
    */
   async getLatestVersion(): Promise<ManifestVersion | undefined> {
-    return this.getCached('latestVersion', async () => this.fetchLatestVersion());
+    return this.getCached("latestVersion", async () => this.fetchLatestVersion());
   }
 
   /**

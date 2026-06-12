@@ -1,27 +1,26 @@
-import { inject, injectable } from 'inversify';
-import { FormatterLanguage } from '../formatter-language.js';
-import { FormatterAdapter, FormatterOptions, LinkFormat } from '../formatter.adapter.js';
-import { SectionIdentifier } from '../../generator/section/section-generator.adapter.js';
-import { ReadableContent } from '../../reader/readable-content.js';
-import { MarkdownTableGenerator } from './markdown-table.generator.js';
-import { MarkdownLinkGenerator } from './markdown-link.generator.js';
-import { MarkdownCodeGenerator } from './markdown-code.generator.js';
+import { inject, injectable } from "inversify";
+import { FormatterLanguage } from "../formatter-language.js";
+import { FormatterAdapter, FormatterOptions, LinkFormat } from "../formatter.adapter.js";
+import { SectionIdentifier } from "../../generator/section/section-generator.adapter.js";
+import { ReadableContent } from "../../reader/readable-content.js";
+import { MarkdownTableGenerator } from "./markdown-table.generator.js";
+import { MarkdownLinkGenerator } from "./markdown-link.generator.js";
+import { MarkdownCodeGenerator } from "./markdown-code.generator.js";
 
 @injectable()
 export class MarkdownFormatterAdapter implements FormatterAdapter {
-  static readonly ITALIC_DELIMITER = '*';
-  private static readonly BOLD_DELIMITER = '**';
+  static readonly ITALIC_DELIMITER = "*";
+  private static readonly BOLD_DELIMITER = "**";
 
   private options: FormatterOptions = {
-    linkFormat: LinkFormat.Auto
+    linkFormat: LinkFormat.Auto,
   };
 
   constructor(
     @inject(MarkdownTableGenerator) private readonly markdownTableGenerator: MarkdownTableGenerator,
     @inject(MarkdownLinkGenerator) private readonly markdownLinkGenerator: MarkdownLinkGenerator,
-    @inject(MarkdownCodeGenerator) private readonly markdownCodeGenerator: MarkdownCodeGenerator
-  ) {
-  }
+    @inject(MarkdownCodeGenerator) private readonly markdownCodeGenerator: MarkdownCodeGenerator,
+  ) {}
 
   setOptions(options: FormatterOptions): void {
     this.options = { ...options };
@@ -32,7 +31,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   heading(content: ReadableContent, level = 1): ReadableContent {
-    const hashes = '#'.repeat(Math.max(1, Math.min(6, level)));
+    const hashes = "#".repeat(Math.max(1, Math.min(6, level)));
     // Enhanced: Use instance method with direct string support
     return new ReadableContent(`${hashes} `).append(content, this.lineBreak());
   }
@@ -51,7 +50,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         if (!lines[i].isEmpty()) {
           // Append the trimmed line. Add a newline after the line except
           // for the last one to avoid introducing an extra blank line.
-          result = result.append('  ', lines[i].trim());
+          result = result.append("  ", lines[i].trim());
           if (i < lines.length - 1) {
             result = result.append(this.lineBreak());
           }
@@ -62,16 +61,17 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       result = result.append(this.lineBreak());
     }
 
-    result = result.append('</div>', this.lineBreak());
+    result = result.append("</div>", this.lineBreak());
 
     return result;
   }
 
   paragraph(content: ReadableContent): ReadableContent {
     const linkFormat = this.options.linkFormat;
-    let processedInput = linkFormat && linkFormat !== LinkFormat.None
-      ? this.markdownLinkGenerator.transformUrls(content, linkFormat === LinkFormat.Full)
-      : content;
+    let processedInput =
+      linkFormat && linkFormat !== LinkFormat.None
+        ? this.markdownLinkGenerator.transformUrls(content, linkFormat === LinkFormat.Full)
+        : content;
 
     processedInput = this.transformList(processedInput);
 
@@ -81,14 +81,14 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   bold(content: ReadableContent): ReadableContent {
     return new ReadableContent(MarkdownFormatterAdapter.BOLD_DELIMITER).append(
       content.escape(MarkdownFormatterAdapter.BOLD_DELIMITER),
-      MarkdownFormatterAdapter.BOLD_DELIMITER
+      MarkdownFormatterAdapter.BOLD_DELIMITER,
     );
   }
 
   italic(input: ReadableContent): ReadableContent {
     return new ReadableContent(MarkdownFormatterAdapter.ITALIC_DELIMITER).append(
       input.escape(MarkdownFormatterAdapter.ITALIC_DELIMITER),
-      MarkdownFormatterAdapter.ITALIC_DELIMITER
+      MarkdownFormatterAdapter.ITALIC_DELIMITER,
     );
   }
 
@@ -110,19 +110,18 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     // don't escape it - callers sometimes pass pre-formatted markdown (badges) as the link text.
     const isInlineMarkdown = this.contentLooksLikeInlineMarkdown(text);
 
-    return new ReadableContent('[')
-      .append(
-        isInlineMarkdown ? text : text.escape(['[', ']']),
-        '](',
-        url.escape(')'),
-        ')'
-      );
+    return new ReadableContent("[").append(
+      isInlineMarkdown ? text : text.escape(["[", "]"]),
+      "](",
+      url.escape(")"),
+      ")",
+    );
   }
 
   image(
     url: ReadableContent,
     altText: ReadableContent,
-    options?: { width?: string; align?: string }
+    options?: { width?: string; align?: string },
   ): ReadableContent {
     if (options?.width || options?.align) {
       let result = new ReadableContent('<img src="').append(url, new ReadableContent('"'));
@@ -134,20 +133,16 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         result = result.append(` align="${options.align}"`);
       }
 
-      result = result.append(
-        ` alt="`,
-        altText.escape(['[', ']']),
-        `" />`
-      );
+      result = result.append(` alt="`, altText.escape(["[", "]"]), `" />`);
 
       return result;
     }
 
-    return new ReadableContent('![').append(
-      altText.escape(['[', ']']),
-      new ReadableContent(']('),
-      url.escape(['[', ']']),
-      new ReadableContent(')')
+    return new ReadableContent("![").append(
+      altText.escape(["[", "]"]),
+      new ReadableContent("]("),
+      url.escape(["[", "]"]),
+      new ReadableContent(")"),
     );
   }
 
@@ -157,11 +152,11 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
   badge(label: ReadableContent, url: ReadableContent): ReadableContent {
     return ReadableContent.empty().append(
-      '![',
-      label.escape([MarkdownFormatterAdapter.ITALIC_DELIMITER, ')']),
-      '](',
-      url.escape([MarkdownFormatterAdapter.ITALIC_DELIMITER, ')']),
-      ')'
+      "![",
+      label.escape([MarkdownFormatterAdapter.ITALIC_DELIMITER, ")"]),
+      "](",
+      url.escape([MarkdownFormatterAdapter.ITALIC_DELIMITER, ")"]),
+      ")",
     );
   }
 
@@ -172,14 +167,14 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
     let result = ReadableContent.empty();
     for (let i = 0; i < items.length; i++) {
-      const prefix = ordered ? `${i + 1}. ` : '- ';
+      const prefix = ordered ? `${i + 1}. ` : "- ";
       result = result.append(prefix, items[i], this.lineBreak());
     }
     return result;
   }
 
   horizontalRule(): ReadableContent {
-    return new ReadableContent('---').append(this.lineBreak());
+    return new ReadableContent("---").append(this.lineBreak());
   }
 
   lineBreak(): ReadableContent {
@@ -195,7 +190,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         startMarker,
         this.lineBreak(),
         endMarker,
-        this.lineBreak()
+        this.lineBreak(),
       );
     }
 
@@ -206,21 +201,21 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
       this.lineBreak(),
       this.lineBreak(),
       endMarker,
-      this.lineBreak()
+      this.lineBreak(),
     );
   }
 
   sectionStart(section: SectionIdentifier): ReadableContent {
-    return new ReadableContent('<!-- ').append(
-      new ReadableContent(section).escape(['<!--', '-->']),
-      new ReadableContent(':start -->')
+    return new ReadableContent("<!-- ").append(
+      new ReadableContent(section).escape(["<!--", "-->"]),
+      new ReadableContent(":start -->"),
     );
   }
 
   sectionEnd(section: SectionIdentifier): ReadableContent {
-    return new ReadableContent('<!-- ').append(
-      new ReadableContent(section).escape(['<!-- ', '-->']),
-      new ReadableContent(':end -->')
+    return new ReadableContent("<!-- ").append(
+      new ReadableContent(section).escape(["<!-- ", "-->"]),
+      new ReadableContent(":end -->"),
     );
   }
 
@@ -235,7 +230,6 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
     return content.test(/^\s*!?\[[^\]]*\]\([^)]*\)\s*$/);
   }
-
 
   private transformList(content: ReadableContent): ReadableContent {
     if (content.isEmpty()) {
@@ -299,7 +293,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         }
 
         // Already-indented continuation: keep as-is
-        if (line.startsWith(' ') || line.startsWith('\t')) {
+        if (line.startsWith(" ") || line.startsWith("\t")) {
           transformedLines = transformedLines.append(line);
           if (i < lines.length - 1) {
             transformedLines = transformedLines.append(this.lineBreak());
@@ -308,7 +302,7 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
         }
 
         // Non-indented, non-empty line after a list item: treat as continuation and indent by two spaces
-        transformedLines = transformedLines.append('  ', line);
+        transformedLines = transformedLines.append("  ", line);
         if (i < lines.length - 1) {
           transformedLines = transformedLines.append(this.lineBreak());
         }
@@ -325,5 +319,4 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
 
     return transformedLines;
   }
-
 }

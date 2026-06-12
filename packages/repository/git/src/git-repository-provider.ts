@@ -1,7 +1,15 @@
-import { RepositoryOptionsDescriptors, AbstractRepositoryProvider, RepositoryInfo, LicenseInfo, ContributingInfo, SecurityInfo, ManifestVersion } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
-import gitUrlParse from 'git-url-parse';
-import { simpleGit } from 'simple-git';
+import {
+  RepositoryOptionsDescriptors,
+  AbstractRepositoryProvider,
+  RepositoryInfo,
+  LicenseInfo,
+  ContributingInfo,
+  SecurityInfo,
+  ManifestVersion,
+} from "@ci-dokumentor/core";
+import { injectable } from "inversify";
+import gitUrlParse from "git-url-parse";
+import { simpleGit } from "simple-git";
 
 export type ParsedRemoteUrl = {
   source: string;
@@ -12,7 +20,7 @@ export type ParsedRemoteUrl = {
 };
 
 export const GIT_REPOSITORY_PROVIDER_IDENTIFIER = Symbol.for(
-  '@ci-dokumentor/repository-git/GitRepositoryProvider'
+  "@ci-dokumentor/repository-git/GitRepositoryProvider",
 );
 
 type GitRepositoryProviderOptions = Record<string, never>;
@@ -24,7 +32,7 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
    * Get the platform name identifier for this provider
    */
   getPlatformName(): string {
-    return 'git';
+    return "git";
   }
 
   getOptions(): RepositoryOptionsDescriptors<GitRepositoryProviderOptions> {
@@ -74,14 +82,13 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
   protected async fetchRepositoryInfo(): Promise<RepositoryInfo> {
     const parsedUrl = await this.getRemoteParsedUrl();
 
-    let url = parsedUrl.toString('https');
+    let url = parsedUrl.toString("https");
     // Remove the .git suffix if present
-    if (url.endsWith('.git')) {
+    if (url.endsWith(".git")) {
       url = url.slice(0, -4);
     }
 
-    const fullName =
-      parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
+    const fullName = parsedUrl.full_name || `${parsedUrl.owner}/${parsedUrl.name}`;
 
     return {
       rootDir: await this.getRootDir(),
@@ -125,20 +132,20 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
       const git = simpleGit();
 
       // First try to get the latest stable semver tag
-      await git.fetch(['--tags']);
+      await git.fetch(["--tags"]);
 
       // Ask Git for tags, version-sorted descending, and only return names.
       // List only tags that look like semantic versions (have at least two dots),
       // sorted by semantic version descending.
       const out = await git.raw([
-        'tag',
-        '--list',
-        '*.*.*', // match tags like 1.2.3 or v1.2.3
-        '--sort=-v:refname',
-        '--format=%(refname:short)',
+        "tag",
+        "--list",
+        "*.*.*", // match tags like 1.2.3 or v1.2.3
+        "--sort=-v:refname",
+        "--format=%(refname:short)",
       ]);
 
-      for (const line of out.split('\n')) {
+      for (const line of out.split("\n")) {
         const tag = line.trim();
         if (GitRepositoryProvider.STABLE_SEMVER_RE.test(tag)) {
           const detectedSha = await git.revparse([tag]);
@@ -155,12 +162,12 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
   private async getCurrentBranchVersion(): Promise<ManifestVersion | undefined> {
     try {
       const git = simpleGit();
-      const detectedSha = await git.revparse('HEAD');
+      const detectedSha = await git.revparse("HEAD");
       let detectedRef: string | undefined;
 
       // Fallback to current branch name
-      const currentBranch = await git.revparse(['--abbrev-ref', 'HEAD']);
-      if (currentBranch && currentBranch !== 'HEAD') {
+      const currentBranch = await git.revparse(["--abbrev-ref", "HEAD"]);
+      if (currentBranch && currentBranch !== "HEAD") {
         detectedRef = currentBranch;
       }
       // Return version info if we have at least one piece of information
@@ -177,7 +184,7 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
   private async getOriginRemote() {
     const git = simpleGit();
     const remotes = await git.getRemotes(true);
-    const originRemote = remotes.find((remote) => remote.name === 'origin');
+    const originRemote = remotes.find((remote) => remote.name === "origin");
 
     if (!originRemote || !originRemote.refs.fetch) {
       throw new Error('No remote "origin" found');
@@ -193,6 +200,6 @@ export class GitRepositoryProvider extends AbstractRepositoryProvider<GitReposit
 
   private async getRootDir(): Promise<string> {
     const git = simpleGit();
-    return await git.revparse(['--show-toplevel']);
+    return await git.revparse(["--show-toplevel"]);
   }
 }

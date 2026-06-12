@@ -1,0 +1,2 @@
+[codespell]
+skip = *.svg,**/pnpm-lock.yaml,**/node_modules/**,**/coverage/**,**/.pnpm-store/**,**/.nx/cache**/,**/.nx/workspace-data/**,**/dist/**,**/out-tsc/**

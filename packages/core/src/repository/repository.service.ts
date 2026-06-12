@@ -1,15 +1,12 @@
-import { injectable, multiInject, optional } from 'inversify';
-import {
-  RepositoryProvider,
-  REPOSITORY_PROVIDER_IDENTIFIER,
-} from './repository.provider.js';
+import { injectable, multiInject, optional } from "inversify";
+import { RepositoryProvider, REPOSITORY_PROVIDER_IDENTIFIER } from "./repository.provider.js";
 
 @injectable()
 export class RepositoryService {
   constructor(
     @multiInject(REPOSITORY_PROVIDER_IDENTIFIER)
     @optional()
-    private providers: RepositoryProvider[] = []
+    private providers: RepositoryProvider[] = [],
   ) {
     // Sort providers by priority in descending order (highest priority first)
     this.providers = this.providers.sort((a, b) => b.getPriority() - a.getPriority());

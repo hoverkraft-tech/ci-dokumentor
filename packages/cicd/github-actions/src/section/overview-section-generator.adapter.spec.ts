@@ -1,80 +1,88 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
-import { FormatterAdapter, MarkdownFormatterAdapter, RepositoryProvider, SectionIdentifier } from '@ci-dokumentor/core';
-import { initTestContainer } from '@ci-dokumentor/repository-github';
-import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
-import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import { GitHubWorkflowMockFactory } from '../../__tests__/github-workflow-mock.factory.js';
-import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
+import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import {
+  FormatterAdapter,
+  MarkdownFormatterAdapter,
+  RepositoryProvider,
+  SectionIdentifier,
+} from "@ci-dokumentor/core";
+import { initTestContainer } from "@ci-dokumentor/repository-github";
+import {
+  RepositoryInfoMockFactory,
+  RepositoryProviderMockFactory,
+} from "@ci-dokumentor/core/tests";
+import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from "../github-actions-parser.js";
+import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
+import { GitHubWorkflowMockFactory } from "../../__tests__/github-workflow-mock.factory.js";
+import { OverviewSectionGenerator } from "./overview-section-generator.adapter.js";
 
-describe('OverviewSectionGenerator', () => {
-    let mockRepositoryProvider: Mocked<RepositoryProvider>;
-    let formatterAdapter: FormatterAdapter;
+describe("OverviewSectionGenerator", () => {
+  let mockRepositoryProvider: Mocked<RepositoryProvider>;
+  let formatterAdapter: FormatterAdapter;
 
-    let generator: OverviewSectionGenerator;
+  let generator: OverviewSectionGenerator;
 
-    beforeEach(() => {
-        vi.resetAllMocks();
+  beforeEach(() => {
+    vi.resetAllMocks();
 
-        mockRepositoryProvider = RepositoryProviderMockFactory.create({
-            getRepositoryInfo: RepositoryInfoMockFactory.create(),
-        });
-
-        const container = initTestContainer();
-        formatterAdapter = container.get(MarkdownFormatterAdapter);
-
-        generator = new OverviewSectionGenerator();
+    mockRepositoryProvider = RepositoryProviderMockFactory.create({
+      getRepositoryInfo: RepositoryInfoMockFactory.create(),
     });
 
-    afterEach(() => {
-        vi.resetAllMocks();
+    const container = initTestContainer();
+    formatterAdapter = container.get(MarkdownFormatterAdapter);
+
+    generator = new OverviewSectionGenerator();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  describe("getSectionIdentifier", () => {
+    it("should return Overview section identifier", () => {
+      // Act
+      const result = generator.getSectionIdentifier();
+
+      // Assert
+      expect(result).toBe(SectionIdentifier.Overview);
     });
+  });
 
-    describe('getSectionIdentifier', () => {
-        it('should return Overview section identifier', () => {
-            // Act
-            const result = generator.getSectionIdentifier();
-
-            // Assert
-            expect(result).toBe(SectionIdentifier.Overview);
-        });
-    });
-
-    describe('generateSection', () => {
-        describe('with GitHub Action manifest', () => {
-            it.each([
-                {
-                    name: 'with description',
-                    description: 'A comprehensive test action for CI/CD workflows',
-                    expected: `## Overview
+  describe("generateSection", () => {
+    describe("with GitHub Action manifest", () => {
+      it.each([
+        {
+          name: "with description",
+          description: "A comprehensive test action for CI/CD workflows",
+          expected: `## Overview
 
 A comprehensive test action for CI/CD workflows
 `,
-                },
-                {
-                    name: 'without description (undefined)',
-                    description: undefined,
-                    expected: '',
-                },
-                {
-                    name: 'with empty description',
-                    description: '',
-                    expected: '',
-                },
-                {
-                    name: 'with multiline description',
-                    description: 'A test action with\nmultiple lines\n\nof description',
-                    expected: `## Overview
+        },
+        {
+          name: "without description (undefined)",
+          description: undefined,
+          expected: "",
+        },
+        {
+          name: "with empty description",
+          description: "",
+          expected: "",
+        },
+        {
+          name: "with multiline description",
+          description: "A test action with\nmultiple lines\n\nof description",
+          expected: `## Overview
 
 A test action with
 multiple lines
 
 of description
 `,
-                },
-                {
-                    name: 'with code block in description',
-                    description: `A test action with code block:
+        },
+        {
+          name: "with code block in description",
+          description: `A test action with code block:
 
 \`\`\`yaml
 test:
@@ -83,7 +91,7 @@ test:
     - item1
     - item2
 \`\`\``,
-                    expected: `## Overview
+          expected: `## Overview
 
 A test action with code block:
 
@@ -95,96 +103,113 @@ test:
     - item2
 \`\`\`
 `,
-                },
-                {
-                    name: 'with special characters',
-                    description: 'A test action with **bold**, *italic*, and `code` formatting',
-                    expected: `## Overview
+        },
+        {
+          name: "with special characters",
+          description: "A test action with **bold**, *italic*, and `code` formatting",
+          expected: `## Overview
 
 A test action with **bold**, *italic*, and \`code\` formatting
 `,
-                },
-                {
-                    name: 'with description and comments combined',
-                    description: 'Short description from manifest\n\nThis is extended description from comments.\nIt provides more details about the action.',
-                    expected: `## Overview
+        },
+        {
+          name: "with description and comments combined",
+          description:
+            "Short description from manifest\n\nThis is extended description from comments.\nIt provides more details about the action.",
+          expected: `## Overview
 
 Short description from manifest
 
 This is extended description from comments.
 It provides more details about the action.
 `,
-                },
-            ])('$name', async ({ description, expected }) => {
-                // Arrange
-                const manifest: GitHubAction = GitHubActionMockFactory.create({ description });
+        },
+      ])("$name", async ({ description, expected }) => {
+        // Arrange
+        const manifest: GitHubAction = GitHubActionMockFactory.create({ description });
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-                // Assert
-                expect(result.toString()).toEqual(expected);
-            });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
         });
 
-        describe('with GitHub Workflow manifest', () => {
-            it('should generate overview section for GitHub Workflow with description only', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        jobs: {
-                            test: {
-                                'runs-on': 'ubuntu-latest',
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                        },
-                    }),
-                    description: 'Continuous integration workflow for the project\n\nWorkflow runs on push to main branch.',
-                } as GitHubWorkflow & { description: string };
+        // Assert
+        expect(result.toString()).toEqual(expected);
+      });
+    });
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+    describe("with GitHub Workflow manifest", () => {
+      it("should generate overview section for GitHub Workflow with description only", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            jobs: {
+              test: {
+                "runs-on": "ubuntu-latest",
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+            },
+          }),
+          description:
+            "Continuous integration workflow for the project\n\nWorkflow runs on push to main branch.",
+        } as GitHubWorkflow & { description: string };
 
-                // Assert
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Continuous integration workflow for the project
 
 Workflow runs on push to main branch.
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should generate overview section for GitHub Workflow with description and permissions', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        permissions: {
-                            contents: 'read',
-                            'pull-requests': 'write',
-                            'id-token': 'write',
-                        },
-                        jobs: {
-                            test: {
-                                'runs-on': 'ubuntu-latest',
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                        },
-                    }),
-                    description: 'Continuous integration workflow with permissions',
-                } as GitHubWorkflow & { description: string };
+      it("should generate overview section for GitHub Workflow with description and permissions", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            permissions: {
+              contents: "read",
+              "pull-requests": "write",
+              "id-token": "write",
+            },
+            jobs: {
+              test: {
+                "runs-on": "ubuntu-latest",
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+            },
+          }),
+          description: "Continuous integration workflow with permissions",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
+        // Assert
 
-                expect(result.toString()).toEqual(
-                    `## Overview
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Continuous integration workflow with permissions
 
@@ -193,151 +218,176 @@ Continuous integration workflow with permissions
 - **\`contents\`**: \`read\`
 - **\`id-token\`**: \`write\`
 - **\`pull-requests\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should handle GitHub Workflow with empty permissions object', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        permissions: {},
-                        jobs: {
-                            test: {
-                                'runs-on': 'ubuntu-latest',
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                        },
-                    }),
-                    description: 'Workflow with empty permissions',
-                } as GitHubWorkflow & { description: string };
+      it("should handle GitHub Workflow with empty permissions object", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            permissions: {},
+            jobs: {
+              test: {
+                "runs-on": "ubuntu-latest",
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+            },
+          }),
+          description: "Workflow with empty permissions",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
+        // Assert
 
-                expect(result.toString()).toEqual(
-                    `## Overview
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow with empty permissions
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should handle GitHub Workflow without permissions', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        jobs: {
-                            test: {
-                                'runs-on': 'ubuntu-latest',
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                        },
-                    }),
-                    description: 'Workflow without permissions',
-                } as GitHubWorkflow & { description: string };
+      it("should handle GitHub Workflow without permissions", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            jobs: {
+              test: {
+                "runs-on": "ubuntu-latest",
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+            },
+          }),
+          description: "Workflow without permissions",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
+        // Assert
 
-                expect(result.toString()).toEqual(
-                    `## Overview
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow without permissions
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should return empty buffer for GitHub Workflow without description', async () => {
-                // Arrange
-                const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
-                    on: { push: { branches: ['main'] } },
-                });
+      it("should return empty buffer for GitHub Workflow without description", async () => {
+        // Arrange
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          on: { push: { branches: ["main"] } },
+        });
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
+        // Assert
 
-                expect(result.toString()).toEqual('');
-            });
+        expect(result.toString()).toEqual("");
+      });
 
-            it('should generate permissions when GitHub Workflow description is empty', async () => {
-                // Arrange
-                const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
-                    on: { push: { branches: ['main'] } },
-                    permissions: {
-                        contents: 'read',
-                    },
-                    jobs: {
-                        test: {
-                            'runs-on': 'ubuntu-latest',
-                            permissions: {
-                                'id-token': 'write',
-                            },
-                            steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                        },
-                    },
-                });
+      it("should generate permissions when GitHub Workflow description is empty", async () => {
+        // Arrange
+        const manifest: GitHubWorkflow = GitHubWorkflowMockFactory.create({
+          on: { push: { branches: ["main"] } },
+          permissions: {
+            contents: "read",
+          },
+          jobs: {
+            test: {
+              "runs-on": "ubuntu-latest",
+              permissions: {
+                "id-token": "write",
+              },
+              steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+            },
+          },
+        });
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Overview
 
 ### Permissions
 
 - **\`contents\`**: \`read\`
 - **\`id-token\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should handle GitHub Workflow with complex permissions structure', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        usesName: 'owner/repo/.github/workflows/release.yml',
-                        name: 'Release Workflow',
-                        on: { push: { tags: ['v*'] }, workflow_dispatch: {} },
-                        permissions: {
-                            contents: 'write',
-                            packages: 'write',
-                            'pull-requests': 'read',
-                            'id-token': 'write',
-                            'security-events': 'write',
-                            actions: 'read',
-                            checks: 'read',
-                            deployments: 'write',
-                        },
-                        jobs: {
-                            release: {
-                                'runs-on': 'ubuntu-latest',
-                                steps: [
-                                    { name: 'Checkout', uses: 'actions/checkout@v4' },
-                                    { name: 'Build', run: 'npm run build' },
-                                ],
-                            },
-                        },
-                    }),
-                    description: 'Automated release workflow',
-                } as GitHubWorkflow & { description: string };
+      it("should handle GitHub Workflow with complex permissions structure", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            usesName: "owner/repo/.github/workflows/release.yml",
+            name: "Release Workflow",
+            on: { push: { tags: ["v*"] }, workflow_dispatch: {} },
+            permissions: {
+              contents: "write",
+              packages: "write",
+              "pull-requests": "read",
+              "id-token": "write",
+              "security-events": "write",
+              actions: "read",
+              checks: "read",
+              deployments: "write",
+            },
+            jobs: {
+              release: {
+                "runs-on": "ubuntu-latest",
+                steps: [
+                  { name: "Checkout", uses: "actions/checkout@v4" },
+                  { name: "Build", run: "npm run build" },
+                ],
+              },
+            },
+          }),
+          description: "Automated release workflow",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
+        // Assert
 
-                expect(result.toString()).toEqual(
-                    `## Overview
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Automated release workflow
 
@@ -351,46 +401,51 @@ Automated release workflow
 - **\`packages\`**: \`write\`
 - **\`pull-requests\`**: \`read\`
 - **\`security-events\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should merge permissions from workflow-level and job-level', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        permissions: {
-                            contents: 'read',
-                            'pull-requests': 'write',
-                        },
-                        jobs: {
-                            job1: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    'id-token': 'write',
-                                    packages: 'write',
-                                },
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                            job2: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    actions: 'read',
-                                },
-                                steps: [{ run: 'echo "test"' }],
-                            },
-                        },
-                    }),
-                    description: 'Workflow with merged permissions',
-                } as GitHubWorkflow & { description: string };
+      it("should merge permissions from workflow-level and job-level", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            permissions: {
+              contents: "read",
+              "pull-requests": "write",
+            },
+            jobs: {
+              job1: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  "id-token": "write",
+                  packages: "write",
+                },
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+              job2: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  actions: "read",
+                },
+                steps: [{ run: 'echo "test"' }],
+              },
+            },
+          }),
+          description: "Workflow with merged permissions",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow with merged permissions
 
@@ -401,39 +456,44 @@ Workflow with merged permissions
 - **\`id-token\`**: \`write\`
 - **\`packages\`**: \`write\`
 - **\`pull-requests\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should override workflow-level permissions with job-level permissions', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        permissions: {
-                            contents: 'read',
-                            packages: 'read',
-                        },
-                        jobs: {
-                            job1: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    contents: 'write', // Override read to write
-                                    'id-token': 'write',
-                                },
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                        },
-                    }),
-                    description: 'Workflow with overridden permissions',
-                } as GitHubWorkflow & { description: string };
+      it("should override workflow-level permissions with job-level permissions", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            permissions: {
+              contents: "read",
+              packages: "read",
+            },
+            jobs: {
+              job1: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  contents: "write", // Override read to write
+                  "id-token": "write",
+                },
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+            },
+          }),
+          description: "Workflow with overridden permissions",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow with overridden permissions
 
@@ -442,42 +502,47 @@ Workflow with overridden permissions
 - **\`contents\`**: \`write\`
 - **\`id-token\`**: \`write\`
 - **\`packages\`**: \`read\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should handle workflow with only job-level permissions', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        jobs: {
-                            job1: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    contents: 'write',
-                                    'id-token': 'write',
-                                },
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                            job2: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    packages: 'write',
-                                },
-                                steps: [{ run: 'echo "test"' }],
-                            },
-                        },
-                    }),
-                    description: 'Workflow with only job-level permissions',
-                } as GitHubWorkflow & { description: string };
+      it("should handle workflow with only job-level permissions", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            jobs: {
+              job1: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  contents: "write",
+                  "id-token": "write",
+                },
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+              job2: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  packages: "write",
+                },
+                steps: [{ run: 'echo "test"' }],
+              },
+            },
+          }),
+          description: "Workflow with only job-level permissions",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow with only job-level permissions
 
@@ -486,41 +551,46 @@ Workflow with only job-level permissions
 - **\`contents\`**: \`write\`
 - **\`id-token\`**: \`write\`
 - **\`packages\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should handle workflow with some jobs having permissions and some not', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        permissions: {
-                            contents: 'read',
-                        },
-                        jobs: {
-                            job1: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    'id-token': 'write',
-                                },
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                            job2: {
-                                'runs-on': 'ubuntu-latest',
-                                steps: [{ run: 'echo "test"' }], // No permissions
-                            },
-                        },
-                    }),
-                    description: 'Workflow with mixed job permissions',
-                } as GitHubWorkflow & { description: string };
+      it("should handle workflow with some jobs having permissions and some not", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            permissions: {
+              contents: "read",
+            },
+            jobs: {
+              job1: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  "id-token": "write",
+                },
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+              job2: {
+                "runs-on": "ubuntu-latest",
+                steps: [{ run: 'echo "test"' }], // No permissions
+              },
+            },
+          }),
+          description: "Workflow with mixed job permissions",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow with mixed job permissions
 
@@ -528,39 +598,44 @@ Workflow with mixed job permissions
 
 - **\`contents\`**: \`read\`
 - **\`id-token\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should keep highest permission level when workflow has write and job has read', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        permissions: {
-                            contents: 'write',
-                            packages: 'write',
-                        },
-                        jobs: {
-                            job1: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    contents: 'read', // Should keep 'write' from workflow
-                                    'id-token': 'write',
-                                },
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                        },
-                    }),
-                    description: 'Workflow where job has lower permission',
-                } as GitHubWorkflow & { description: string };
+      it("should keep highest permission level when workflow has write and job has read", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            permissions: {
+              contents: "write",
+              packages: "write",
+            },
+            jobs: {
+              job1: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  contents: "read", // Should keep 'write' from workflow
+                  "id-token": "write",
+                },
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+            },
+          }),
+          description: "Workflow where job has lower permission",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow where job has lower permission
 
@@ -569,47 +644,52 @@ Workflow where job has lower permission
 - **\`contents\`**: \`write\`
 - **\`id-token\`**: \`write\`
 - **\`packages\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
 
-            it('should handle mixed permission levels across multiple jobs', async () => {
-                // Arrange
-                const manifest = {
-                    ...GitHubWorkflowMockFactory.create({
-                        on: { push: { branches: ['main'] } },
-                        permissions: {
-                            contents: 'read',
-                            actions: 'none',
-                        },
-                        jobs: {
-                            job1: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    contents: 'write', // Upgrade from read to write
-                                    packages: 'read',
-                                },
-                                steps: [{ name: 'Checkout', uses: 'actions/checkout@v4' }],
-                            },
-                            job2: {
-                                'runs-on': 'ubuntu-latest',
-                                permissions: {
-                                    actions: 'read', // Upgrade from none to read
-                                    packages: 'write', // Upgrade from read to write
-                                },
-                                steps: [{ run: 'echo "test"' }],
-                            },
-                        },
-                    }),
-                    description: 'Workflow with mixed permission levels',
-                } as GitHubWorkflow & { description: string };
+      it("should handle mixed permission levels across multiple jobs", async () => {
+        // Arrange
+        const manifest = {
+          ...GitHubWorkflowMockFactory.create({
+            on: { push: { branches: ["main"] } },
+            permissions: {
+              contents: "read",
+              actions: "none",
+            },
+            jobs: {
+              job1: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  contents: "write", // Upgrade from read to write
+                  packages: "read",
+                },
+                steps: [{ name: "Checkout", uses: "actions/checkout@v4" }],
+              },
+              job2: {
+                "runs-on": "ubuntu-latest",
+                permissions: {
+                  actions: "read", // Upgrade from none to read
+                  packages: "write", // Upgrade from read to write
+                },
+                steps: [{ run: 'echo "test"' }],
+              },
+            },
+          }),
+          description: "Workflow with mixed permission levels",
+        } as GitHubWorkflow & { description: string };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                // Assert
-                expect(result.toString()).toEqual(
-                    `## Overview
+        // Assert
+        expect(result.toString()).toEqual(
+          `## Overview
 
 Workflow with mixed permission levels
 
@@ -618,79 +698,91 @@ Workflow with mixed permission levels
 - **\`actions\`**: \`read\`
 - **\`contents\`**: \`write\`
 - **\`packages\`**: \`write\`
-`
-                );
-            });
+`,
+        );
+      });
+    });
+
+    describe("edge cases", () => {
+      it("should handle undefined manifest gracefully", async () => {
+        // Act & Assert
+        await expect(
+          generator.generateSection({
+            formatterAdapter,
+            manifest: undefined as unknown as GitHubActionsManifest,
+            repositoryProvider: mockRepositoryProvider,
+            destination: "README.md",
+          }),
+        ).rejects.toThrow("Cannot use 'in' operator to search for 'description' in undefined");
+      });
+
+      it("should handle manifest without description property", async () => {
+        // Arrange
+        const manifest = {
+          usesName: "owner/repo",
+          name: "Test Action",
+          runs: { using: "node20" },
+        } as GitHubAction;
+
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
         });
 
-        describe('edge cases', () => {
-            it('should handle undefined manifest gracefully', async () => {
-                // Act & Assert
-                await expect(generator.generateSection({
-                    formatterAdapter,
-                    manifest: undefined as unknown as GitHubActionsManifest,
-                    repositoryProvider: mockRepositoryProvider
-                    , destination: 'README.md'
-                })).rejects.toThrow("Cannot use 'in' operator to search for 'description' in undefined");
+        // Assert
 
-            });
+        expect(result.toString()).toEqual("");
+      });
 
-            it('should handle manifest without description property', async () => {
-                // Arrange
-                const manifest = {
-                    usesName: 'owner/repo',
-                    name: 'Test Action',
-                    runs: { using: 'node20' },
-                } as GitHubAction;
+      it.each([
+        {
+          name: "standard full info",
+          repositoryInfo: RepositoryInfoMockFactory.create(),
+        },
+        {
+          name: "different repository name",
+          repositoryInfo: RepositoryInfoMockFactory.create({
+            name: "different-repo",
+          }),
+        },
+        {
+          name: "different repository owner",
+          repositoryInfo: RepositoryInfoMockFactory.create({
+            owner: "different-owner",
+          }),
+        },
+      ])("should generate section independent of repository with $name", async ({
+        repositoryInfo,
+      }) => {
+        // Arrange
+        const manifest: GitHubAction = {
+          usesName: "owner/repo",
+          name: "Test Action",
+          description: "Test description",
+          runs: { using: "node20" },
+        };
 
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
+        mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(repositoryInfo);
 
-                // Assert
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-                expect(result.toString()).toEqual('');
-            });
-
-            it.each([
-                {
-                    name: 'standard full info',
-                    repositoryInfo: RepositoryInfoMockFactory.create(),
-                },
-                {
-                    name: 'different repository name',
-                    repositoryInfo: RepositoryInfoMockFactory.create({
-                        name: 'different-repo',
-                    }),
-                },
-                {
-                    name: 'different repository owner',
-                    repositoryInfo: RepositoryInfoMockFactory.create({
-                        owner: 'different-owner',
-                    }),
-                },
-            ])('should generate section independent of repository with $name', async ({ repositoryInfo }) => {
-                // Arrange
-                const manifest: GitHubAction = {
-                    usesName: 'owner/repo',
-                    name: 'Test Action',
-                    description: 'Test description',
-                    runs: { using: 'node20' },
-                };
-
-                mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(repositoryInfo);
-
-
-                // Act
-                const result = await generator.generateSection({ formatterAdapter, manifest, repositoryProvider: mockRepositoryProvider, destination: 'README.md' });
-
-                // Assert
-                const expectedOutput = `## Overview
+        // Assert
+        const expectedOutput = `## Overview
 
 Test description
 `;
 
-                expect(result.toString()).toEqual(expectedOutput);
-            });
-        });
+        expect(result.toString()).toEqual(expectedOutput);
+      });
     });
+  });
 });

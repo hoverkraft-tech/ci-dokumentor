@@ -1,7 +1,7 @@
-import { injectable, injectFromBase } from 'inversify';
-import { SectionIdentifier, ReadableContent } from '@ci-dokumentor/core';
-import type { FormatterAdapter } from '@ci-dokumentor/core';
-import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
+import { injectable, injectFromBase } from "inversify";
+import { SectionIdentifier, ReadableContent } from "@ci-dokumentor/core";
+import type { FormatterAdapter } from "@ci-dokumentor/core";
+import { AbstractMigrationAdapter } from "./abstract-migration.adapter.js";
 
 /**
  * Migration adapter for GitHub Action's Readme Generator tool
@@ -22,17 +22,17 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
   extendConstructorArguments: true,
 })
 export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrationAdapter {
-  protected readonly name = 'github-action-readme-generator';
+  protected readonly name = "github-action-readme-generator";
 
   protected readonly sectionMappings: Record<string, SectionIdentifier> = {
-    'branding': SectionIdentifier.Header,
-    'title': SectionIdentifier.Header,
-    'badges': SectionIdentifier.Badges,
-    'description': SectionIdentifier.Overview,
-    'usage': SectionIdentifier.Usage,
-    'inputs': SectionIdentifier.Inputs,
-    'outputs': SectionIdentifier.Outputs,
-    'examples': SectionIdentifier.Examples,
+    branding: SectionIdentifier.Header,
+    title: SectionIdentifier.Header,
+    badges: SectionIdentifier.Badges,
+    description: SectionIdentifier.Overview,
+    usage: SectionIdentifier.Usage,
+    inputs: SectionIdentifier.Inputs,
+    outputs: SectionIdentifier.Outputs,
+    examples: SectionIdentifier.Examples,
   };
 
   protected readonly patterns = {
@@ -41,15 +41,20 @@ export class GitHubActionReadmeGeneratorMigrationAdapter extends AbstractMigrati
     detectionPattern: /<!--\s*(start|end)\s+[\w[\]/.-]+\s*-->/,
   };
 
-  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
+  protected migrateContent(
+    content: ReadableContent,
+    formatterAdapter: FormatterAdapter,
+  ): ReadableContent {
     // Normalize example paths inside the fragment to the 'examples' token
-    const working = content.replace(/(<!--\s*(?:start|end)\s+)([\w[\]/.]+)(\s*-->)/gi, (m, p1, p2, p3) => {
-      const normalized = p2.toLowerCase().includes('.github/ghadocs/examples') ? 'examples' : p2;
-      return `${p1}${normalized}${p3}`;
-    });
+    const working = content.replace(
+      /(<!--\s*(?:start|end)\s+)([\w[\]/.]+)(\s*-->)/gi,
+      (m, p1, p2, p3) => {
+        const normalized = p2.toLowerCase().includes(".github/ghadocs/examples") ? "examples" : p2;
+        return `${p1}${normalized}${p3}`;
+      },
+    );
 
     // Process marker mappings first
     return this.processMarkerMappings(working, formatterAdapter);
   }
-
 }

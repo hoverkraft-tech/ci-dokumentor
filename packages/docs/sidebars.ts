@@ -1,4 +1,4 @@
-import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
+import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -15,61 +15,52 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   // Create a structured sidebar for CI Dokumentor documentation
   tutorialSidebar: [
-    'intro',
+    "intro",
     {
-      type: 'category',
-      label: 'Integrations',
+      type: "category",
+      label: "Integrations",
       items: [
-        'integrations/docker',
-        'integrations/github-action',
-        'integrations/nodejs-package',
-        'integrations/migration',
+        "integrations/docker",
+        "integrations/github-action",
+        "integrations/nodejs-package",
+        "integrations/migration",
       ],
     },
     {
-      type: 'category',
-      label: 'Developers',
+      type: "category",
+      label: "Developers",
       items: [
-        'developers/contributing',
-        'developers/architecture',
-        'developers/setup',
-        'developers/testing',
-        'developers/ci-cd',
+        "developers/contributing",
+        "developers/architecture",
+        "developers/setup",
+        "developers/testing",
+        "developers/ci-cd",
       ],
     },
     {
-      type: 'category',
-      label: 'Packages',
+      type: "category",
+      label: "Packages",
       items: [
-        'packages/index',
+        "packages/index",
         {
-          type: 'category',
-          label: 'Core',
-          items: [
-            'packages/core/index',
-          ],
+          type: "category",
+          label: "Core",
+          items: ["packages/core/index"],
         },
         {
-          type: 'category',
-          label: 'CLI',
-          items: [
-            'packages/cli/index',
-          ],
+          type: "category",
+          label: "CLI",
+          items: ["packages/cli/index"],
         },
         {
-          type: 'category',
-          label: 'CI/CD',
-          items: [
-            'packages/cicd/github-actions/index',
-          ],
+          type: "category",
+          label: "CI/CD",
+          items: ["packages/cicd/github-actions/index"],
         },
         {
-          type: 'category',
-          label: 'Repository',
-          items: [
-            'packages/repository/git/index',
-            'packages/repository/github/index',
-          ],
+          type: "category",
+          label: "Repository",
+          items: ["packages/repository/git/index", "packages/repository/github/index"],
         },
       ],
     },

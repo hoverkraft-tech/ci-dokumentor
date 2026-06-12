@@ -1,13 +1,13 @@
-import { ReadableContent } from '../reader/readable-content.js';
-import { SectionIdentifier } from '../generator/section/section-generator.adapter.js';
-import { FormatterLanguage } from './formatter-language.js';
+import { ReadableContent } from "../reader/readable-content.js";
+import { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
+import { FormatterLanguage } from "./formatter-language.js";
 
-export const FORMATTER_ADAPTER_IDENTIFIER = Symbol('FormatterAdapter');
+export const FORMATTER_ADAPTER_IDENTIFIER = Symbol("FormatterAdapter");
 
 export enum LinkFormat {
-  Auto = 'auto',
-  Full = 'full',
-  None = 'none'
+  Auto = "auto",
+  Full = "full",
+  None = "none",
 }
 
 export type FormatterOptions = {
@@ -44,7 +44,7 @@ export interface FormatterAdapter {
   image(
     url: ReadableContent,
     altText: ReadableContent,
-    options?: { width?: string; align?: string }
+    options?: { width?: string; align?: string },
   ): ReadableContent;
 
   table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent;

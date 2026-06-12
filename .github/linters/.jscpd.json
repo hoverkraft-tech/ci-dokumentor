@@ -1,4 +1,17 @@
 {
-  "threshold": 5,
-  "gitignore": true
+  "threshold": 6,
+  "gitignore": true,
+  "ignore": [
+    "**/node_modules/**",
+    "**/coverage/**",
+    "**/.pnpm-store/**",
+    "**/.nx/cache**/",
+    "**/.nx/workspace-data/**",
+    "**/dist/**",
+    "**/out-tsc/**",
+    "**/packages/**/vite.config.ts",
+    "**/packages/**/tsconfig.spec.json",
+    "**/packages/**/tsconfig.lib.json",
+    "**/packages/**/package.json"
+  ]
 }

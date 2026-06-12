@@ -1,25 +1,25 @@
-import { injectable, multiInject } from 'inversify';
-import { LOGGER_ADAPTER_IDENTIFIER  } from './adapters/logger.adapter.js';
-import type {LoggerAdapter} from './adapters/logger.adapter.js';
+import { injectable, multiInject } from "inversify";
+import { LOGGER_ADAPTER_IDENTIFIER } from "./adapters/logger.adapter.js";
+import type { LoggerAdapter } from "./adapters/logger.adapter.js";
 /**
  * Logger service that manages different logger adapters based on output format
  */
 @injectable()
 export class LoggerService {
   constructor(
-    @multiInject(LOGGER_ADAPTER_IDENTIFIER) private readonly loggerAdapters: LoggerAdapter[]
-  ) { }
+    @multiInject(LOGGER_ADAPTER_IDENTIFIER) private readonly loggerAdapters: LoggerAdapter[],
+  ) {}
 
   /**
    * Get all supported output formats
    */
   getSupportedFormats(): string[] {
-    return this.loggerAdapters.map(adapter => adapter.getFormat());
+    return this.loggerAdapters.map((adapter) => adapter.getFormat());
   }
 
   /**
- * Log a debug message
- */
+   * Log a debug message
+   */
   debug(message: string, format: string | undefined): void {
     this.getLogger(format).debug(message);
   }
@@ -59,16 +59,15 @@ export class LoggerService {
   private getLogger(format: string | undefined): LoggerAdapter {
     if (format === undefined) {
       if (this.loggerAdapters.length === 0) {
-        throw new Error('No logger adapters are configured');
+        throw new Error("No logger adapters are configured");
       }
       return this.loggerAdapters[0];
     }
 
-    const logger = this.loggerAdapters.find(adapter => adapter.getFormat() === format);
+    const logger = this.loggerAdapters.find((adapter) => adapter.getFormat() === format);
     if (!logger) {
       throw new Error(`Unsupported output format: ${format}`);
     }
     return logger;
   }
-
 }

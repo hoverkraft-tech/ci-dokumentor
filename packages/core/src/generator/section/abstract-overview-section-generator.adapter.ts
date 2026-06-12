@@ -1,6 +1,6 @@
-import { ReadableContent } from '../../reader/readable-content.js';
-import { FormatterAdapter } from '../../formatter/formatter.adapter.js';
-import { SectionGenerationPayload, SectionIdentifier } from './section-generator.adapter.js';
+import { ReadableContent } from "../../reader/readable-content.js";
+import { FormatterAdapter } from "../../formatter/formatter.adapter.js";
+import { SectionGenerationPayload, SectionIdentifier } from "./section-generator.adapter.js";
 
 /**
  * Mixin type for Overview section generator.
@@ -24,7 +24,10 @@ export function OverviewSectionMixin<TManifest, TBase extends AbstractConstructo
       return SectionIdentifier.Overview;
     }
 
-    async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<TManifest>): Promise<ReadableContent> {
+    async generateSection({
+      formatterAdapter,
+      manifest,
+    }: SectionGenerationPayload<TManifest>): Promise<ReadableContent> {
       const description = this.getDescription(manifest);
       const additionalContent = await this.generateAdditionalContent(formatterAdapter, manifest);
 
@@ -32,7 +35,7 @@ export function OverviewSectionMixin<TManifest, TBase extends AbstractConstructo
         return ReadableContent.empty();
       }
 
-      let overviewContent = formatterAdapter.heading(new ReadableContent('Overview'), 2);
+      let overviewContent = formatterAdapter.heading(new ReadableContent("Overview"), 2);
 
       if (description) {
         overviewContent = overviewContent.append(
@@ -61,7 +64,7 @@ export function OverviewSectionMixin<TManifest, TBase extends AbstractConstructo
      */
     public generateAdditionalContent(
       formatterAdapter: FormatterAdapter,
-      manifest: TManifest
+      manifest: TManifest,
     ): Promise<ReadableContent> {
       void formatterAdapter;
       void manifest;

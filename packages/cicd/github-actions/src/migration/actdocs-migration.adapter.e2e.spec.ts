@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
-import mockFs, { restore } from 'mock-fs';
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { initTestContainer } from '../container.js';
-import { ActdocsMigrationAdapter } from './actdocs-migration.adapter.js';
+import { readFileSync } from "node:fs";
+import { MarkdownFormatterAdapter, FileRendererAdapter } from "@ci-dokumentor/core";
+import mockFs, { restore } from "mock-fs";
+import { describe, beforeEach, afterEach, it, expect } from "vitest";
+import { initTestContainer } from "../container.js";
+import { ActdocsMigrationAdapter } from "./actdocs-migration.adapter.js";
 
-describe('ActdocsMigrationAdapter', () => {
+describe("ActdocsMigrationAdapter", () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
   let adapter: ActdocsMigrationAdapter;
@@ -23,38 +23,38 @@ describe('ActdocsMigrationAdapter', () => {
     restore();
   });
 
-  describe('getName', () => {
-    it('returns the adapter name', () => {
+  describe("getName", () => {
+    it("returns the adapter name", () => {
       // Arrange
       // Act
       const name = adapter.getName();
       // Assert
-      expect(name).toBe('actdocs');
+      expect(name).toBe("actdocs");
     });
   });
 
-  describe('supportsDestination', () => {
-    it('returns true when a file contains actdocs markers', async () => {
+  describe("supportsDestination", () => {
+    it("returns true when a file contains actdocs markers", async () => {
       // Arrange
       const tmpPath = `/tmp/actdocs-support-${Date.now()}.md`;
-      mockFs({ [tmpPath]: '<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->' });
+      mockFs({ [tmpPath]: "<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->" });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', async () => {
+    it("returns false for missing files", async () => {
       // Arrange
       // Act
-      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination("NON_EXISTENT_FILE.md");
       // Assert
       expect(supported).toBe(false);
     });
   });
 
-  describe('migrateDocumentation', () => {
-    it('migrates actdocs markers to ci-dokumentor format (e2e test)', async () => {
+  describe("migrateDocumentation", () => {
+    it("migrates actdocs markers to ci-dokumentor format (e2e test)", async () => {
       // Arrange: create a file with actdocs markers
       const source = `<!-- actdocs description start -->
 Description here
@@ -84,14 +84,14 @@ Perm stuff
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
       });
 
       // Finalize renderer
       await rendererAdapter.finalize();
 
       // Assert: read the actual file content and verify complete migration
-      const actualContent = readFileSync(tmpPath, 'utf-8');
+      const actualContent = readFileSync(tmpPath, "utf-8");
       const expectedContent = `<!-- overview:start -->
 
 Description here
@@ -148,9 +148,9 @@ Perm stuff
       expect(actualContent).toEqual(expectedContent);
     });
 
-    it('handles files with no actdocs markers (e2e test)', async () => {
+    it("handles files with no actdocs markers (e2e test)", async () => {
       // Arrange: create a file with no actdocs markers
-      const source = 'No markers here';
+      const source = "No markers here";
       const tmpPath = `/tmp/actdocs-no-markers-${Date.now()}.md`;
 
       // Mock the file system with the source content
@@ -162,14 +162,14 @@ Perm stuff
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
       });
 
       // Finalize renderer
       await rendererAdapter.finalize();
 
       // Assert: read the actual file content and verify it remains unchanged
-      const actualContent = readFileSync(tmpPath, 'utf-8');
+      const actualContent = readFileSync(tmpPath, "utf-8");
       expect(actualContent).toEqual(`No markers here
 
 <!-- header:start -->
