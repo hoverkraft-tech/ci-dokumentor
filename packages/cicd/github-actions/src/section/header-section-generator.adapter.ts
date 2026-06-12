@@ -1,12 +1,12 @@
 import {
   HeaderSectionMixin,
-  FormatterAdapter,
+  type FormatterAdapter,
   ReadableContent,
-  RepositoryInfo,
+  type RepositoryInfo,
 } from "@ci-dokumentor/core";
 import { icons } from "feather-icons";
 import { injectable } from "inversify";
-import { GitHubActionsManifest } from "../github-actions-parser.js";
+import type { GitHubActionsManifest } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 @injectable()
@@ -24,12 +24,16 @@ export class HeaderSectionGenerator extends HeaderSectionMixin<
     );
     const branchingIcon = this.generateBrandingIcon(formatterAdapter, manifest);
 
-    const headingContent = branchingIcon.isEmpty() ? title : branchingIcon.append(" ", title);
+    const headingContent = branchingIcon.isEmpty()
+      ? title
+      : branchingIcon.append(" ", title);
 
     return formatterAdapter.heading(headingContent, 1);
   }
 
-  public override getLogoAltText(manifest: GitHubActionsManifest): ReadableContent {
+  public override getLogoAltText(
+    manifest: GitHubActionsManifest,
+  ): ReadableContent {
     return this.getDisplayName(manifest);
   }
 
@@ -39,11 +43,13 @@ export class HeaderSectionGenerator extends HeaderSectionMixin<
   ): ReadableContent {
     const name = manifest.name || repositoryInfo?.name || "Unknown";
     // Convert to pascal case
-    return new ReadableContent(name.replace(/(?:^|_)(\w)/g, (_, c) => c.toUpperCase()));
+    return new ReadableContent(
+      name.replace(/(?:^|_)(\w)/g, (_, c) => c.toUpperCase()),
+    );
   }
 
   private getTitlePrefix(manifest: GitHubActionsManifest): ReadableContent {
-    let title;
+    let title: string | undefined;
 
     switch (true) {
       case this.isGitHubAction(manifest):
@@ -57,7 +63,7 @@ export class HeaderSectionGenerator extends HeaderSectionMixin<
         title = "GitHub Workflow";
         break;
     }
-    return new ReadableContent(`${title ? title + ": " : ""}`);
+    return new ReadableContent(`${title ? `${title}: ` : ""}`);
   }
 
   private generateBrandingIcon(

@@ -11,7 +11,10 @@ export const GITHUB_OUTPUT_IDENTIFIER = Symbol("GITHUB_OUTPUT");
  */
 @injectable()
 export class GitHubActionLoggerAdapter implements LoggerAdapter {
-  constructor(@inject(GITHUB_OUTPUT_IDENTIFIER) private readonly injectedOutputPath?: string) {}
+  constructor(
+    @inject(GITHUB_OUTPUT_IDENTIFIER)
+    private readonly injectedOutputPath?: string,
+  ) {}
 
   getFormat(): string {
     return "github-action";
@@ -50,12 +53,14 @@ export class GitHubActionLoggerAdapter implements LoggerAdapter {
    */
   result(data: unknown): void {
     if (Array.isArray(data)) {
-      return this.resultArray(data);
+      this.resultArray(data);
+      return;
     }
     if (typeof data === "object" && data !== null) {
-      return this.resultObject(data);
+      this.resultObject(data);
+      return;
     }
-    return this.setOutput("result", data);
+    this.setOutput("result", data);
   }
 
   private resultArray(data: unknown[]): void {
@@ -94,7 +99,9 @@ export class GitHubActionLoggerAdapter implements LoggerAdapter {
       );
     } else {
       // Use simple key=value format for single-line outputs
-      appendFileSync(this.injectedOutputPath, `${key}=${stringValue}\n`, { encoding: "utf8" });
+      appendFileSync(this.injectedOutputPath, `${key}=${stringValue}\n`, {
+        encoding: "utf8",
+      });
     }
   }
 }

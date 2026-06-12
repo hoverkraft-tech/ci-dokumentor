@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mocked } from "vitest";
 import { LinkFormat } from "../formatter/formatter.adapter.js";
-import type { FormatterAdapter, FormatterOptions } from "../formatter/formatter.adapter.js";
+import type {
+  FormatterAdapter,
+  FormatterOptions,
+} from "../formatter/formatter.adapter.js";
 import type { FormatterService } from "../formatter/formatter.service.js";
 import type { RendererFactory } from "../renderer/renderer.factory.js";
-import { DiffRendererAdapter } from "../renderer/diff-renderer.adapter.js";
-import { FileRendererAdapter } from "../renderer/file-renderer.adapter.js";
+import type { DiffRendererAdapter } from "../renderer/diff-renderer.adapter.js";
+import type { FileRendererAdapter } from "../renderer/file-renderer.adapter.js";
 import type { RepositoryProvider } from "../repository/repository.provider.js";
 import {
   FormatterServiceMockFactory,
@@ -14,7 +17,10 @@ import {
   RepositoryProviderMockFactory,
 } from "../../__tests__/index.js";
 import { GeneratorService } from "./generator.service.js";
-import type { GeneratorAdapter, GenerateSectionsOptions } from "./generator.adapter.js";
+import type {
+  GeneratorAdapter,
+  GenerateSectionsOptions,
+} from "./generator.adapter.js";
 
 describe("GeneratorService", () => {
   let generatorService: GeneratorService;
@@ -40,12 +46,16 @@ describe("GeneratorService", () => {
       getFormatterAdapterForFile: formatterAdapter,
     });
 
-    mockFileRenderer = RendererAdapterMockFactory.create() as Mocked<FileRendererAdapter>;
-    mockDiffRenderer = RendererAdapterMockFactory.create() as Mocked<DiffRendererAdapter>;
+    mockFileRenderer =
+      RendererAdapterMockFactory.create() as Mocked<FileRendererAdapter>;
+    mockDiffRenderer =
+      RendererAdapterMockFactory.create() as Mocked<DiffRendererAdapter>;
 
     rendererFactory = vi
       .fn()
-      .mockImplementation((dryRun: boolean) => (dryRun ? mockDiffRenderer : mockFileRenderer));
+      .mockImplementation((dryRun: boolean) =>
+        dryRun ? mockDiffRenderer : mockFileRenderer,
+      );
 
     githubAdapter = GeneratorAdapterMockFactory.create({
       getPlatformName: "github-actions",
@@ -86,7 +96,8 @@ describe("GeneratorService", () => {
   describe("getGeneratorAdapterByPlatform", () => {
     it("returns generator adapter by platform name when it exists", () => {
       // Act
-      const adapter = generatorService.getGeneratorAdapterByPlatform("gitlab-ci");
+      const adapter =
+        generatorService.getGeneratorAdapterByPlatform("gitlab-ci");
 
       // Assert
       expect(adapter).toBe(gitlabAdapter);
@@ -94,7 +105,8 @@ describe("GeneratorService", () => {
 
     it("returns undefined when generator adapter for platform does not exist", () => {
       // Act
-      const adapter = generatorService.getGeneratorAdapterByPlatform("bitbucket");
+      const adapter =
+        generatorService.getGeneratorAdapterByPlatform("bitbucket");
 
       // Assert
       expect(adapter).toBeUndefined();
@@ -167,10 +179,17 @@ describe("GeneratorService", () => {
 
       // Assert
       expect(githubAdapter.getDocumentationPath).toHaveBeenCalledWith(source);
-      expect(formatterService.getFormatterAdapterForFile).toHaveBeenCalledWith("/tmp/README.md");
-      expect(formatterAdapter.setOptions).toHaveBeenCalledWith(formatterOptions);
+      expect(formatterService.getFormatterAdapterForFile).toHaveBeenCalledWith(
+        "/tmp/README.md",
+      );
+      expect(formatterAdapter.setOptions).toHaveBeenCalledWith(
+        formatterOptions,
+      );
       expect(rendererFactory).toHaveBeenCalledWith(true);
-      expect(mockDiffRenderer.initialize).toHaveBeenCalledWith("/tmp/README.md", formatterAdapter);
+      expect(mockDiffRenderer.initialize).toHaveBeenCalledWith(
+        "/tmp/README.md",
+        formatterAdapter,
+      );
       expect(githubAdapter.generateDocumentation).toHaveBeenCalledWith({
         source,
         sections,
@@ -178,7 +197,10 @@ describe("GeneratorService", () => {
         repositoryProvider,
       });
       expect(mockDiffRenderer.finalize).toHaveBeenCalled();
-      expect(result).toEqual({ destination: "/tmp/README.md", data: "diff-output" });
+      expect(result).toEqual({
+        destination: "/tmp/README.md",
+        data: "diff-output",
+      });
     });
 
     it("generates documentation using provided destination", async () => {
@@ -200,10 +222,17 @@ describe("GeneratorService", () => {
 
       // Assert
       expect(githubAdapter.getDocumentationPath).not.toHaveBeenCalled();
-      expect(formatterService.getFormatterAdapterForFile).toHaveBeenCalledWith(customDestination);
-      expect(formatterAdapter.setOptions).toHaveBeenCalledWith(formatterOptions);
+      expect(formatterService.getFormatterAdapterForFile).toHaveBeenCalledWith(
+        customDestination,
+      );
+      expect(formatterAdapter.setOptions).toHaveBeenCalledWith(
+        formatterOptions,
+      );
       expect(rendererFactory).toHaveBeenCalledWith(false);
-      expect(mockFileRenderer.initialize).toHaveBeenCalledWith(customDestination, formatterAdapter);
+      expect(mockFileRenderer.initialize).toHaveBeenCalledWith(
+        customDestination,
+        formatterAdapter,
+      );
       expect(githubAdapter.generateDocumentation).toHaveBeenCalledWith({
         source,
         sections,
@@ -211,7 +240,10 @@ describe("GeneratorService", () => {
         repositoryProvider,
       });
       expect(mockFileRenderer.finalize).toHaveBeenCalled();
-      expect(result).toEqual({ destination: customDestination, data: "final-content" });
+      expect(result).toEqual({
+        destination: customDestination,
+        data: "final-content",
+      });
     });
 
     it("throws when adapter does not support the provided source", async () => {
@@ -231,7 +263,9 @@ describe("GeneratorService", () => {
       );
 
       expect(githubAdapter.getDocumentationPath).not.toHaveBeenCalled();
-      expect(formatterService.getFormatterAdapterForFile).not.toHaveBeenCalled();
+      expect(
+        formatterService.getFormatterAdapterForFile,
+      ).not.toHaveBeenCalled();
     });
   });
 });

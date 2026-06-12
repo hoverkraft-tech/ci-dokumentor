@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import mockFs, { restore } from "mock-fs";
-import { ConsoleMockFactory, MockedConsole } from "../../../../__tests__/console-mock.factory.js";
+import {
+  ConsoleMockFactory,
+  type MockedConsole,
+} from "../../../../__tests__/console-mock.factory.js";
 import { GitHubActionLoggerAdapter } from "./github-action-logger.adapter.js";
 
 describe("GitHubActionLoggerAdapter", () => {
@@ -52,7 +55,9 @@ describe("GitHubActionLoggerAdapter", () => {
       const message = "Warning message";
       githubActionLoggerAdapter.warn(message);
 
-      expect(consoleMock.error).toHaveBeenCalledWith("::warning::Warning message");
+      expect(consoleMock.error).toHaveBeenCalledWith(
+        "::warning::Warning message",
+      );
     });
   });
 
@@ -165,7 +170,9 @@ describe("GitHubActionLoggerAdapter", () => {
       };
       githubActionLoggerAdapter.result(data);
       const contents = readFileSync(githubOutputPath, { encoding: "utf8" });
-      expect(contents).toContain("message<<EOF\nFirst line\nSecond line\nEOF\n");
+      expect(contents).toContain(
+        "message<<EOF\nFirst line\nSecond line\nEOF\n",
+      );
       expect(contents).toContain("status=success\n");
     });
 

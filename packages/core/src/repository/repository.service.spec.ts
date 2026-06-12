@@ -74,10 +74,14 @@ describe("RepositoryService", () => {
       });
 
       // Pass providers in reverse priority order to test sorting
-      repositoryService = new RepositoryService([lowPriorityProvider, highPriorityProvider]);
+      repositoryService = new RepositoryService([
+        lowPriorityProvider,
+        highPriorityProvider,
+      ]);
 
       // Act
-      const autoDetectedProvider = await repositoryService.autoDetectRepositoryProvider();
+      const autoDetectedProvider =
+        await repositoryService.autoDetectRepositoryProvider();
 
       // Assert
       expect(callOrder).toEqual(["github"]); // Only github should be called since it supports and has higher priority
@@ -108,10 +112,14 @@ describe("RepositoryService", () => {
         return false;
       });
 
-      repositoryService = new RepositoryService([lowPriorityProvider, highPriorityProvider]);
+      repositoryService = new RepositoryService([
+        lowPriorityProvider,
+        highPriorityProvider,
+      ]);
 
       // Act
-      const autoDetectedProvider = await repositoryService.autoDetectRepositoryProvider();
+      const autoDetectedProvider =
+        await repositoryService.autoDetectRepositoryProvider();
 
       // Assert
       expect(callOrder).toEqual(["github", "git"]); // github checked first, then git
@@ -136,7 +144,11 @@ describe("RepositoryService", () => {
       });
 
       // Pass providers in random order
-      repositoryService = new RepositoryService([provider1, provider3, provider2]);
+      repositoryService = new RepositoryService([
+        provider1,
+        provider3,
+        provider2,
+      ]);
 
       // Act
       const result = repositoryService.getSupportedRepositoryPlatforms();

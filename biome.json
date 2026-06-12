@@ -6,23 +6,35 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!**/dist",
-      "!**/out-tsc",
-      "!**/coverage",
-      "!**/.nx",
-      "!packages/docs/build",
-      "!packages/docs/.docusaurus",
-      "!**/*.svg",
-      "!pnpm-lock.yaml"
-    ]
+    "ignoreUnknown": false,
+    "includes": ["**", "!**/*.svg", "!pnpm-lock.yaml", "!**/pnpm-lock.yaml"]
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space",
-    "lineWidth": 100
+    "indentStyle": "space"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "noVoidTypeReturn": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn",
+        "noAssignInExpressions": "warn",
+        "noImplicitAnyLet": "warn",
+        "useIterableCallbackReturn": "warn"
+      }
+    }
+  },
+  "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    },
+    "formatter": {
+      "quoteStyle": "double"
+    }
   },
   "assist": {
     "enabled": true,
@@ -30,17 +42,6 @@
       "source": {
         "organizeImports": "on"
       }
-    }
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": false
-    }
-  },
-  "javascript": {
-    "parser": {
-      "unsafeParameterDecoratorsEnabled": true
     }
   }
 }

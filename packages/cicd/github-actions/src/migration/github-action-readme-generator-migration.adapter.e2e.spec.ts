@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
-import { FileRendererAdapter, MarkdownFormatterAdapter } from "@ci-dokumentor/core";
+import {
+  FileRendererAdapter,
+  MarkdownFormatterAdapter,
+} from "@ci-dokumentor/core";
 import mockFs, { restore } from "mock-fs";
 import { describe, beforeEach, afterEach, it, expect } from "vitest";
 import { initTestContainer } from "../container.js";
@@ -52,7 +55,9 @@ describe("GitHubActionReadmeGeneratorMigrationAdapter", () => {
     it("returns false for missing files", async () => {
       // Arrange
       // Act
-      const supported = await adapter.supportsDestination("NON_EXISTENT_FILE.md");
+      const supported = await adapter.supportsDestination(
+        "NON_EXISTENT_FILE.md",
+      );
       // Assert
       expect(supported).toBe(false);
     });

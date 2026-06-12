@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
 } from "@ci-dokumentor/core";
 import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
 } from "@ci-dokumentor/core/tests";
-import {
+import type {
   GitHubAction,
   GitHubWorkflow,
   GitHubActionOutput,
@@ -110,7 +110,9 @@ describe("OutputsSectionGenerator", () => {
 
       it("should generate outputs section for GitHub Action with empty outputs object", async () => {
         // Arrange
-        const manifest: GitHubAction = GitHubActionMockFactory.create({ outputs: {} });
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          outputs: {},
+        });
 
         // Act
         const result = await generator.generateSection({
@@ -154,7 +156,9 @@ describe("OutputsSectionGenerator", () => {
       it("should handle outputs with only description", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
-          outputs: { "description-only": { description: "Output with description only" } },
+          outputs: {
+            "description-only": { description: "Output with description only" },
+          },
         });
 
         // Act
@@ -180,7 +184,9 @@ describe("OutputsSectionGenerator", () => {
       it("should handle outputs with no description", async () => {
         // Arrange
         const manifest: GitHubAction = GitHubActionMockFactory.create({
-          outputs: { "no-description": { value: "${{ steps.build.outputs.version }}" } },
+          outputs: {
+            "no-description": { value: "${{ steps.build.outputs.version }}" },
+          },
         });
 
         // Act
@@ -296,7 +302,9 @@ describe("OutputsSectionGenerator", () => {
             repositoryProvider: mockRepositoryProvider,
             destination: "README.md",
           }),
-        ).rejects.toThrow("Unsupported manifest type for OutputsSectionGenerator");
+        ).rejects.toThrow(
+          "Unsupported manifest type for OutputsSectionGenerator",
+        );
       });
     });
   });

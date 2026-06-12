@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import mockFs, { restore } from "mock-fs";
 import { MarkdownFormatterAdapter } from "../formatter/markdown/markdown-formatter.adapter.js";
 import { FileReaderAdapter } from "../reader/file-reader.adapter.js";
-import { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import type { FormatterAdapter } from "../formatter/formatter.adapter.js";
 import { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
 import { initContainer, resetContainer } from "../container.js";
 import { ReadableContent } from "../reader/readable-content.js";
@@ -151,10 +151,15 @@ New section content
     it("should throw error when trying to get destination before initialization", () => {
       // Arrange
       const fileRenderer = new FileRendererAdapter(new FileReaderAdapter());
-      const adapter = new DiffRendererAdapter(fileRenderer, new FileReaderAdapter());
+      const adapter = new DiffRendererAdapter(
+        fileRenderer,
+        new FileReaderAdapter(),
+      );
 
       // Act & Assert
-      expect(() => adapter.getDestination()).toThrow("Destination not initialized");
+      expect(() => adapter.getDestination()).toThrow(
+        "Destination not initialized",
+      );
     });
   });
 });

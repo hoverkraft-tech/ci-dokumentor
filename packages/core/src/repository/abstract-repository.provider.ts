@@ -1,6 +1,6 @@
-import { ManifestVersion } from "../version/version.service.js";
-import { LicenseInfo } from "../license/license.service.js";
-import {
+import type { ManifestVersion } from "../version/version.service.js";
+import type { LicenseInfo } from "../license/license.service.js";
+import type {
   RepositoryProvider,
   RepositoryInfo,
   ContributingInfo,
@@ -94,13 +94,18 @@ export abstract class AbstractRepositoryProvider<
    * Get the latest version information with caching
    */
   async getLatestVersion(): Promise<ManifestVersion | undefined> {
-    return this.getCached("latestVersion", async () => this.fetchLatestVersion());
+    return this.getCached("latestVersion", async () =>
+      this.fetchLatestVersion(),
+    );
   }
 
   /**
    * Generic caching helper
    */
-  protected async getCached<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  protected async getCached<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+  ): Promise<T> {
     if (this.cache.has(key)) {
       return this.cache.get(key) as T;
     }

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
   SectionIdentifier,
 } from "@ci-dokumentor/core";
 import { initTestContainer } from "@ci-dokumentor/repository-github";
@@ -10,7 +10,11 @@ import {
   RepositoryInfoMockFactory,
   RepositoryProviderMockFactory,
 } from "@ci-dokumentor/core/tests";
-import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from "../github-actions-parser.js";
+import type {
+  GitHubAction,
+  GitHubActionsManifest,
+  GitHubWorkflow,
+} from "../github-actions-parser.js";
 import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
 import { GitHubWorkflowMockFactory } from "../../__tests__/github-workflow-mock.factory.js";
 import { OverviewSectionGenerator } from "./overview-section-generator.adapter.js";
@@ -106,7 +110,8 @@ test:
         },
         {
           name: "with special characters",
-          description: "A test action with **bold**, *italic*, and `code` formatting",
+          description:
+            "A test action with **bold**, *italic*, and `code` formatting",
           expected: `## Overview
 
 A test action with **bold**, *italic*, and \`code\` formatting
@@ -126,7 +131,9 @@ It provides more details about the action.
         },
       ])("$name", async ({ description, expected }) => {
         // Arrange
-        const manifest: GitHubAction = GitHubActionMockFactory.create({ description });
+        const manifest: GitHubAction = GitHubActionMockFactory.create({
+          description,
+        });
 
         // Act
         const result = await generator.generateSection({
@@ -713,7 +720,9 @@ Workflow with mixed permission levels
             repositoryProvider: mockRepositoryProvider,
             destination: "README.md",
           }),
-        ).rejects.toThrow("Cannot use 'in' operator to search for 'description' in undefined");
+        ).rejects.toThrow(
+          "Cannot use 'in' operator to search for 'description' in undefined",
+        );
       });
 
       it("should handle manifest without description property", async () => {
@@ -765,7 +774,9 @@ Workflow with mixed permission levels
           runs: { using: "node20" },
         };
 
-        mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(repositoryInfo);
+        mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(
+          repositoryInfo,
+        );
 
         // Act
         const result = await generator.generateSection({

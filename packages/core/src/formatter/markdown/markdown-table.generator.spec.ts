@@ -7,7 +7,9 @@ describe("MarkdownTableGenerator", () => {
   let markdownTableGenerator: MarkdownTableGenerator;
 
   beforeEach(() => {
-    markdownTableGenerator = new MarkdownTableGenerator(new MarkdownCodeGenerator());
+    markdownTableGenerator = new MarkdownTableGenerator(
+      new MarkdownCodeGenerator(),
+    );
   });
 
   describe("table", () => {
@@ -19,8 +21,16 @@ describe("MarkdownTableGenerator", () => {
         new ReadableContent("City"),
       ];
       const rows = [
-        [new ReadableContent("John"), new ReadableContent("25"), new ReadableContent("New York")],
-        [new ReadableContent("Jane"), new ReadableContent("30"), new ReadableContent("Paris")],
+        [
+          new ReadableContent("John"),
+          new ReadableContent("25"),
+          new ReadableContent("New York"),
+        ],
+        [
+          new ReadableContent("Jane"),
+          new ReadableContent("30"),
+          new ReadableContent("Paris"),
+        ],
       ];
 
       // Act
@@ -50,7 +60,10 @@ describe("MarkdownTableGenerator", () => {
 
     it("should handle table with only headers", () => {
       // Arrange
-      const headers = [new ReadableContent("Column 1"), new ReadableContent("Column 2")];
+      const headers = [
+        new ReadableContent("Column 1"),
+        new ReadableContent("Column 2"),
+      ];
       const rows: ReadableContent[][] = [];
 
       // Act
@@ -66,9 +79,15 @@ describe("MarkdownTableGenerator", () => {
 
     it("should handle table with special characters", () => {
       // Arrange
-      const headers = [new ReadableContent("Name"), new ReadableContent("Description")];
+      const headers = [
+        new ReadableContent("Name"),
+        new ReadableContent("Description"),
+      ];
       const rows = [
-        [new ReadableContent('Item "A"'), new ReadableContent("Description with & symbols!")],
+        [
+          new ReadableContent('Item "A"'),
+          new ReadableContent("Description with & symbols!"),
+        ],
       ];
 
       // Act
@@ -121,7 +140,10 @@ describe("MarkdownTableGenerator", () => {
 
     it("should handle multiline content in table cells", () => {
       // Arrange
-      const headers = [new ReadableContent("Name"), new ReadableContent("Description")];
+      const headers = [
+        new ReadableContent("Name"),
+        new ReadableContent("Description"),
+      ];
       const rows = [
         [
           new ReadableContent("John\nDoe"),
@@ -145,9 +167,15 @@ describe("MarkdownTableGenerator", () => {
 
     it("should escape pipe characters in table cells", () => {
       // Arrange
-      const headers = [new ReadableContent("Code"), new ReadableContent("Output")];
+      const headers = [
+        new ReadableContent("Code"),
+        new ReadableContent("Output"),
+      ];
       const rows = [
-        [new ReadableContent("if (a | b)"), new ReadableContent("result: true | false")],
+        [
+          new ReadableContent("if (a | b)"),
+          new ReadableContent("result: true | false"),
+        ],
       ];
 
       // Act
@@ -168,7 +196,12 @@ describe("MarkdownTableGenerator", () => {
         new ReadableContent("Multi\nLine\nHeader"),
         new ReadableContent("Description"),
       ];
-      const rows = [[new ReadableContent("Value"), new ReadableContent("Single line content")]];
+      const rows = [
+        [
+          new ReadableContent("Value"),
+          new ReadableContent("Single line content"),
+        ],
+      ];
 
       // Act
       const result = markdownTableGenerator.table(headers, rows);
@@ -221,7 +254,10 @@ describe("MarkdownTableGenerator", () => {
 
     it("should treat code blocks as single lines in table cells", () => {
       // Arrange
-      const headers = [new ReadableContent("Language"), new ReadableContent("Example Code")];
+      const headers = [
+        new ReadableContent("Language"),
+        new ReadableContent("Example Code"),
+      ];
       const rows = [
         [
           new ReadableContent("JavaScript"),
@@ -231,7 +267,9 @@ describe("MarkdownTableGenerator", () => {
         ],
         [
           new ReadableContent("Python"),
-          new ReadableContent('Example:\n```python\ndef hello():\n    return "Hello World"\n```'),
+          new ReadableContent(
+            'Example:\n```python\ndef hello():\n    return "Hello World"\n```',
+          ),
         ],
         [
           new ReadableContent("Yaml"),
@@ -258,13 +296,19 @@ describe("MarkdownTableGenerator", () => {
 
     it("should handle mixed code blocks and regular multiline content", () => {
       // Arrange
-      const headers = [new ReadableContent("Type"), new ReadableContent("Content")];
+      const headers = [
+        new ReadableContent("Type"),
+        new ReadableContent("Content"),
+      ];
       const rows = [
         [
           new ReadableContent("Code"),
           new ReadableContent("```js\nconst x = 1;\nconsole.log(x);\n```"),
         ],
-        [new ReadableContent("Text"), new ReadableContent("Line 1\nLine 2\nLine 3")],
+        [
+          new ReadableContent("Text"),
+          new ReadableContent("Line 1\nLine 2\nLine 3"),
+        ],
       ];
 
       // Act
@@ -284,9 +328,15 @@ describe("MarkdownTableGenerator", () => {
 
     it("should preserve ~~~ fenced code blocks as single lines in table cells", () => {
       // Arrange
-      const headers = [new ReadableContent("Lang"), new ReadableContent("Example")];
+      const headers = [
+        new ReadableContent("Lang"),
+        new ReadableContent("Example"),
+      ];
       const rows = [
-        [new ReadableContent("Custom"), new ReadableContent("~~~text\nline a\nline b\n~~~")],
+        [
+          new ReadableContent("Custom"),
+          new ReadableContent("~~~text\nline a\nline b\n~~~"),
+        ],
       ];
 
       // Act

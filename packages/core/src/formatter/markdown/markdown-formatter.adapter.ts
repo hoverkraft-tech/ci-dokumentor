@@ -1,7 +1,11 @@
 import { inject, injectable } from "inversify";
 import { FormatterLanguage } from "../formatter-language.js";
-import { FormatterAdapter, FormatterOptions, LinkFormat } from "../formatter.adapter.js";
-import { SectionIdentifier } from "../../generator/section/section-generator.adapter.js";
+import {
+  type FormatterAdapter,
+  type FormatterOptions,
+  LinkFormat,
+} from "../formatter.adapter.js";
+import type { SectionIdentifier } from "../../generator/section/section-generator.adapter.js";
 import { ReadableContent } from "../../reader/readable-content.js";
 import { MarkdownTableGenerator } from "./markdown-table.generator.js";
 import { MarkdownLinkGenerator } from "./markdown-link.generator.js";
@@ -17,9 +21,12 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   };
 
   constructor(
-    @inject(MarkdownTableGenerator) private readonly markdownTableGenerator: MarkdownTableGenerator,
-    @inject(MarkdownLinkGenerator) private readonly markdownLinkGenerator: MarkdownLinkGenerator,
-    @inject(MarkdownCodeGenerator) private readonly markdownCodeGenerator: MarkdownCodeGenerator,
+    @inject(MarkdownTableGenerator)
+    private readonly markdownTableGenerator: MarkdownTableGenerator,
+    @inject(MarkdownLinkGenerator)
+    private readonly markdownLinkGenerator: MarkdownLinkGenerator,
+    @inject(MarkdownCodeGenerator)
+    private readonly markdownCodeGenerator: MarkdownCodeGenerator,
   ) {}
 
   setOptions(options: FormatterOptions): void {
@@ -70,7 +77,10 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     const linkFormat = this.options.linkFormat;
     let processedInput =
       linkFormat && linkFormat !== LinkFormat.None
-        ? this.markdownLinkGenerator.transformUrls(content, linkFormat === LinkFormat.Full)
+        ? this.markdownLinkGenerator.transformUrls(
+            content,
+            linkFormat === LinkFormat.Full,
+          )
         : content;
 
     processedInput = this.transformList(processedInput);
@@ -86,7 +96,9 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   italic(input: ReadableContent): ReadableContent {
-    return new ReadableContent(MarkdownFormatterAdapter.ITALIC_DELIMITER).append(
+    return new ReadableContent(
+      MarkdownFormatterAdapter.ITALIC_DELIMITER,
+    ).append(
       input.escape(MarkdownFormatterAdapter.ITALIC_DELIMITER),
       MarkdownFormatterAdapter.ITALIC_DELIMITER,
     );
@@ -124,7 +136,10 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     options?: { width?: string; align?: string },
   ): ReadableContent {
     if (options?.width || options?.align) {
-      let result = new ReadableContent('<img src="').append(url, new ReadableContent('"'));
+      let result = new ReadableContent('<img src="').append(
+        url,
+        new ReadableContent('"'),
+      );
       // Use HTML img tag for advanced formatting (buffer-based)
       if (options.width) {
         result = result.append(` width="${options.width}"`);
@@ -146,7 +161,10 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
     );
   }
 
-  table(headers: ReadableContent[], rows: ReadableContent[][]): ReadableContent {
+  table(
+    headers: ReadableContent[],
+    rows: ReadableContent[][],
+  ): ReadableContent {
     return this.markdownTableGenerator.table(headers, rows);
   }
 
@@ -178,10 +196,15 @@ export class MarkdownFormatterAdapter implements FormatterAdapter {
   }
 
   lineBreak(): ReadableContent {
-    return new ReadableContent(String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE));
+    return new ReadableContent(
+      String.fromCharCode(ReadableContent.NEW_LINE_CHAR_CODE),
+    );
   }
 
-  section(section: SectionIdentifier, content: ReadableContent): ReadableContent {
+  section(
+    section: SectionIdentifier,
+    content: ReadableContent,
+  ): ReadableContent {
     const startMarker = this.sectionStart(section);
     const endMarker = this.sectionEnd(section);
 

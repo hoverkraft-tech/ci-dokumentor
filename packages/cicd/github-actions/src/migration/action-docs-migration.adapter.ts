@@ -28,7 +28,8 @@ export class ActionDocsMigrationAdapter extends AbstractMigrationAdapter {
   };
 
   protected readonly patterns = {
-    startMarkerPattern: /<!--\s*action-docs-(\w+)\s+source=["'][^"']+["']\s*-->/g,
+    startMarkerPattern:
+      /<!--\s*action-docs-(\w+)\s+source=["'][^"']+["']\s*-->/g,
     endMarkerPattern: /<!--\s*action-docs-(\w+)\s+source=["'][^"']+["']\s*-->/g,
     detectionPattern: /<!--\s*action-docs-\w+\s+source=["'][^"']+["']\s*-->/,
   };

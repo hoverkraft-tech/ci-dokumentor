@@ -1,11 +1,11 @@
 import {
   ReadableContent,
-  SectionGenerationPayload,
-  FormatterAdapter,
+  type SectionGenerationPayload,
+  type FormatterAdapter,
   SectionIdentifier,
 } from "@ci-dokumentor/core";
 import { injectable } from "inversify";
-import {
+import type {
   GitHubActionsManifest,
   GitHubWorkflow,
   GitHubWorkflowSecret,
@@ -30,7 +30,10 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       throw new Error("Unsupported manifest type for InputsSectionGenerator");
     }
 
-    const manifestSecretsContent = this.generateWorkflowSecretsTable(formatterAdapter, manifest);
+    const manifestSecretsContent = this.generateWorkflowSecretsTable(
+      formatterAdapter,
+      manifest,
+    );
     if (manifestSecretsContent.isEmpty()) {
       return ReadableContent.empty();
     }
@@ -67,21 +70,30 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return formatterAdapter.table(headers, rows);
   }
 
-  private getSecretName(name: string, formatterAdapter: FormatterAdapter): ReadableContent {
-    return formatterAdapter.bold(formatterAdapter.inlineCode(new ReadableContent(name)));
+  private getSecretName(
+    name: string,
+    formatterAdapter: FormatterAdapter,
+  ): ReadableContent {
+    return formatterAdapter.bold(
+      formatterAdapter.inlineCode(new ReadableContent(name)),
+    );
   }
 
   private getSecretDescription(
     secret: GitHubWorkflowSecret,
     formatterAdapter: FormatterAdapter,
   ): ReadableContent {
-    return formatterAdapter.paragraph(new ReadableContent((secret.description || "").trim()));
+    return formatterAdapter.paragraph(
+      new ReadableContent((secret.description || "").trim()),
+    );
   }
 
   private getSecretRequired(
     secret: GitHubWorkflowSecret,
     formatterAdapter: FormatterAdapter,
   ): ReadableContent {
-    return formatterAdapter.bold(new ReadableContent(secret.required ? "true" : "false"));
+    return formatterAdapter.bold(
+      new ReadableContent(secret.required ? "true" : "false"),
+    );
   }
 }

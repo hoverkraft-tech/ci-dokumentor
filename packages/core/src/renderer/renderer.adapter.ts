@@ -1,5 +1,5 @@
-import { ReadableContent } from "../reader/readable-content.js";
-import { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import type { ReadableContent } from "../reader/readable-content.js";
+import type { FormatterAdapter } from "../formatter/formatter.adapter.js";
 
 /**
  * RendererAdapter is responsible for producing an OutputAdapter tied to a
@@ -13,13 +13,19 @@ import { FormatterAdapter } from "../formatter/formatter.adapter.js";
  *  - finalize()                                 // finalize and cleanup
  */
 export interface RendererAdapter {
-  initialize(destination: string, formatterAdapter: FormatterAdapter): Promise<void>;
+  initialize(
+    destination: string,
+    formatterAdapter: FormatterAdapter,
+  ): Promise<void>;
 
   getFormatterAdapter(): FormatterAdapter;
 
   getDestination(): string;
 
-  writeSection(sectionIdentifier: string, content: ReadableContent): Promise<void>;
+  writeSection(
+    sectionIdentifier: string,
+    content: ReadableContent,
+  ): Promise<void>;
 
   /**
    * Replace the entire content at the destination with the provided data.

@@ -1,13 +1,21 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  type Mocked,
+} from "vitest";
+import {
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
   ReadableContent,
 } from "@ci-dokumentor/core";
 import { RepositoryProviderMockFactory } from "@ci-dokumentor/core/tests";
-import { GitLabComponentInput } from "../gitlab-ci-parser.js";
+import type { GitLabComponentInput } from "../gitlab-ci-parser.js";
 import { GitLabComponentMockFactory } from "../../__tests__/gitlab-component-mock.factory.js";
 import { GitLabCIPipelineMockFactory } from "../../__tests__/gitlab-pipeline-mock.factory.js";
 import { initTestContainer } from "../container.js";
@@ -168,7 +176,10 @@ describe("InputsSectionGenerator", () => {
             },
           },
           spec: {
-            inputs: undefined as unknown as Record<string, GitLabComponentInput>,
+            inputs: undefined as unknown as Record<
+              string,
+              GitLabComponentInput
+            >,
           },
         });
 

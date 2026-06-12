@@ -68,7 +68,9 @@ describe("FileReaderAdapter", () => {
 
     it("should return empty buffer for non-existent file", async () => {
       // Act
-      const result = await fileReaderAdapter.readResource("/test/nonexistent.md");
+      const result = await fileReaderAdapter.readResource(
+        "/test/nonexistent.md",
+      );
 
       // Assert
       expect(result.getSize()).toBe(0);
@@ -93,9 +95,9 @@ describe("FileReaderAdapter", () => {
       });
 
       // Act & Assert
-      await expect(fileReaderAdapter.readResource("/test/document.md")).rejects.toThrow(
-        `EACCES, permission denied '/test/document.md'`,
-      );
+      await expect(
+        fileReaderAdapter.readResource("/test/document.md"),
+      ).rejects.toThrow(`EACCES, permission denied '/test/document.md'`);
     });
   });
 
@@ -168,7 +170,10 @@ describe("FileReaderAdapter", () => {
       const result = await fileReaderAdapter.readContainer("/dirwithdots");
 
       // Assert
-      expect(result).toEqual(["/dirwithdots/file1.txt", "/dirwithdots/file2.txt"]);
+      expect(result).toEqual([
+        "/dirwithdots/file1.txt",
+        "/dirwithdots/file2.txt",
+      ]);
     });
 
     it("should handle directories with many files efficiently", async () => {
@@ -198,9 +203,9 @@ describe("FileReaderAdapter", () => {
         }),
       });
       // Act & Assert
-      await expect(fileReaderAdapter.readContainer("/restricted")).rejects.toThrow(
-        `EACCES, permission denied '/restricted'`,
-      );
+      await expect(
+        fileReaderAdapter.readContainer("/restricted"),
+      ).rejects.toThrow(`EACCES, permission denied '/restricted'`);
     });
   });
 });

@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, beforeEach, type Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
   ReadableContent,
 } from "@ci-dokumentor/core";
 import { RepositoryProviderMockFactory } from "@ci-dokumentor/core/tests";
@@ -46,7 +46,8 @@ describe("OverviewSectionGenerator", () => {
     it("should return description as paragraph when present", async () => {
       // Arrange
       const manifest = GitLabComponentMockFactory.create({
-        description: "This is a test GitLab component that builds Docker images",
+        description:
+          "This is a test GitLab component that builds Docker images",
       });
 
       // Act

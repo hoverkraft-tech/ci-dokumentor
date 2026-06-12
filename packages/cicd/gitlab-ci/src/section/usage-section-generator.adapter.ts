@@ -1,14 +1,14 @@
 import {
   SectionIdentifier,
   ReadableContent,
-  SectionGenerationPayload,
-  SectionOptions,
-  SectionGeneratorAdapter,
-  VersionService,
+  type SectionGenerationPayload,
+  type SectionOptions,
+  type SectionGeneratorAdapter,
+  type VersionService,
   VERSION_SERVICE_IDENTIFIER,
 } from "@ci-dokumentor/core";
 import { inject, injectable } from "inversify";
-import { GitLabCIManifest } from "../gitlab-ci-parser.js";
+import type { GitLabCIManifest } from "../gitlab-ci-parser.js";
 import { GitLabCISectionGeneratorAdapter } from "./gitlab-ci-section-generator.adapter.js";
 
 export interface UsageSectionOptions extends SectionOptions {
@@ -22,7 +22,10 @@ export class UsageSectionGenerator
 {
   private version?: string;
 
-  constructor(@inject(VERSION_SERVICE_IDENTIFIER) private readonly versionService: VersionService) {
+  constructor(
+    @inject(VERSION_SERVICE_IDENTIFIER)
+    private readonly versionService: VersionService,
+  ) {
     super();
   }
 
@@ -34,7 +37,8 @@ export class UsageSectionGenerator
     return {
       version: {
         flags: "--version <version>",
-        description: "Version identifier of the manifest (tag, branch, commit SHA, etc.)",
+        description:
+          "Version identifier of the manifest (tag, branch, commit SHA, etc.)",
       },
     };
   }
@@ -49,7 +53,10 @@ export class UsageSectionGenerator
     repositoryProvider,
   }: SectionGenerationPayload<GitLabCIManifest>): Promise<ReadableContent> {
     // Resolve version information from section options or auto-detection
-    const version = await this.versionService.getVersion(this.version, repositoryProvider);
+    const version = await this.versionService.getVersion(
+      this.version,
+      repositoryProvider,
+    );
     const resolvedRef = version?.sha ?? version?.ref ?? "latest";
     const refComment = version?.sha && version?.ref ? ` # ${version.ref}` : "";
 
@@ -60,7 +67,10 @@ export class UsageSectionGenerator
     with:
       # Add component inputs here`;
 
-      return formatterAdapter.code(new ReadableContent(usageExample), new ReadableContent("yaml"));
+      return formatterAdapter.code(
+        new ReadableContent(usageExample),
+        new ReadableContent("yaml"),
+      );
     }
 
     if (this.isGitLabCIPipeline(manifest)) {
@@ -70,7 +80,10 @@ export class UsageSectionGenerator
     file: '.gitlab-ci.yml'
     ref: '${resolvedRef}'${refComment}`;
 
-      return formatterAdapter.code(new ReadableContent(usageExample), new ReadableContent("yaml"));
+      return formatterAdapter.code(
+        new ReadableContent(usageExample),
+        new ReadableContent("yaml"),
+      );
     }
 
     return ReadableContent.empty();

@@ -11,7 +11,9 @@ import type { PackageInfo, PackageService } from "./package-service.js";
 @injectable()
 export class FilePackageService implements PackageService {
   private packageInfo: PackageInfo | null = null;
-  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) {}
+  constructor(
+    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter,
+  ) {}
 
   /**
    * Get package information from package.json
@@ -29,11 +31,14 @@ export class FilePackageService implements PackageService {
   private async loadPackageInfo(): Promise<PackageInfo> {
     // Navigate up to the package root
     const packageJsonPath = this.getPackageJsonPath();
-    const packageJsonContent = await this.readerAdapter.readResource(packageJsonPath);
+    const packageJsonContent =
+      await this.readerAdapter.readResource(packageJsonPath);
     const packageJson = JSON.parse(packageJsonContent.toString());
 
     if (!packageJson.name || !packageJson.version || !packageJson.description) {
-      throw new Error("Invalid package.json: name, version, and description are required");
+      throw new Error(
+        "Invalid package.json: name, version, and description are required",
+      );
     }
 
     return {
@@ -49,12 +54,18 @@ export class FilePackageService implements PackageService {
 
     let level = 1;
     while (level++ < 4) {
-      const potentialPath = join(currentDir, ...Array(level).fill(".."), "package.json");
+      const potentialPath = join(
+        currentDir,
+        ...Array(level).fill(".."),
+        "package.json",
+      );
       if (this.readerAdapter.resourceExists(potentialPath)) {
         return potentialPath;
       }
     }
 
-    throw new Error('package.json not found in "' + currentDir + '" parent directories');
+    throw new Error(
+      `package.json not found in "${currentDir}" parent directories`,
+    );
   }
 }

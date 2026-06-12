@@ -11,12 +11,16 @@ export interface ReaderAdapterDefaults {
 }
 
 export class ReaderAdapterMockFactory {
-  static create(defaults?: Partial<ReaderAdapterDefaults>): Mocked<ReaderAdapter> {
+  static create(
+    defaults?: Partial<ReaderAdapterDefaults>,
+  ): Mocked<ReaderAdapter> {
     const mock = {
       readResource: vi.fn() as Mocked<ReaderAdapter["readResource"]>,
       resourceExists: vi.fn() as Mocked<ReaderAdapter["resourceExists"]>,
       containerExists: vi.fn() as Mocked<ReaderAdapter["containerExists"]>,
-      readContainer: vi.fn().mockResolvedValue([]) as Mocked<ReaderAdapter["readContainer"]>,
+      readContainer: vi.fn().mockResolvedValue([]) as Mocked<
+        ReaderAdapter["readContainer"]
+      >,
       findResources: vi.fn() as Mocked<ReaderAdapter["findResources"]>,
     } as Mocked<ReaderAdapter>;
 
@@ -31,14 +35,18 @@ export class ReaderAdapterMockFactory {
     }
     if (defaults?.readContainer !== undefined) {
       mock.readContainer.mockResolvedValue(
-        defaults.readContainer as unknown as Awaited<ReturnType<ReaderAdapter["readContainer"]>>,
+        defaults.readContainer as unknown as Awaited<
+          ReturnType<ReaderAdapter["readContainer"]>
+        >,
       );
     }
     if (defaults?.findResources !== undefined) {
       mock.findResources.mockResolvedValue(defaults.findResources);
     } else {
       // Default behavior: return the pattern as a single-element array (like a single file match)
-      mock.findResources.mockImplementation(async (pattern: string) => [pattern]);
+      mock.findResources.mockImplementation(async (pattern: string) => [
+        pattern,
+      ]);
     }
 
     return mock;

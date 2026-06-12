@@ -18,7 +18,9 @@ export class MarkdownCodeGenerator {
   isFenceLine(line: ReadableContent): boolean {
     if (line.isEmpty()) return false;
     return line.test(
-      new RegExp(`^${MarkdownCodeGenerator.TICK}{${MarkdownCodeGenerator.MIN_FENCE_LEN},}`),
+      new RegExp(
+        `^${MarkdownCodeGenerator.TICK}{${MarkdownCodeGenerator.MIN_FENCE_LEN},}`,
+      ),
     );
   }
 
@@ -51,9 +53,15 @@ export class MarkdownCodeGenerator {
     return ReadableContent.empty().padEnd(fenceLen, MarkdownCodeGenerator.TICK);
   }
 
-  codeBlock(content: ReadableContent, language?: ReadableContent, toHTML = false): ReadableContent {
+  codeBlock(
+    content: ReadableContent,
+    language?: ReadableContent,
+    toHTML = false,
+  ): ReadableContent {
     const resolvedLanguage =
-      language && !language.isEmpty() ? language : MarkdownCodeGenerator.DEFAULT_LANGUAGE;
+      language && !language.isEmpty()
+        ? language
+        : MarkdownCodeGenerator.DEFAULT_LANGUAGE;
 
     if (toHTML) {
       return this.htmlCodeBlock(content, resolvedLanguage);
@@ -73,13 +81,19 @@ export class MarkdownCodeGenerator {
     return ReadableContent.empty().append(
       MarkdownCodeGenerator.TICK,
       content
-        .escape([MarkdownCodeGenerator.TICK, MarkdownFormatterAdapter.ITALIC_DELIMITER])
+        .escape([
+          MarkdownCodeGenerator.TICK,
+          MarkdownFormatterAdapter.ITALIC_DELIMITER,
+        ])
         .htmlEscape(),
       MarkdownCodeGenerator.TICK,
     );
   }
 
-  private htmlCodeBlock(content: ReadableContent, language: ReadableContent): ReadableContent {
+  private htmlCodeBlock(
+    content: ReadableContent,
+    language: ReadableContent,
+  ): ReadableContent {
     const inner = content || ReadableContent.empty();
     const innerParts: ReadableContent[] = [];
     let last = 0;
@@ -88,7 +102,9 @@ export class MarkdownCodeGenerator {
         if (i > last) {
           innerParts.push(inner.slice(last, i));
         }
-        innerParts.push(new ReadableContent(MarkdownCodeGenerator.HTML_NEWLINE_ENTITY));
+        innerParts.push(
+          new ReadableContent(MarkdownCodeGenerator.HTML_NEWLINE_ENTITY),
+        );
         last = i + 1;
       }
     }
@@ -142,7 +158,9 @@ export class MarkdownCodeGenerator {
       if (part.equals(MarkdownCodeGenerator.HTML_NEWLINE_ENTITY)) {
         result = result.append(MarkdownCodeGenerator.HTML_NEWLINE_ENTITY);
       } else {
-        result = result.append(part.escape([MarkdownCodeGenerator.TICK, "*"]).htmlEscape());
+        result = result.append(
+          part.escape([MarkdownCodeGenerator.TICK, "*"]).htmlEscape(),
+        );
       }
     }
     result = result.append(`</pre>`).append("<!-- textlint-enable -->");
@@ -180,7 +198,10 @@ export class MarkdownCodeGenerator {
       }
 
       let k = idx;
-      while (k < contentSize && content.includesAt(MarkdownCodeGenerator.TICK, k)) {
+      while (
+        k < contentSize &&
+        content.includesAt(MarkdownCodeGenerator.TICK, k)
+      ) {
         k++;
       }
 
@@ -199,7 +220,10 @@ export class MarkdownCodeGenerator {
         }
 
         let kk = next;
-        while (kk < contentSize && content.includesAt(MarkdownCodeGenerator.TICK, kk)) {
+        while (
+          kk < contentSize &&
+          content.includesAt(MarkdownCodeGenerator.TICK, kk)
+        ) {
           kk++;
         }
         const closeLen = kk - next;
@@ -244,8 +268,14 @@ export class MarkdownCodeGenerator {
     const contentSize = content.getSize();
     let pos = 0;
     while (pos < contentSize) {
-      const backtickIdx = content.search(MarkdownCodeGenerator.TICK_CHAR_CODE, pos);
-      const tildeIdx = content.search(MarkdownCodeGenerator.TILDE_CHAR_CODE, pos);
+      const backtickIdx = content.search(
+        MarkdownCodeGenerator.TICK_CHAR_CODE,
+        pos,
+      );
+      const tildeIdx = content.search(
+        MarkdownCodeGenerator.TILDE_CHAR_CODE,
+        pos,
+      );
       let idx: number;
       let marker: number;
       if (backtickIdx === -1 && tildeIdx === -1) {
@@ -263,7 +293,10 @@ export class MarkdownCodeGenerator {
         idx = tildeIdx;
         marker = MarkdownCodeGenerator.TILDE_CHAR_CODE;
       }
-      if (idx !== 0 && !content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, idx - 1)) {
+      if (
+        idx !== 0 &&
+        !content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, idx - 1)
+      ) {
         pos = idx + 1;
         continue;
       }
@@ -285,11 +318,14 @@ export class MarkdownCodeGenerator {
       }
 
       const innerStart = infoLineEnd + 1;
-      let lang: ReadableContent | undefined = undefined;
+      let lang: ReadableContent | undefined;
       if (infoLineEnd > k) {
         let ls = k;
         let le = infoLineEnd - 1;
-        while (ls <= le && content.includesAt(ReadableContent.SPACE_CHAR_CODE, ls)) {
+        while (
+          ls <= le &&
+          content.includesAt(ReadableContent.SPACE_CHAR_CODE, ls)
+        ) {
           ls++;
         }
         while (
@@ -310,7 +346,10 @@ export class MarkdownCodeGenerator {
         if (next === -1) {
           break;
         }
-        if (next !== 0 && !content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, next - 1)) {
+        if (
+          next !== 0 &&
+          !content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, next - 1)
+        ) {
           searchPos = next + 1;
           continue;
         }
@@ -322,11 +361,15 @@ export class MarkdownCodeGenerator {
 
         const closeLen = kk - next;
         if (closeLen >= fenceLen) {
-          const lineEnd = content.search(ReadableContent.NEW_LINE_CHAR_CODE, kk);
+          const lineEnd = content.search(
+            ReadableContent.NEW_LINE_CHAR_CODE,
+            kk,
+          );
           const endPos = lineEnd === -1 ? kk : lineEnd + 1;
           found = next;
           const innerEnd =
-            next - 1 >= 0 && content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, next - 1)
+            next - 1 >= 0 &&
+            content.includesAt(ReadableContent.NEW_LINE_CHAR_CODE, next - 1)
               ? next - 1
               : next;
           res.push({ start: idx, end: endPos, innerStart, innerEnd, lang });

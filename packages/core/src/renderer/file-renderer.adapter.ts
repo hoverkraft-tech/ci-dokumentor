@@ -1,7 +1,7 @@
 import { createReadStream, writeFile, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { injectable, inject } from "inversify";
-import { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
+import type { SectionIdentifier } from "../generator/section/section-generator.adapter.js";
 import type { ReaderAdapter } from "../reader/reader.adapter.js";
 import { FileReaderAdapter } from "../reader/file-reader.adapter.js";
 import { ReadableContent } from "../reader/readable-content.js";
@@ -11,7 +11,9 @@ import { AbstractRendererAdapter } from "./abstract-renderer.adapter.js";
 export class FileRendererAdapter extends AbstractRendererAdapter {
   private static readonly fileLocks = new Map<string, Promise<void>>();
 
-  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) {
+  constructor(
+    @inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter,
+  ) {
     super();
   }
 
@@ -138,7 +140,9 @@ export class FileRendererAdapter extends AbstractRendererAdapter {
     // Serialize access to the same file to prevent race conditions
     const existingLock = this.getExistingLock();
 
-    const lockPromise = existingLock ? existingLock.then(operation) : operation();
+    const lockPromise = existingLock
+      ? existingLock.then(operation)
+      : operation();
 
     FileRendererAdapter.fileLocks.set(destination, lockPromise);
 

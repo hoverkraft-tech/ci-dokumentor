@@ -1,6 +1,6 @@
 import { GeneratedSectionMixin } from "@ci-dokumentor/core";
 import { injectable } from "inversify";
-import { GitHubActionsManifest } from "../github-actions-parser.js";
+import type { GitHubActionsManifest } from "../github-actions-parser.js";
 import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 @injectable()

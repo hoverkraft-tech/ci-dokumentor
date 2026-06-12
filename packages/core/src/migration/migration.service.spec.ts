@@ -1,13 +1,13 @@
-import { describe, beforeEach, it, expect, vi, Mocked } from "vitest";
-import { FormatterService } from "../formatter/formatter.service.js";
-import { FileRendererAdapter } from "../renderer/file-renderer.adapter.js";
-import { DiffRendererAdapter } from "../renderer/diff-renderer.adapter.js";
+import { describe, beforeEach, it, expect, vi, type Mocked } from "vitest";
+import type { FormatterService } from "../formatter/formatter.service.js";
+import type { FileRendererAdapter } from "../renderer/file-renderer.adapter.js";
+import type { DiffRendererAdapter } from "../renderer/diff-renderer.adapter.js";
 import {
   FormatterServiceMockFactory,
   MigrationAdapterMockFactory,
   RendererAdapterMockFactory,
 } from "../../__tests__/index.js";
-import { MigrationAdapter } from "./migration.adapter.js";
+import type { MigrationAdapter } from "./migration.adapter.js";
 import { MigrationService } from "./migration.service.js";
 
 describe("MigrationService", () => {
@@ -26,8 +26,10 @@ describe("MigrationService", () => {
 
     // Create proper mocks using mock factories
     mockFormatterService = FormatterServiceMockFactory.create();
-    mockFileRenderer = RendererAdapterMockFactory.create() as Mocked<FileRendererAdapter>;
-    mockDiffRenderer = RendererAdapterMockFactory.create() as Mocked<DiffRendererAdapter>;
+    mockFileRenderer =
+      RendererAdapterMockFactory.create() as Mocked<FileRendererAdapter>;
+    mockDiffRenderer =
+      RendererAdapterMockFactory.create() as Mocked<DiffRendererAdapter>;
 
     service = new MigrationService(
       mockFormatterService,

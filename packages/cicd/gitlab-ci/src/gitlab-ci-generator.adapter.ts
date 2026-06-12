@@ -1,11 +1,11 @@
 import { dirname, join } from "node:path";
 import {
   AbstractGeneratorAdapter,
-  RepositoryInfo,
-  SectionGeneratorAdapter,
+  type RepositoryInfo,
+  type SectionGeneratorAdapter,
 } from "@ci-dokumentor/core";
 import { inject, multiInject } from "inversify";
-import { GitLabCIManifest, GitLabCIParser } from "./gitlab-ci-parser.js";
+import { type GitLabCIManifest, GitLabCIParser } from "./gitlab-ci-parser.js";
 
 export const GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
   "GitLabCISectionGeneratorAdapter",

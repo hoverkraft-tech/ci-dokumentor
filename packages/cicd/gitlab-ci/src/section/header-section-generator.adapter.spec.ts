@@ -1,9 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  type Mocked,
+} from "vitest";
+import {
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
   ReadableContent,
 } from "@ci-dokumentor/core";
 import { RepositoryProviderMockFactory } from "@ci-dokumentor/core/tests";
@@ -70,7 +78,9 @@ describe("HeaderSectionGenerator", () => {
       const manifest = GitLabComponentMockFactory.create({
         name: "Docker Build Component",
       });
-      mockRepositoryProvider.getLogo.mockResolvedValue("https://example.com/logo.png");
+      mockRepositoryProvider.getLogo.mockResolvedValue(
+        "https://example.com/logo.png",
+      );
 
       // Act
       const result = await generator.generateSection({
@@ -99,7 +109,9 @@ describe("HeaderSectionGenerator", () => {
       const manifest = GitLabComponentMockFactory.create({
         name: "Test Component",
       });
-      mockRepositoryProvider.getLogo.mockResolvedValue("file://.gitlab/logo.png");
+      mockRepositoryProvider.getLogo.mockResolvedValue(
+        "file://.gitlab/logo.png",
+      );
 
       // Act
       const result = await generator.generateSection({
@@ -150,7 +162,9 @@ describe("HeaderSectionGenerator", () => {
       const manifest = GitLabComponentMockFactory.create({
         name: "Test Component",
       });
-      mockRepositoryProvider.getLogo.mockResolvedValue("file://.gitlab/logo.png");
+      mockRepositoryProvider.getLogo.mockResolvedValue(
+        "file://.gitlab/logo.png",
+      );
 
       // Act
       const result = await generator.generateSection({
@@ -179,7 +193,9 @@ describe("HeaderSectionGenerator", () => {
       const manifest = GitLabComponentMockFactory.create({
         name: "Nested Component",
       });
-      mockRepositoryProvider.getLogo.mockResolvedValue("file://assets/logo.svg");
+      mockRepositoryProvider.getLogo.mockResolvedValue(
+        "file://assets/logo.svg",
+      );
 
       // Act
       const result = await generator.generateSection({

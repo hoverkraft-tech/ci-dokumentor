@@ -1,12 +1,27 @@
-import { describe, it, expect, beforeEach, afterEach, Mocked, vi } from "vitest";
-import { ReadableContent, ReaderAdapter, RepositoryInfo } from "@ci-dokumentor/core";
-import { ReaderAdapterMockFactory, RepositoryInfoMockFactory } from "@ci-dokumentor/core/tests";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mocked,
+  vi,
+} from "vitest";
+import {
+  ReadableContent,
+  type ReaderAdapter,
+  type RepositoryInfo,
+} from "@ci-dokumentor/core";
+import {
+  ReaderAdapterMockFactory,
+  RepositoryInfoMockFactory,
+} from "@ci-dokumentor/core/tests";
 import {
   GitHubActionsParser,
-  GitHubAction,
-  GitHubWorkflow,
-  GitHubActionInput,
-  GitHubActionOutput,
+  type GitHubAction,
+  type GitHubWorkflow,
+  type GitHubActionInput,
+  type GitHubActionOutput,
 } from "./github-actions-parser.js";
 
 describe("GitHubActionsParser", () => {
@@ -78,10 +93,15 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
-        const result = (await parser.parseFile(filePath, mockRepositoryInfo)) as GitHubAction;
+        const result = (await parser.parseFile(
+          filePath,
+          mockRepositoryInfo,
+        )) as GitHubAction;
 
         // Assert
         expect(result).toBeDefined();
@@ -92,20 +112,28 @@ runs:
         expect(result.branding).toEqual({ icon: "activity", color: "blue" });
 
         expect(result.inputs).toBeDefined();
-        expect((result.inputs as Record<string, GitHubActionInput>)["input-name"]).toEqual({
+        expect(
+          (result.inputs as Record<string, GitHubActionInput>)["input-name"],
+        ).toEqual({
           description: "Input description",
           required: true,
           default: "default-value",
           type: "string",
         });
-        expect((result.inputs as Record<string, GitHubActionInput>)["optional-input"]).toEqual({
+        expect(
+          (result.inputs as Record<string, GitHubActionInput>)[
+            "optional-input"
+          ],
+        ).toEqual({
           description: "Optional input",
           required: false,
           type: "choice",
           options: ["option1", "option2"],
         });
         expect(
-          (result.inputs as Record<string, GitHubActionInput>)["input-with-multiline-description"],
+          (result.inputs as Record<string, GitHubActionInput>)[
+            "input-with-multiline-description"
+          ],
         ).toEqual({
           description: "An input\nwith multiline\ndescription\n",
           required: false,
@@ -129,7 +157,9 @@ runs:
         });
 
         expect(result.outputs).toBeDefined();
-        expect((result.outputs as Record<string, GitHubActionOutput>)["output-name"]).toEqual({
+        expect(
+          (result.outputs as Record<string, GitHubActionOutput>)["output-name"],
+        ).toEqual({
           description: "Output description",
           value: "${{ steps.step-id.outputs.value }}",
         });
@@ -303,7 +333,9 @@ jobs:
         expectedDescription,
       }) => {
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         const result = (await parser.parseFile(
           "/test/.github/workflows/test.yml",
@@ -330,10 +362,15 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
-        const result = (await parser.parseFile(filePath, mockRepositoryInfo)) as GitHubAction;
+        const result = (await parser.parseFile(
+          filePath,
+          mockRepositoryInfo,
+        )) as GitHubAction;
 
         // Assert
         expect(result).toBeDefined();
@@ -341,7 +378,9 @@ runs:
         expect(result.description).toBe(
           "Action description from field\n\nThis is an action comment from the top of the file",
         );
-        expect("description" in result && typeof result.description === "string").toBe(true);
+        expect(
+          "description" in result && typeof result.description === "string",
+        ).toBe(true);
       });
 
       it("should extract description from action comments only when no description field", async () => {
@@ -355,15 +394,22 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
-        const result = (await parser.parseFile(filePath, mockRepositoryInfo)) as GitHubAction;
+        const result = (await parser.parseFile(
+          filePath,
+          mockRepositoryInfo,
+        )) as GitHubAction;
 
         // Assert
         expect(result).toBeDefined();
         expect(result.name).toBe("Test Action");
-        expect(result.description).toBe("This is an action comment\nSecond line of comment");
+        expect(result.description).toBe(
+          "This is an action comment\nSecond line of comment",
+        );
       });
 
       it("should use only description field when no comments", async () => {
@@ -376,10 +422,15 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
-        const result = (await parser.parseFile(filePath, mockRepositoryInfo)) as GitHubAction;
+        const result = (await parser.parseFile(
+          filePath,
+          mockRepositoryInfo,
+        )) as GitHubAction;
 
         // Assert
         expect(result).toBeDefined();
@@ -403,10 +454,15 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
-        const result = (await parser.parseFile(filePath, mockRepositoryInfo)) as GitHubAction;
+        const result = (await parser.parseFile(
+          filePath,
+          mockRepositoryInfo,
+        )) as GitHubAction;
 
         // Assert
         expect(result).toBeDefined();
@@ -435,14 +491,21 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
-        const result = (await parser.parseFile(filePath, mockRepositoryInfo)) as GitHubWorkflow;
+        const result = (await parser.parseFile(
+          filePath,
+          mockRepositoryInfo,
+        )) as GitHubWorkflow;
 
         // Assert
         expect(result).toBeDefined();
-        expect(result.usesName).toBe("owner/repo/.github/workflows/workflow.yml");
+        expect(result.usesName).toBe(
+          "owner/repo/.github/workflows/workflow.yml",
+        );
         expect(result.name).toBe("Test Workflow");
       });
 
@@ -459,10 +522,15 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
-        const result = (await parser.parseFile(filePath, mockRepositoryInfo)) as GitHubWorkflow;
+        const result = (await parser.parseFile(
+          filePath,
+          mockRepositoryInfo,
+        )) as GitHubWorkflow;
 
         // Assert
         expect(result).toBeDefined();
@@ -477,10 +545,14 @@ jobs:
         const fileContent = `invalid: yaml: content`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow();
       });
 
       it("should throw error for empty file", async () => {
@@ -488,10 +560,14 @@ jobs:
         const filePath = "/test/.github/workflows/empty.yml";
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(""));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(""),
+        );
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow();
       });
 
       it("should throw error for plain text when parseable as YAML", async () => {
@@ -500,24 +576,33 @@ jobs:
         const fileContent = `This is not a YAML file`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow();
       });
 
       it("should throw error for valid YAML but unsupported structure", async () => {
         // Arrange
-        const filePath = "/test/.github/workflows/object-without-required-fields.yml";
+        const filePath =
+          "/test/.github/workflows/object-without-required-fields.yml";
         const fileContent = `someField: value
 anotherField: 123
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow();
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow();
       });
     });
 
@@ -532,7 +617,9 @@ runs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -558,7 +645,9 @@ jobs:
 `;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);

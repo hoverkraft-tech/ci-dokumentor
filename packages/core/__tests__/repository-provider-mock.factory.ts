@@ -1,17 +1,26 @@
 import { vi } from "vitest";
 import type { Mocked } from "vitest";
-import { RepositoryOptions, RepositoryProvider } from "../src/repository/repository.provider.js";
+import type {
+  RepositoryOptions,
+  RepositoryProvider,
+} from "../src/repository/repository.provider.js";
 
 type RepositoryProviderDefaults<Options extends RepositoryOptions> = Partial<{
   getPlatformName: ReturnType<RepositoryProvider<Options>["getPlatformName"]>;
   getPriority: ReturnType<RepositoryProvider<Options>["getPriority"]>;
   supports: Awaited<ReturnType<RepositoryProvider<Options>["supports"]>>;
-  getRepositoryInfo: Awaited<ReturnType<RepositoryProvider<Options>["getRepositoryInfo"]>>;
+  getRepositoryInfo: Awaited<
+    ReturnType<RepositoryProvider<Options>["getRepositoryInfo"]>
+  >;
   getLogo: Awaited<ReturnType<RepositoryProvider<Options>["getLogo"]>>;
   getLicense: Awaited<ReturnType<RepositoryProvider<Options>["getLicense"]>>;
-  getContributing: Awaited<ReturnType<RepositoryProvider<Options>["getContributing"]>>;
+  getContributing: Awaited<
+    ReturnType<RepositoryProvider<Options>["getContributing"]>
+  >;
   getSecurity: Awaited<ReturnType<RepositoryProvider<Options>["getSecurity"]>>;
-  getLatestVersion: Awaited<ReturnType<RepositoryProvider<Options>["getLatestVersion"]>>;
+  getLatestVersion: Awaited<
+    ReturnType<RepositoryProvider<Options>["getLatestVersion"]>
+  >;
   getOptions: ReturnType<RepositoryProvider<Options>["getOptions"]>;
   setOptions: ReturnType<RepositoryProvider<Options>["setOptions"]>;
 }>;
@@ -21,15 +30,27 @@ export class RepositoryProviderMockFactory {
     defaults?: RepositoryProviderDefaults<Options>,
   ): Mocked<RepositoryProvider<Options>> {
     const mock = {
-      getPlatformName: vi.fn() as Mocked<RepositoryProvider<Options>["getPlatformName"]>,
-      getPriority: vi.fn() as Mocked<RepositoryProvider<Options>["getPriority"]>,
+      getPlatformName: vi.fn() as Mocked<
+        RepositoryProvider<Options>["getPlatformName"]
+      >,
+      getPriority: vi.fn() as Mocked<
+        RepositoryProvider<Options>["getPriority"]
+      >,
       supports: vi.fn() as Mocked<RepositoryProvider<Options>["supports"]>,
-      getRepositoryInfo: vi.fn() as Mocked<RepositoryProvider<Options>["getRepositoryInfo"]>,
+      getRepositoryInfo: vi.fn() as Mocked<
+        RepositoryProvider<Options>["getRepositoryInfo"]
+      >,
       getLogo: vi.fn() as Mocked<RepositoryProvider<Options>["getLogo"]>,
       getLicense: vi.fn() as Mocked<RepositoryProvider<Options>["getLicense"]>,
-      getContributing: vi.fn() as Mocked<RepositoryProvider<Options>["getContributing"]>,
-      getSecurity: vi.fn() as Mocked<RepositoryProvider<Options>["getSecurity"]>,
-      getLatestVersion: vi.fn() as Mocked<RepositoryProvider<Options>["getLatestVersion"]>,
+      getContributing: vi.fn() as Mocked<
+        RepositoryProvider<Options>["getContributing"]
+      >,
+      getSecurity: vi.fn() as Mocked<
+        RepositoryProvider<Options>["getSecurity"]
+      >,
+      getLatestVersion: vi.fn() as Mocked<
+        RepositoryProvider<Options>["getLatestVersion"]
+      >,
       getOptions: vi.fn() as Mocked<RepositoryProvider<Options>["getOptions"]>,
       setOptions: vi.fn() as Mocked<RepositoryProvider<Options>["setOptions"]>,
     } as Mocked<RepositoryProvider<Options>>;

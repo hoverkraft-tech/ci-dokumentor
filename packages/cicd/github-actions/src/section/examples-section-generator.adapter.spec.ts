@@ -1,12 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mocked } from "vitest";
 import {
-  VersionService,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  type Mocked,
+} from "vitest";
+import {
+  type VersionService,
   SectionIdentifier,
-  ManifestVersion,
+  type ManifestVersion,
   ReadableContent,
-  FormatterAdapter,
-  RepositoryProvider,
-  ReaderAdapter,
+  type FormatterAdapter,
+  type RepositoryProvider,
+  type ReaderAdapter,
   MarkdownFormatterAdapter,
 } from "@ci-dokumentor/core";
 import {
@@ -15,7 +23,7 @@ import {
   RepositoryProviderMockFactory,
   VersionServiceMockFactory,
 } from "@ci-dokumentor/core/tests";
-import { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
+import type { GitHubAction, GitHubWorkflow } from "../github-actions-parser.js";
 import { initTestContainer } from "../container.js";
 import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
 import { GitHubWorkflowMockFactory } from "../../__tests__/github-workflow-mock.factory.js";
@@ -54,7 +62,10 @@ describe("ExamplesSectionGenerator", () => {
 
     mockReaderAdapter = ReaderAdapterMockFactory.create();
 
-    generator = new ExamplesSectionGenerator(mockVersionService, mockReaderAdapter);
+    generator = new ExamplesSectionGenerator(
+      mockVersionService,
+      mockReaderAdapter,
+    );
   });
 
   afterEach(() => {
@@ -105,7 +116,9 @@ describe("ExamplesSectionGenerator", () => {
       // Arrange
       // Mock examples directory with YAML file containing action usage
       mockReaderAdapter.containerExists.mockReturnValue(true);
-      mockReaderAdapter.readContainer.mockResolvedValue(["/test/examples/example1.yaml"]);
+      mockReaderAdapter.readContainer.mockResolvedValue([
+        "/test/examples/example1.yaml",
+      ]);
 
       const exampleContent = `name: Test Workflow
 on: push
@@ -118,7 +131,9 @@ jobs:
           input: value`;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(exampleContent));
+      mockReaderAdapter.readResource.mockResolvedValue(
+        new ReadableContent(exampleContent),
+      );
 
       // Act
       const result = await generator.generateSection({
@@ -136,7 +151,9 @@ jobs:
       // Arrange
       // Mock examples directory with YAML file containing action usage
       mockReaderAdapter.containerExists.mockReturnValue(true);
-      mockReaderAdapter.readContainer.mockResolvedValue(["/test/examples/example1.yaml"]);
+      mockReaderAdapter.readContainer.mockResolvedValue([
+        "/test/examples/example1.yaml",
+      ]);
 
       const exampleContent = `name: Example Workflow
 on: push
@@ -152,7 +169,9 @@ jobs:
           local: true`;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(exampleContent));
+      mockReaderAdapter.readResource.mockResolvedValue(
+        new ReadableContent(exampleContent),
+      );
 
       // Act
       const result = await generator.generateSection({
@@ -438,7 +457,9 @@ ${destinationContent}
 <!-- examples:end -->`),
         );
 
-        mockVersionService.getVersion.mockResolvedValue(version ? version : mockVersion);
+        mockVersionService.getVersion.mockResolvedValue(
+          version ? version : mockVersion,
+        );
 
         // Act
         const result = await generator.generateSection({

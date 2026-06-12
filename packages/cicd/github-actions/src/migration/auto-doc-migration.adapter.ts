@@ -45,7 +45,11 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
 
     const headerRegex = /^(##\s+(Inputs|Outputs|Secrets|Description))\s*$/i;
 
-    type Section = { headerLine: ReadableContent; sectionKey: string; content: ReadableContent };
+    type Section = {
+      headerLine: ReadableContent;
+      sectionKey: string;
+      content: ReadableContent;
+    };
     let current: Section | null = null;
     let result = ReadableContent.empty();
 
@@ -54,19 +58,29 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
         return;
       }
 
-      const sectionIdentifier = this.mapToStandardSection(current.sectionKey.toLowerCase());
+      const sectionIdentifier = this.mapToStandardSection(
+        current.sectionKey.toLowerCase(),
+      );
       if (sectionIdentifier) {
         const contentPart = current.content.isEmpty()
           ? current.headerLine
-          : current.headerLine.append(formatterAdapter.lineBreak(), current.content);
+          : current.headerLine.append(
+              formatterAdapter.lineBreak(),
+              current.content,
+            );
 
-        const wrapped = formatterAdapter.section(sectionIdentifier, contentPart);
+        const wrapped = formatterAdapter.section(
+          sectionIdentifier,
+          contentPart,
+        );
         result = result.append(wrapped);
       } else {
         // Unknown section: emit original header + content as-is
         result = result.append(
           current.headerLine,
-          ...(current.content.isEmpty() ? [] : [formatterAdapter.lineBreak(), current.content]),
+          ...(current.content.isEmpty()
+            ? []
+            : [formatterAdapter.lineBreak(), current.content]),
         );
       }
       current = null;
@@ -91,7 +105,10 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
 
       // Not a header
       if (current) {
-        current.content = current.content.append(line, formatterAdapter.lineBreak());
+        current.content = current.content.append(
+          line,
+          formatterAdapter.lineBreak(),
+        );
       } else {
         // Outside any section, preserve original content
         result = result.append(line, formatterAdapter.lineBreak());
@@ -102,13 +119,16 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
       const end = Math.min(offset + chunkSize, content.getSize());
       const chunk = content.slice(offset, end);
       offset = end;
-      remainingContent = remainingContent.append(decoder.write(chunk.toString()));
+      remainingContent = remainingContent.append(
+        decoder.write(chunk.toString()),
+      );
 
-      let idx: number;
-      while ((idx = remainingContent.search(formatterAdapter.lineBreak())) !== -1) {
+      let idx = remainingContent.search(formatterAdapter.lineBreak());
+      while (idx !== -1) {
         const line = remainingContent.slice(0, idx);
         processLine(line);
         remainingContent = remainingContent.slice(idx + 1);
+        idx = remainingContent.search(formatterAdapter.lineBreak());
       }
     }
 

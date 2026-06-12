@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import mockFs, { restore } from "mock-fs";
 import { describe, beforeEach, afterEach, it, expect } from "vitest";
-import { MarkdownFormatterAdapter, FileRendererAdapter } from "@ci-dokumentor/core";
+import {
+  MarkdownFormatterAdapter,
+  FileRendererAdapter,
+} from "@ci-dokumentor/core";
 import { initTestContainer } from "../container.js";
 import { ActionDocsMigrationAdapter } from "./action-docs-migration.adapter.js";
 
@@ -48,7 +51,9 @@ describe("ActionDocsMigrationAdapter", () => {
     it("returns false for missing files", async () => {
       // Arrange
       // Act
-      const supported = await adapter.supportsDestination("NON_EXISTENT_FILE.md");
+      const supported = await adapter.supportsDestination(
+        "NON_EXISTENT_FILE.md",
+      );
       // Assert
       expect(supported).toBe(false);
     });

@@ -1,12 +1,15 @@
-import { FormatterAdapter } from "../formatter/formatter.adapter.js";
-import { ReadableContent } from "../reader/readable-content.js";
-import { RendererAdapter } from "./renderer.adapter.js";
+import type { FormatterAdapter } from "../formatter/formatter.adapter.js";
+import type { ReadableContent } from "../reader/readable-content.js";
+import type { RendererAdapter } from "./renderer.adapter.js";
 
 export abstract class AbstractRendererAdapter implements RendererAdapter {
   private destination?: string;
   private formatterAdapter?: FormatterAdapter;
 
-  async initialize(destination: string, formatterAdapter: FormatterAdapter): Promise<void> {
+  async initialize(
+    destination: string,
+    formatterAdapter: FormatterAdapter,
+  ): Promise<void> {
     if (this.destination) {
       throw new Error("Destination is already initialized");
     }
@@ -32,7 +35,10 @@ export abstract class AbstractRendererAdapter implements RendererAdapter {
     return this.destination;
   }
 
-  abstract writeSection(sectionIdentifier: string, data: ReadableContent): Promise<void>;
+  abstract writeSection(
+    sectionIdentifier: string,
+    data: ReadableContent,
+  ): Promise<void>;
 
   abstract replaceContent(data: ReadableContent): Promise<void>;
 

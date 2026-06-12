@@ -1,5 +1,5 @@
 import type { Mocked } from "vitest";
-import { RepositoryInfo } from "../src/repository/repository.provider.js";
+import type { RepositoryInfo } from "../src/repository/repository.provider.js";
 
 export class RepositoryInfoMockFactory {
   static create(defaults?: Partial<RepositoryInfo>): Mocked<RepositoryInfo> {

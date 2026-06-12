@@ -1,7 +1,21 @@
-import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type MockInstance,
+} from "vitest";
 import type { Container } from "@ci-dokumentor/core";
-import { initGlobalContainer, resetGlobalContainer } from "../global-container.js";
-import { ConsoleMockFactory, MockedConsole } from "../../../__tests__/console-mock.factory.js";
+import {
+  initGlobalContainer,
+  resetGlobalContainer,
+} from "../global-container.js";
+import {
+  ConsoleMockFactory,
+  type MockedConsole,
+} from "../../../__tests__/console-mock.factory.js";
 import { CliApplication } from "./cli-application.js";
 
 describe("CliApplication Integration Tests", () => {
@@ -27,10 +41,12 @@ describe("CliApplication Integration Tests", () => {
     consoleMock = ConsoleMockFactory.create();
 
     const processExitMock = ((code?: number | string | null | undefined) => {
-      throw new Error("process.exit: " + code);
+      throw new Error(`process.exit: ${code}`);
     }) as unknown as typeof process.exit;
 
-    processExitSpy = vi.spyOn(process, "exit").mockImplementation(processExitMock);
+    processExitSpy = vi
+      .spyOn(process, "exit")
+      .mockImplementation(processExitMock);
   });
 
   afterEach(() => {
@@ -72,7 +88,9 @@ describe("CliApplication Integration Tests", () => {
       expect(consoleMock.error).not.toHaveBeenCalled();
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
-      expect(consoleMock.info).toHaveBeenCalledWith(expect.stringContaining("Usage:"));
+      expect(consoleMock.info).toHaveBeenCalledWith(
+        expect.stringContaining("Usage:"),
+      );
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
 
@@ -88,7 +106,9 @@ describe("CliApplication Integration Tests", () => {
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
       // Should output version information
-      expect(consoleMock.info).toHaveBeenCalledWith(expect.stringMatching(/\d+\.\d+\.\d+/));
+      expect(consoleMock.info).toHaveBeenCalledWith(
+        expect.stringMatching(/\d+\.\d+\.\d+/),
+      );
       expect(processExitSpy).toHaveBeenCalledWith(0);
     });
 
@@ -104,7 +124,9 @@ describe("CliApplication Integration Tests", () => {
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
       expect(consoleMock.info).toHaveBeenCalled();
-      const helpOutput = consoleMock.info.mock.calls.map((call) => call[0]).join("\n");
+      const helpOutput = consoleMock.info.mock.calls
+        .map((call) => call[0])
+        .join("\n");
 
       // Should contain commands section
       expect(helpOutput).toContain("Commands:");
@@ -125,7 +147,9 @@ describe("CliApplication Integration Tests", () => {
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
       expect(consoleMock.error).toHaveBeenCalled();
-      const errorOutput = consoleMock.error.mock.calls.map((call) => call[0]).join("\n");
+      const errorOutput = consoleMock.error.mock.calls
+        .map((call) => call[0])
+        .join("\n");
 
       expect(errorOutput).toContain("unknown command");
       expect(processExitSpy).toHaveBeenCalledWith(1);
@@ -157,7 +181,9 @@ describe("CliApplication Integration Tests", () => {
       expect(consoleMock.debug).not.toHaveBeenCalled();
 
       expect(consoleMock.error).toHaveBeenCalled();
-      const errorOutput = consoleMock.error.mock.calls.map((call) => call[0]).join("\n");
+      const errorOutput = consoleMock.error.mock.calls
+        .map((call) => call[0])
+        .join("\n");
 
       expect(errorOutput).toContain("unknown option");
       expect(processExitSpy).toHaveBeenCalledWith(1);

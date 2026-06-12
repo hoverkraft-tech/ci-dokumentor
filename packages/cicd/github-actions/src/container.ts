@@ -1,5 +1,5 @@
 import {
-  Container,
+  type Container,
   GENERATOR_ADAPTER_IDENTIFIER,
   MIGRATION_ADAPTER_IDENTIFIER,
   initContainer as coreInitContainer,
@@ -39,8 +39,14 @@ export function resetContainer(): void {
   container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
+export function initContainer(
+  baseContainer: Container | undefined = undefined,
+): Container {
+  let targetContainer = baseContainer ?? container;
+  if (!targetContainer) {
+    targetContainer = new InversifyContainer() as Container;
+    container = targetContainer;
+  }
 
   // Return early if this package has already been initialized in this container.
   if (targetContainer.isCurrentBound(GitHubActionsParser)) {
@@ -52,8 +58,13 @@ export function initContainer(baseContainer: Container | undefined = undefined):
   targetContainer.bind(GitHubActionsParser).toSelf().inSingletonScope();
 
   // Bind generator
-  targetContainer.bind(GitHubActionsGeneratorAdapter).toSelf().inSingletonScope();
-  targetContainer.bind(GENERATOR_ADAPTER_IDENTIFIER).toService(GitHubActionsGeneratorAdapter);
+  targetContainer
+    .bind(GitHubActionsGeneratorAdapter)
+    .toSelf()
+    .inSingletonScope();
+  targetContainer
+    .bind(GENERATOR_ADAPTER_IDENTIFIER)
+    .toService(GitHubActionsGeneratorAdapter);
 
   // Bind section generators
   targetContainer
@@ -95,15 +106,24 @@ export function initContainer(baseContainer: Container | undefined = undefined):
 
   // Bind migration adapters to the container
   targetContainer.bind(ActionDocsMigrationAdapter).toSelf().inSingletonScope();
-  targetContainer.bind(MIGRATION_ADAPTER_IDENTIFIER).toService(ActionDocsMigrationAdapter);
+  targetContainer
+    .bind(MIGRATION_ADAPTER_IDENTIFIER)
+    .toService(ActionDocsMigrationAdapter);
 
   targetContainer.bind(AutoDocMigrationAdapter).toSelf().inSingletonScope();
-  targetContainer.bind(MIGRATION_ADAPTER_IDENTIFIER).toService(AutoDocMigrationAdapter);
+  targetContainer
+    .bind(MIGRATION_ADAPTER_IDENTIFIER)
+    .toService(AutoDocMigrationAdapter);
 
   targetContainer.bind(ActdocsMigrationAdapter).toSelf().inSingletonScope();
-  targetContainer.bind(MIGRATION_ADAPTER_IDENTIFIER).toService(ActdocsMigrationAdapter);
+  targetContainer
+    .bind(MIGRATION_ADAPTER_IDENTIFIER)
+    .toService(ActdocsMigrationAdapter);
 
-  targetContainer.bind(GitHubActionReadmeGeneratorMigrationAdapter).toSelf().inSingletonScope();
+  targetContainer
+    .bind(GitHubActionReadmeGeneratorMigrationAdapter)
+    .toSelf()
+    .inSingletonScope();
   targetContainer
     .bind(MIGRATION_ADAPTER_IDENTIFIER)
     .toService(GitHubActionReadmeGeneratorMigrationAdapter);

@@ -1,6 +1,21 @@
-import { describe, it, expect, beforeEach, afterEach, Mocked, vi } from "vitest";
-import { ReadableContent, ReaderAdapter, RepositoryInfo } from "@ci-dokumentor/core";
-import { ReaderAdapterMockFactory, RepositoryInfoMockFactory } from "@ci-dokumentor/core/tests";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mocked,
+  vi,
+} from "vitest";
+import {
+  ReadableContent,
+  type ReaderAdapter,
+  type RepositoryInfo,
+} from "@ci-dokumentor/core";
+import {
+  ReaderAdapterMockFactory,
+  RepositoryInfoMockFactory,
+} from "@ci-dokumentor/core/tests";
 import { GitLabCIParser } from "./gitlab-ci-parser.js";
 
 describe("GitLabCIParser", () => {
@@ -139,7 +154,9 @@ docker-build:
     - docker build -t $[[ inputs.image_name ]]:$[[ inputs.image_tag ]] .`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -147,8 +164,11 @@ docker-build:
         // Assert
         expect(result).toMatchObject({
           name: expect.any(String),
-          description: "Docker Build Component\nA reusable component for building Docker images",
-          usesName: expect.stringContaining("templates/docker-build/template.yml"),
+          description:
+            "Docker Build Component\nA reusable component for building Docker images",
+          usesName: expect.stringContaining(
+            "templates/docker-build/template.yml",
+          ),
           spec: {
             inputs: {
               image_name: {
@@ -176,7 +196,9 @@ docker-build:
       type: string`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -213,7 +235,9 @@ test:
     - npm test`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -221,7 +245,8 @@ test:
         // Assert
         expect(result).toMatchObject({
           name: expect.any(String),
-          description: "GitLab CI Pipeline\nThis pipeline builds and tests the application",
+          description:
+            "GitLab CI Pipeline\nThis pipeline builds and tests the application",
           usesName: expect.any(String),
           stages: ["build", "test"],
           variables: {
@@ -254,7 +279,9 @@ build:
     - echo "Building"`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act
         const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -271,33 +298,37 @@ build:
         mockReaderAdapter.resourceExists.mockReturnValue(false);
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow(
-          'Source file does not exist: "non-existent.yml"',
-        );
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow('Source file does not exist: "non-existent.yml"');
       });
 
       it("should throw error when YAML is invalid", async () => {
         // Arrange
         const filePath = ".gitlab-ci.yml";
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(""));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(""),
+        );
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow(
-          "Unsupported source file: .gitlab-ci.yml",
-        );
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow("Unsupported source file: .gitlab-ci.yml");
       });
 
       it("should throw error when YAML is not an object", async () => {
         // Arrange
         const filePath = ".gitlab-ci.yml";
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent("[]"));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent("[]"),
+        );
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow(
-          "Unsupported GitLab CI file format: .gitlab-ci.yml",
-        );
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow("Unsupported GitLab CI file format: .gitlab-ci.yml");
       });
 
       it("should throw error for unsupported file format", async () => {
@@ -308,12 +339,14 @@ runs:
   using: node20`;
 
         mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+        mockReaderAdapter.readResource.mockResolvedValue(
+          new ReadableContent(fileContent),
+        );
 
         // Act & Assert
-        await expect(parser.parseFile(filePath, mockRepositoryInfo)).rejects.toThrow(
-          "Unsupported source file: unsupported.yml",
-        );
+        await expect(
+          parser.parseFile(filePath, mockRepositoryInfo),
+        ).rejects.toThrow("Unsupported source file: unsupported.yml");
       });
     });
   });
@@ -330,7 +363,9 @@ stages:
   - test`;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+      mockReaderAdapter.readResource.mockResolvedValue(
+        new ReadableContent(fileContent),
+      );
 
       // Act
       const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -352,7 +387,9 @@ stages:
   - test`;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+      mockReaderAdapter.readResource.mockResolvedValue(
+        new ReadableContent(fileContent),
+      );
 
       // Act
       const result = await parser.parseFile(filePath, mockRepositoryInfo);
@@ -371,7 +408,9 @@ stages:
   - test`;
 
       mockReaderAdapter.resourceExists.mockReturnValue(true);
-      mockReaderAdapter.readResource.mockResolvedValue(new ReadableContent(fileContent));
+      mockReaderAdapter.readResource.mockResolvedValue(
+        new ReadableContent(fileContent),
+      );
 
       // Act
       const result = await parser.parseFile(filePath, mockRepositoryInfo);

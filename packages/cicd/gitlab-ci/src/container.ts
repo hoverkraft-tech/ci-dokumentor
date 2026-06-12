@@ -1,5 +1,5 @@
 import {
-  Container,
+  type Container,
   GENERATOR_ADAPTER_IDENTIFIER,
   initContainer as coreInitContainer,
 } from "@ci-dokumentor/core";
@@ -25,8 +25,14 @@ export function resetContainer(): void {
   container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-  const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
+export function initContainer(
+  baseContainer: Container | undefined = undefined,
+): Container {
+  let targetContainer = baseContainer ?? container;
+  if (!targetContainer) {
+    targetContainer = new InversifyContainer() as Container;
+    container = targetContainer;
+  }
 
   // Return early if this package has already been initialized in this container.
   if (targetContainer.isCurrentBound(GitLabCIParser)) {
@@ -39,13 +45,23 @@ export function initContainer(baseContainer: Container | undefined = undefined):
 
   // Bind generator
   targetContainer.bind(GitLabCIGeneratorAdapter).toSelf().inSingletonScope();
-  targetContainer.bind(GENERATOR_ADAPTER_IDENTIFIER).toService(GitLabCIGeneratorAdapter);
+  targetContainer
+    .bind(GENERATOR_ADAPTER_IDENTIFIER)
+    .toService(GitLabCIGeneratorAdapter);
 
   // Bind section generators
-  targetContainer.bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(HeaderSectionGenerator);
-  targetContainer.bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(OverviewSectionGenerator);
-  targetContainer.bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(UsageSectionGenerator);
-  targetContainer.bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER).to(InputsSectionGenerator);
+  targetContainer
+    .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(HeaderSectionGenerator);
+  targetContainer
+    .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(OverviewSectionGenerator);
+  targetContainer
+    .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(UsageSectionGenerator);
+  targetContainer
+    .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
+    .to(InputsSectionGenerator);
   targetContainer
     .bind(GITLAB_CI_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
     .to(GeneratedSectionGenerator);

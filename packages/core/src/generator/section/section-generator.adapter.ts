@@ -1,9 +1,11 @@
-import { RepositoryProvider } from "../../repository/repository.provider.js";
-import { OptionDescriptor } from "../../options/options.js";
-import { ReadableContent } from "../../reader/readable-content.js";
-import { FormatterAdapter } from "../../formatter/formatter.adapter.js";
+import type { RepositoryProvider } from "../../repository/repository.provider.js";
+import type { OptionDescriptor } from "../../options/options.js";
+import type { ReadableContent } from "../../reader/readable-content.js";
+import type { FormatterAdapter } from "../../formatter/formatter.adapter.js";
 
-export const SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol("SectionGeneratorAdapter");
+export const SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
+  "SectionGeneratorAdapter",
+);
 
 export enum SectionIdentifier {
   Header = "header", // Title and logo
@@ -22,10 +24,9 @@ export enum SectionIdentifier {
 
 export type SectionOptions = Record<string, unknown>;
 
-export type SectionOptionsDescriptors<Options extends SectionOptions = SectionOptions> = Record<
-  keyof Options,
-  OptionDescriptor
->;
+export type SectionOptionsDescriptors<
+  Options extends SectionOptions = SectionOptions,
+> = Record<keyof Options, OptionDescriptor>;
 
 /**
  * Payload object for section generation
@@ -49,7 +50,9 @@ export interface SectionGeneratorAdapter<
   /**
    * Generate the section content using a structured payload object
    */
-  generateSection(payload: SectionGenerationPayload<TManifest>): Promise<ReadableContent>;
+  generateSection(
+    payload: SectionGenerationPayload<TManifest>,
+  ): Promise<ReadableContent>;
 
   /**
    * Provide CLI option descriptors specific to this section generator

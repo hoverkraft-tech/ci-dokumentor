@@ -1,5 +1,5 @@
 import {
-  Container,
+  type Container,
   initContainer as coreInitContainer,
   resetContainer as resetCoreContainer,
 } from "@ci-dokumentor/core";

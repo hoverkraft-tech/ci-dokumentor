@@ -1,4 +1,4 @@
-import {
+import type {
   SectionGeneratorAdapter,
   SectionIdentifier,
   SectionOptions,
@@ -6,7 +6,11 @@ import {
   SectionOptionsDescriptors,
   ReadableContent,
 } from "@ci-dokumentor/core";
-import { GitHubAction, GitHubActionsManifest, GitHubWorkflow } from "../github-actions-parser.js";
+import type {
+  GitHubAction,
+  GitHubActionsManifest,
+  GitHubWorkflow,
+} from "../github-actions-parser.js";
 
 export abstract class GitHubActionsSectionGeneratorAdapter
   implements SectionGeneratorAdapter<GitHubActionsManifest>
@@ -60,8 +64,12 @@ export abstract class GitHubActionsSectionGeneratorAdapter
     );
   }
 
-  protected getWorkflowPermissions(workflow: GitHubWorkflow): Record<string, string> {
-    const permissions: Record<string, string> = { ...(workflow.permissions || {}) };
+  protected getWorkflowPermissions(
+    workflow: GitHubWorkflow,
+  ): Record<string, string> {
+    const permissions: Record<string, string> = {
+      ...(workflow.permissions || {}),
+    };
 
     for (const job of Object.values(workflow.jobs || {})) {
       if (!job.permissions) {
@@ -69,7 +77,10 @@ export abstract class GitHubActionsSectionGeneratorAdapter
       }
 
       for (const [permission, level] of Object.entries(job.permissions)) {
-        permissions[permission] = this.getHigherPermissionLevel(permissions[permission], level);
+        permissions[permission] = this.getHigherPermissionLevel(
+          permissions[permission],
+          level,
+        );
       }
     }
 
@@ -88,7 +99,8 @@ export abstract class GitHubActionsSectionGeneratorAdapter
       return candidateLevel;
     }
 
-    return this.getPermissionPriority(currentLevel) >= this.getPermissionPriority(candidateLevel)
+    return this.getPermissionPriority(currentLevel) >=
+      this.getPermissionPriority(candidateLevel)
       ? currentLevel
       : candidateLevel;
   }

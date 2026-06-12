@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
-import { MarkdownFormatterAdapter, FileRendererAdapter } from "@ci-dokumentor/core";
+import {
+  MarkdownFormatterAdapter,
+  FileRendererAdapter,
+} from "@ci-dokumentor/core";
 import mockFs, { restore } from "mock-fs";
 import { describe, beforeEach, afterEach, it, expect } from "vitest";
 import { initTestContainer } from "../container.js";
@@ -37,7 +40,10 @@ describe("ActdocsMigrationAdapter", () => {
     it("returns true when a file contains actdocs markers", async () => {
       // Arrange
       const tmpPath = `/tmp/actdocs-support-${Date.now()}.md`;
-      mockFs({ [tmpPath]: "<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->" });
+      mockFs({
+        [tmpPath]:
+          "<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->",
+      });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
@@ -47,7 +53,9 @@ describe("ActdocsMigrationAdapter", () => {
     it("returns false for missing files", async () => {
       // Arrange
       // Act
-      const supported = await adapter.supportsDestination("NON_EXISTENT_FILE.md");
+      const supported = await adapter.supportsDestination(
+        "NON_EXISTENT_FILE.md",
+      );
       // Assert
       expect(supported).toBe(false);
     });

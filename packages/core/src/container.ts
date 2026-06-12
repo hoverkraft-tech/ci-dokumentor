@@ -4,11 +4,20 @@ import { FormatterService } from "./formatter/formatter.service.js";
 import { MarkdownFormatterAdapter } from "./formatter/markdown/markdown-formatter.adapter.js";
 import { FORMATTER_ADAPTER_IDENTIFIER } from "./formatter/formatter.adapter.js";
 import { RepositoryService } from "./repository/repository.service.js";
-import { LicenseService, LICENSE_SERVICE_IDENTIFIER } from "./license/license.service.js";
+import {
+  LicenseService,
+  LICENSE_SERVICE_IDENTIFIER,
+} from "./license/license.service.js";
 import { FileRendererAdapter } from "./renderer/file-renderer.adapter.js";
 import { DiffRendererAdapter } from "./renderer/diff-renderer.adapter.js";
-import { FileReaderAdapter, FILE_READER_ADAPTER_IDENTIFIER } from "./reader/file-reader.adapter.js";
-import { VersionService, VERSION_SERVICE_IDENTIFIER } from "./version/version.service.js";
+import {
+  FileReaderAdapter,
+  FILE_READER_ADAPTER_IDENTIFIER,
+} from "./reader/file-reader.adapter.js";
+import {
+  VersionService,
+  VERSION_SERVICE_IDENTIFIER,
+} from "./version/version.service.js";
 import { MigrationService } from "./migration/migration.service.js";
 import { ConcurrencyService } from "./concurrency/concurrency.service.js";
 import { MarkdownTableGenerator } from "./formatter/markdown/markdown-table.generator.js";
@@ -17,7 +26,7 @@ import { MarkdownCodeGenerator } from "./formatter/markdown/markdown-code.genera
 import {
   RENDERER_FACTORY_IDENTIFIER,
   containerRendererFactory,
-  RendererFactory,
+  type RendererFactory,
 } from "./renderer/renderer.factory.js";
 
 export type Container = InversifyContainer;
@@ -28,8 +37,14 @@ export function resetContainer(): void {
   container = null;
 }
 
-export function initContainer(baseContainer: Container | undefined = undefined): Container {
-  const targetContainer = baseContainer ?? (container ??= new InversifyContainer());
+export function initContainer(
+  baseContainer: Container | undefined = undefined,
+): Container {
+  let targetContainer = baseContainer ?? container;
+  if (!targetContainer) {
+    targetContainer = new InversifyContainer();
+    container = targetContainer;
+  }
 
   // Return early if this package has already been initialized in this container.
   if (targetContainer.isCurrentBound(FormatterService)) {
@@ -40,7 +55,9 @@ export function initContainer(baseContainer: Container | undefined = undefined):
   targetContainer.bind(FormatterService).toSelf().inSingletonScope();
   targetContainer.bind(GeneratorService).toSelf().inSingletonScope();
   targetContainer.bind(FileReaderAdapter).toSelf().inSingletonScope();
-  targetContainer.bind(FILE_READER_ADAPTER_IDENTIFIER).toService(FileReaderAdapter);
+  targetContainer
+    .bind(FILE_READER_ADAPTER_IDENTIFIER)
+    .toService(FileReaderAdapter);
   targetContainer.bind(FileRendererAdapter).toSelf().inTransientScope();
   targetContainer.bind(DiffRendererAdapter).toSelf().inTransientScope();
   targetContainer

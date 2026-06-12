@@ -1,11 +1,19 @@
-import { describe, it, expect, beforeEach, vi, afterEach, Mocked } from "vitest";
 import {
-  FormatterAdapter,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  afterEach,
+  type Mocked,
+} from "vitest";
+import {
+  type FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
-  RepositoryProvider,
+  type RepositoryProvider,
   ReadableContent,
-  VersionService,
+  type VersionService,
 } from "@ci-dokumentor/core";
 import {
   RepositoryProviderMockFactory,
@@ -55,7 +63,8 @@ describe("UsageSectionGenerator", () => {
       it("should generate component usage example", async () => {
         // Arrange
         const manifest = GitLabComponentMockFactory.create({
-          usesName: "gitlab.com/test-user/test-repo@templates/docker-build/template.yml",
+          usesName:
+            "gitlab.com/test-user/test-repo@templates/docker-build/template.yml",
         });
 
         // Act

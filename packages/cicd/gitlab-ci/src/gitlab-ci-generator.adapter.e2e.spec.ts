@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   FileRendererAdapter,
-  RepositoryProvider,
-  RendererAdapter,
+  type RepositoryProvider,
+  type RendererAdapter,
   MarkdownFormatterAdapter,
-  FormatterAdapter,
+  type FormatterAdapter,
 } from "@ci-dokumentor/core";
 import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { sanitizeSnapshotContent } from "@ci-dokumentor/core/tests";
@@ -81,12 +81,23 @@ describe("GitLabCIGeneratorAdapter", () => {
 
   describe("getDocumentationPath", () => {
     it.each([
-      { input: "templates/test/template.yml", expected: "templates/test/docs.md" },
-      { input: "templates/test/template.yaml", expected: "templates/test/docs.md" },
+      {
+        input: "templates/test/template.yml",
+        expected: "templates/test/docs.md",
+      },
+      {
+        input: "templates/test/template.yaml",
+        expected: "templates/test/docs.md",
+      },
       { input: "templates/test.yml", expected: "templates/test.md" },
       { input: "templates/test.yaml", expected: "templates/test.md" },
-    ])("should generate correct paths for GitLab Components", ({ input, expected }) => {
-      expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(expected);
+    ])("should generate correct paths for GitLab Components", ({
+      input,
+      expected,
+    }) => {
+      expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(
+        expected,
+      );
     });
 
     it.each([
@@ -98,8 +109,13 @@ describe("GitLabCIGeneratorAdapter", () => {
         input: ".gitlab-ci.yaml",
         expected: ".gitlab-ci.md",
       },
-    ])("should generate correct paths for GitLab CI files", ({ input, expected }) => {
-      expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(expected);
+    ])("should generate correct paths for GitLab CI files", ({
+      input,
+      expected,
+    }) => {
+      expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(
+        expected,
+      );
     });
   });
 
@@ -183,7 +199,9 @@ docker-build:
 
       // Snapshot test the generated content
       const sanitizedContent = sanitizeSnapshotContent(generatedContent);
-      expect(sanitizedContent).toMatchSnapshot("gitlab-component-documentation");
+      expect(sanitizedContent).toMatchSnapshot(
+        "gitlab-component-documentation",
+      );
     });
 
     it("should generate documentation for a GitLab CI Pipeline", async () => {

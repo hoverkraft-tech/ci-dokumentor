@@ -28,22 +28,26 @@ export type FileResult = {
 /**
  * Base output interface for multi-file use cases
  */
-export type MultiFileUseCaseOutput<Result extends FileResult = FileResult> = FileResult & {
-  results: Result[];
-};
+export type MultiFileUseCaseOutput<Result extends FileResult = FileResult> =
+  FileResult & {
+    results: Result[];
+  };
 
 /**
  * Abstract base class for use cases that process multiple files concurrently
  * Provides common functionality for file resolution, concurrent execution, and result handling
  */
 @injectable()
-export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileResult> {
+export abstract class AbstractMultiFileUseCase<
+  Result extends FileResult = FileResult,
+> {
   protected static readonly DEFAULT_CONCURRENCY = 5;
 
   constructor(
     @inject(LoggerService) protected readonly loggerService: LoggerService,
     @inject(FileReaderAdapter) protected readonly readerAdapter: ReaderAdapter,
-    @inject(ConcurrencyService) protected readonly concurrencyService: ConcurrencyService,
+    @inject(ConcurrencyService)
+    protected readonly concurrencyService: ConcurrencyService,
   ) {}
 
   /**
@@ -55,7 +59,9 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
 
     for (const pattern of patternArray) {
       const files = await this.readerAdapter.findResources(pattern);
-      files.forEach((file) => resolvedFiles.add(file));
+      for (const file of files) {
+        resolvedFiles.add(file);
+      }
     }
 
     return Array.from(resolvedFiles).sort();
@@ -73,13 +79,19 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
     const isMultiFile = fileList.length > 1;
 
     if (isMultiFile) {
-      this.logMultiFileExecutionStart(operation, fileList.length, input.dryRun, input.outputFormat);
+      this.logMultiFileExecutionStart(
+        operation,
+        fileList.length,
+        input.dryRun,
+        input.outputFormat,
+      );
     }
 
     return {
       files: fileList,
       isMultiFile,
-      concurrency: input.concurrency ?? AbstractMultiFileUseCase.DEFAULT_CONCURRENCY,
+      concurrency:
+        input.concurrency ?? AbstractMultiFileUseCase.DEFAULT_CONCURRENCY,
     } satisfies MultiFileExecutionContext;
   }
 
@@ -104,11 +116,16 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
     executionContext: MultiFileExecutionContext,
   ) {
     const results = await this.executeConcurrently(
-      executionContext.files.map((file: string) => () => this.processFile({ ...input, file })),
+      executionContext.files.map(
+        (file: string) => () => this.processFile({ ...input, file }),
+      ),
       executionContext.concurrency,
     );
 
-    const fileResults = this.collectFileResults(results, executionContext.files);
+    const fileResults = this.collectFileResults(
+      results,
+      executionContext.files,
+    );
 
     this.validateFileResults(fileResults, executionContext.files);
 
@@ -134,13 +151,21 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
     return this.concurrencyService.executeWithLimit(tasks, concurrency);
   }
 
-  protected abstract processFile(input: MultiFileUseCaseInput & { file: string }): Promise<Result>;
+  protected abstract processFile(
+    input: MultiFileUseCaseInput & { file: string },
+  ): Promise<Result>;
 
   /**
    * Log successful multi-file processing completion
    */
-  private logMultiFileExecutionSuccess(fileCount: number, outputFormat: string | undefined): void {
-    this.loggerService.info(`Successfully processed ${fileCount} files!`, outputFormat);
+  private logMultiFileExecutionSuccess(
+    fileCount: number,
+    outputFormat: string | undefined,
+  ): void {
+    this.loggerService.info(
+      `Successfully processed ${fileCount} files!`,
+      outputFormat,
+    );
   }
 
   /**
@@ -198,7 +223,10 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   /**
    * Collect file processing results from promise settled results
    */
-  private collectFileResults(results: PromiseSettledResult<Result>[], files: string[]): Result[] {
+  private collectFileResults(
+    results: PromiseSettledResult<Result>[],
+    files: string[],
+  ): Result[] {
     const resultMapper = (file: string, fileResult: Result) => ({
       ...fileResult,
       success: true,
@@ -235,7 +263,10 @@ export abstract class AbstractMultiFileUseCase<Result extends FileResult = FileR
   /**
    * Collect and format error messages from failed results
    */
-  private formatFailureMessages(fileResults: Result[], files: string[]): string {
+  private formatFailureMessages(
+    fileResults: Result[],
+    files: string[],
+  ): string {
     const failures = fileResults.filter((r) => !r.success);
 
     if (failures.length === 0) {

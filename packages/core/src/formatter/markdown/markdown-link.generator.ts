@@ -10,7 +10,10 @@ export class MarkdownLinkGenerator {
    * Transform URLs in text to markdown links.
    * By default creates autolinks (<url>), or full links if fullLinkFormat is true.
    */
-  public transformUrls(content: ReadableContent, fullLinkFormat = false): ReadableContent {
+  public transformUrls(
+    content: ReadableContent,
+    fullLinkFormat = false,
+  ): ReadableContent {
     if (content.isEmpty()) {
       return content;
     }
@@ -18,13 +21,18 @@ export class MarkdownLinkGenerator {
     const segments = this.splitIntoCodeAndTextSegments(content);
 
     const processed = segments
-      .map((s) => (s.code ? s.content : this.processFragment(s.content, fullLinkFormat)))
+      .map((s) =>
+        s.code ? s.content : this.processFragment(s.content, fullLinkFormat),
+      )
       .join("");
 
     return new ReadableContent(processed);
   }
 
-  private processFragment(content: ReadableContent, fullLinkFormat: boolean): ReadableContent {
+  private processFragment(
+    content: ReadableContent,
+    fullLinkFormat: boolean,
+  ): ReadableContent {
     if (content.isEmpty()) {
       return content;
     }
@@ -35,8 +43,10 @@ export class MarkdownLinkGenerator {
     this.linkRegex.lastIndex = 0;
 
     if (!containsMarkdownLinks) {
-      const replaced = content.replace(this.urlRegex, (url: string, offset: number) =>
-        this.replaceUrl(url, offset, content, fullLinkFormat),
+      const replaced = content.replace(
+        this.urlRegex,
+        (url: string, offset: number) =>
+          this.replaceUrl(url, offset, content, fullLinkFormat),
       );
 
       return new ReadableContent(replaced);
@@ -45,8 +55,13 @@ export class MarkdownLinkGenerator {
     // There are markdown links: replace URLs only outside link destinations
     const links: Array<{ start: number; end: number; fullMatch: string }> = [];
     let match: RegExpExecArray | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: assignment within loop condition
     while ((match = content.execRegExp(this.linkRegex)) !== null) {
-      links.push({ start: match.index, end: match.index + match[0].length, fullMatch: match[0] });
+      links.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        fullMatch: match[0],
+      });
     }
     this.linkRegex.lastIndex = 0;
 
@@ -59,7 +74,12 @@ export class MarkdownLinkGenerator {
       const processedBefore = beforeLink.replace(
         this.urlRegex,
         (url: string, offsetInBefore: number) =>
-          this.replaceUrl(url, lastIndex + (offsetInBefore ?? 0), content, fullLinkFormat),
+          this.replaceUrl(
+            url,
+            lastIndex + (offsetInBefore ?? 0),
+            content,
+            fullLinkFormat,
+          ),
       );
 
       result = result.append(processedBefore, linkInfo.fullMatch);
@@ -67,8 +87,15 @@ export class MarkdownLinkGenerator {
     }
 
     const afterLast = text.slice(lastIndex);
-    const processedAfter = afterLast.replace(this.urlRegex, (url: string, offsetInAfter: number) =>
-      this.replaceUrl(url, lastIndex + (offsetInAfter ?? 0), content, fullLinkFormat),
+    const processedAfter = afterLast.replace(
+      this.urlRegex,
+      (url: string, offsetInAfter: number) =>
+        this.replaceUrl(
+          url,
+          lastIndex + (offsetInAfter ?? 0),
+          content,
+          fullLinkFormat,
+        ),
     );
 
     result = result.append(processedAfter);
@@ -114,7 +141,10 @@ export class MarkdownLinkGenerator {
           segments.push({ code: true, content: content.slice(idx) });
           break;
         }
-        segments.push({ code: true, content: content.slice(idx, endFence + 3) });
+        segments.push({
+          code: true,
+          content: content.slice(idx, endFence + 3),
+        });
         idx = endFence + 3;
         continue;
       }
@@ -122,14 +152,20 @@ export class MarkdownLinkGenerator {
       // Inline code span: one or more backticks. Support matching number of backticks.
       if (content.includesAt("`", idx)) {
         let tickCount = 1;
-        while (idx + tickCount < contentLength && content.includesAt("`", idx + tickCount)) {
+        while (
+          idx + tickCount < contentLength &&
+          content.includesAt("`", idx + tickCount)
+        ) {
           tickCount++;
         }
 
         const ticks = "`".repeat(tickCount);
         const end = content.search(ticks, idx + tickCount);
         if (end === -1) {
-          segments.push({ code: true, content: new ReadableContent(content.slice(idx)) });
+          segments.push({
+            code: true,
+            content: new ReadableContent(content.slice(idx)),
+          });
           break;
         }
         segments.push({
