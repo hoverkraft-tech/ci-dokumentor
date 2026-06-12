@@ -1,11 +1,16 @@
-import { ReadableContent, SectionGenerationPayload, FormatterAdapter, SectionIdentifier } from '@ci-dokumentor/core';
-import { injectable } from 'inversify';
+import {
+  ReadableContent,
+  SectionGenerationPayload,
+  FormatterAdapter,
+  SectionIdentifier,
+} from "@ci-dokumentor/core";
+import { injectable } from "inversify";
 import {
   GitHubActionsManifest,
   GitHubWorkflow,
   GitHubWorkflowSecret,
-} from '../github-actions-parser.js';
-import { GitHubActionsSectionGeneratorAdapter } from './github-actions-section-generator.adapter.js';
+} from "../github-actions-parser.js";
+import { GitHubActionsSectionGeneratorAdapter } from "./github-actions-section-generator.adapter.js";
 
 @injectable()
 export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapter {
@@ -13,13 +18,16 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return SectionIdentifier.Secrets;
   }
 
-  async generateSection({ formatterAdapter, manifest }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
+  async generateSection({
+    formatterAdapter,
+    manifest,
+  }: SectionGenerationPayload<GitHubActionsManifest>): Promise<ReadableContent> {
     if (this.isGitHubAction(manifest)) {
       return ReadableContent.empty();
     }
 
     if (!this.isGitHubWorkflow(manifest)) {
-      throw new Error('Unsupported manifest type for InputsSectionGenerator');
+      throw new Error("Unsupported manifest type for InputsSectionGenerator");
     }
 
     const manifestSecretsContent = this.generateWorkflowSecretsTable(formatterAdapter, manifest);
@@ -27,15 +35,14 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
       return ReadableContent.empty();
     }
 
-    return formatterAdapter.heading(new ReadableContent('Secrets'), 2).append(
-      formatterAdapter.lineBreak(),
-      manifestSecretsContent,
-    );
+    return formatterAdapter
+      .heading(new ReadableContent("Secrets"), 2)
+      .append(formatterAdapter.lineBreak(), manifestSecretsContent);
   }
 
   private generateWorkflowSecretsTable(
     formatterAdapter: FormatterAdapter,
-    manifest: GitHubWorkflow
+    manifest: GitHubWorkflow,
   ): ReadableContent {
     const secrets = Object.entries(manifest.on?.workflow_call?.secrets || {});
 
@@ -44,11 +51,10 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     }
 
     const headers = [
-      formatterAdapter.bold(new ReadableContent('Secret')),
-      formatterAdapter.bold(new ReadableContent('Description')),
-      formatterAdapter.bold(new ReadableContent('Required')),
+      formatterAdapter.bold(new ReadableContent("Secret")),
+      formatterAdapter.bold(new ReadableContent("Description")),
+      formatterAdapter.bold(new ReadableContent("Required")),
     ];
-
 
     const rows = secrets.map(([name, secret]) => {
       return [
@@ -61,25 +67,21 @@ export class SecretsSectionGenerator extends GitHubActionsSectionGeneratorAdapte
     return formatterAdapter.table(headers, rows);
   }
 
-  private getSecretName(
-    name: string,
-    formatterAdapter: FormatterAdapter
-  ): ReadableContent {
-    return formatterAdapter.bold(
-      formatterAdapter.inlineCode(new ReadableContent(name))
-    );
+  private getSecretName(name: string, formatterAdapter: FormatterAdapter): ReadableContent {
+    return formatterAdapter.bold(formatterAdapter.inlineCode(new ReadableContent(name)));
   }
 
-  private getSecretDescription(secret: GitHubWorkflowSecret, formatterAdapter: FormatterAdapter): ReadableContent {
-    return formatterAdapter.paragraph(new ReadableContent((secret.description || '').trim()));
+  private getSecretDescription(
+    secret: GitHubWorkflowSecret,
+    formatterAdapter: FormatterAdapter,
+  ): ReadableContent {
+    return formatterAdapter.paragraph(new ReadableContent((secret.description || "").trim()));
   }
 
   private getSecretRequired(
     secret: GitHubWorkflowSecret,
-    formatterAdapter: FormatterAdapter
+    formatterAdapter: FormatterAdapter,
   ): ReadableContent {
-    return formatterAdapter.bold(
-      new ReadableContent(secret.required ? 'true' : 'false')
-    );
+    return formatterAdapter.bold(new ReadableContent(secret.required ? "true" : "false"));
   }
 }

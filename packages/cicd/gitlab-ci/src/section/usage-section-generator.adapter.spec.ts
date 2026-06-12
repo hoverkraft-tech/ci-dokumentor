@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach, Mocked } from "vitest";
 import {
   FormatterAdapter,
   SectionIdentifier,
@@ -6,14 +6,17 @@ import {
   RepositoryProvider,
   ReadableContent,
   VersionService,
-} from '@ci-dokumentor/core';
-import { RepositoryProviderMockFactory, VersionServiceMockFactory } from '@ci-dokumentor/core/tests';
-import { GitLabComponentMockFactory } from '../../__tests__/gitlab-component-mock.factory.js';
-import { GitLabCIPipelineMockFactory } from '../../__tests__/gitlab-pipeline-mock.factory.js';
-import { initTestContainer } from '../container.js';
-import { UsageSectionGenerator } from './usage-section-generator.adapter.js';
+} from "@ci-dokumentor/core";
+import {
+  RepositoryProviderMockFactory,
+  VersionServiceMockFactory,
+} from "@ci-dokumentor/core/tests";
+import { GitLabComponentMockFactory } from "../../__tests__/gitlab-component-mock.factory.js";
+import { GitLabCIPipelineMockFactory } from "../../__tests__/gitlab-pipeline-mock.factory.js";
+import { initTestContainer } from "../container.js";
+import { UsageSectionGenerator } from "./usage-section-generator.adapter.js";
 
-describe('UsageSectionGenerator', () => {
+describe("UsageSectionGenerator", () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let mockVersionService: Mocked<VersionService>;
   let formatterAdapter: FormatterAdapter;
@@ -24,7 +27,7 @@ describe('UsageSectionGenerator', () => {
 
     mockRepositoryProvider = RepositoryProviderMockFactory.create();
     mockVersionService = VersionServiceMockFactory.create({
-      getVersion: { ref: 'v1.0.0', sha: 'abc123' }
+      getVersion: { ref: "v1.0.0", sha: "abc123" },
     });
 
     const container = initTestContainer();
@@ -37,8 +40,8 @@ describe('UsageSectionGenerator', () => {
     vi.resetAllMocks();
   });
 
-  describe('getSectionIdentifier', () => {
-    it('should return Usage section identifier', () => {
+  describe("getSectionIdentifier", () => {
+    it("should return Usage section identifier", () => {
       // Act
       const result = generator.getSectionIdentifier();
 
@@ -47,12 +50,12 @@ describe('UsageSectionGenerator', () => {
     });
   });
 
-  describe('generateSection', () => {
-    describe('with GitLab Component manifest', () => {
-      it('should generate component usage example', async () => {
+  describe("generateSection", () => {
+    describe("with GitLab Component manifest", () => {
+      it("should generate component usage example", async () => {
         // Arrange
         const manifest = GitLabComponentMockFactory.create({
-          usesName: 'gitlab.com/test-user/test-repo@templates/docker-build/template.yml'
+          usesName: "gitlab.com/test-user/test-repo@templates/docker-build/template.yml",
         });
 
         // Act
@@ -60,7 +63,7 @@ describe('UsageSectionGenerator', () => {
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'docs.md'
+          destination: "docs.md",
         });
 
         // Assert
@@ -76,11 +79,11 @@ include:
       });
     });
 
-    describe('with GitLab CI Pipeline manifest', () => {
-      it('should generate pipeline usage example', async () => {
+    describe("with GitLab CI Pipeline manifest", () => {
+      it("should generate pipeline usage example", async () => {
         // Arrange
         const manifest = GitLabCIPipelineMockFactory.create({
-          usesName: 'test-user/test-repo'
+          usesName: "test-user/test-repo",
         });
 
         // Act
@@ -88,7 +91,7 @@ include:
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'README.md'
+          destination: "README.md",
         });
 
         // Assert
@@ -103,19 +106,19 @@ include:
 `);
       });
 
-      it('should fall back to version ref when sha is unavailable', async () => {
+      it("should fall back to version ref when sha is unavailable", async () => {
         // Arrange
         const manifest = GitLabCIPipelineMockFactory.create({
-          usesName: 'test-user/test-repo'
+          usesName: "test-user/test-repo",
         });
-        mockVersionService.getVersion.mockResolvedValue({ ref: 'v2.0.0' });
+        mockVersionService.getVersion.mockResolvedValue({ ref: "v2.0.0" });
 
         // Act
         const result = await generator.generateSection({
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'README.md'
+          destination: "README.md",
         });
 
         // Assert
@@ -130,10 +133,10 @@ include:
 `);
       });
 
-      it('should default to latest when no version information is available', async () => {
+      it("should default to latest when no version information is available", async () => {
         // Arrange
         const manifest = GitLabCIPipelineMockFactory.create({
-          usesName: 'test-user/test-repo'
+          usesName: "test-user/test-repo",
         });
         mockVersionService.getVersion.mockResolvedValue(undefined);
 
@@ -142,7 +145,7 @@ include:
           formatterAdapter,
           manifest,
           repositoryProvider: mockRepositoryProvider,
-          destination: 'README.md'
+          destination: "README.md",
         });
 
         // Assert

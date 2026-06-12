@@ -1,11 +1,8 @@
-import { basename, extname, relative, dirname } from 'node:path';
-import type { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
-import {
-  FILE_READER_ADAPTER_IDENTIFIER,
-  ReadableContent,
-} from '@ci-dokumentor/core';
-import { inject, injectable } from 'inversify';
-import { parse } from 'yaml';
+import { basename, extname, relative, dirname } from "node:path";
+import type { ReaderAdapter, RepositoryInfo } from "@ci-dokumentor/core";
+import { FILE_READER_ADAPTER_IDENTIFIER, ReadableContent } from "@ci-dokumentor/core";
+import { inject, injectable } from "inversify";
+import { parse } from "yaml";
 
 // GitLab CI Component manifest structure
 // See https://docs.gitlab.com/ci/components/
@@ -27,7 +24,7 @@ export type GitLabComponentInput = {
   options?: string[]; // for select type inputs
 };
 
-// GitLab CI Pipeline structure  
+// GitLab CI Pipeline structure
 // See https://docs.gitlab.com/ci/yaml/
 export type GitLabCIJob = {
   stage?: string;
@@ -82,8 +79,9 @@ export type GitLabCIManifest = GitLabComponent | GitLabCIPipeline;
 
 @injectable()
 export class GitLabCIParser {
-  constructor(@inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter) { }
-
+  constructor(
+    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter,
+  ) {}
 
   isGitLabComponentFile(source: string): boolean {
     // Determine the filename and its parent directory to support two valid
@@ -93,18 +91,18 @@ export class GitLabCIParser {
     // 2) Component subdirectory containing a `template.yml`, e.g.
     //    templates/secret-detection/template.yml
     const fileName = basename(source);
-    const parentDir = dirname(source).split(/[/\\]/).pop() || '';
-    const parentDir2 = dirname(dirname(source)).split(/[/\\]/).pop() || '';
+    const parentDir = dirname(source).split(/[/\\]/).pop() || "";
+    const parentDir2 = dirname(dirname(source)).split(/[/\\]/).pop() || "";
 
     // If the file itself is named `template.yml` (or .yaml) anywhere under
     // a `templates/` directory, treat it as a component.
-    if (/template\.ya?ml$/i.test(fileName) && parentDir2 === 'templates') {
+    if (/template\.ya?ml$/i.test(fileName) && parentDir2 === "templates") {
       return true;
     }
 
     // If the file is a YAML file directly inside the `templates` directory
     // (not nested deeper), treat it as a single-file component.
-    if (/\.ya?ml$/i.test(fileName) && parentDir === 'templates') {
+    if (/\.ya?ml$/i.test(fileName) && parentDir === "templates") {
       return true;
     }
 
@@ -116,10 +114,7 @@ export class GitLabCIParser {
     return /\.gitlab-ci\.ya?ml$/i.test(source) || !!basename(source).match(/^\.gitlab-ci\.ya?ml$/i);
   }
 
-  async parseFile(
-    source: string,
-    repositoryInfo: RepositoryInfo
-  ): Promise<GitLabCIManifest> {
+  async parseFile(source: string, repositoryInfo: RepositoryInfo): Promise<GitLabCIManifest> {
     if (!this.readerAdapter.resourceExists(source)) {
       throw new Error(`Source file does not exist: "${source}"`);
     }
@@ -131,16 +126,14 @@ export class GitLabCIParser {
       throw new Error(`Unsupported source file: ${source}`);
     }
 
-    if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+    if (typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error(`Unsupported GitLab CI file format: ${source}`);
     }
 
     if (!parsed.name) {
       // Extract filename without extension and convert to readable name
       const fileName = basename(source, extname(source));
-      const readableName = fileName
-        .replace(/[-_]/g, ' ')
-        .replace(/\b\w/g, l => l.toUpperCase());
+      const readableName = fileName.replace(/[-_]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
       parsed.name = readableName;
     }
 
@@ -159,10 +152,19 @@ export class GitLabCIParser {
     if (this.isGitLabCIPipeline(parsed)) {
       // Convert job-like objects to jobs record
       const jobs: Record<string, GitLabCIJob> = {};
-      const reservedKeys = ['stages', 'variables', 'include', 'workflow', 'default', 'name', 'description', 'usesName'];
+      const reservedKeys = [
+        "stages",
+        "variables",
+        "include",
+        "workflow",
+        "default",
+        "name",
+        "description",
+        "usesName",
+      ];
 
       for (const [key, value] of Object.entries(parsed)) {
-        if (!reservedKeys.includes(key) && typeof value === 'object' && value !== null) {
+        if (!reservedKeys.includes(key) && typeof value === "object" && value !== null) {
           // This looks like a job definition
           jobs[key] = value as GitLabCIJob;
         }
@@ -200,7 +202,7 @@ export class GitLabCIParser {
       const trimmedLineIsEmpty = trimmedLine.isEmpty();
 
       // Stop if we encounter the YAML document separator
-      if (trimmedLine.equals('---')) {
+      if (trimmedLine.equals("---")) {
         break;
       }
 
@@ -210,15 +212,15 @@ export class GitLabCIParser {
       }
 
       // If we encounter a non-comment line after starting to collect comments, stop
-      if (!trimmedLineIsEmpty && !trimmedLine.startsWith('#')) {
+      if (!trimmedLineIsEmpty && !trimmedLine.startsWith("#")) {
         break;
       }
 
       // Extract comment content
-      if (trimmedLine.startsWith('#')) {
-        const hashIndex = line.search('#');
+      if (trimmedLine.startsWith("#")) {
+        const hashIndex = line.search("#");
         let commentPart = line.slice(hashIndex + 1);
-        if (commentPart.startsWith(' ')) {
+        if (commentPart.startsWith(" ")) {
           commentPart = commentPart.slice(1);
         }
         commentLines.push(commentPart);
@@ -246,7 +248,7 @@ export class GitLabCIParser {
     // Join comment lines
     let descriptionRC = commentLines[0];
     for (let i = 1; i < commentLines.length; i++) {
-      descriptionRC = descriptionRC.append('\n').append(commentLines[i]);
+      descriptionRC = descriptionRC.append("\n").append(commentLines[i]);
     }
 
     return descriptionRC || undefined;
@@ -254,23 +256,23 @@ export class GitLabCIParser {
 
   private isGitLabComponent(parsed: unknown): parsed is GitLabComponent {
     return (
-      typeof parsed === 'object' &&
+      typeof parsed === "object" &&
       parsed !== null &&
-      'name' in parsed &&
-      typeof parsed.name === 'string' &&
-      'spec' in parsed &&
-      typeof parsed.spec === 'object' &&
+      "name" in parsed &&
+      typeof parsed.name === "string" &&
+      "spec" in parsed &&
+      typeof parsed.spec === "object" &&
       parsed.spec !== null &&
-      'inputs' in parsed.spec
+      "inputs" in parsed.spec
     );
   }
 
   private isGitLabCIPipeline(parsed: unknown): parsed is GitLabCIPipeline {
     return (
-      typeof parsed === 'object' &&
+      typeof parsed === "object" &&
       parsed !== null &&
-      'name' in parsed &&
-      typeof parsed.name === 'string'
+      "name" in parsed &&
+      typeof parsed.name === "string"
       // GitLab CI files can have various structures, so we're more lenient here
     );
   }

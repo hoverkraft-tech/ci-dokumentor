@@ -13,24 +13,24 @@ import { FormatterAdapter } from "../formatter/formatter.adapter.js";
  *  - finalize()                                 // finalize and cleanup
  */
 export interface RendererAdapter {
-    initialize(destination: string, formatterAdapter: FormatterAdapter): Promise<void>;
+  initialize(destination: string, formatterAdapter: FormatterAdapter): Promise<void>;
 
-    getFormatterAdapter(): FormatterAdapter;
+  getFormatterAdapter(): FormatterAdapter;
 
-    getDestination(): string;
+  getDestination(): string;
 
-    writeSection(sectionIdentifier: string, content: ReadableContent): Promise<void>;
+  writeSection(sectionIdentifier: string, content: ReadableContent): Promise<void>;
 
-    /**
-     * Replace the entire content at the destination with the provided data.
-     * This is useful for migration scenarios where the entire content needs
-     * to be transformed and replaced, rather than appending sections.
-     */
-    replaceContent(content: ReadableContent): Promise<void>;
+  /**
+   * Replace the entire content at the destination with the provided data.
+   * This is useful for migration scenarios where the entire content needs
+   * to be transformed and replaced, rather than appending sections.
+   */
+  replaceContent(content: ReadableContent): Promise<void>;
 
-    /**
-     * Finalize the rendering process and cleanup initialization.
-     * @return A promise that resolves to an optional string (for example a diff)
-     */
-    finalize(): Promise<string | undefined>;
+  /**
+   * Finalize the rendering process and cleanup initialization.
+   * @return A promise that resolves to an optional string (for example a diff)
+   */
+  finalize(): Promise<string | undefined>;
 }

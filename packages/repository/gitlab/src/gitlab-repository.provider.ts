@@ -9,14 +9,14 @@ import {
   LICENSE_SERVICE_IDENTIFIER,
   RepositoryOptionsDescriptors,
   ManifestVersion,
-} from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
+} from "@ci-dokumentor/core";
+import type { ReaderAdapter } from "@ci-dokumentor/core";
 import {
   GitRepositoryProvider,
   GIT_REPOSITORY_PROVIDER_IDENTIFIER,
-} from '@ci-dokumentor/repository-git';
-import { Gitlab, ProjectLicenseSchema, SimpleProjectSchema } from '@gitbeaker/rest';
-import { injectable, inject } from 'inversify';
+} from "@ci-dokumentor/repository-git";
+import { Gitlab, ProjectLicenseSchema, SimpleProjectSchema } from "@gitbeaker/rest";
+import { injectable, inject } from "inversify";
 
 export type GitLabRepositoryProviderOptions = {
   gitlabToken?: string;
@@ -44,7 +44,7 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
    * Get the platform name identifier for this provider
    */
   getPlatformName(): string {
-    return 'gitlab';
+    return "gitlab";
   }
 
   /**
@@ -61,14 +61,14 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
   getOptions(): RepositoryOptionsDescriptors<GitLabRepositoryProviderOptions> {
     return {
       gitlabToken: {
-        flags: '--gitlab-token <token>',
-        description: 'Optional GitLab token to authenticate API requests',
-        env: 'GITLAB_TOKEN',
+        flags: "--gitlab-token <token>",
+        description: "Optional GitLab token to authenticate API requests",
+        env: "GITLAB_TOKEN",
       },
       gitlabUrl: {
-        flags: '--gitlab-url <url>',
-        description: 'GitLab instance URL (defaults to https://gitlab.com)',
-        env: 'GITLAB_URL',
+        flags: "--gitlab-url <url>",
+        description: "GitLab instance URL (defaults to https://gitlab.com)",
+        env: "GITLAB_URL",
       },
     };
   }
@@ -84,8 +84,7 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
     }
 
     const shouldResetClient =
-      options.gitlabToken !== this.gitlabToken ||
-      options.gitlabUrl !== this.gitlabUrl;
+      options.gitlabToken !== this.gitlabToken || options.gitlabUrl !== this.gitlabUrl;
 
     this.gitlabToken = options.gitlabToken;
     this.gitlabUrl = options.gitlabUrl;
@@ -107,9 +106,11 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
     }
 
     const parsedUrl = await this.gitRepositoryProvider.getRemoteParsedUrl();
-    return parsedUrl.source === 'gitlab.com' ||
-      parsedUrl.source.includes('gitlab') ||
-      (!!this.gitlabUrl && parsedUrl.source === new URL(this.gitlabUrl).hostname);
+    return (
+      parsedUrl.source === "gitlab.com" ||
+      parsedUrl.source.includes("gitlab") ||
+      (!!this.gitlabUrl && parsedUrl.source === new URL(this.gitlabUrl).hostname)
+    );
   }
 
   protected async fetchRepositoryInfo(): Promise<RepositoryInfo> {
@@ -118,10 +119,10 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
 
   protected async fetchLogo(): Promise<string | undefined> {
     const possibleLogoPaths = [
-      '.gitlab/logo.png',
-      '.gitlab/logo.jpg',
-      '.gitlab/logo.jpeg',
-      '.gitlab/logo.svg',
+      ".gitlab/logo.png",
+      ".gitlab/logo.jpg",
+      ".gitlab/logo.jpeg",
+      ".gitlab/logo.svg",
     ];
 
     for (const path of possibleLogoPaths) {
@@ -153,11 +154,11 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
   protected async fetchContributing(): Promise<ContributingInfo | undefined> {
     // Check for common contributing file paths
     const contributingPaths = [
-      'CONTRIBUTING.md',
-      'CONTRIBUTING.rst',
-      'CONTRIBUTING.txt',
-      '.gitlab/CONTRIBUTING.md',
-      'docs/CONTRIBUTING.md',
+      "CONTRIBUTING.md",
+      "CONTRIBUTING.rst",
+      "CONTRIBUTING.txt",
+      ".gitlab/CONTRIBUTING.md",
+      "docs/CONTRIBUTING.md",
     ];
 
     for (const path of contributingPaths) {
@@ -175,11 +176,11 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
   protected async fetchSecurity(): Promise<SecurityInfo | undefined> {
     // Check for common security policy file paths
     const securityPaths = [
-      'SECURITY.md',
-      'SECURITY.rst',
-      'SECURITY.txt',
-      '.gitlab/SECURITY.md',
-      'docs/SECURITY.md',
+      "SECURITY.md",
+      "SECURITY.rst",
+      "SECURITY.txt",
+      ".gitlab/SECURITY.md",
+      "docs/SECURITY.md",
     ];
 
     for (const path of securityPaths) {
@@ -199,7 +200,7 @@ export class GitLabRepositoryProvider extends AbstractRepositoryProvider<GitLabR
   }
 
   private async getProjectInfo(): Promise<SimpleProjectSchema> {
-    return this.getCached('projectInfo', async () => {
+    return this.getCached("projectInfo", async () => {
       const repositoryInfo = await this.getRepositoryInfo();
       const client = this.getGitLabClient();
 

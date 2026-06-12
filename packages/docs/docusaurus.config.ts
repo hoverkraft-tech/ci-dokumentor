@@ -1,13 +1,13 @@
-import { themes as prismThemes } from 'prism-react-renderer';
-import type { Config } from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import { themes as prismThemes } from "prism-react-renderer";
+import type { Config } from "@docusaurus/types";
+import type * as Preset from "@docusaurus/preset-classic";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'CI Dokumentor',
-  tagline: 'Automated documentation generator for CI/CD components',
-  favicon: 'img/favicon.ico',
+  title: "CI Dokumentor",
+  tagline: "Automated documentation generator for CI/CD components",
+  favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -19,20 +19,20 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://hoverkraft-tech.github.io',
+  url: "https://hoverkraft-tech.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/ci-dokumentor/',
+  baseUrl: "/ci-dokumentor/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'hoverkraft-tech', // Usually your GitHub org/user name.
-  projectName: 'ci-dokumentor', // Usually your repo name.
+  organizationName: "hoverkraft-tech", // Usually your GitHub org/user name.
+  projectName: "ci-dokumentor", // Usually your repo name.
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: "throw",
   markdown: {
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: "warn",
     },
   },
 
@@ -40,25 +40,24 @@ const config: Config = {
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       {
         docs: {
-          path: 'content',
-          routeBasePath: '/',
-          sidebarPath: './sidebars.ts',
+          path: "content",
+          routeBasePath: "/",
+          sidebarPath: "./sidebars.ts",
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/hoverkraft-tech/ci-dokumentor/tree/main/packages/docs/',
+          editUrl: "https://github.com/hoverkraft-tech/ci-dokumentor/tree/main/packages/docs/",
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       } satisfies Preset.Options,
     ],
@@ -66,74 +65,74 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/social-preview.svg',
+    image: "img/social-preview.svg",
     navbar: {
-      title: 'CI Dokumentor',
+      title: "CI Dokumentor",
       logo: {
-        alt: 'CI Dokumentor Logo',
-        src: 'img/logo.svg',
+        alt: "CI Dokumentor Logo",
+        src: "img/logo.svg",
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Documentation',
+          type: "docSidebar",
+          sidebarId: "tutorialSidebar",
+          position: "left",
+          label: "Documentation",
         },
         {
-          href: 'https://github.com/hoverkraft-tech/ci-dokumentor',
-          label: 'GitHub',
-          position: 'right',
+          href: "https://github.com/hoverkraft-tech/ci-dokumentor",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         {
-          title: 'Documentation',
+          title: "Documentation",
           items: [
             {
-              label: 'Getting Started',
-              to: '/intro',
+              label: "Getting Started",
+              to: "/intro",
             },
             {
-              label: 'Integrations',
-              to: '/integrations/',
+              label: "Integrations",
+              to: "/integrations/",
             },
             {
-              label: 'Packages',
-              to: '/packages/',
+              label: "Packages",
+              to: "/packages/",
             },
             {
-              label: 'Developers',
-              to: '/developers/',
-            }
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
-            {
-              label: 'GitHub',
-              href: 'https://github.com/hoverkraft-tech/ci-dokumentor',
-            },
-            {
-              label: 'Pull Requests',
-              href: 'https://github.com/hoverkraft-tech/ci-dokumentor/pulls',
-            },
-            {
-              label: 'Issues',
-              href: 'https://github.com/hoverkraft-tech/ci-dokumentor/issues',
+              label: "Developers",
+              to: "/developers/",
             },
           ],
         },
         {
-          title: 'More',
+          title: "Community",
           items: [
             {
-              label: 'Hoverkraft',
-              href: 'https://hoverkraft.cloud',
+              label: "GitHub",
+              href: "https://github.com/hoverkraft-tech/ci-dokumentor",
+            },
+            {
+              label: "Pull Requests",
+              href: "https://github.com/hoverkraft-tech/ci-dokumentor/pulls",
+            },
+            {
+              label: "Issues",
+              href: "https://github.com/hoverkraft-tech/ci-dokumentor/issues",
+            },
+          ],
+        },
+        {
+          title: "More",
+          items: [
+            {
+              label: "Hoverkraft",
+              href: "https://hoverkraft.cloud",
             },
           ],
         },
@@ -143,7 +142,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['bash', 'powershell'],
+      additionalLanguages: ["bash", "powershell"],
     },
   } satisfies Preset.ThemeConfig,
 };

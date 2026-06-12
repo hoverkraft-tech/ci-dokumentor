@@ -1,8 +1,8 @@
-import { StringDecoder } from 'node:string_decoder';
-import { injectable, injectFromBase } from 'inversify';
-import { SectionIdentifier, ReadableContent } from '@ci-dokumentor/core';
-import type { FormatterAdapter } from '@ci-dokumentor/core';
-import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
+import { StringDecoder } from "node:string_decoder";
+import { injectable, injectFromBase } from "inversify";
+import { SectionIdentifier, ReadableContent } from "@ci-dokumentor/core";
+import type { FormatterAdapter } from "@ci-dokumentor/core";
+import { AbstractMigrationAdapter } from "./abstract-migration.adapter.js";
 
 /**
  * Migration adapter for auto-doc tool
@@ -17,13 +17,13 @@ import { AbstractMigrationAdapter } from './abstract-migration.adapter.js';
   extendConstructorArguments: true,
 })
 export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
-  protected readonly name = 'auto-doc';
+  protected readonly name = "auto-doc";
 
   protected readonly sectionMappings: Record<string, SectionIdentifier> = {
-    'inputs': SectionIdentifier.Inputs,
-    'outputs': SectionIdentifier.Outputs,
-    'secrets': SectionIdentifier.Secrets,
-    'description': SectionIdentifier.Overview,
+    inputs: SectionIdentifier.Inputs,
+    outputs: SectionIdentifier.Outputs,
+    secrets: SectionIdentifier.Secrets,
+    description: SectionIdentifier.Overview,
   };
 
   protected readonly patterns = {
@@ -31,9 +31,11 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
     detectionPattern: /^##\s+(Inputs|Outputs|Secrets|Description)\s*$/m,
   };
 
-  protected migrateContent(content: ReadableContent, formatterAdapter: FormatterAdapter): ReadableContent {
-
-    const decoder = new StringDecoder('utf8');
+  protected migrateContent(
+    content: ReadableContent,
+    formatterAdapter: FormatterAdapter,
+  ): ReadableContent {
+    const decoder = new StringDecoder("utf8");
     const chunkSize = 8 * 1024;
 
     // We'll stream through the input buffer, emit lines, and process headers as
@@ -56,8 +58,7 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
       if (sectionIdentifier) {
         const contentPart = current.content.isEmpty()
           ? current.headerLine
-          : current.headerLine.append(formatterAdapter.lineBreak(), current.content)
-
+          : current.headerLine.append(formatterAdapter.lineBreak(), current.content);
 
         const wrapped = formatterAdapter.section(sectionIdentifier, contentPart);
         result = result.append(wrapped);
@@ -65,11 +66,7 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
         // Unknown section: emit original header + content as-is
         result = result.append(
           current.headerLine,
-          ...(
-            current.content.isEmpty()
-              ? []
-              : [formatterAdapter.lineBreak(), current.content]
-          )
+          ...(current.content.isEmpty() ? [] : [formatterAdapter.lineBreak(), current.content]),
         );
       }
       current = null;
@@ -87,7 +84,7 @@ export class AutoDocMigrationAdapter extends AbstractMigrationAdapter {
         current = {
           headerLine: new ReadableContent(header),
           sectionKey: sectionName,
-          content: ReadableContent.empty()
+          content: ReadableContent.empty(),
         };
         return;
       }

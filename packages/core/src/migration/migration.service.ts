@@ -1,8 +1,8 @@
-import { inject, injectable, multiInject, optional } from 'inversify';
-import { FormatterService } from '../formatter/formatter.service.js';
-import { RENDERER_FACTORY_IDENTIFIER } from '../renderer/renderer.factory.js';
-import type { RendererFactory } from '../renderer/renderer.factory.js';
-import { MigrationAdapter, MIGRATION_ADAPTER_IDENTIFIER } from './migration.adapter.js';
+import { inject, injectable, multiInject, optional } from "inversify";
+import { FormatterService } from "../formatter/formatter.service.js";
+import { RENDERER_FACTORY_IDENTIFIER } from "../renderer/renderer.factory.js";
+import type { RendererFactory } from "../renderer/renderer.factory.js";
+import { MigrationAdapter, MIGRATION_ADAPTER_IDENTIFIER } from "./migration.adapter.js";
 
 /**
  * Service for migrating documentation from various tools to ci-dokumentor format
@@ -16,7 +16,7 @@ export class MigrationService {
     private readonly formatterService: FormatterService,
     @inject(RENDERER_FACTORY_IDENTIFIER)
     private readonly rendererFactory: RendererFactory,
-    @multiInject(MIGRATION_ADAPTER_IDENTIFIER) @optional() adapters: MigrationAdapter[] = []
+    @multiInject(MIGRATION_ADAPTER_IDENTIFIER) @optional() adapters: MigrationAdapter[] = [],
   ) {
     for (const adapter of adapters) {
       this.adapters.set(adapter.getName().toLowerCase(), adapter);

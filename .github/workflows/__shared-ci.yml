@@ -25,23 +25,18 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@4c9d51717dc04d823dac2dc9ac2857e7b3069454 # 0.35.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@624be17604ee0a7378488191aacb35851e7cf001 # 0.37.1
     permissions:
       actions: read
       contents: read
+      issues: write
+      packages: read
+      pull-requests: write
       security-events: write
       statuses: write
-    with:
-      linter-env: |
-        FILTER_REGEX_EXCLUDE=dist/**/*
-        VALIDATE_JSCPD=false
-        VALIDATE_TYPESCRIPT_ES=false
-        VALIDATE_TYPESCRIPT_PRETTIER=false
-        VALIDATE_JAVASCRIPT_ES=false
-        VALIDATE_TSX=false
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@a10d5e32daef8e060c49fe617833fb0d53476f22 # 0.24.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@df348077afa4e79725151d50606e9dc63f86dcb6 # 0.24.4
     permissions:
       contents: read
       id-token: write
@@ -68,7 +63,7 @@ jobs:
     steps:
       - id: package
         name: Create package tarball
-        uses: hoverkraft-tech/ci-github-nodejs/actions/package@a10d5e32daef8e060c49fe617833fb0d53476f22 # 0.24.0
+        uses: hoverkraft-tech/ci-github-nodejs/actions/package@df348077afa4e79725151d50606e9dc63f86dcb6 # 0.24.4
         with:
           working-directory: .
           package-directory: packages/cli
@@ -89,7 +84,7 @@ jobs:
       - name: Test help command
         run: npx ci-dokumentor --help
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -105,7 +100,7 @@ jobs:
 
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@2b647ed6f11d50cb6beb6d56333e68ba2c804826 # 0.33.1
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@c9088e8447c5a8be45157e17701023fc50ccb1c0 # 0.37.2
     permissions:
       contents: read
       id-token: write
@@ -145,7 +140,7 @@ jobs:
       # Test help command
       - run: docker run --rm "$IMAGE" --help
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -170,7 +165,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -182,9 +177,11 @@ jobs:
           destination: packages/docs/content/integrations/github-action.md
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: |
+      - env:
+          GENERATED_FILE: ${{ steps.generate-docs.outputs.destination }}
+        run: |
           # Assert generate-docs action outputs
-          output_destination="${{ steps.generate-docs.outputs.destination }}"
+          output_destination="${GENERATED_FILE}"
           expected_output_destination="packages/docs/content/integrations/github-action.md"
           if [ "$output_destination" != "$expected_output_destination" ]; then
             echo "Error: Unexpected output destination"

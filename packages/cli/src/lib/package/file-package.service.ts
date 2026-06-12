@@ -1,12 +1,9 @@
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { injectable, inject } from 'inversify';
-import { FileReaderAdapter } from '@ci-dokumentor/core';
-import type { ReaderAdapter } from '@ci-dokumentor/core';
-import type {
-  PackageInfo,
-  PackageService,
-} from './package-service.js';
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { injectable, inject } from "inversify";
+import { FileReaderAdapter } from "@ci-dokumentor/core";
+import type { ReaderAdapter } from "@ci-dokumentor/core";
+import type { PackageInfo, PackageService } from "./package-service.js";
 
 /**
  * Package service implementation that reads package.json
@@ -14,7 +11,7 @@ import type {
 @injectable()
 export class FilePackageService implements PackageService {
   private packageInfo: PackageInfo | null = null;
-  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) { }
+  constructor(@inject(FileReaderAdapter) private readonly readerAdapter: ReaderAdapter) {}
 
   /**
    * Get package information from package.json
@@ -36,9 +33,7 @@ export class FilePackageService implements PackageService {
     const packageJson = JSON.parse(packageJsonContent.toString());
 
     if (!packageJson.name || !packageJson.version || !packageJson.description) {
-      throw new Error(
-        'Invalid package.json: name, version, and description are required'
-      );
+      throw new Error("Invalid package.json: name, version, and description are required");
     }
 
     return {
@@ -54,7 +49,7 @@ export class FilePackageService implements PackageService {
 
     let level = 1;
     while (level++ < 4) {
-      const potentialPath = join(currentDir, ...Array(level).fill('..'), 'package.json');
+      const potentialPath = join(currentDir, ...Array(level).fill(".."), "package.json");
       if (this.readerAdapter.resourceExists(potentialPath)) {
         return potentialPath;
       }

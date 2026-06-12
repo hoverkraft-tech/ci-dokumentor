@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
-import mockFs, { restore } from 'mock-fs';
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
-import { initTestContainer } from '../container.js';
-import { ActionDocsMigrationAdapter } from './action-docs-migration.adapter.js';
+import { readFileSync } from "node:fs";
+import mockFs, { restore } from "mock-fs";
+import { describe, beforeEach, afterEach, it, expect } from "vitest";
+import { MarkdownFormatterAdapter, FileRendererAdapter } from "@ci-dokumentor/core";
+import { initTestContainer } from "../container.js";
+import { ActionDocsMigrationAdapter } from "./action-docs-migration.adapter.js";
 
-describe('ActionDocsMigrationAdapter', () => {
+describe("ActionDocsMigrationAdapter", () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
   let adapter: ActionDocsMigrationAdapter;
@@ -24,18 +24,18 @@ describe('ActionDocsMigrationAdapter', () => {
     restore();
   });
 
-  describe('getName', () => {
-    it('returns the adapter name', () => {
+  describe("getName", () => {
+    it("returns the adapter name", () => {
       // Arrange
       // Act
       const name = adapter.getName();
       // Assert
-      expect(name).toBe('action-docs');
+      expect(name).toBe("action-docs");
     });
   });
 
-  describe('supportsDestination', () => {
-    it('detects markers in files', async () => {
+  describe("supportsDestination", () => {
+    it("detects markers in files", async () => {
       // Arrange
       const tmpPath = `/tmp/actiondocs-support-${Date.now()}.md`;
       mockFs({ [tmpPath]: '<!-- action-docs-inputs source="action.yml" -->' });
@@ -45,17 +45,17 @@ describe('ActionDocsMigrationAdapter', () => {
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', async () => {
+    it("returns false for missing files", async () => {
       // Arrange
       // Act
-      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination("NON_EXISTENT_FILE.md");
       // Assert
       expect(supported).toBe(false);
     });
   });
 
-  describe('migrateDocumentation', () => {
-    it('migrates action-docs markers to ci-dokumentor format (e2e test)', async () => {
+  describe("migrateDocumentation", () => {
+    it("migrates action-docs markers to ci-dokumentor format (e2e test)", async () => {
       // Arrange: create a file with action-docs markers
       const source = `<!-- action-docs-header source="action.yml" -->
 Header here
@@ -85,14 +85,14 @@ Usage details here
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
       });
 
       // Finalize renderer
       await rendererAdapter.finalize();
 
       // Assert: read the actual file content and verify complete migration
-      const actualContent = readFileSync(tmpPath, 'utf-8');
+      const actualContent = readFileSync(tmpPath, "utf-8");
       const expectedContent = `<!-- header:start -->
 
 Header here

@@ -215,8 +215,7 @@ ci-dokumentor/
 Install recommended extensions (see `.vscode/extensions.json`):
 
 - **TypeScript** - Language support
-- **ESLint** - Linting integration
-- **Prettier** - Code formatting
+- **Biome** - Linting and formatting integration
 - **Vitest** - Test runner integration
 - **GitLens** - Git integration
 
@@ -227,9 +226,8 @@ Settings are preconfigured in `.vscode/settings.json`.
 For IntelliJ IDEA, WebStorm, or other IDEs:
 
 1. **Import as TypeScript project**
-2. **Enable ESLint integration**
-3. **Configure Prettier for formatting**
-4. **Set up Vitest test runner**
+2. **Enable Biome integration**
+3. **Set up Vitest test runner**
 
 ## Environment Variables
 

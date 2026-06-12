@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
-import { FileRendererAdapter, MarkdownFormatterAdapter } from '@ci-dokumentor/core';
-import mockFs, { restore } from 'mock-fs';
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { initTestContainer } from '../container.js';
-import { GitHubActionReadmeGeneratorMigrationAdapter } from './github-action-readme-generator-migration.adapter.js';
+import { readFileSync } from "node:fs";
+import { FileRendererAdapter, MarkdownFormatterAdapter } from "@ci-dokumentor/core";
+import mockFs, { restore } from "mock-fs";
+import { describe, beforeEach, afterEach, it, expect } from "vitest";
+import { initTestContainer } from "../container.js";
+import { GitHubActionReadmeGeneratorMigrationAdapter } from "./github-action-readme-generator-migration.adapter.js";
 
-describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
+describe("GitHubActionReadmeGeneratorMigrationAdapter", () => {
   let adapter: GitHubActionReadmeGeneratorMigrationAdapter;
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
@@ -28,38 +28,38 @@ describe('GitHubActionReadmeGeneratorMigrationAdapter', () => {
     vi.resetAllMocks();
   });
 
-  describe('getName', () => {
-    it('returns the adapter name', () => {
+  describe("getName", () => {
+    it("returns the adapter name", () => {
       // Arrange
       // Act
       const name = adapter.getName();
       // Assert
-      expect(name).toBe('github-action-readme-generator');
+      expect(name).toBe("github-action-readme-generator");
     });
   });
 
-  describe('supportsDestination', () => {
-    it('detects start/end markers in files', async () => {
+  describe("supportsDestination", () => {
+    it("detects start/end markers in files", async () => {
       // Arrange
       const tmpPath = `/tmp/gharg-support-${Date.now()}.md`;
-      mockFs({ [tmpPath]: '<!-- start inputs -->' });
+      mockFs({ [tmpPath]: "<!-- start inputs -->" });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', async () => {
+    it("returns false for missing files", async () => {
       // Arrange
       // Act
-      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination("NON_EXISTENT_FILE.md");
       // Assert
       expect(supported).toBe(false);
     });
   });
 
-  describe('migrateDocumentation', () => {
-    it('migrates github-action-readme-generator markers to ci-dokumentor format (e2e test)', async () => {
+  describe("migrateDocumentation", () => {
+    it("migrates github-action-readme-generator markers to ci-dokumentor format (e2e test)", async () => {
       // Arrange: create a file with github-action-readme-generator markers
       const source = `<!-- start branding -->
 Brand stuff
@@ -101,14 +101,14 @@ ExampleX
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
       });
 
       // Finalize renderer
       await rendererAdapter.finalize();
 
       // Assert: read the actual file content and verify complete migration
-      const actualContent = readFileSync(tmpPath, 'utf-8');
+      const actualContent = readFileSync(tmpPath, "utf-8");
       const expectedContent = `<!-- header:start -->
 
 Brand stuff

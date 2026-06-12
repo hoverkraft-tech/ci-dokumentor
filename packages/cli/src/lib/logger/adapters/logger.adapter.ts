@@ -1,10 +1,9 @@
-export const LOGGER_ADAPTER_IDENTIFIER = Symbol('LoggerAdapter');
+export const LOGGER_ADAPTER_IDENTIFIER = Symbol("LoggerAdapter");
 
 /**
  * Logger interface for abstracting logging operations with format-aware output
  */
 export interface LoggerAdapter {
-
   /**
    * Get the output format supported by this adapter
    */

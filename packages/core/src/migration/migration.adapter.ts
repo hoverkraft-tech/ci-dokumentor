@@ -1,6 +1,6 @@
-export const MIGRATION_ADAPTER_IDENTIFIER = Symbol.for('MigrationAdapter');
+export const MIGRATION_ADAPTER_IDENTIFIER = Symbol.for("MigrationAdapter");
 
-import type { RendererAdapter } from '../renderer/renderer.adapter.js';
+import type { RendererAdapter } from "../renderer/renderer.adapter.js";
 
 export type MigrateDocumentationPayload = {
   destination: string;

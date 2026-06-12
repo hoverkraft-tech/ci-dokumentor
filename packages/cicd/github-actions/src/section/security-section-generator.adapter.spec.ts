@@ -1,12 +1,21 @@
-import { describe, it, expect, Mocked } from 'vitest';
-import { FormatterAdapter, MarkdownFormatterAdapter, SectionIdentifier, SectionGenerationPayload, RepositoryProvider } from '@ci-dokumentor/core';
-import { initTestContainer } from '@ci-dokumentor/repository-github';
-import { RepositoryInfoMockFactory, RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
-import { GitHubAction } from '../github-actions-parser.js';
-import { GitHubActionMockFactory } from '../../__tests__/github-action-mock.factory.js';
-import { SecuritySectionGenerator } from './security-section-generator.adapter.js';
+import { describe, it, expect, Mocked } from "vitest";
+import {
+  FormatterAdapter,
+  MarkdownFormatterAdapter,
+  SectionIdentifier,
+  SectionGenerationPayload,
+  RepositoryProvider,
+} from "@ci-dokumentor/core";
+import { initTestContainer } from "@ci-dokumentor/repository-github";
+import {
+  RepositoryInfoMockFactory,
+  RepositoryProviderMockFactory,
+} from "@ci-dokumentor/core/tests";
+import { GitHubAction } from "../github-actions-parser.js";
+import { GitHubActionMockFactory } from "../../__tests__/github-action-mock.factory.js";
+import { SecuritySectionGenerator } from "./security-section-generator.adapter.js";
 
-describe('SecuritySectionGenerator', () => {
+describe("SecuritySectionGenerator", () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
 
@@ -29,8 +38,8 @@ describe('SecuritySectionGenerator', () => {
     vi.resetAllMocks();
   });
 
-  describe('getSectionIdentifier', () => {
-    it('should return Security section identifier', () => {
+  describe("getSectionIdentifier", () => {
+    it("should return Security section identifier", () => {
       // Act
       const result = generator.getSectionIdentifier();
 
@@ -39,13 +48,13 @@ describe('SecuritySectionGenerator', () => {
     });
   });
 
-  describe('generateSection', () => {
-    it('should generate security section with security policy information', async () => {
+  describe("generateSection", () => {
+    it("should generate security section with security policy information", async () => {
       // Arrange
       const manifest: GitHubAction = GitHubActionMockFactory.create();
 
       mockRepositoryProvider.getSecurity.mockResolvedValue({
-        url: 'https://github.com/owner/repo/security/policy',
+        url: "https://github.com/owner/repo/security/policy",
       });
 
       const payload: SectionGenerationPayload<GitHubAction> = {
@@ -53,8 +62,7 @@ describe('SecuritySectionGenerator', () => {
         manifest,
         repositoryProvider: mockRepositoryProvider,
 
-        destination: 'README.md',
-
+        destination: "README.md",
       };
 
       // Act
@@ -66,11 +74,11 @@ describe('SecuritySectionGenerator', () => {
         `## Security
 
 We take security seriously. Please see our [security policy](https://github.com/owner/repo/security/policy) for information on how to report security vulnerabilities.
-`
+`,
       );
     });
 
-    it('should return empty buffer when no security information is available', async () => {
+    it("should return empty buffer when no security information is available", async () => {
       // Arrange
       const manifest: GitHubAction = GitHubActionMockFactory.create();
       const payload: SectionGenerationPayload<GitHubAction> = {
@@ -78,8 +86,7 @@ We take security seriously. Please see our [security policy](https://github.com/
         manifest,
         repositoryProvider: mockRepositoryProvider,
 
-        destination: 'README.md',
-
+        destination: "README.md",
       };
 
       // Act
@@ -87,10 +94,10 @@ We take security seriously. Please see our [security policy](https://github.com/
 
       // Assert
 
-      expect(result.toString()).toEqual('');
+      expect(result.toString()).toEqual("");
     });
 
-    it('should return empty buffer when security info url is undefined', async () => {
+    it("should return empty buffer when security info url is undefined", async () => {
       // Arrange
       const manifest: GitHubAction = GitHubActionMockFactory.create();
 
@@ -103,8 +110,7 @@ We take security seriously. Please see our [security policy](https://github.com/
         manifest,
         repositoryProvider: mockRepositoryProvider,
 
-        destination: 'README.md',
-
+        destination: "README.md",
       };
 
       // Act
@@ -112,7 +118,7 @@ We take security seriously. Please see our [security policy](https://github.com/
 
       // Assert
 
-      expect(result.toString()).toEqual('');
+      expect(result.toString()).toEqual("");
     });
   });
 });

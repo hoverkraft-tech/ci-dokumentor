@@ -1,4 +1,4 @@
-export const PROGRAM_IDENTIFIER = Symbol('Program');
+export const PROGRAM_IDENTIFIER = Symbol("Program");
 
 export interface Program {
   parent: Program | null;

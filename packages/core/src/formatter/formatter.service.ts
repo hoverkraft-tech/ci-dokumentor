@@ -1,15 +1,12 @@
-import { injectable, multiInject } from 'inversify';
-import {
-  FORMATTER_ADAPTER_IDENTIFIER,
-  FormatterAdapter,
-} from './formatter.adapter.js';
-import { FormatterLanguage } from './formatter-language.js';
+import { injectable, multiInject } from "inversify";
+import { FORMATTER_ADAPTER_IDENTIFIER, FormatterAdapter } from "./formatter.adapter.js";
+import { FormatterLanguage } from "./formatter-language.js";
 
 @injectable()
 export class FormatterService {
   constructor(
     @multiInject(FORMATTER_ADAPTER_IDENTIFIER)
-    private readonly formatterAdapters: FormatterAdapter[]
+    private readonly formatterAdapters: FormatterAdapter[],
   ) {}
 
   getFormatterAdapterForFile(filePath: string): FormatterAdapter {
@@ -26,10 +23,10 @@ export class FormatterService {
 
   private getFileLanguage(filePath: string): FormatterLanguage {
     // Determine the file language based on the file extension or content.
-    const fileExtension = filePath.split('.').pop()?.toLowerCase();
+    const fileExtension = filePath.split(".").pop()?.toLowerCase();
     switch (fileExtension) {
-      case 'md':
-      case 'markdown':
+      case "md":
+      case "markdown":
         return FormatterLanguage.Markdown;
       default:
         throw new Error(`Unsupported language for file: ${filePath}`);

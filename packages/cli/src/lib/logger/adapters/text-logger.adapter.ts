@@ -1,5 +1,5 @@
-import { injectable } from 'inversify';
-import type { LoggerAdapter } from './logger.adapter.js';
+import { injectable } from "inversify";
+import type { LoggerAdapter } from "./logger.adapter.js";
 
 /**
  * Text logger adapter for console output with emojis and formatting
@@ -7,7 +7,7 @@ import type { LoggerAdapter } from './logger.adapter.js';
 @injectable()
 export class TextLoggerAdapter implements LoggerAdapter {
   getFormat(): string {
-    return 'text';
+    return "text";
   }
 
   /**
@@ -49,7 +49,7 @@ export class TextLoggerAdapter implements LoggerAdapter {
     if (Array.isArray(data)) {
       return this.resultArray(data);
     }
-    if (typeof data === 'object' && data !== null) {
+    if (typeof data === "object" && data !== null) {
       return this.resultObject(data);
     }
     console.info(`✅ Result: ${data}`);
@@ -58,7 +58,7 @@ export class TextLoggerAdapter implements LoggerAdapter {
   private resultArray(data: unknown[]): void {
     console.info(`✅ Result:`);
     data.forEach((item) => {
-      const stringValue = typeof item === 'string' ? item : JSON.stringify(item);
+      const stringValue = typeof item === "string" ? item : JSON.stringify(item);
       console.info(`   - ${stringValue}`);
     });
   }
@@ -69,7 +69,7 @@ export class TextLoggerAdapter implements LoggerAdapter {
       if (value === undefined) {
         continue;
       }
-      const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+      const stringValue = typeof value === "string" ? value : JSON.stringify(value);
       console.info(`   - ${key}: ${stringValue}`);
     }
   }

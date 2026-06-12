@@ -1,11 +1,8 @@
-import { basename, dirname, extname, join, relative } from 'node:path';
-import type { ReaderAdapter, RepositoryInfo } from '@ci-dokumentor/core';
-import {
-  FILE_READER_ADAPTER_IDENTIFIER,
-  ReadableContent,
-} from '@ci-dokumentor/core';
-import { inject, injectable } from 'inversify';
-import { parse } from 'yaml';
+import { basename, dirname, extname, join, relative } from "node:path";
+import type { ReaderAdapter, RepositoryInfo } from "@ci-dokumentor/core";
+import { FILE_READER_ADAPTER_IDENTIFIER, ReadableContent } from "@ci-dokumentor/core";
+import { inject, injectable } from "inversify";
+import { parse } from "yaml";
 
 // See https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-action.json
 
@@ -41,7 +38,7 @@ export type GitHubAction = {
 
 export type GitHubWorkflowJob = {
   name?: string;
-  'runs-on': string | string[];
+  "runs-on": string | string[];
   needs?: string | string[];
   strategy?: {
     matrix?: Record<string, unknown>;
@@ -109,7 +106,9 @@ export type GitHubActionsManifest = GitHubAction | GitHubWorkflow;
 
 @injectable()
 export class GitHubActionsParser {
-  constructor(@inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter) { }
+  constructor(
+    @inject(FILE_READER_ADAPTER_IDENTIFIER) private readonly readerAdapter: ReaderAdapter,
+  ) {}
 
   isGitHubActionFile(source: string): boolean {
     // Check if the source is a GitHub Action by looking for action.yml or action.yaml
@@ -118,13 +117,10 @@ export class GitHubActionsParser {
 
   isGitHubWorkflowFile(source: string): boolean {
     // Check if the source is a GitHub Workflow by looking for .github/workflows/
-    return source.includes('.github/workflows/');
+    return source.includes(".github/workflows/");
   }
 
-  async parseFile(
-    source: string,
-    repositoryInfo: RepositoryInfo
-  ): Promise<GitHubActionsManifest> {
+  async parseFile(source: string, repositoryInfo: RepositoryInfo): Promise<GitHubActionsManifest> {
     if (!this.readerAdapter.resourceExists(source)) {
       throw new Error(`Source file does not exist: "${source}"`);
     }
@@ -135,7 +131,7 @@ export class GitHubActionsParser {
       throw new Error(`Unsupported source file: ${source}`);
     }
 
-    if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+    if (typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error(`Unsupported GitHub Actions file format: ${source}`);
     }
 
@@ -144,10 +140,8 @@ export class GitHubActionsParser {
       const fileName = basename(source, extname(source));
       const pascalCaseName = fileName
         .split(/[-_\s]/)
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(' ');
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
       parsed.name = pascalCaseName;
     }
 
@@ -170,11 +164,7 @@ export class GitHubActionsParser {
         if (existingDescription) {
           // Combine: description field + newline + comments
           (parsed as GitHubAction).description = ReadableContent.empty()
-            .append(
-              existingDescription.trim(),
-              `\n\n`,
-              commentsDescription.trim()
-            )
+            .append(existingDescription.trim(), `\n\n`, commentsDescription.trim())
             .toString();
         } else {
           // Only comments available
@@ -195,7 +185,6 @@ export class GitHubActionsParser {
     // For GitHub Actions, the usesName is typically the repository name
     const sourceRelativePath = relative(repositoryInfo.rootDir, source);
     if (this.isGitHubActionFile(source)) {
-
       return join(repositoryInfo.owner, repositoryInfo.name, dirname(sourceRelativePath));
     }
 
@@ -217,7 +206,7 @@ export class GitHubActionsParser {
       const trimmedLineIsEmpty = trimmedLine.isEmpty();
 
       // Stop if we encounter the YAML document separator
-      if (trimmedLine.equals('---')) {
+      if (trimmedLine.equals("---")) {
         break;
       }
 
@@ -227,23 +216,23 @@ export class GitHubActionsParser {
       }
 
       // If we encounter a non-comment line after starting to collect comments, stop
-      if (!trimmedLineIsEmpty && !trimmedLine.startsWith('#')) {
+      if (!trimmedLineIsEmpty && !trimmedLine.startsWith("#")) {
         break;
       }
 
       // Extract comment content
-      if (trimmedLine.startsWith('#')) {
+      if (trimmedLine.startsWith("#")) {
         // Find the position of the first '#' in the raw line (handles leading spaces)
-        const hashIndex = line.search('#');
+        const hashIndex = line.search("#");
         // Slice after the '#' to get the comment content as ReadableContent
         let commentPart = line.slice(hashIndex + 1);
         // Remove a single space if present (conventional `# ` style)
-        if (commentPart.startsWith(' ')) {
+        if (commentPart.startsWith(" ")) {
           commentPart = commentPart.slice(1);
         }
 
         // Detect code fence opening/closing (e.g. ``` or```yaml)
-        const startsWithFence = commentPart.trimStart().startsWith('```');
+        const startsWithFence = commentPart.trimStart().startsWith("```");
         if (startsWithFence) {
           inCodeFence = !inCodeFence;
         }
@@ -276,16 +265,16 @@ export class GitHubActionsParser {
     // converting each line to string individually.
     let descriptionRC = commentLines[0];
     for (let i = 1; i < commentLines.length; i++) {
-      descriptionRC = descriptionRC.append('\n').append(commentLines[i]);
+      descriptionRC = descriptionRC.append("\n").append(commentLines[i]);
     }
 
     // If the last non-empty comment line is a code fence, ensure the
     // description ends with a newline so code fences are preserved
     // exactly as expected in tests (closing fence followed by a newline).
     const lastNonEmpty = commentLines[commentLines.length - 1];
-    if (lastNonEmpty.trimStart().startsWith('```')) {
+    if (lastNonEmpty.trimStart().startsWith("```")) {
       // append a trailing newline to match expected formatting
-      descriptionRC = descriptionRC.append('\n');
+      descriptionRC = descriptionRC.append("\n");
     }
 
     return descriptionRC || undefined;
@@ -294,29 +283,27 @@ export class GitHubActionsParser {
   private isGitHubAction(parsed: unknown): parsed is GitHubAction {
     // Validate all required fields for a GitHub Action
     return (
-      typeof parsed === 'object' &&
+      typeof parsed === "object" &&
       parsed !== null &&
-      'name' in parsed &&
-      typeof parsed.name === 'string' &&
-      'runs' in parsed &&
-      typeof parsed.runs === 'object' &&
+      "name" in parsed &&
+      typeof parsed.name === "string" &&
+      "runs" in parsed &&
+      typeof parsed.runs === "object" &&
       parsed.runs !== null &&
-      'using' in parsed.runs &&
-      typeof parsed.runs.using === 'string'
+      "using" in parsed.runs &&
+      typeof parsed.runs.using === "string"
     );
   }
 
   private isGitHubWorkflow(parsed: unknown): parsed is GitHubWorkflow {
     // Validate all required fields for a GitHub Workflow
     return (
-      typeof parsed === 'object' &&
+      typeof parsed === "object" &&
       parsed !== null &&
-      'name' in parsed &&
-      typeof parsed.name === 'string' &&
-      'on' in parsed &&
-      (typeof parsed.on === 'object' ||
-        Array.isArray(parsed.on) ||
-        typeof parsed.on === 'string')
+      "name" in parsed &&
+      typeof parsed.name === "string" &&
+      "on" in parsed &&
+      (typeof parsed.on === "object" || Array.isArray(parsed.on) || typeof parsed.on === "string")
     );
   }
 }

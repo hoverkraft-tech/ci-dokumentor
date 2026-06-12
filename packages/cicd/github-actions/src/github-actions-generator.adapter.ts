@@ -1,17 +1,14 @@
-import { dirname, join } from 'node:path';
+import { dirname, join } from "node:path";
 import {
   AbstractGeneratorAdapter,
   RepositoryInfo,
   SectionGeneratorAdapter,
-} from '@ci-dokumentor/core';
-import { inject, multiInject } from 'inversify';
-import {
-  GitHubActionsManifest,
-  GitHubActionsParser,
-} from './github-actions-parser.js';
+} from "@ci-dokumentor/core";
+import { inject, multiInject } from "inversify";
+import { GitHubActionsManifest, GitHubActionsParser } from "./github-actions-parser.js";
 
 export const GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER = Symbol(
-  'GitHubActionsSectionGeneratorAdapter'
+  "GitHubActionsSectionGeneratorAdapter",
 );
 
 /**
@@ -24,7 +21,7 @@ export class GitHubActionsGeneratorAdapter extends AbstractGeneratorAdapter<GitH
     @inject(GitHubActionsParser)
     public readonly gitHubActionsParser: GitHubActionsParser,
     @multiInject(GITHUB_ACTIONS_SECTION_GENERATOR_ADAPTER_IDENTIFIER)
-    sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubActionsManifest>[]
+    sectionGeneratorAdapters: SectionGeneratorAdapter<GitHubActionsManifest>[],
   ) {
     super(sectionGeneratorAdapters);
   }
@@ -33,7 +30,7 @@ export class GitHubActionsGeneratorAdapter extends AbstractGeneratorAdapter<GitH
    * Get the platform name identifier for this adapter
    */
   getPlatformName(): string {
-    return 'github-actions';
+    return "github-actions";
   }
 
   /**
@@ -58,12 +55,12 @@ export class GitHubActionsGeneratorAdapter extends AbstractGeneratorAdapter<GitH
   getDocumentationPath(source: string): string {
     // For GitHub Actions, the documentation path README.md in the same directory
     if (this.gitHubActionsParser.isGitHubActionFile(source)) {
-      return join(dirname(source), 'README.md');
+      return join(dirname(source), "README.md");
     }
 
     // For GitHub Workflows, the documentation path is .github/workflows/[workflow].md
     if (this.gitHubActionsParser.isGitHubWorkflowFile(source)) {
-      return source.replace(/\.ya?ml$/, '.md');
+      return source.replace(/\.ya?ml$/, ".md");
     }
 
     throw new Error(`Unsupported source file: ${source}`);
@@ -72,7 +69,10 @@ export class GitHubActionsGeneratorAdapter extends AbstractGeneratorAdapter<GitH
   /**
    * Parse the source file into a manifest
    */
-  protected async parseFile(source: string, repositoryInfo: RepositoryInfo): Promise<GitHubActionsManifest> {
+  protected async parseFile(
+    source: string,
+    repositoryInfo: RepositoryInfo,
+  ): Promise<GitHubActionsManifest> {
     return await this.gitHubActionsParser.parseFile(source, repositoryInfo);
   }
 }

@@ -1,4 +1,4 @@
-export const PACKAGE_SERVICE_IDENTIFIER = Symbol('PackageService');
+export const PACKAGE_SERVICE_IDENTIFIER = Symbol("PackageService");
 
 export type PackageInfo = {
   name: string;

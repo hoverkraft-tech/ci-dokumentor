@@ -1,9 +1,9 @@
-import { Container, REPOSITORY_PROVIDER_IDENTIFIER } from '@ci-dokumentor/core';
-import { Container as InversifyContainer } from 'inversify';
+import { Container, REPOSITORY_PROVIDER_IDENTIFIER } from "@ci-dokumentor/core";
+import { Container as InversifyContainer } from "inversify";
 import {
   GitRepositoryProvider,
   GIT_REPOSITORY_PROVIDER_IDENTIFIER,
-} from './git-repository-provider.js';
+} from "./git-repository-provider.js";
 
 let container: Container | null = null;
 
@@ -11,9 +11,7 @@ export function resetContainer(): void {
   container = null;
 }
 
-export function initContainer(
-  baseContainer: Container | undefined = undefined
-): Container {
+export function initContainer(baseContainer: Container | undefined = undefined): Container {
   const targetContainer = baseContainer ?? (container ??= new InversifyContainer() as Container);
 
   // Return early if this package has already been initialized in this container.

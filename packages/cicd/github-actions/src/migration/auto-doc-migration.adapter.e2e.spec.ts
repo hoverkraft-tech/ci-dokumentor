@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
-import mockFs, { restore } from 'mock-fs';
-import { MarkdownFormatterAdapter, FileRendererAdapter } from '@ci-dokumentor/core';
-import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { initTestContainer } from '../container.js';
-import { AutoDocMigrationAdapter } from './auto-doc-migration.adapter.js';
+import { readFileSync } from "node:fs";
+import mockFs, { restore } from "mock-fs";
+import { MarkdownFormatterAdapter, FileRendererAdapter } from "@ci-dokumentor/core";
+import { describe, beforeEach, afterEach, it, expect } from "vitest";
+import { initTestContainer } from "../container.js";
+import { AutoDocMigrationAdapter } from "./auto-doc-migration.adapter.js";
 
-describe('AutoDocMigrationAdapter', () => {
+describe("AutoDocMigrationAdapter", () => {
   let adapter: AutoDocMigrationAdapter;
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
@@ -28,36 +28,36 @@ describe('AutoDocMigrationAdapter', () => {
     vi.resetAllMocks();
   });
 
-  describe('getName', () => {
-    it('returns the adapter name', () => {
+  describe("getName", () => {
+    it("returns the adapter name", () => {
       // Act
       const name = adapter.getName();
       // Assert
-      expect(name).toBe('auto-doc');
+      expect(name).toBe("auto-doc");
     });
   });
 
-  describe('supportsDestination', () => {
-    it('detects headers in files', async () => {
+  describe("supportsDestination", () => {
+    it("detects headers in files", async () => {
       // Arrange
       const tmpPath = `/tmp/autodoc-support-${Date.now()}.md`;
-      mockFs({ [tmpPath]: '## Inputs' });
+      mockFs({ [tmpPath]: "## Inputs" });
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
       expect(supported).toBe(true);
     });
 
-    it('returns false for missing files', async () => {
+    it("returns false for missing files", async () => {
       // Act
-      const supported = await adapter.supportsDestination('NON_EXISTENT_FILE.md');
+      const supported = await adapter.supportsDestination("NON_EXISTENT_FILE.md");
       // Assert
       return expect(supported).toBe(false);
     });
   });
 
-  describe('migrateDocumentation', () => {
-    it('wraps markdown headers with ci-dokumentor markers (e2e test)', async () => {
+  describe("migrateDocumentation", () => {
+    it("wraps markdown headers with ci-dokumentor markers (e2e test)", async () => {
       // Arrange: create a file with markdown headers that should be wrapped
       const source = `## Description
 
@@ -91,14 +91,14 @@ Some description here
       // Act: perform migration using real dependencies
       await adapter.migrateDocumentation({
         destination: tmpPath,
-        rendererAdapter: rendererAdapter
+        rendererAdapter: rendererAdapter,
       });
 
       // Finalize renderer
       await rendererAdapter.finalize();
 
       // Assert: read the actual file content and verify headers are wrapped with markers
-      const actualContent = readFileSync(tmpPath, 'utf-8');
+      const actualContent = readFileSync(tmpPath, "utf-8");
       const expectedContent = `<!-- overview:start -->
 
 ## Description

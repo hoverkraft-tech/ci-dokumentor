@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeEach, Mocked } from 'vitest';
+import { describe, it, expect, beforeEach, Mocked } from "vitest";
 import {
   FormatterAdapter,
   SectionIdentifier,
   MarkdownFormatterAdapter,
   RepositoryProvider,
   ReadableContent,
-} from '@ci-dokumentor/core';
-import { RepositoryProviderMockFactory } from '@ci-dokumentor/core/tests';
-import { GitLabComponentMockFactory } from '../../__tests__/gitlab-component-mock.factory.js';
-import { GitLabCIPipelineMockFactory } from '../../__tests__/gitlab-pipeline-mock.factory.js';
-import { initTestContainer } from '../container.js';
-import { OverviewSectionGenerator } from './overview-section-generator.adapter.js';
+} from "@ci-dokumentor/core";
+import { RepositoryProviderMockFactory } from "@ci-dokumentor/core/tests";
+import { GitLabComponentMockFactory } from "../../__tests__/gitlab-component-mock.factory.js";
+import { GitLabCIPipelineMockFactory } from "../../__tests__/gitlab-pipeline-mock.factory.js";
+import { initTestContainer } from "../container.js";
+import { OverviewSectionGenerator } from "./overview-section-generator.adapter.js";
 
-describe('OverviewSectionGenerator', () => {
+describe("OverviewSectionGenerator", () => {
   let mockRepositoryProvider: Mocked<RepositoryProvider>;
   let formatterAdapter: FormatterAdapter;
   let generator: OverviewSectionGenerator;
@@ -32,8 +32,8 @@ describe('OverviewSectionGenerator', () => {
     vi.resetAllMocks();
   });
 
-  describe('getSectionIdentifier', () => {
-    it('should return Overview section identifier', () => {
+  describe("getSectionIdentifier", () => {
+    it("should return Overview section identifier", () => {
       // Act
       const result = generator.getSectionIdentifier();
 
@@ -42,11 +42,11 @@ describe('OverviewSectionGenerator', () => {
     });
   });
 
-  describe('generateSection', () => {
-    it('should return description as paragraph when present', async () => {
+  describe("generateSection", () => {
+    it("should return description as paragraph when present", async () => {
       // Arrange
       const manifest = GitLabComponentMockFactory.create({
-        description: 'This is a test GitLab component that builds Docker images'
+        description: "This is a test GitLab component that builds Docker images",
       });
 
       // Act
@@ -54,7 +54,7 @@ describe('OverviewSectionGenerator', () => {
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-        destination: 'docs.md'
+        destination: "docs.md",
       });
 
       // Assert
@@ -66,10 +66,10 @@ This is a test GitLab component that builds Docker images
 `);
     });
 
-    it('should return empty content when description is not present', async () => {
+    it("should return empty content when description is not present", async () => {
       // Arrange
       const manifest = GitLabComponentMockFactory.create({
-        description: undefined
+        description: undefined,
       });
 
       // Act
@@ -77,17 +77,17 @@ This is a test GitLab component that builds Docker images
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-        destination: 'docs.md'
+        destination: "docs.md",
       });
 
       // Assert
       expect(result.isEmpty()).toBe(true);
     });
 
-    it('should return empty content when description is empty string', async () => {
+    it("should return empty content when description is empty string", async () => {
       // Arrange
       const manifest = GitLabComponentMockFactory.create({
-        description: ''
+        description: "",
       });
 
       // Act
@@ -95,17 +95,17 @@ This is a test GitLab component that builds Docker images
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-        destination: 'docs.md'
+        destination: "docs.md",
       });
 
       // Assert
       expect(result.isEmpty()).toBe(true);
     });
 
-    it('should work with GitLab CI pipeline manifests', async () => {
+    it("should work with GitLab CI pipeline manifests", async () => {
       // Arrange
       const manifest = GitLabCIPipelineMockFactory.create({
-        description: 'This is a CI/CD pipeline for Node.js applications'
+        description: "This is a CI/CD pipeline for Node.js applications",
       });
 
       // Act
@@ -113,7 +113,7 @@ This is a test GitLab component that builds Docker images
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-        destination: 'README.md'
+        destination: "README.md",
       });
 
       // Assert
@@ -125,10 +125,11 @@ This is a CI/CD pipeline for Node.js applications
 `);
     });
 
-    it('should handle multiline descriptions', async () => {
+    it("should handle multiline descriptions", async () => {
       // Arrange
       const manifest = GitLabComponentMockFactory.create({
-        description: 'This is a multiline description\nWith multiple paragraphs\nAnd different content'
+        description:
+          "This is a multiline description\nWith multiple paragraphs\nAnd different content",
       });
 
       // Act
@@ -136,7 +137,7 @@ This is a CI/CD pipeline for Node.js applications
         formatterAdapter,
         manifest,
         repositoryProvider: mockRepositoryProvider,
-        destination: 'docs.md'
+        destination: "docs.md",
       });
 
       // Assert
