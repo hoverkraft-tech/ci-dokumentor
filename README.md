@@ -68,7 +68,7 @@ docker run --rm -v $(pwd):/workspace -u $(id -u):$(id -g) ghcr.io/hoverkraft-tec
 
 ```yaml
 - name: Generate CI Documentation
-  uses: hoverkraft-tech/ci-dokumentor@3258ef0de948ec25e5939618d5ef510445aed869 # 0.3.1
+  uses: hoverkraft-tech/ci-dokumentor@301ef70a95e03b39e07ee0d3dc2da21de82e51ce # 0.4.0
   with:
     source: "action.yml"
 ```
