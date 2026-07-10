@@ -57,3 +57,5 @@ vitest.config.*.timestamp*
 # AI config
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+.nx/migrate-runs

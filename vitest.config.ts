@@ -11,6 +11,7 @@ export default defineConfig({
     ],
     // project configs cannot define coverage; keep provider at the root
     coverage: {
+      include: ["packages/**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
       provider: "v8",
     },
     reporters: ["default"],
