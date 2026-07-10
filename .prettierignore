@@ -1,0 +1,2 @@
+# Exclude generated lockfile from Prettier-based YAML linting
+pnpm-lock.yaml
