@@ -11,7 +11,7 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "test": "nx run-many --target=test --all --parallel --exclude=@ci-dokumentor/source",
-    "test:ci": "nx run-many --target=test --all --parallel --exclude=@ci-dokumentor/source --coverage --coverage.all",
+    "test:ci": "nx run-many --target=test --all --parallel --exclude=@ci-dokumentor/source --coverage",
     "all": "pnpm run build && pnpm run lint:fix && pnpm run test:ci",
     "docs:start": "nx start @ci-dokumentor/docs",
     "docs:serve": "nx serve @ci-dokumentor/docs",
@@ -20,9 +20,10 @@
   "private": true,
   "devDependencies": {
     "@biomejs/biome": "2.5.3",
-    "@nx/js": "22.7.5",
-    "@nx/vite": "22.7.5",
-    "@nx/web": "22.7.5",
+    "@nx/js": "23.0.1",
+    "@nx/vite": "23.0.1",
+    "@nx/vitest": "23.0.1",
+    "@nx/web": "23.0.1",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.43",
     "@swc/helpers": "~0.5.23",
@@ -33,7 +34,7 @@
     "jiti": "2.7.0",
     "jsdom": "~29.1.1",
     "mock-fs": "^5.5.0",
-    "nx": "22.7.5",
+    "nx": "23.0.1",
     "tslib": "^2.8.1",
     "typescript": "6.0.3",
     "vite": "^8.1.4",
@@ -42,5 +43,6 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {}
 }

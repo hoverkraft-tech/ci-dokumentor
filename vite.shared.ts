@@ -37,7 +37,7 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
       // target and ssr are common for node libraries in this workspace
       target: "node20",
       ssr: true,
-      rollupOptions: {
+      rolldownOptions: {
         external: [
           "inversify",
           "reflect-metadata",

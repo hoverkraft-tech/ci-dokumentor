@@ -16,7 +16,7 @@ export default defineConfig(() => {
         fileName: "index",
         formats: ["es" as const],
       },
-      rollupOptions: {
+      rolldownOptions: {
         input: {
           "bin/ci-dokumentor": "src/bin/ci-dokumentor.ts",
         },
