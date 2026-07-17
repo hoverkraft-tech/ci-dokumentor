@@ -1,5 +1,5 @@
 # Multi-stage build: build & pack then install globally in a minimal runtime image
-FROM node:25-alpine AS builder
+FROM node:26-alpine AS builder
 
 WORKDIR /build
 
@@ -33,7 +33,7 @@ RUN mkdir -p /pack && \
     npm pack --pack-destination /pack
 
 # Final runtime image: minimal, with the CLI installed globally
-FROM node:25-alpine AS production
+FROM node:26-alpine AS production
 
 # Install minimal runtime deps
 # hadolint ignore=DL3018
