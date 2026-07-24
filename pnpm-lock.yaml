@@ -124,8 +124,8 @@ importers:
         specifier: ^4.29.2
         version: 4.29.2
       inversify:
-        specifier: ^8.1.2
-        version: 8.1.2(reflect-metadata@0.2.2)
+        specifier: ^8.2.1
+        version: 8.2.1(reflect-metadata@0.2.2)
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
@@ -146,8 +146,8 @@ importers:
         specifier: workspace:*
         version: link:../../repository/gitlab
       inversify:
-        specifier: ^8.1.2
-        version: 8.1.2(reflect-metadata@0.2.2)
+        specifier: ^8.2.1
+        version: 8.2.1(reflect-metadata@0.2.2)
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
@@ -158,8 +158,8 @@ importers:
         specifier: ^15.0.0
         version: 15.0.0
       inversify:
-        specifier: ^8.1.2
-        version: 8.1.2(reflect-metadata@0.2.2)
+        specifier: ^8.2.1
+        version: 8.2.1(reflect-metadata@0.2.2)
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -192,8 +192,8 @@ importers:
         specifier: ^3.3.3
         version: 3.3.3
       inversify:
-        specifier: ^8.1.2
-        version: 8.1.2(reflect-metadata@0.2.2)
+        specifier: ^8.2.1
+        version: 8.2.1(reflect-metadata@0.2.2)
       p-limit:
         specifier: ^7.3.0
         version: 7.3.0
@@ -247,8 +247,8 @@ importers:
         specifier: ^16.1.0
         version: 16.1.0
       inversify:
-        specifier: ^8.1.2
-        version: 8.1.2(reflect-metadata@0.2.2)
+        specifier: ^8.2.1
+        version: 8.2.1(reflect-metadata@0.2.2)
       simple-git:
         specifier: ^3.36.0
         version: 3.36.0
@@ -268,8 +268,8 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
       inversify:
-        specifier: ^8.1.2
-        version: 8.1.2(reflect-metadata@0.2.2)
+        specifier: ^8.2.1
+        version: 8.2.1(reflect-metadata@0.2.2)
 
   packages/repository/gitlab:
     dependencies:
@@ -283,8 +283,8 @@ importers:
         specifier: ^43.8.0
         version: 43.8.0
       inversify:
-        specifier: ^8.1.2
-        version: 8.1.2(reflect-metadata@0.2.2)
+        specifier: ^8.2.1
+        version: 8.2.1(reflect-metadata@0.2.2)
 
 packages:
 
@@ -1666,13 +1666,13 @@ packages:
   '@inversifyjs/common@2.0.1':
     resolution: {integrity: sha512-pJAR4IAcT2jkYfZ9bD9XhtUDBLJRr8QOiSjb+2XyaHru6DLvu0VD2Id2iP7+tVRKkEe3XFUwDUEdKxcYlF699Q==}
 
-  '@inversifyjs/container@3.0.0':
-    resolution: {integrity: sha512-xOMZ/CqzZxyuYTPTNjPCuMmvCYVoUe4kVtm01UP6/XvCtywmiARKQ/6BTyD9uIIQu8VU44KMgHIpuShix7CiaA==}
+  '@inversifyjs/container@3.1.1':
+    resolution: {integrity: sha512-xYpAhlmFk+TTYTAtJtaajSwMvbN4m7O2h45AIzFz8tMZVm6eHsh8v+Ticf49y+pPhxcyRoLJL+Cr09aeoD4Cmg==}
     peerDependencies:
       reflect-metadata: ~0.2.2
 
-  '@inversifyjs/core@12.0.0':
-    resolution: {integrity: sha512-CtRNpQT2J2ZIabcEuwQrbV/WpDsAExno/ON+RWjMcXb14wqmTdM65v+0O4F2kPQb/uXgTuhArAPms9GK+uussg==}
+  '@inversifyjs/core@14.0.0':
+    resolution: {integrity: sha512-XSdKDKE2I9Sd539CC+GC3PZdcvx0nqvGo423BOzQzVvLG56Ws0aWtDw5D+lYxyWKpduHjqw/Hc80nqpGu4txBA==}
 
   '@inversifyjs/plugin@0.3.1':
     resolution: {integrity: sha512-ByklTw731fydBCTMwMpkmwm+lv0U+JWm9NEqRsz3n5KzAC5Om2XtLjqzEC2w+8Ote3gVC3Qxsx6YmG9XLIZpvg==}
@@ -4305,8 +4305,8 @@ packages:
   invariant@2.2.4:
     resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
 
-  inversify@8.1.2:
-    resolution: {integrity: sha512-iTKz3FysgfL3X6CsVzixdJ8UZCcPk49EqSspl+PXsds+TtAdlIEQHMGDqNal+R3zNIk+WtP4ct2Wg44HgJDvLQ==}
+  inversify@8.2.1:
+    resolution: {integrity: sha512-uqPy3dGPx5R5lSW3Aa8eTUc85zBkJVwW6FaJnE4Z3byz+QixDpo/86jMxcrh0qAWmymzOBoBBLzBcEk+6LHJnw==}
 
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
@@ -9459,15 +9459,15 @@ snapshots:
 
   '@inversifyjs/common@2.0.1': {}
 
-  '@inversifyjs/container@3.0.0(reflect-metadata@0.2.2)':
+  '@inversifyjs/container@3.1.1(reflect-metadata@0.2.2)':
     dependencies:
       '@inversifyjs/common': 2.0.1
-      '@inversifyjs/core': 12.0.0(reflect-metadata@0.2.2)
+      '@inversifyjs/core': 14.0.0(reflect-metadata@0.2.2)
       '@inversifyjs/plugin': 0.3.1
       '@inversifyjs/reflect-metadata-utils': 1.5.0(reflect-metadata@0.2.2)
       reflect-metadata: 0.2.2
 
-  '@inversifyjs/core@12.0.0(reflect-metadata@0.2.2)':
+  '@inversifyjs/core@14.0.0(reflect-metadata@0.2.2)':
     dependencies:
       '@inversifyjs/common': 2.0.1
       '@inversifyjs/prototype-utils': 0.2.1
@@ -12390,11 +12390,11 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
 
-  inversify@8.1.2(reflect-metadata@0.2.2):
+  inversify@8.2.1(reflect-metadata@0.2.2):
     dependencies:
       '@inversifyjs/common': 2.0.1
-      '@inversifyjs/container': 3.0.0(reflect-metadata@0.2.2)
-      '@inversifyjs/core': 12.0.0(reflect-metadata@0.2.2)
+      '@inversifyjs/container': 3.1.1(reflect-metadata@0.2.2)
+      '@inversifyjs/core': 14.0.0(reflect-metadata@0.2.2)
     transitivePeerDependencies:
       - reflect-metadata
 

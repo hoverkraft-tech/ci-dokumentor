@@ -20,7 +20,7 @@
     "@ci-dokumentor/repository-git": "workspace:*",
     "@ci-dokumentor/repository-github": "workspace:*",
     "feather-icons": "^4.29.2",
-    "inversify": "^8.1.2",
+    "inversify": "^8.2.1",
     "yaml": "^2.9.0"
   },
   "devDependencies": {
