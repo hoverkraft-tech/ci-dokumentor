@@ -23,7 +23,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # Copy source and build configs
 COPY ./packages ./packages
-COPY ./nx.json ./tsconfig.base.json ./tsconfig.json ./vite.shared.ts ./
+COPY ./nx.json ./tsconfig.base.json ./tsconfig.json ./vite.shared.mjs ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build --exclude=docs --verbose
 
 # Pack the CLI package to a single tarball for an efficient, cache-friendly install
