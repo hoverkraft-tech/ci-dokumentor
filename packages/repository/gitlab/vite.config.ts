@@ -1,9 +1,9 @@
 /// <reference types='vitest' />
 import { defineConfig } from "vite";
-import { createSharedConfig } from "../../../vite.shared";
+import { createSharedConfig } from "../../../vite.shared.mjs";
 
 export default defineConfig(() => {
-  const sharedConfig = createSharedConfig(__dirname);
+  const sharedConfig = createSharedConfig(import.meta.dirname);
   return {
     ...sharedConfig,
     // Configuration for building your library.

@@ -1,13 +1,15 @@
-/// <reference types='vitest' />
-import type { UserConfig } from "vite";
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import dts from "vite-plugin-dts";
 import { join } from "node:path";
+import dts from "vite-plugin-dts";
 
 // Common shared Vite configuration for all packages. Keep this file limited to
 // settings that are identical across packages (build/test defaults).
-const packagesPath = join(__dirname, "packages");
-export function createSharedConfig(packageDirPath: string): UserConfig {
+const packagesPath = join(import.meta.dirname, "packages");
+
+/**
+ * @param {string} packageDirPath
+ * @returns {import("vite").UserConfig}
+ */
+export function createSharedConfig(packageDirPath) {
   if (!packageDirPath.startsWith(packagesPath)) {
     throw new Error(`Invalid package directory: ${packageDirPath}`);
   }
@@ -16,12 +18,15 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
 
   return {
     root: packageDirPath,
-    cacheDir: join(__dirname, "node_modules/.vite/packages/", packageDirname),
+    cacheDir: join(
+      import.meta.dirname,
+      "node_modules/.vite/packages/",
+      packageDirname,
+    ),
     resolve: {
       tsconfigPaths: true,
     },
     plugins: [
-      nxCopyAssetsPlugin(["*.md", "package.json"]),
       dts({
         entryRoot: "src",
         tsconfigPath: join(packageDirPath, "tsconfig.lib.json"),
@@ -59,7 +64,7 @@ export function createSharedConfig(packageDirPath: string): UserConfig {
       ],
       reporters: ["default"],
       coverage: {
-        provider: "v8" as const,
+        provider: "v8",
       },
     },
   };

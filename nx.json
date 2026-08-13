@@ -9,7 +9,7 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/__tests__/**/*"
     ],
-    "sharedGlobals": ["{workspaceRoot}/vite.shared.ts"],
+    "sharedGlobals": ["{workspaceRoot}/vite.shared.mjs"],
     "tests": [
       "{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "{projectRoot}/__tests__/**/*",
