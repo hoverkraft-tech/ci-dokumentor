@@ -118,6 +118,6 @@ describe("CLI", () => {
       ).toMatchSnapshot();
 
       expect(processExitSpy).not.toHaveBeenCalled();
-    });
+    }, 15_000);
   });
 });

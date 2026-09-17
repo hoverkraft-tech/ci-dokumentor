@@ -36,8 +36,8 @@ test:
 
 ci: ## Execute all formats and checks
 	$(MAKE) setup
-	$(MAKE) build
 	$(MAKE) lint-fix
+	$(MAKE) build
 	$(MAKE) test
 
 docker-build: ## Build Docker image

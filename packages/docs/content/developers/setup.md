@@ -10,15 +10,15 @@ This guide walks you through setting up a complete development environment for C
 
 ### Required Software
 
-#### Node.js 20+
+#### Node.js 22.12+
 
-CI Dokumentor requires Node.js 20 or higher for development:
+CI Dokumentor requires Node.js 22.12 or higher for development.
 
 ```bash
 # Check your current Node.js version
 node --version
 
-# Should output v20.x.x or higher
+# Should output v22.12.0 or higher
 ```
 
 **Installation options:**
@@ -30,19 +30,19 @@ node --version
    # Install nvm (macOS/Linux)
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 
-   # Install and use Node.js 20
-   nvm install 20
-   nvm use 20
+   # Install and use Node.js 22
+   nvm install 22
+   nvm use 22
    ```
 
 3. **Package managers**:
 
    ```bash
    # macOS with Homebrew
-   brew install node@20
+   brew install node@22
 
    # Ubuntu/Debian
-   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
    sudo apt-get install -y nodejs
    ```
 
