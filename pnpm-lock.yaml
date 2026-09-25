@@ -58,13 +58,13 @@ importers:
         version: 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
       '@nx/vite':
         specifier: 23.2.1
-        version: 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1)
+        version: 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1)
       '@nx/vitest':
         specifier: 23.2.1
-        version: 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1)
+        version: 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1)
       '@nx/web':
         specifier: 23.2.1
-        version: 23.2.1(@babel/traverse@7.29.8)(@nx/vite@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1))(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
+        version: 23.2.1(@babel/traverse@7.29.8)(@nx/vite@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1))(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
       '@swc-node/register':
         specifier: ~1.12.1
         version: 1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2)
@@ -109,13 +109,13 @@ importers:
         version: '@typescript/typescript6@6.0.2'
       vite:
         specifier: ^8.3.0
-        version: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
+        version: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)
       vite-plugin-dts:
         specifier: ~5.1.0
-        version: 5.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23)))
+        version: 5.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23)))
       vitest:
         specifier: ^5.0.1
-        version: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
+        version: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))
 
   packages/cicd/github-actions:
     dependencies:
@@ -135,8 +135,8 @@ importers:
         specifier: ^8.2.3
         version: 8.2.3(reflect-metadata@0.2.2)
       yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
+        specifier: ^2.9.1
+        version: 2.9.1
     devDependencies:
       '@types/feather-icons':
         specifier: ^4.29.4
@@ -157,8 +157,8 @@ importers:
         specifier: ^8.2.3
         version: 8.2.3(reflect-metadata@0.2.2)
       yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
+        specifier: ^2.9.1
+        version: 2.9.1
 
   packages/cli:
     dependencies:
@@ -7265,6 +7265,11 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
@@ -10141,18 +10146,18 @@ snapshots:
   '@nx/nx-win32-x64-msvc@23.2.1':
     optional: true
 
-  '@nx/vite@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1)':
+  '@nx/vite@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1)':
     dependencies:
       '@nx/devkit': 23.2.1(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
       '@nx/js': 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
-      '@nx/vitest': 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1)
+      '@nx/vitest': 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1)
       '@phenomnomnominal/tsquery': 6.2.0(@typescript/typescript6@6.0.2)
       ajv: 8.20.0
       picomatch: 4.0.4
       semver: 7.8.5
       tsconfig-paths: 4.2.0
       tslib: 2.8.1
-      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
+      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@nx/eslint'
@@ -10165,7 +10170,7 @@ snapshots:
       - verdaccio
       - vitest
 
-  '@nx/vitest@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1)':
+  '@nx/vitest@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1)':
     dependencies:
       '@nx/devkit': 23.2.1(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
       '@nx/js': 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
@@ -10173,8 +10178,8 @@ snapshots:
       semver: 7.8.5
       tslib: 2.8.1
     optionalDependencies:
-      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
-      vitest: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
+      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)
+      vitest: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -10185,7 +10190,7 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nx/web@23.2.1(@babel/traverse@7.29.8)(@nx/vite@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1))(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))':
+  '@nx/web@23.2.1(@babel/traverse@7.29.8)(@nx/vite@23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1))(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))':
     dependencies:
       '@nx/devkit': 23.2.1(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
       '@nx/js': 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))
@@ -10194,7 +10199,7 @@ snapshots:
       picocolors: 1.1.1
       tslib: 2.8.1
     optionalDependencies:
-      '@nx/vite': 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vitest@5.0.1)
+      '@nx/vite': 23.2.1(@babel/traverse@7.29.8)(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23))(@typescript/typescript6@6.0.2)(nx@23.2.1(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(@typescript/typescript6@6.0.2))(@swc/core@1.16.2(@swc/helpers@0.5.23)))(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(vitest@5.0.1)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -10972,7 +10977,7 @@ snapshots:
       obug: 2.2.1
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
+      vitest: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))
 
   '@vitest/istanbul-lib-coverage@1.0.1': {}
 
@@ -10980,14 +10985,14 @@ snapshots:
     dependencies:
       '@vitest/istanbul-lib-coverage': 1.0.1
 
-  '@vitest/mocker@5.0.1(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))':
+  '@vitest/mocker@5.0.1(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.1
       estree-walker: 3.0.3
       magic-string: 1.4.1
     optionalDependencies:
-      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
+      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)
 
   '@vitest/pretty-format@5.0.1':
     dependencies:
@@ -11003,7 +11008,7 @@ snapshots:
       pathe: 2.0.3
       sirv: 3.0.2
       tinyrainbow: 3.1.1
-      vitest: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
+      vitest: 5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))
 
   '@vitest/utils@5.0.1':
     dependencies:
@@ -15612,7 +15617,7 @@ snapshots:
 
   unpipe@1.0.0: {}
 
-  unplugin-dts@1.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23))):
+  unplugin-dts@1.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23))):
     dependencies:
       '@rollup/pluginutils': 5.4.0
       '@volar/typescript': 2.4.28
@@ -15626,7 +15631,7 @@ snapshots:
       unplugin: 2.3.11
     optionalDependencies:
       rolldown: 1.2.9
-      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
+      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)
       webpack: 5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23))
     transitivePeerDependencies:
       - supports-color
@@ -15711,11 +15716,11 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite-plugin-dts@5.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23))):
+  vite-plugin-dts@5.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23))):
     dependencies:
-      unplugin-dts: 1.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23)))
+      unplugin-dts: 1.1.0(@typescript/typescript6@6.0.2)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))(webpack@5.109.0(@swc/core@1.16.2(@swc/helpers@0.5.23)))
     optionalDependencies:
-      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
+      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - '@rspack/core'
       - '@vue/language-core'
@@ -15725,7 +15730,7 @@ snapshots:
       - typescript
       - webpack
 
-  vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0):
+  vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -15737,12 +15742,12 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.7.0
       terser: 5.49.0
-      yaml: 2.9.0
+      yaml: 2.9.1
 
-  vitest@5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)):
+  vitest@5.0.1(@types/node@26.4.0)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(jsdom@30.1.0)(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
+      '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -15753,7 +15758,7 @@ snapshots:
       tinybench: 6.1.4
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
-      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
+      vite: 8.3.0(@types/node@26.4.0)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.4.0
@@ -16086,6 +16091,8 @@ snapshots:
   yaml@1.10.3: {}
 
   yaml@2.9.0: {}
+
+  yaml@2.9.1: {}
 
   yargs-parser@21.1.1: {}
 
