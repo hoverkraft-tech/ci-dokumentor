@@ -31,7 +31,7 @@
     "@swc/core": "~1.16.2",
     "@swc/helpers": "~0.5.23",
     "@types/mock-fs": "^4.13.4",
-    "@types/node": "26.4.0",
+    "@types/node": "26.6.1",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vitest/coverage-v8": "^5.0.1",
     "@vitest/ui": "^5.0.1",
