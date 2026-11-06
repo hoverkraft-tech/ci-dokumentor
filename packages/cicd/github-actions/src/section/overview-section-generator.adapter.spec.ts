@@ -763,37 +763,38 @@ Workflow with mixed permission levels
             owner: "different-owner",
           }),
         },
-      ])("should generate section independent of repository with $name", async ({
-        repositoryInfo,
-      }) => {
-        // Arrange
-        const manifest: GitHubAction = {
-          usesName: "owner/repo",
-          name: "Test Action",
-          description: "Test description",
-          runs: { using: "node20" },
-        };
+      ])(
+        "should generate section independent of repository with $name",
+        async ({ repositoryInfo }) => {
+          // Arrange
+          const manifest: GitHubAction = {
+            usesName: "owner/repo",
+            name: "Test Action",
+            description: "Test description",
+            runs: { using: "node20" },
+          };
 
-        mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(
-          repositoryInfo,
-        );
+          mockRepositoryProvider.getRepositoryInfo.mockResolvedValue(
+            repositoryInfo,
+          );
 
-        // Act
-        const result = await generator.generateSection({
-          formatterAdapter,
-          manifest,
-          repositoryProvider: mockRepositoryProvider,
-          destination: "README.md",
-        });
+          // Act
+          const result = await generator.generateSection({
+            formatterAdapter,
+            manifest,
+            repositoryProvider: mockRepositoryProvider,
+            destination: "README.md",
+          });
 
-        // Assert
-        const expectedOutput = `## Overview
+          // Assert
+          const expectedOutput = `## Overview
 
 Test description
 `;
 
-        expect(result.toString()).toEqual(expectedOutput);
-      });
+          expect(result.toString()).toEqual(expectedOutput);
+        },
+      );
     });
   });
 });

@@ -327,29 +327,28 @@ jobs:
         },
       ];
 
-      it.each(cases)("should parse a workflow with $title", async ({
-        content: fileContent,
-        expectedName,
-        expectedDescription,
-      }) => {
-        mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(
-          new ReadableContent(fileContent),
-        );
+      it.each(cases)(
+        "should parse a workflow with $title",
+        async ({ content: fileContent, expectedName, expectedDescription }) => {
+          mockReaderAdapter.resourceExists.mockReturnValue(true);
+          mockReaderAdapter.readResource.mockResolvedValue(
+            new ReadableContent(fileContent),
+          );
 
-        const result = (await parser.parseFile(
-          "/test/.github/workflows/test.yml",
-          mockRepositoryInfo,
-        )) as GitHubWorkflow;
+          const result = (await parser.parseFile(
+            "/test/.github/workflows/test.yml",
+            mockRepositoryInfo,
+          )) as GitHubWorkflow;
 
-        expect(result).toBeDefined();
-        expect(result.name).toBe(expectedName);
-        if (expectedDescription === undefined) {
-          expect(result.description).toBeUndefined();
-        } else {
-          expect(result.description).toBe(expectedDescription);
-        }
-      });
+          expect(result).toBeDefined();
+          expect(result.name).toBe(expectedName);
+          if (expectedDescription === undefined) {
+            expect(result.description).toBeUndefined();
+          } else {
+            expect(result.description).toBe(expectedDescription);
+          }
+        },
+      );
 
       it("should extract and combine description from action manifest and comments", async () => {
         // Arrange

@@ -1,9 +1,10 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   FileRendererAdapter,
   MarkdownFormatterAdapter,
 } from "@ci-dokumentor/core";
-import mockFs, { restore } from "mock-fs";
 import { describe, beforeEach, afterEach, it, expect } from "vitest";
 import { initTestContainer } from "../container.js";
 import { GitHubActionReadmeGeneratorMigrationAdapter } from "./github-action-readme-generator-migration.adapter.js";
@@ -13,7 +14,10 @@ describe("GitHubActionReadmeGeneratorMigrationAdapter", () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
 
+  let testDirectory: string;
+
   beforeEach(() => {
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-migration-"));
     vi.resetAllMocks();
 
     // Use real dependencies from the container for e2e testing
@@ -25,8 +29,7 @@ describe("GitHubActionReadmeGeneratorMigrationAdapter", () => {
   });
 
   afterEach(() => {
-    // Restore the real file system after each test
-    restore();
+    rmSync(testDirectory, { recursive: true, force: true });
 
     vi.resetAllMocks();
   });
@@ -44,8 +47,8 @@ describe("GitHubActionReadmeGeneratorMigrationAdapter", () => {
   describe("supportsDestination", () => {
     it("detects start/end markers in files", async () => {
       // Arrange
-      const tmpPath = `/tmp/gharg-support-${Date.now()}.md`;
-      mockFs({ [tmpPath]: "<!-- start inputs -->" });
+      const tmpPath = join(testDirectory, "gharg-support.md");
+      writeFileSync(tmpPath, "<!-- start inputs -->");
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
@@ -56,7 +59,7 @@ describe("GitHubActionReadmeGeneratorMigrationAdapter", () => {
       // Arrange
       // Act
       const supported = await adapter.supportsDestination(
-        "NON_EXISTENT_FILE.md",
+        join(testDirectory, "missing.md"),
       );
       // Assert
       expect(supported).toBe(false);
@@ -95,10 +98,9 @@ ExampleX
 <!-- end [.github/ghadocs/examples/] -->
 `;
 
-      const tmpPath = `/tmp/gharg-e2e-${Date.now()}.md`;
+      const tmpPath = join(testDirectory, "gharg-e2e.md");
 
-      // Mock the file system with the source content
-      mockFs({ [tmpPath]: source });
+      writeFileSync(tmpPath, source);
 
       // Initialize real renderer with real formatter
       await rendererAdapter.initialize(tmpPath, formatterAdapter);

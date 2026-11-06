@@ -1,9 +1,10 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   MarkdownFormatterAdapter,
   FileRendererAdapter,
 } from "@ci-dokumentor/core";
-import mockFs, { restore } from "mock-fs";
 import { describe, beforeEach, afterEach, it, expect } from "vitest";
 import { initTestContainer } from "../container.js";
 import { ActdocsMigrationAdapter } from "./actdocs-migration.adapter.js";
@@ -13,7 +14,10 @@ describe("ActdocsMigrationAdapter", () => {
   let rendererAdapter: FileRendererAdapter;
   let adapter: ActdocsMigrationAdapter;
 
+  let testDirectory: string;
+
   beforeEach(() => {
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-migration-"));
     // Use real dependencies from the container for e2e testing
     const container = initTestContainer();
 
@@ -23,7 +27,7 @@ describe("ActdocsMigrationAdapter", () => {
   });
 
   afterEach(() => {
-    restore();
+    rmSync(testDirectory, { recursive: true, force: true });
   });
 
   describe("getName", () => {
@@ -39,11 +43,11 @@ describe("ActdocsMigrationAdapter", () => {
   describe("supportsDestination", () => {
     it("returns true when a file contains actdocs markers", async () => {
       // Arrange
-      const tmpPath = `/tmp/actdocs-support-${Date.now()}.md`;
-      mockFs({
-        [tmpPath]:
-          "<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->",
-      });
+      const tmpPath = join(testDirectory, "actdocs-support.md");
+      writeFileSync(
+        tmpPath,
+        "<!-- actdocs inputs start -->\nInput\n<!-- actdocs inputs end -->",
+      );
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
@@ -54,7 +58,7 @@ describe("ActdocsMigrationAdapter", () => {
       // Arrange
       // Act
       const supported = await adapter.supportsDestination(
-        "NON_EXISTENT_FILE.md",
+        join(testDirectory, "missing.md"),
       );
       // Assert
       expect(supported).toBe(false);
@@ -81,10 +85,9 @@ Perm stuff
 <!-- actdocs permissions end -->
 `;
 
-      const tmpPath = `/tmp/actdocs-e2e-${Date.now()}.md`;
+      const tmpPath = join(testDirectory, "actdocs-e2e.md");
 
-      // Mock the file system with the source content
-      mockFs({ [tmpPath]: source });
+      writeFileSync(tmpPath, source);
 
       // Initialize real renderer with real formatter
       await rendererAdapter.initialize(tmpPath, formatterAdapter);
@@ -159,10 +162,9 @@ Perm stuff
     it("handles files with no actdocs markers (e2e test)", async () => {
       // Arrange: create a file with no actdocs markers
       const source = "No markers here";
-      const tmpPath = `/tmp/actdocs-no-markers-${Date.now()}.md`;
+      const tmpPath = join(testDirectory, "actdocs-no-markers.md");
 
-      // Mock the file system with the source content
-      mockFs({ [tmpPath]: source });
+      writeFileSync(tmpPath, source);
 
       // Initialize real renderer with real formatter
       await rendererAdapter.initialize(tmpPath, formatterAdapter);

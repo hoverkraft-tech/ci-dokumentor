@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
-import mockFs, { restore } from "mock-fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, beforeEach, afterEach, it, expect } from "vitest";
 import {
   MarkdownFormatterAdapter,
@@ -13,7 +14,10 @@ describe("ActionDocsMigrationAdapter", () => {
   let rendererAdapter: FileRendererAdapter;
   let adapter: ActionDocsMigrationAdapter;
 
+  let testDirectory: string;
+
   beforeEach(() => {
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-migration-"));
     // Use real dependencies from the container for e2e testing
     const container = initTestContainer();
 
@@ -23,8 +27,7 @@ describe("ActionDocsMigrationAdapter", () => {
   });
 
   afterEach(() => {
-    // Restore the real file system after each test
-    restore();
+    rmSync(testDirectory, { recursive: true, force: true });
   });
 
   describe("getName", () => {
@@ -40,8 +43,8 @@ describe("ActionDocsMigrationAdapter", () => {
   describe("supportsDestination", () => {
     it("detects markers in files", async () => {
       // Arrange
-      const tmpPath = `/tmp/actiondocs-support-${Date.now()}.md`;
-      mockFs({ [tmpPath]: '<!-- action-docs-inputs source="action.yml" -->' });
+      const tmpPath = join(testDirectory, "actiondocs-support.md");
+      writeFileSync(tmpPath, '<!-- action-docs-inputs source="action.yml" -->');
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
@@ -52,7 +55,7 @@ describe("ActionDocsMigrationAdapter", () => {
       // Arrange
       // Act
       const supported = await adapter.supportsDestination(
-        "NON_EXISTENT_FILE.md",
+        join(testDirectory, "missing.md"),
       );
       // Assert
       expect(supported).toBe(false);
@@ -79,10 +82,9 @@ Usage details here
 <!-- action-docs-runs source="action.yml" -->
 `;
 
-      const tmpPath = `/tmp/actiondocs-e2e-${Date.now()}.md`;
+      const tmpPath = join(testDirectory, "actiondocs-e2e.md");
 
-      // Mock the file system with the source content
-      mockFs({ [tmpPath]: source });
+      writeFileSync(tmpPath, source);
 
       // Initialize real renderer with real formatter
       await rendererAdapter.initialize(tmpPath, formatterAdapter);

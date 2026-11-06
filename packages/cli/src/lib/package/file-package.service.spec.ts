@@ -1,13 +1,14 @@
+import { fileURLToPath } from "node:url";
+import { ReadableContent, type ReaderAdapter } from "@ci-dokumentor/core";
+import { ReaderAdapterMockFactory } from "@ci-dokumentor/core/tests";
 import {
-  describe,
-  it,
-  expect,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
   type Mocked,
 } from "vitest";
-import { ReaderAdapterMockFactory } from "@ci-dokumentor/core/tests";
-import { ReadableContent, type ReaderAdapter } from "@ci-dokumentor/core";
 import { FilePackageService } from "./file-package.service.js";
 
 describe("FilePackageService", () => {
@@ -45,6 +46,9 @@ describe("FilePackageService", () => {
       const packageInfo = await filePackageService.getPackageInfo();
 
       // Assert
+      expect(mockReaderAdapter.readResource).toHaveBeenCalledWith(
+        fileURLToPath(new URL("../../../package.json", import.meta.url)),
+      );
       expect(packageInfo).toEqual({
         name: "@ci-dokumentor/cli",
         version: "1.0.0",

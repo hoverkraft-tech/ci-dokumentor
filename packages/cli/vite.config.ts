@@ -18,6 +18,7 @@ export default defineConfig(() => {
       },
       rolldownOptions: {
         input: {
+          index: "src/index.ts",
           "bin/ci-dokumentor": "src/bin/ci-dokumentor.ts",
         },
         output: {

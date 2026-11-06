@@ -142,26 +142,27 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
         name: "External documentation URL",
         url: "https://docs.example.com/contributing",
       },
-    ])("should handle different contributing URL formats correctly: $name", async ({
-      url,
-    }) => {
-      // Arrange
-      mockRepositoryProvider.getContributing.mockResolvedValue({ url });
+    ])(
+      "should handle different contributing URL formats correctly: $name",
+      async ({ url }) => {
+        // Arrange
+        mockRepositoryProvider.getContributing.mockResolvedValue({ url });
 
-      // Act
-      const result = await generator.generateSection({
-        formatterAdapter,
-        manifest: mockManifest,
-        repositoryProvider: mockRepositoryProvider,
-        destination: "README.md",
-      });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest: mockManifest,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-      // Assert
-      expect(result.toString()).toEqual(`## Contributing
+        // Assert
+        expect(result.toString()).toEqual(`## Contributing
 
 Contributions are welcome! Please see the [contributing guidelines](${url}) for more details.
 `);
-    });
+      },
+    );
 
     it("should properly escape special characters in contributing URL", async () => {
       // Arrange
@@ -203,30 +204,31 @@ Contributions are welcome! Please see the [contributing guidelines](https://gith
           inputs: { input1: { description: "Test input" } },
         },
       },
-    ])("should generate consistent output regardless of manifest content", async ({
-      manifest,
-    }) => {
-      // Arrange
-      mockRepositoryProvider.getContributing.mockResolvedValue({
-        url: "https://github.com/owner/repo/blob/main/CONTRIBUTING.md",
-      });
+    ])(
+      "should generate consistent output regardless of manifest content",
+      async ({ manifest }) => {
+        // Arrange
+        mockRepositoryProvider.getContributing.mockResolvedValue({
+          url: "https://github.com/owner/repo/blob/main/CONTRIBUTING.md",
+        });
 
-      const expectedOutput = `## Contributing
+        const expectedOutput = `## Contributing
 
 Contributions are welcome! Please see the [contributing guidelines](https://github.com/owner/repo/blob/main/CONTRIBUTING.md) for more details.
 `;
 
-      // Act
-      const result = await generator.generateSection({
-        formatterAdapter,
-        manifest: manifest as GitHubAction,
-        repositoryProvider: mockRepositoryProvider,
-        destination: "README.md",
-      });
+        // Act
+        const result = await generator.generateSection({
+          formatterAdapter,
+          manifest: manifest as GitHubAction,
+          repositoryProvider: mockRepositoryProvider,
+          destination: "README.md",
+        });
 
-      // Assert
+        // Assert
 
-      expect(result.toString()).toEqual(expectedOutput);
-    });
+        expect(result.toString()).toEqual(expectedOutput);
+      },
+    );
   });
 });

@@ -1,7 +1,13 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { basename } from "node:path";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { basename, join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import mockFs, { restore } from "mock-fs";
 import { MarkdownFormatterAdapter } from "../formatter/markdown/markdown-formatter.adapter.js";
 import { FileReaderAdapter } from "../reader/file-reader.adapter.js";
 import type { FormatterAdapter } from "../formatter/formatter.adapter.js";
@@ -13,6 +19,8 @@ import { FileRendererAdapter } from "./file-renderer.adapter.js";
 
 describe("DiffRendererAdapter", () => {
   const fixedNow = 1234567890;
+  let testDirectory: string;
+  let testFilePath: string;
 
   let formatter: FormatterAdapter;
   let adapter: DiffRendererAdapter;
@@ -21,13 +29,10 @@ describe("DiffRendererAdapter", () => {
     // Reset mocks before each test
     vi.resetAllMocks();
 
-    // Provide a deterministic tmpdir and test file structure
-    mockFs({
-      "/tmp": {},
-      "/test": {
-        "document.md": "Original content\n",
-      },
-    });
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-diff-"));
+    vi.stubEnv("TMPDIR", testDirectory);
+    testFilePath = join(testDirectory, "document.md");
+    writeFileSync(testFilePath, "Original content\n");
 
     const container = initContainer();
 
@@ -41,16 +46,16 @@ describe("DiffRendererAdapter", () => {
   afterEach(() => {
     resetContainer();
 
-    restore();
-
-    vi.resetAllMocks();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+    rmSync(testDirectory, { recursive: true, force: true });
   });
 
   describe("writeSection", () => {
     it("should delegate writeSection to FileRendererAdapter and write to a temp file", async () => {
       // Arrange
 
-      await adapter.initialize("/test/document.md", formatter);
+      await adapter.initialize(testFilePath, formatter);
 
       // Act
       await adapter.writeSection(
@@ -59,7 +64,10 @@ describe("DiffRendererAdapter", () => {
       );
 
       // Assert
-      const tmpPath = `/tmp/${basename("/test/document.md")}.${fixedNow}.tmp`;
+      const tmpPath = join(
+        testDirectory,
+        `${basename(testFilePath)}.${fixedNow}.tmp`,
+      );
       expect(existsSync(tmpPath)).toBe(true);
       const content = readFileSync(tmpPath, "utf-8");
       expect(content).toEqual(`<!-- examples:start -->
@@ -75,8 +83,8 @@ New section content
     it("should return a unified patch between destination and temp file", async () => {
       // Arrange
       // Prepare original and temp files
-      const dest = "/test/document.md";
-      const tmpPath = `/tmp/${basename(dest)}.${fixedNow}.tmp`;
+      const dest = testFilePath;
+      const tmpPath = join(testDirectory, `${basename(dest)}.${fixedNow}.tmp`);
       writeFileSync(dest, "original line\n");
       writeFileSync(tmpPath, "modified line\n");
 
@@ -88,10 +96,10 @@ New section content
 
       // Assert
       // unified diff should contain removed and added lines
-      expect(patch).toEqual(`Index: /test/document.md
+      expect(patch).toEqual(`Index: ${dest}
 ===================================================================
---- /test/document.md
-+++ /test/document.md
+--- ${dest}
++++ ${dest}
 @@ -1,1 +1,1 @@
 -original line
 +modified line
@@ -100,8 +108,8 @@ New section content
 
     it("should get patch for non existing destination file", async () => {
       // Arrange
-      const dest = "/test/new-document.md";
-      const tmpPath = `/tmp/${basename(dest)}.${fixedNow}.tmp`;
+      const dest = join(testDirectory, "new-document.md");
+      const tmpPath = join(testDirectory, `${basename(dest)}.${fixedNow}.tmp`);
       writeFileSync(tmpPath, "new file content\n");
 
       // initialize adapter so it knows destination/temp
@@ -113,10 +121,10 @@ New section content
 
       // Assert
       // unified diff should contain only added lines since destination did not exist
-      expect(patch).toEqual(`Index: /test/new-document.md
+      expect(patch).toEqual(`Index: ${dest}
 ===================================================================
---- /test/new-document.md
-+++ /test/new-document.md
+--- ${dest}
++++ ${dest}
 @@ -0,0 +1,1 @@
 +new file content
 `);
@@ -124,21 +132,21 @@ New section content
 
     it("should throw when temp file is missing", async () => {
       // Arrange
-      const dest = "/test/document.md";
+      const dest = testFilePath;
       // initialize to set destination but do not create temp
       await adapter.initialize(dest, formatter);
 
       // Act & Assert
-      await expect(adapter.finalize()).rejects.toThrow(
-        "ENOENT, no such file or directory '/tmp/document.md",
-      );
+      await expect(adapter.finalize()).rejects.toMatchObject({
+        code: "ENOENT",
+      });
     });
   });
 
   describe("getDestination", () => {
     it("should return the destination path after initialization", async () => {
       // Arrange
-      const testDestination = "/test/document.md";
+      const testDestination = testFilePath;
 
       // Act
       await adapter.initialize(testDestination, formatter);

@@ -191,31 +191,30 @@ End of description.
         },
       ];
 
-      it.each(cases)("should generate usage section for $title", async ({
-        inputs,
-        version,
-        expected,
-      }) => {
-        // Arrange
-        const manifest: GitHubAction = inputs
-          ? GitHubActionMockFactory.create({ inputs })
-          : GitHubActionMockFactory.create();
+      it.each(cases)(
+        "should generate usage section for $title",
+        async ({ inputs, version, expected }) => {
+          // Arrange
+          const manifest: GitHubAction = inputs
+            ? GitHubActionMockFactory.create({ inputs })
+            : GitHubActionMockFactory.create();
 
-        if (version) {
-          mockVersionService.getVersion.mockResolvedValue(version);
-        }
+          if (version) {
+            mockVersionService.getVersion.mockResolvedValue(version);
+          }
 
-        // Act
-        const result = await generator.generateSection({
-          formatterAdapter,
-          manifest,
-          repositoryProvider: mockRepositoryProvider,
-          destination: "README.md",
-        });
+          // Act
+          const result = await generator.generateSection({
+            formatterAdapter,
+            manifest,
+            repositoryProvider: mockRepositoryProvider,
+            destination: "README.md",
+          });
 
-        // Assert
-        expect(result.toString()).toBe(expected);
-      });
+          // Assert
+          expect(result.toString()).toBe(expected);
+        },
+      );
     });
 
     describe("with GitHub Workflow manifest", () => {
