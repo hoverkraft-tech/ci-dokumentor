@@ -23,6 +23,7 @@ CI Dokumentor uses GitHub Actions for continuous integration and deployment with
 .github/workflows/
 ├── __shared-ci.yml          # Reusable CI tasks
 ├── main-ci.yml             # Main branch CI/CD
+├── release.yml             # Manual and scheduled npm releases
 ├── pull-request-ci.yml     # PR validation
 ├── semantic-pull-request.yml # PR title validation
 ├── greetings.yml           # Welcome new contributors
@@ -37,9 +38,10 @@ graph TD
     A[pull-request-ci.yml] --> B[__shared-ci.yml]
     C[main-ci.yml] --> B
     C --> D[Docker Build]
-    C --> E[Release]
+    R[release.yml] --> B
+    R --> E[Release]
     C --> F[Documentation Update]
-    C --> G[NPM Publish]
+    E --> G[NPM Publish]
 
     B --> H[Linting]
     B --> I[Node.js CI]
@@ -74,9 +76,9 @@ graph TD
 #### Package Testing Stage
 
 - **CLI Build Verification** - Ensure CLI binary is properly built
-- **Package Creation** - Create npm tarball using `npm pack`
-- **Global Installation** - Install package globally from tarball
-- **Command Testing** - Test version, help, and generate commands
+- **Package Creation** - Create the CLI tarball using the workspace package manager
+- **Isolated Installation** - Install the tarball in a temporary consumer project
+- **Command Testing** - Check the exact package version, help, and generation without writing documentation
 - **Output Validation** - Verify documentation generation works
 - **Artifact Upload** - Upload tested package for later publishing
 
@@ -130,16 +132,7 @@ To pass CI, your PR must:
 - **Tag management** - Latest, version tags, and SHA tags
 - **Security scanning** - Container vulnerability assessment
 
-#### 4. Npm Publish Job
-
-- **Tag-triggered** - Only runs on Git tag pushes
-- **Artifact reuse** - Publishes tested package tarball
-- **Shared workflow** - Delegates npm publishing to the reusable Node.js release workflow
-- **Provenance** - Includes npm provenance for security
-- **Scoped package** - Published as `@ci-dokumentor/cli`
-- **Public access** - Available for global installation
-
-#### 5. Release Job
+#### 3. Documentation Job
 
 - **Readme generation** - Auto-update repository readme
 - **Documentation updates** - Generate action/workflow docs
@@ -161,50 +154,13 @@ Images are published to GitHub Container Registry:
 
 ## Release Automation
 
-### Semantic Versioning
+The dedicated `release.yml` workflow prepares committed versions, validates
+packages through shared CI, and publishes the exact tested tarballs. It runs
+manually or weekly, with an optional manual force input. A normal run with no
+changes skips publication. Main CI does not publish npm packages.
 
-CI Dokumentor follows semantic versioning:
-
-- **Major (1.0.0)** - Breaking changes
-- **Minor (0.1.0)** - New features (backward compatible)
-- **Patch (0.0.1)** - Bugfixes
-
-### Automated Releases
-
-The release process is triggered by:
-
-1. **Manual workflow dispatch**
-2. **Tag creation**
-3. **Scheduled releases** (weekly)
-
-### Release Steps
-
-1. **Version Detection** - Parse version from tags or package.json
-2. **Changelog Generation** - Auto-generate from commit history
-3. **Asset Creation** - Build and package artifacts
-4. **Docker Image** - Build and tag container images
-5. **Documentation** - Update documentation and readme
-6. **GitHub Release** - Create release with notes and assets
-7. **NPM Publish** - Publish CLI package to npm registry (triggered on tags)
-
-### NPM Publishing Pipeline
-
-- **Tag Trigger** - Automatically triggered on Git tag pushes
-- **Artifact Reuse** - Publishes the exact tarball that was tested
-- **Reusable Release** - Uses the shared Node.js release workflow for tarball download and `npm publish`
-- **Provenance** - Includes npm provenance for supply chain security
-- **Public Access** - Published as public scoped package `@ci-dokumentor/cli`
-
-The two-stage approach ensures that the published package works correctly in real-world scenarios before it reaches the npm registry.
-
-### Release Artifacts
-
-Each release includes:
-
-- **Source code** - Tarball and ZIP
-- **Docker images** - Multi-architecture containers
-- **Documentation** - Generated docs archive
-- **NPM Package** - Standalone CLI package with bundled dependencies
+See [Releasing](./releasing.md) for App permissions, npm trusted publishing,
+optional AI summaries, version planning, and recovery.
 
 ## Documentation Deployment
 

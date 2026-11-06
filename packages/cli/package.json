@@ -1,7 +1,7 @@
 {
   "name": "@ci-dokumentor/cli",
   "description": "Command Line Interface for CI Dokumentor - Automated documentation generator for CI/CD components",
-  "version": "0.2.2",
+  "version": "0.5.0",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -53,5 +53,15 @@
     "@ci-dokumentor/repository-git": "workspace:*",
     "@ci-dokumentor/repository-github": "workspace:*",
     "@ci-dokumentor/repository-gitlab": "workspace:*"
+  },
+  "publishConfig": {
+    "exports": {
+      "./package.json": "./package.json",
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      }
+    }
   }
 }
