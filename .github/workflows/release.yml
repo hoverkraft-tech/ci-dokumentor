@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  # checkov:skip=CKV_GHA_7:Force selects a committed release version; it cannot change build commands or bypass package validation.
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Release the package even without changes
+        type: boolean
+        default: false
+  schedule:
+    - cron: "25 8 * * 1"
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/prepare-package-release.yml@edb594602aad107aa3917911341be04503e9e6bd # PR #563
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: read
+    with:
+      package-directory: packages/cli
+      force: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
+      github-app-client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
+    secrets:
+      github-app-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
+
+  ci:
+    needs: prepare
+    if: needs.prepare.outputs.status == 'ready'
+    uses: ./.github/workflows/__shared-ci.yml
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+      pull-requests: write
+      security-events: write
+      id-token: write
+      statuses: write
+      issues: write
+
+    with:
+      sign-images: true
+
+  release:
+    needs: [prepare, ci]
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@edb594602aad107aa3917911341be04503e9e6bd # PR #563
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: read
+      id-token: write
+    with:
+      packages: ${{ needs.prepare.outputs.packages }}
+      package-tarball-artifact-id: ${{ needs.ci.outputs.package-tarball-artifact-id }}
+    secrets:
+      changelog-summary: ${{ secrets.CHANGELOG_SUMMARY }}

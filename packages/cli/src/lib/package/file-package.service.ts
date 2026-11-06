@@ -1,8 +1,7 @@
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { injectable, inject } from "inversify";
-import { FileReaderAdapter } from "@ci-dokumentor/core";
+import { createRequire } from "node:module";
 import type { ReaderAdapter } from "@ci-dokumentor/core";
+import { FileReaderAdapter } from "@ci-dokumentor/core";
+import { inject, injectable } from "inversify";
 import type { PackageInfo, PackageService } from "./package-service.js";
 
 /**
@@ -29,8 +28,9 @@ export class FilePackageService implements PackageService {
    * Load package information from package.json
    */
   private async loadPackageInfo(): Promise<PackageInfo> {
-    // Navigate up to the package root
-    const packageJsonPath = this.getPackageJsonPath();
+    const packageJsonPath = createRequire(import.meta.url).resolve(
+      "@ci-dokumentor/cli/package.json",
+    );
     const packageJsonContent =
       await this.readerAdapter.readResource(packageJsonPath);
     const packageJson = JSON.parse(packageJsonContent.toString());
@@ -46,26 +46,5 @@ export class FilePackageService implements PackageService {
       version: packageJson.version,
       description: packageJson.description,
     };
-  }
-
-  private getPackageJsonPath(): string {
-    // Get the directory of the current module
-    const currentDir = dirname(fileURLToPath(import.meta.url));
-
-    let level = 1;
-    while (level++ < 4) {
-      const potentialPath = join(
-        currentDir,
-        ...Array(level).fill(".."),
-        "package.json",
-      );
-      if (this.readerAdapter.resourceExists(potentialPath)) {
-        return potentialPath;
-      }
-    }
-
-    throw new Error(
-      `package.json not found in "${currentDir}" parent directories`,
-    );
   }
 }
