@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
-import mockFs, { restore } from "mock-fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   MarkdownFormatterAdapter,
   FileRendererAdapter,
@@ -13,7 +14,10 @@ describe("AutoDocMigrationAdapter", () => {
   let formatterAdapter: MarkdownFormatterAdapter;
   let rendererAdapter: FileRendererAdapter;
 
+  let testDirectory: string;
+
   beforeEach(() => {
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-migration-"));
     vi.resetAllMocks();
 
     // Use real dependencies from the container for e2e testing
@@ -25,8 +29,7 @@ describe("AutoDocMigrationAdapter", () => {
   });
 
   afterEach(() => {
-    // Restore the real file system after each test
-    restore();
+    rmSync(testDirectory, { recursive: true, force: true });
 
     vi.resetAllMocks();
   });
@@ -43,8 +46,8 @@ describe("AutoDocMigrationAdapter", () => {
   describe("supportsDestination", () => {
     it("detects headers in files", async () => {
       // Arrange
-      const tmpPath = `/tmp/autodoc-support-${Date.now()}.md`;
-      mockFs({ [tmpPath]: "## Inputs" });
+      const tmpPath = join(testDirectory, "autodoc-support.md");
+      writeFileSync(tmpPath, "## Inputs");
       // Act
       const supported = await adapter.supportsDestination(tmpPath);
       // Assert
@@ -54,7 +57,7 @@ describe("AutoDocMigrationAdapter", () => {
     it("returns false for missing files", async () => {
       // Act
       const supported = await adapter.supportsDestination(
-        "NON_EXISTENT_FILE.md",
+        join(testDirectory, "missing.md"),
       );
       // Assert
       return expect(supported).toBe(false);
@@ -85,10 +88,9 @@ Some description here
 - SECRET_X
 `;
 
-      const tmpPath = `/tmp/autodoc-e2e-${Date.now()}.md`;
+      const tmpPath = join(testDirectory, "autodoc-e2e.md");
 
-      // Mock the file system with the source content
-      mockFs({ [tmpPath]: source });
+      writeFileSync(tmpPath, source);
 
       // Initialize real renderer with real formatter
       await rendererAdapter.initialize(tmpPath, formatterAdapter);

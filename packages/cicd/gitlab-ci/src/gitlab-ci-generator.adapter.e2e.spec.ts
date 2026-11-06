@@ -1,5 +1,13 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   FileRendererAdapter,
@@ -10,23 +18,31 @@ import {
 } from "@ci-dokumentor/core";
 import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { sanitizeSnapshotContent } from "@ci-dokumentor/core/tests";
-import mockFs, { restore } from "mock-fs";
 import { initTestContainer } from "./container.js";
 import { GitLabCIGeneratorAdapter } from "./gitlab-ci-generator.adapter.js";
 
-const rootPath = join(__dirname, "../../../..");
-
 describe("GitLabCIGeneratorAdapter", () => {
+  let rootPath: string;
   let repositoryProvider: RepositoryProvider;
   let formatterAdapter: FormatterAdapter;
   let rendererAdapter: RendererAdapter;
   let gitLabCIGeneratorAdapter: GitLabCIGeneratorAdapter;
 
   beforeEach(async () => {
+    rootPath = mkdtempSync(join(tmpdir(), "ci-dokumentor-generator-"));
     // Use real dependencies from the container
     const container = initTestContainer();
 
     repositoryProvider = container.get(GitRepositoryProvider);
+    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
+    vi.spyOn(repositoryProvider, "getRepositoryInfo").mockResolvedValue({
+      ...repositoryInfo,
+      rootDir: rootPath,
+    });
+    vi.spyOn(repositoryProvider, "getLatestVersion").mockResolvedValue({
+      sha: "a".repeat(40),
+      ref: "1.0.0",
+    });
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
 
@@ -34,8 +50,7 @@ describe("GitLabCIGeneratorAdapter", () => {
   });
 
   afterEach(() => {
-    // Restore real file system
-    restore();
+    rmSync(rootPath, { recursive: true, force: true });
     // Restore all mocks
     vi.restoreAllMocks();
   });
@@ -60,12 +75,12 @@ describe("GitLabCIGeneratorAdapter", () => {
       expect(gitLabCIGeneratorAdapter.supportsSource(file)).toBe(true);
     });
 
-    it.each([
-      ".gitlab-ci.yml",
-      ".gitlab-ci.yaml",
-    ])("should correctly identify supported GitLab CI files", (file) => {
-      expect(gitLabCIGeneratorAdapter.supportsSource(file)).toBe(true);
-    });
+    it.each([".gitlab-ci.yml", ".gitlab-ci.yaml"])(
+      "should correctly identify supported GitLab CI files",
+      (file) => {
+        expect(gitLabCIGeneratorAdapter.supportsSource(file)).toBe(true);
+      },
+    );
 
     it.each([
       "package.json",
@@ -91,14 +106,14 @@ describe("GitLabCIGeneratorAdapter", () => {
       },
       { input: "templates/test.yml", expected: "templates/test.md" },
       { input: "templates/test.yaml", expected: "templates/test.md" },
-    ])("should generate correct paths for GitLab Components", ({
-      input,
-      expected,
-    }) => {
-      expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(
-        expected,
-      );
-    });
+    ])(
+      "should generate correct paths for GitLab Components",
+      ({ input, expected }) => {
+        expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(
+          expected,
+        );
+      },
+    );
 
     it.each([
       {
@@ -109,14 +124,14 @@ describe("GitLabCIGeneratorAdapter", () => {
         input: ".gitlab-ci.yaml",
         expected: ".gitlab-ci.md",
       },
-    ])("should generate correct paths for GitLab CI files", ({
-      input,
-      expected,
-    }) => {
-      expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(
-        expected,
-      );
-    });
+    ])(
+      "should generate correct paths for GitLab CI files",
+      ({ input, expected }) => {
+        expect(gitLabCIGeneratorAdapter.getDocumentationPath(input)).toBe(
+          expected,
+        );
+      },
+    );
   });
 
   describe("generateDocumentation", () => {
@@ -172,10 +187,8 @@ docker-build:
       const sourcePath = join(rootPath, "templates/docker-build/template.yml");
       const destinationPath = join(rootPath, "templates/docker-build/docs.md");
 
-      // Setup mock file with the component YAML content
-      mockFs({
-        [sourcePath]: componentYaml,
-      });
+      mkdirSync(dirname(sourcePath), { recursive: true });
+      writeFileSync(sourcePath, componentYaml);
 
       // Act
       await rendererAdapter.initialize(destinationPath, formatterAdapter);
@@ -198,7 +211,9 @@ docker-build:
       expect(generatedContent.length).toBeGreaterThan(0);
 
       // Snapshot test the generated content
-      const sanitizedContent = sanitizeSnapshotContent(generatedContent);
+      const sanitizedContent = sanitizeSnapshotContent(
+        generatedContent.replaceAll(rootPath, "/test"),
+      );
       expect(sanitizedContent).toMatchSnapshot(
         "gitlab-component-documentation",
       );
@@ -294,10 +309,8 @@ deploy:
       const sourcePath = join(rootPath, ".gitlab-ci.yml");
       const destinationPath = join(rootPath, ".gitlab-ci.md");
 
-      // Setup mock file with the pipeline YAML content
-      mockFs({
-        [sourcePath]: pipelineYaml,
-      });
+      mkdirSync(dirname(sourcePath), { recursive: true });
+      writeFileSync(sourcePath, pipelineYaml);
 
       // Act
       await rendererAdapter.initialize(destinationPath, formatterAdapter);
@@ -320,28 +333,32 @@ deploy:
       expect(generatedContent.length).toBeGreaterThan(0);
 
       // Snapshot test the generated content
-      const sanitizedContent = sanitizeSnapshotContent(generatedContent);
+      const sanitizedContent = sanitizeSnapshotContent(
+        generatedContent.replaceAll(rootPath, "/test"),
+      );
       expect(sanitizedContent).toMatchSnapshot("gitlab-pipeline-documentation");
     });
 
     it("should handle empty YAML files", async () => {
       // Arrange
-      // Setup mock file with empty content
-      mockFs({
-        "/test/.gitlab-ci.yml": "",
-      });
+      writeFileSync(join(rootPath, ".gitlab-ci.yml"), "");
 
       // Act
-      await rendererAdapter.initialize("/test/.gitlab-ci.md", formatterAdapter);
+      await rendererAdapter.initialize(
+        join(rootPath, ".gitlab-ci.md"),
+        formatterAdapter,
+      );
 
       await expect(
         gitLabCIGeneratorAdapter.generateDocumentation({
-          source: "/test/.gitlab-ci.yml",
+          source: join(rootPath, ".gitlab-ci.yml"),
           sections: {},
           rendererAdapter,
           repositoryProvider,
         }),
-      ).rejects.toThrow("Unsupported source file: /test/.gitlab-ci.yml");
+      ).rejects.toThrow(
+        `Unsupported source file: ${join(rootPath, ".gitlab-ci.yml")}`,
+      );
 
       await rendererAdapter.finalize();
     });

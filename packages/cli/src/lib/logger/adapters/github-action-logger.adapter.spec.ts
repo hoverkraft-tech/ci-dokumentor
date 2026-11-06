@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import mockFs, { restore } from "mock-fs";
 import {
   ConsoleMockFactory,
   type MockedConsole,
@@ -11,11 +12,12 @@ describe("GitHubActionLoggerAdapter", () => {
   let githubActionLoggerAdapter: GitHubActionLoggerAdapter;
   let consoleMock: MockedConsole;
   let githubOutputPath: string;
+  let testDirectory: string;
 
   beforeEach(() => {
-    githubOutputPath = `/tmp/ci-dokumentor-test-output.txt`;
-    // Use mock-fs to create a virtual file for GITHUB_OUTPUT
-    mockFs({ [githubOutputPath]: "" });
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-output-"));
+    githubOutputPath = join(testDirectory, "GITHUB_OUTPUT");
+    writeFileSync(githubOutputPath, "");
 
     githubActionLoggerAdapter = new GitHubActionLoggerAdapter(githubOutputPath);
     consoleMock = ConsoleMockFactory.create();
@@ -23,7 +25,7 @@ describe("GitHubActionLoggerAdapter", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    restore();
+    rmSync(testDirectory, { recursive: true, force: true });
   });
 
   describe("getFormat", () => {

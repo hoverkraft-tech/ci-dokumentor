@@ -1,26 +1,34 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import mockFs, { directory, file, restore } from "mock-fs";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { FileReaderAdapter } from "./file-reader.adapter.js";
 
 describe("FileReaderAdapter", () => {
   let fileReaderAdapter: FileReaderAdapter;
-  const testFilePath = "/test/document.md";
+  let testDirectory: string;
+  let testFilePath: string;
   const testContent = "Test content\nLine 2\nLine 3";
 
   beforeEach(() => {
     fileReaderAdapter = new FileReaderAdapter();
 
-    // Set up mock filesystem
-    mockFs({
-      "/test": {
-        "document.md": testContent,
-        "empty.md": "",
-      },
-    });
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-reader-"));
+    mkdirSync(join(testDirectory, "test"));
+    testFilePath = join(testDirectory, "test/document.md");
+    writeFileSync(testFilePath, testContent);
+    writeFileSync(join(testDirectory, "test/empty.md"), "");
   });
 
   afterEach(() => {
-    restore();
+    vi.restoreAllMocks();
+    rmSync(testDirectory, { recursive: true, force: true });
   });
 
   describe("resourceExists", () => {
@@ -34,7 +42,9 @@ describe("FileReaderAdapter", () => {
 
     it("should return true for existing empty file", async () => {
       // Act
-      const result = fileReaderAdapter.resourceExists("/test/empty.md");
+      const result = fileReaderAdapter.resourceExists(
+        join(testDirectory, "test/empty.md"),
+      );
 
       // Assert
       expect(result).toBe(true);
@@ -42,7 +52,9 @@ describe("FileReaderAdapter", () => {
 
     it("should return false for non-existent file", async () => {
       // Act
-      const result = fileReaderAdapter.resourceExists("/test/nonexistent.md");
+      const result = fileReaderAdapter.resourceExists(
+        join(testDirectory, "test/nonexistent.md"),
+      );
 
       // Assert
       expect(result).toBe(false);
@@ -50,7 +62,9 @@ describe("FileReaderAdapter", () => {
 
     it("should return false for a directory path", async () => {
       // Act
-      const result = fileReaderAdapter.resourceExists("/test");
+      const result = fileReaderAdapter.resourceExists(
+        join(testDirectory, "test"),
+      );
 
       // Assert
       expect(result).toBe(false);
@@ -69,7 +83,7 @@ describe("FileReaderAdapter", () => {
     it("should return empty buffer for non-existent file", async () => {
       // Act
       const result = await fileReaderAdapter.readResource(
-        "/test/nonexistent.md",
+        join(testDirectory, "test/nonexistent.md"),
       );
 
       // Assert
@@ -78,33 +92,35 @@ describe("FileReaderAdapter", () => {
 
     it("should handle empty files", async () => {
       // Act
-      const result = await fileReaderAdapter.readResource("/test/empty.md");
+      const result = await fileReaderAdapter.readResource(
+        join(testDirectory, "test/empty.md"),
+      );
 
       // Assert
       expect(result.getSize()).toBe(0);
     });
 
     it("should handle file read errors", async () => {
-      // Arrange - Create a mock fs with a directory instead of a file
-      mockFs({
-        "/test": {
-          "document.md": file({
-            mode: 0o000, // No permissions
-          }),
-        },
+      // Simulate a file disappearing between the existence check and opening it.
+      vi.spyOn(fileReaderAdapter, "resourceExists").mockImplementation(() => {
+        unlinkSync(testFilePath);
+        return true;
       });
 
-      // Act & Assert
       await expect(
-        fileReaderAdapter.readResource("/test/document.md"),
-      ).rejects.toThrow(`EACCES, permission denied '/test/document.md'`);
+        fileReaderAdapter.readResource(testFilePath),
+      ).rejects.toMatchObject({
+        code: "ENOENT",
+      });
     });
   });
 
   describe("containerExists", () => {
     it("should return true for existing directory", async () => {
       // Act
-      const result = fileReaderAdapter.containerExists("/test");
+      const result = fileReaderAdapter.containerExists(
+        join(testDirectory, "test"),
+      );
 
       // Assert
       expect(result).toBe(true);
@@ -112,7 +128,9 @@ describe("FileReaderAdapter", () => {
 
     it("should return false for non-existent directory", async () => {
       // Act
-      const result = fileReaderAdapter.containerExists("/nonexistent");
+      const result = fileReaderAdapter.containerExists(
+        join(testDirectory, "nonexistent"),
+      );
 
       // Assert
       expect(result).toBe(false);
@@ -130,15 +148,22 @@ describe("FileReaderAdapter", () => {
   describe("readContainer", () => {
     it("should list files in a directory", async () => {
       // Act
-      const result = await fileReaderAdapter.readContainer("/test");
+      const result = await fileReaderAdapter.readContainer(
+        join(testDirectory, "test"),
+      );
 
       // Assert
-      expect(result).toEqual(["/test/document.md", "/test/empty.md"]);
+      expect(result).toEqual([
+        join(testDirectory, "test/document.md"),
+        join(testDirectory, "test/empty.md"),
+      ]);
     });
 
     it("should return empty list for non-existent directory", async () => {
       // Act
-      const result = await fileReaderAdapter.readContainer("/nonexistent");
+      const result = await fileReaderAdapter.readContainer(
+        join(testDirectory, "nonexistent"),
+      );
 
       // Assert
       expect(result).toEqual([]);
@@ -146,66 +171,70 @@ describe("FileReaderAdapter", () => {
 
     it("should return empty list for an empty directory", async () => {
       // Arrange - Create an empty directory
-      mockFs({
-        "/emptydir": {},
-      });
+      mkdirSync(join(testDirectory, "emptydir"));
 
       // Act
-      const result = await fileReaderAdapter.readContainer("/emptydir");
+      const result = await fileReaderAdapter.readContainer(
+        join(testDirectory, "emptydir"),
+      );
 
       // Assert
       expect(result).toEqual([]);
     });
 
     it("should ignore . and .. entries", async () => {
-      // Arrange - Create a directory with . and .. entries (mock-fs does this automatically)
-      mockFs({
-        "/dirwithdots": {
-          "file1.txt": "content1",
-          "file2.txt": "content2",
-        },
-      });
+      mkdirSync(join(testDirectory, "dirwithdots"));
+      writeFileSync(join(testDirectory, "dirwithdots/file1.txt"), "content1");
+      writeFileSync(join(testDirectory, "dirwithdots/file2.txt"), "content2");
 
       // Act
-      const result = await fileReaderAdapter.readContainer("/dirwithdots");
+      const result = await fileReaderAdapter.readContainer(
+        join(testDirectory, "dirwithdots"),
+      );
 
       // Assert
       expect(result).toEqual([
-        "/dirwithdots/file1.txt",
-        "/dirwithdots/file2.txt",
+        join(testDirectory, "dirwithdots/file1.txt"),
+        join(testDirectory, "dirwithdots/file2.txt"),
       ]);
     });
 
     it("should handle directories with many files efficiently", async () => {
       // Arrange - Create a directory with many files
-      const manyFiles: Record<string, string> = {};
+      mkdirSync(join(testDirectory, "manyfiles"));
       for (let i = 0; i < 1000; i++) {
-        manyFiles[`file${i}.txt`] = `content of file ${i}`;
+        writeFileSync(
+          join(testDirectory, "manyfiles", `file${i}.txt`),
+          `content of file ${i}`,
+        );
       }
-      mockFs({
-        "/manyfiles": manyFiles,
-      });
 
       // Act
-      const result = await fileReaderAdapter.readContainer("/manyfiles");
+      const result = await fileReaderAdapter.readContainer(
+        join(testDirectory, "manyfiles"),
+      );
 
       // Assert
       expect(result.length).toBe(1000);
-      expect(result).toContain("/manyfiles/file0.txt");
-      expect(result).toContain("/manyfiles/file999.txt");
+      expect(result).toContain(join(testDirectory, "manyfiles/file0.txt"));
+      expect(result).toContain(join(testDirectory, "manyfiles/file999.txt"));
     });
 
     it("should handle read errors gracefully", async () => {
-      // Arrange - Create a mock fs with a directory that cannot be read
-      mockFs({
-        "/restricted": directory({
-          mode: 0o000, // No permissions
-        }),
+      // Simulate a directory being replaced by a file after the existence check.
+      const directoryPath = join(testDirectory, "restricted");
+      mkdirSync(directoryPath);
+      vi.spyOn(fileReaderAdapter, "containerExists").mockImplementation(() => {
+        rmSync(directoryPath, { recursive: true });
+        writeFileSync(directoryPath, "no longer a directory");
+        return true;
       });
-      // Act & Assert
+
       await expect(
-        fileReaderAdapter.readContainer("/restricted"),
-      ).rejects.toThrow(`EACCES, permission denied '/restricted'`);
+        fileReaderAdapter.readContainer(directoryPath),
+      ).rejects.toMatchObject({
+        code: "ENOTDIR",
+      });
     });
   });
 });

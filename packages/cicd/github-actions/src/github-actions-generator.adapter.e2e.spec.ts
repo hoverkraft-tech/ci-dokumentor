@@ -1,5 +1,13 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   FileRendererAdapter,
@@ -10,23 +18,31 @@ import {
 } from "@ci-dokumentor/core";
 import { GitRepositoryProvider } from "@ci-dokumentor/repository-git";
 import { sanitizeSnapshotContent } from "@ci-dokumentor/core/tests";
-import mockFs, { restore } from "mock-fs";
 import { initTestContainer } from "./container.js";
 import { GitHubActionsGeneratorAdapter } from "./github-actions-generator.adapter.js";
 
-const rootPath = join(__dirname, "../../../..");
-
 describe("GitHubActionsGeneratorAdapter - Integration Tests", () => {
+  let rootPath: string;
   let repositoryProvider: RepositoryProvider;
   let formatterAdapter: FormatterAdapter;
   let rendererAdapter: RendererAdapter;
   let gitHubActionsGeneratorAdapter: GitHubActionsGeneratorAdapter;
 
   beforeEach(async () => {
+    rootPath = mkdtempSync(join(tmpdir(), "ci-dokumentor-generator-"));
     // Use real dependencies from the container
     const container = initTestContainer();
 
     repositoryProvider = container.get(GitRepositoryProvider);
+    const repositoryInfo = await repositoryProvider.getRepositoryInfo();
+    vi.spyOn(repositoryProvider, "getRepositoryInfo").mockResolvedValue({
+      ...repositoryInfo,
+      rootDir: rootPath,
+    });
+    vi.spyOn(repositoryProvider, "getLatestVersion").mockResolvedValue({
+      sha: "a".repeat(40),
+      ref: "1.0.0",
+    });
     formatterAdapter = container.get(MarkdownFormatterAdapter);
     rendererAdapter = container.get(FileRendererAdapter);
 
@@ -36,8 +52,7 @@ describe("GitHubActionsGeneratorAdapter - Integration Tests", () => {
   });
 
   afterEach(() => {
-    // Restore real file system
-    restore();
+    rmSync(rootPath, { recursive: true, force: true });
     // Restore all mocks
     vi.restoreAllMocks();
   });
@@ -95,10 +110,8 @@ runs:
       const sourcePath = join(rootPath, "action.yml");
       const destinationPath = join(rootPath, "README.md");
 
-      // Setup mock file with the action YAML content
-      mockFs({
-        [sourcePath]: actionYaml,
-      });
+      mkdirSync(dirname(sourcePath), { recursive: true });
+      writeFileSync(sourcePath, actionYaml);
 
       // Act
       await rendererAdapter.initialize(destinationPath, formatterAdapter);
@@ -121,7 +134,9 @@ runs:
       expect(generatedContent.length).toBeGreaterThan(0);
 
       // Snapshot test the generated content
-      const sanitizedContent = sanitizeSnapshotContent(generatedContent);
+      const sanitizedContent = sanitizeSnapshotContent(
+        generatedContent.replaceAll(rootPath, "/test"),
+      );
       expect(sanitizedContent).toMatchSnapshot("github-action-documentation");
     });
 
@@ -236,10 +251,8 @@ jobs:
       const sourcePath = join(rootPath, ".github/workflows/ci-cd.yml");
       const destinationPath = join(rootPath, ".github/workflows/ci-cd.md");
 
-      // Setup mock file with the workflow YAML content
-      mockFs({
-        [sourcePath]: workflowYaml,
-      });
+      mkdirSync(dirname(sourcePath), { recursive: true });
+      writeFileSync(sourcePath, workflowYaml);
 
       // Act
       await rendererAdapter.initialize(destinationPath, formatterAdapter);
@@ -262,7 +275,9 @@ jobs:
       expect(generatedContent.length).toBeGreaterThan(0);
 
       // Snapshot test the generated content
-      const sanitizedContent = sanitizeSnapshotContent(generatedContent);
+      const sanitizedContent = sanitizeSnapshotContent(
+        generatedContent.replaceAll(rootPath, "/test"),
+      );
       expect(sanitizedContent).toMatchSnapshot("workflow-documentation");
     });
   });
@@ -357,17 +372,17 @@ runs:
   main: index.js
 `;
 
-      // Setup mock file with malformed YAML
-      mockFs({
-        "/test/action.yml": malformedYaml,
-      });
+      writeFileSync(join(rootPath, "action.yml"), malformedYaml);
 
       // Act & Assert
-      await rendererAdapter.initialize("/test/README.md", formatterAdapter);
+      await rendererAdapter.initialize(
+        join(rootPath, "README.md"),
+        formatterAdapter,
+      );
 
       await expect(
         gitHubActionsGeneratorAdapter.generateDocumentation({
-          source: "/test/action.yml",
+          source: join(rootPath, "action.yml"),
           sections: {},
           rendererAdapter,
           repositoryProvider,
@@ -379,42 +394,47 @@ runs:
 
     it("should handle non-existent files gracefully", async () => {
       // Arrange
-      // Setup empty mock file system
-      mockFs({});
 
       // Act & Assert
-      await rendererAdapter.initialize("/test/README.md", formatterAdapter);
+      await rendererAdapter.initialize(
+        join(rootPath, "README.md"),
+        formatterAdapter,
+      );
 
       await expect(
         gitHubActionsGeneratorAdapter.generateDocumentation({
-          source: "/test/action.yml",
+          source: join(rootPath, "action.yml"),
           sections: {},
           rendererAdapter,
           repositoryProvider,
         }),
-      ).rejects.toThrow('Source file does not exist: "/test/action.yml"');
+      ).rejects.toThrow(
+        `Source file does not exist: "${join(rootPath, "action.yml")}"`,
+      );
 
       await rendererAdapter.finalize();
     });
 
     it("should handle empty YAML files", async () => {
       // Arrange
-      // Setup mock file with empty content
-      mockFs({
-        "/test/action.yml": "",
-      });
+      writeFileSync(join(rootPath, "action.yml"), "");
 
       // Act
-      await rendererAdapter.initialize("/test/README.md", formatterAdapter);
+      await rendererAdapter.initialize(
+        join(rootPath, "README.md"),
+        formatterAdapter,
+      );
 
       await expect(
         gitHubActionsGeneratorAdapter.generateDocumentation({
-          source: "/test/action.yml",
+          source: join(rootPath, "action.yml"),
           sections: {},
           rendererAdapter,
           repositoryProvider,
         }),
-      ).rejects.toThrow("Unsupported source file: /test/action.yml");
+      ).rejects.toThrow(
+        `Unsupported source file: ${join(rootPath, "action.yml")}`,
+      );
 
       await rendererAdapter.finalize();
     });

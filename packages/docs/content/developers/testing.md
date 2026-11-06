@@ -21,7 +21,7 @@ CI Dokumentor follows these testing principles:
 CI Dokumentor uses a modern testing stack:
 
 - **[Vitest](https://vitest.dev/)** - Fast unit testing framework with native TypeScript support
-- **[Mock-fs](https://github.com/tschaub/mock-fs)** - File system mocking for end-to-end tests
+- **Node.js filesystem APIs** - Isolated temporary fixtures for filesystem tests
 - **[InversifyJS Testing](https://inversify.io/)** - Dependency injection mocking and testing patterns
 - **[@vitest/coverage-v8](https://vitest.dev/guide/coverage)** - Code coverage reporting
 
@@ -156,24 +156,31 @@ beforeEach(() => {
 
 ### File System Testing
 
-Use mock-fs for **End-to-end** file system operations tests **only**:
+Use a fresh temporary directory for each filesystem test. Create fixtures with
+Node.js filesystem APIs and remove the directory in `afterEach`. Keep fixtures
+outside the checkout so tests cannot overwrite source files or documentation.
 
 ```typescript
-import mockFs from "mock-fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, beforeEach } from "vitest";
+
+let testDirectory: string;
 
 beforeEach(() => {
-  mockFs({
-    "/test": {
-      "action.yml": "name: Test Action",
-      "README.md": "# Test",
-    },
-  });
+  testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-"));
+  writeFileSync(join(testDirectory, "action.yml"), "name: Test Action");
 });
 
 afterEach(() => {
-  mockFs.restore();
+  rmSync(testDirectory, { recursive: true, force: true });
 });
 ```
+
+For error paths, exercise filesystem failures such as a missing parent directory
+or a directory at a file destination. Assert the error code so tests do not depend
+on operating-system-specific message text or the current user's permissions.
 
 ### CI/CD Testing Patterns
 
@@ -281,12 +288,12 @@ it("should parse large action files efficiently", () => {
 
 ### Common Issues
 
-#### File System Permissions
+#### File System Cleanup
 
 ```typescript
-// Ensure mock-fs is properly restored
+// Remove only the temporary directory owned by the test.
 afterEach(() => {
-  mockFs.restore();
+  rmSync(testDirectory, { recursive: true, force: true });
 });
 ```
 

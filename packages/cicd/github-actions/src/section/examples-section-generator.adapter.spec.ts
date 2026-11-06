@@ -436,16 +436,13 @@ jobs:
         },
       ];
 
-      it.each(generateSectionScenarios)("$name", async ({
-        manifest,
-        version,
-        destinationContent,
-        expectedContent,
-      }) => {
-        // Arrange
-        mockReaderAdapter.resourceExists.mockReturnValue(true);
-        mockReaderAdapter.readResource.mockResolvedValue(
-          new ReadableContent(`
+      it.each(generateSectionScenarios)(
+        "$name",
+        async ({ manifest, version, destinationContent, expectedContent }) => {
+          // Arrange
+          mockReaderAdapter.resourceExists.mockReturnValue(true);
+          mockReaderAdapter.readResource.mockResolvedValue(
+            new ReadableContent(`
 # Test Action
 
 <!-- examples:start -->
@@ -455,23 +452,24 @@ jobs:
 ${destinationContent}
 
 <!-- examples:end -->`),
-        );
+          );
 
-        mockVersionService.getVersion.mockResolvedValue(
-          version ? version : mockVersion,
-        );
+          mockVersionService.getVersion.mockResolvedValue(
+            version ? version : mockVersion,
+          );
 
-        // Act
-        const result = await generator.generateSection({
-          formatterAdapter,
-          manifest,
-          repositoryProvider: mockRepositoryProvider,
-          destination: "/test/destination.md",
-        });
+          // Act
+          const result = await generator.generateSection({
+            formatterAdapter,
+            manifest,
+            repositoryProvider: mockRepositoryProvider,
+            destination: "/test/destination.md",
+          });
 
-        // Assert
-        expect(result.toString()).toEqual(expectedContent);
-      });
+          // Assert
+          expect(result.toString()).toEqual(expectedContent);
+        },
+      );
     });
 
     it("should throws on file system errors", async () => {

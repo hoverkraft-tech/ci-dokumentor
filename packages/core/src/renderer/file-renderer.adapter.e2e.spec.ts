@@ -1,5 +1,13 @@
-import { existsSync, readFileSync } from "node:fs";
-import mockFs, { file, restore } from "mock-fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MarkdownFormatterAdapter } from "../formatter/markdown/markdown-formatter.adapter.js";
 import { FileReaderAdapter } from "../reader/file-reader.adapter.js";
@@ -9,7 +17,8 @@ import { ReadableContent } from "../reader/readable-content.js";
 import { FileRendererAdapter } from "./file-renderer.adapter.js";
 
 describe("FileRendererAdapter", () => {
-  const testFilePath = "/test/document.md";
+  let testDirectory: string;
+  let testFilePath: string;
   const testSectionIdentifier = SectionIdentifier.Examples;
   const testData = new ReadableContent("New section content\n");
 
@@ -20,9 +29,10 @@ describe("FileRendererAdapter", () => {
   beforeEach(() => {
     vi.resetAllMocks();
 
-    // Set up mock filesystem
-    mockFs({
-      "/test": {
+    testDirectory = mkdtempSync(join(tmpdir(), "ci-dokumentor-renderer-"));
+    testFilePath = join(testDirectory, "test/document.md");
+    const fixtures = {
+      test: {
         "document.md": "Initial content\nSome text\n",
         "existing-section.md": `Content before section
 <!-- examples:start -->
@@ -48,11 +58,17 @@ License content
 `,
         "empty.md": "",
       },
-      "/unsupported": {
+      unsupported: {
         "document.txt": "Text file content",
         "no-extension": "File without extension",
       },
-    });
+    };
+    for (const [directory, files] of Object.entries(fixtures)) {
+      mkdirSync(join(testDirectory, directory));
+      for (const [name, content] of Object.entries(files)) {
+        writeFileSync(join(testDirectory, directory, name), content);
+      }
+    }
 
     const container = initContainer();
 
@@ -64,8 +80,7 @@ License content
   afterEach(() => {
     resetContainer();
 
-    // Restore real filesystem
-    restore();
+    rmSync(testDirectory, { recursive: true, force: true });
 
     vi.resetAllMocks();
   });
@@ -96,7 +111,7 @@ New section content
 
       // Act
       await adapterWithExistingSection.initialize(
-        "/test/existing-section.md",
+        join(testDirectory, "test/existing-section.md"),
         formatterAdapter,
       );
       await adapterWithExistingSection.writeSection(
@@ -105,7 +120,10 @@ New section content
       );
 
       // Assert
-      const fileContent = readFileSync("/test/existing-section.md", "utf-8");
+      const fileContent = readFileSync(
+        join(testDirectory, "test/existing-section.md"),
+        "utf-8",
+      );
       expect(fileContent).toEqual(`Content before section
 <!-- examples:start -->
 
@@ -121,11 +139,17 @@ Content after section
       const emptyFileAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act
-      await emptyFileAdapter.initialize("/test/empty.md", formatterAdapter);
+      await emptyFileAdapter.initialize(
+        join(testDirectory, "test/empty.md"),
+        formatterAdapter,
+      );
       await emptyFileAdapter.writeSection(testSectionIdentifier, testData);
 
       // Assert
-      const fileContent = readFileSync("/test/empty.md", "utf-8");
+      const fileContent = readFileSync(
+        join(testDirectory, "test/empty.md"),
+        "utf-8",
+      );
       const expectedContent = `<!-- ${testSectionIdentifier}:start -->
 
 New section content
@@ -147,7 +171,7 @@ New section content
 
       // Act
       await multipleSectionsAdapter.initialize(
-        "/test/multiple-sections.md",
+        join(testDirectory, "test/multiple-sections.md"),
         formatterAdapter,
       );
       await multipleSectionsAdapter.writeSection(
@@ -164,7 +188,10 @@ New section content
       );
 
       // Assert
-      const fileContent = readFileSync("/test/multiple-sections.md", "utf-8");
+      const fileContent = readFileSync(
+        join(testDirectory, "test/multiple-sections.md"),
+        "utf-8",
+      );
 
       // Should preserve first section with blank lines around content
       expect(fileContent).toEqual(`Header content
@@ -265,10 +292,13 @@ Updated license section
       const newFileAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act & Assert - This should fail because the file doesn't exist
-      await newFileAdapter.initialize("/test/new-file.md", formatterAdapter);
+      await newFileAdapter.initialize(
+        join(testDirectory, "test/new-file.md"),
+        formatterAdapter,
+      );
       await newFileAdapter.writeSection(testSectionIdentifier, testData);
 
-      expect(existsSync("/test/new-file.md")).toBe(true);
+      expect(existsSync(join(testDirectory, "test/new-file.md"))).toBe(true);
     });
   });
 
@@ -296,23 +326,17 @@ Updated license section
 
   describe("error handling", () => {
     it("should handle file system errors gracefully", async () => {
-      // Arrange - Create a read-only file system
-      mockFs({
-        "/readonly": {
-          "document.md": file({
-            content: "Initial content",
-            mode: 0o444, // Read-only
-          }),
-        },
-      });
+      // A directory at the destination must propagate the filesystem write error.
+      rmSync(testFilePath);
+      mkdirSync(testFilePath);
+      const adapter = new FileRendererAdapter(new FileReaderAdapter());
+      await adapter.initialize(testFilePath, formatterAdapter);
 
-      const readOnlyAdapter = new FileRendererAdapter(new FileReaderAdapter());
-
-      // Act & Assert
-      await readOnlyAdapter.initialize(testFilePath, formatterAdapter);
       await expect(
-        readOnlyAdapter.writeSection(testSectionIdentifier, testData),
-      ).rejects.toThrow("test");
+        adapter.writeSection(testSectionIdentifier, testData),
+      ).rejects.toMatchObject({
+        code: "EISDIR",
+      });
     });
 
     it("should handle invalid file paths", async () => {
@@ -323,14 +347,12 @@ Updated license section
 
       // Act & Assert
       await invalidPathAdapter.initialize(
-        "/nonexistent/path/file.md",
+        join(testDirectory, "nonexistent/path/file.md"),
         formatterAdapter,
       );
       await expect(
         invalidPathAdapter.writeSection(testSectionIdentifier, testData),
-      ).rejects.toThrow(
-        "ENOENT, no such file or directory '/nonexistent/path/file.md'",
-      );
+      ).rejects.toMatchObject({ code: "ENOENT" });
     });
   });
 
@@ -420,7 +442,7 @@ Section 2 content
 
     it("should return correct destination for different file paths", async () => {
       // Arrange
-      const differentPath = "/test/different-document.md";
+      const differentPath = join(testDirectory, "test/different-document.md");
       const differentAdapter = new FileRendererAdapter(new FileReaderAdapter());
 
       // Act

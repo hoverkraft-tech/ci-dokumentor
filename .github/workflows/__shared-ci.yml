@@ -13,10 +13,7 @@ on:
         value: ${{ fromJSON(jobs.docker.outputs.built-images).cli.tags[0] }}
       package-tarball-artifact-id:
         description: The artifact ID for the package tarball
-        value: ${{ jobs.package-test.outputs.package-tarball-artifact-id }}
-      package-tarball-path:
-        description: The relative path to the package tarball for downstream jobs
-        value: ${{ jobs.package-test.outputs.package-tarball-path }}
+        value: ${{ jobs.nodejs.outputs.package-tarball-artifact-id }}
       build-artifact-id:
         description: The artifact ID for the build output
         value: ${{ jobs.nodejs.outputs.build-artifact-id }}
@@ -25,7 +22,7 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@3a27d31e9ccefbe9609cc9165017ed100ff34a22 # 0.38.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@90211d735aa0289702ddbd7eb95b218020ccadad # 2.0.2
     permissions:
       actions: read
       contents: read
@@ -36,7 +33,7 @@ jobs:
       statuses: write
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@df348077afa4e79725151d50606e9dc63f86dcb6 # 0.24.4
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@02a04ad25ceaacdf3b7200e45fb7fec07fadf4fa # 2.1.0
     permissions:
       contents: read
       id-token: write
@@ -44,6 +41,9 @@ jobs:
       pull-requests: write
       security-events: write
     with:
+      package: >-
+        {"tests": "test \"$(ci-dokumentor --version)\" = \"$PACKAGE_VERSION\"\nci-dokumentor --help\ncd \"$GITHUB_WORKSPACE\"\nci-dokumentor generate --source
+        action.yml --destination \"$RUNNER_TEMP/action.md\" --repository git --cicd github-actions --dry-run\n"}
       build: |
         {
           "commands": ["build"],
@@ -52,56 +52,11 @@ jobs:
       test: |
         { "coverage": "codecov" }
 
-  package-test:
-    needs: [linter, nodejs]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      package-tarball-artifact-id: ${{ steps.package.outputs.package-tarball-artifact-id }}
-      package-tarball-path: ${{ steps.package.outputs.package-tarball-path }}
-    steps:
-      - id: package
-        name: Create package tarball
-        uses: hoverkraft-tech/ci-github-nodejs/actions/package@df348077afa4e79725151d50606e9dc63f86dcb6 # 0.24.4
-        with:
-          working-directory: .
-          package-directory: packages/cli
-          build-artifact-id: ${{ needs.nodejs.outputs.build-artifact-id }}
-          build-artifact-path: "/"
-          version: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
-
-      - name: Install package globally
-        env:
-          PACKAGE_TARBALL_PATH: ${{ steps.package.outputs.package-tarball-path }}
-        run: npm install -g "${PACKAGE_TARBALL_PATH}"
-
-      # Test version command
-      - name: Test version command
-        run: npx ci-dokumentor --version
-
-      # Test help command
-      - name: Test help command
-        run: npx ci-dokumentor --help
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      # Test generate command
-      - name: Test generate command
-        run: |
-          npx ci-dokumentor generate \
-          --source "action.yml" \
-          --destination "packages/docs/content/integrations/github-action.md" \
-          --dry-run
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@f8255a6a37eb141fa331527f5aed9b9e1d598c77 # 0.38.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@5ffc3c81daacc57700a14bb91d67edbc67eedc1d # 0.39.0
     permissions:
+      attestations: write
       contents: read
       id-token: write
       issues: read
@@ -170,7 +125,7 @@ jobs:
           persist-credentials: false
 
       - id: generate-docs
-        uses: ./
+        uses: $/
         with:
           ci-dokumentor-version: ${{ fromJSON(needs.docker.outputs.built-images).cli.tags[0] }}
           source: action.yml
