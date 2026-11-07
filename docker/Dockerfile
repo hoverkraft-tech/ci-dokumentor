@@ -57,7 +57,7 @@ COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
 # Run as non-root for better security
-USER ci-dokumentor
+USER 1001:1001
 
 # Production environment variables
 ENV NODE_ENV=production
@@ -68,7 +68,7 @@ EXPOSE 0
 
 # Healthcheck: ensure the globally-installed binary is healthy
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD /usr/local/bin/ci-dokumentor --version || exit 1
+    CMD ["/usr/local/bin/ci-dokumentor", "--version"]
 
 ENTRYPOINT ["dumb-init", "/usr/local/bin/entrypoint"]
 
