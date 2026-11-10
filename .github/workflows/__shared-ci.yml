@@ -22,7 +22,7 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@90211d735aa0289702ddbd7eb95b218020ccadad # 2.0.2
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@66882b24f9f13e45a6541896a5a7c638cb91c94c # 4.0.0
     permissions:
       actions: read
       contents: read
@@ -33,7 +33,7 @@ jobs:
       statuses: write
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@02a04ad25ceaacdf3b7200e45fb7fec07fadf4fa # 2.1.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@fbd3522b68c55a6314aadbededaa487825ba9b35 # 3.0.0
     permissions:
       contents: read
       id-token: write
@@ -54,7 +54,7 @@ jobs:
 
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@5ffc3c81daacc57700a14bb91d67edbc67eedc1d # 0.39.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@ec1cd960fb1a1908ac21680756eb49a4c8f018d5 # 0.40.0
     permissions:
       attestations: write
       contents: read
