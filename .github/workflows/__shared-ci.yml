@@ -22,7 +22,7 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@66882b24f9f13e45a6541896a5a7c638cb91c94c # 4.0.0
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@f44e1bcc350b6bfe9e4a86a27b1d5e032e58f292 # 4.2.1
     permissions:
       actions: read
       contents: read
@@ -33,7 +33,7 @@ jobs:
       statuses: write
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@18eb770c5d63c9b9809c367a91c55fb02c138ad4 # 3.0.1
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@a60704c5e9902675a1b4a5141411d95733e80ff5 # 3.0.2
     permissions:
       contents: read
       id-token: write
@@ -49,12 +49,11 @@ jobs:
           "commands": ["build"],
           "artifact": ["packages/docs/build", "packages/cli/dist"]
         }
-      test: |
-        { "coverage": "codecov" }
+      test: '{ "coverage": "codecov" }'
 
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@ec1cd960fb1a1908ac21680756eb49a4c8f018d5 # 0.40.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@d6569ca423f29f68152ee561f51f7de0c08db709 # 1.0.0
     permissions:
       attestations: write
       contents: read
