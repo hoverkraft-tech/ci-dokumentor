@@ -1,0 +1,81 @@
+# Run the existing CLI and action smoke tests against the supplied image digest.
+# Successful callers can use validated-images as evidence for image promotion.
+name: Internal - Test Docker image
+
+on:
+  workflow_call:
+    inputs:
+      built-images:
+        description: Image metadata returned by the Docker build workflow
+        type: string
+        required: true
+    outputs:
+      validated-images:
+        description: Exact image metadata exercised by the smoke tests
+        value: ${{ jobs.docker-test.outputs.validated-images }}
+
+permissions: {}
+
+jobs:
+  docker-test:
+    outputs:
+      validated-images: ${{ inputs.built-images }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      IMAGE: ${{ fromJSON(inputs.built-images).cli.images[0] }}
+    steps:
+      # Test version command
+      - run: docker run --rm "$IMAGE" --version
+
+      # Test help command
+      - run: docker run --rm "$IMAGE" --help
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Test generate command (dry-run) on this repository's action.yml file
+      - run: |
+          docker run --rm \
+          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+          -u "$(id -u):$(id -g)" \
+          -w "$GITHUB_WORKSPACE" \
+          -e GITHUB_TOKEN \
+          "$IMAGE" \
+          generate \
+          --source "action.yml" \
+          --destination "packages/docs/content/integrations/github-action.md" \
+          --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  action-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: generate-docs
+        uses: $/
+        with:
+          ci-dokumentor-version: ${{ fromJSON(inputs.built-images).cli.tags[0] }}
+          source: action.yml
+          destination: packages/docs/content/integrations/github-action.md
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - env:
+          GENERATED_FILE: ${{ steps.generate-docs.outputs.destination }}
+        run: |
+          # Assert generate-docs action outputs
+          output_destination="${GENERATED_FILE}"
+          expected_output_destination="packages/docs/content/integrations/github-action.md"
+          if [ "$output_destination" != "$expected_output_destination" ]; then
+            echo "Error: Unexpected output destination"
+            exit 1
+          fi

@@ -1,3 +1,6 @@
+# Release the prepared tag after shared CI validates packages and candidate images.
+# Promotion verifies the original build/test results. Rerun all jobs after a
+# promotion failure so build and validation evidence belong to the same attempt.
 name: Release
 
 on:
@@ -19,7 +22,7 @@ concurrency:
 
 jobs:
   prepare:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/prepare-package-release.yml@a60704c5e9902675a1b4a5141411d95733e80ff5 # 3.0.2
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/prepare-package-release.yml@6dee39a2a74172ea5539caa886a12b32765d5bd1 # 3.0.3
     permissions:
       actions: write
       contents: write
@@ -48,10 +51,26 @@ jobs:
 
     with:
       sign-images: true
+      candidate-images: true
+
+  promote:
+    needs: validate
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-promote-images.yml@0592b66c9ed74d8cb7b0c015881ca590fc5d550b # 2.0.0
+    permissions:
+      actions: read
+      attestations: read
+      contents: read
+      deployments: write
+      packages: write
+      pull-requests: read
+    with:
+      job-results: ${{ needs.validate.outputs.job-results }}
+    secrets:
+      oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   release:
-    needs: [prepare, validate]
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@a60704c5e9902675a1b4a5141411d95733e80ff5 # 3.0.2
+    needs: [prepare, validate, promote]
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@6dee39a2a74172ea5539caa886a12b32765d5bd1 # 3.0.3
     permissions:
       actions: read
       contents: write
@@ -61,4 +80,4 @@ jobs:
       packages: ${{ needs.prepare.outputs.packages }}
       package-tarball-artifact-id: ${{ needs.validate.outputs.package-tarball-artifact-id }}
     secrets:
-      changelog-summary: ${{ secrets.CHANGELOG_SUMMARY }}
+      changelog-summary: ${{ format('{{"llmAuth":{0},"llmProvider":"openai"}}', toJSON(secrets.OPENAI_API_KEY)) }}

@@ -4,10 +4,17 @@ name: Common Continuous Integration tasks
 on:
   workflow_call:
     inputs:
+      candidate-images:
+        description: Build temporary images for release validation before promotion
+        type: boolean
+        default: false
       sign-images:
         required: true
         type: boolean
     outputs:
+      job-results:
+        description: GitHub results and outputs of all build, lint and validation jobs for image promotion
+        value: ${{ toJSON(jobs) }}
       image-tag:
         description: The image tag for the CI Dokumentor CLI
         value: ${{ fromJSON(jobs.docker.outputs.built-images).cli.tags[0] }}
@@ -22,7 +29,7 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@2fa562bd44f9e752a99a374c85ae14644e7f2bdd # 4.2.2
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@c63b4ce928082260ab263abc01faf3c1fa20c52b # 4.2.3
     permissions:
       actions: read
       contents: read
@@ -33,7 +40,7 @@ jobs:
       statuses: write
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@a60704c5e9902675a1b4a5141411d95733e80ff5 # 3.0.2
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@6dee39a2a74172ea5539caa886a12b32765d5bd1 # 3.0.3
     permissions:
       contents: read
       id-token: write
@@ -53,7 +60,7 @@ jobs:
 
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@d6569ca423f29f68152ee561f51f7de0c08db709 # 1.0.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@0592b66c9ed74d8cb7b0c015881ca590fc5d550b # 2.0.0
     permissions:
       attestations: write
       contents: read
@@ -64,6 +71,7 @@ jobs:
     secrets:
       oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
     with:
+      candidate: ${{ inputs.candidate-images }}
       sign: ${{ inputs.sign-images }}
       images: |
         [
@@ -79,65 +87,11 @@ jobs:
           }
         ]
 
-  docker-test:
+  test-docker:
     needs: docker
-    runs-on: ubuntu-latest
+    uses: $/.github/workflows/__test-docker-image.yml
     permissions:
       contents: read
       packages: read
-    env:
-      IMAGE: ${{ fromJSON(needs.docker.outputs.built-images).cli.images[0] }}
-    steps:
-      # Test version command
-      - run: docker run --rm "$IMAGE" --version
-
-      # Test help command
-      - run: docker run --rm "$IMAGE" --help
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      # Test generate command (dry-run) on this repository's action.yml file
-      - run: |
-          docker run --rm \
-          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
-          -u "$(id -u):$(id -g)" \
-          -w "$GITHUB_WORKSPACE" \
-          -e GITHUB_TOKEN \
-          "$IMAGE" \
-          generate \
-          --source "action.yml" \
-          --destination "packages/docs/content/integrations/github-action.md" \
-          --dry-run
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  action-test:
-    needs: docker
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - id: generate-docs
-        uses: $/
-        with:
-          ci-dokumentor-version: ${{ fromJSON(needs.docker.outputs.built-images).cli.tags[0] }}
-          source: action.yml
-          destination: packages/docs/content/integrations/github-action.md
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - env:
-          GENERATED_FILE: ${{ steps.generate-docs.outputs.destination }}
-        run: |
-          # Assert generate-docs action outputs
-          output_destination="${GENERATED_FILE}"
-          expected_output_destination="packages/docs/content/integrations/github-action.md"
-          if [ "$output_destination" != "$expected_output_destination" ]; then
-            echo "Error: Unexpected output destination"
-            exit 1
-          fi
+    with:
+      built-images: ${{ needs.docker.outputs.built-images }}
