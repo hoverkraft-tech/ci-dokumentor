@@ -37,9 +37,12 @@ CI Dokumentor uses GitHub Actions for continuous integration and deployment with
 graph TD
     A[pull-request-ci.yml] --> B[__shared-ci.yml]
     C[main-ci.yml] --> B
-    C --> D[Docker Build]
+    B --> D[Docker Build]
+    D --> V[CLI and action image validation]
     R[release.yml] --> B
-    R --> E[Release]
+    B --> V
+    V --> P0[Promote validated release images]
+    P0 --> E[Release]
     C --> F[Documentation Update]
     E --> G[NPM Publish]
 
@@ -155,12 +158,12 @@ Images are published to GitHub Container Registry:
 ## Release Automation
 
 The dedicated `release.yml` workflow prepares committed versions, validates
-packages through shared CI, and publishes the exact tested tarballs. It runs
+packages through shared CI, promotes tested Docker image digests, and publishes the exact tested tarballs. It runs
 manually or weekly, with an optional manual force input. A normal run with no
 changes skips publication. Main CI does not publish npm packages.
 
-See [Releasing](./releasing.md) for App permissions, npm trusted publishing,
-optional AI summaries, version planning, and recovery.
+The internal [release workflow](https://github.com/hoverkraft-tech/ci-dokumentor/blob/main/.github/workflows/release.yml)
+uses the original shared CI job results to verify candidate image promotion.
 
 ## Documentation Deployment
 
