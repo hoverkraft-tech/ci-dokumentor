@@ -151,8 +151,8 @@ importers:
         specifier: ^4.29.2
         version: 4.29.2
       inversify:
-        specifier: ^8.2.4
-        version: 8.2.4(reflect-metadata@0.2.2)
+        specifier: ^8.3.0
+        version: 8.3.0(reflect-metadata@0.2.2)
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
@@ -173,8 +173,8 @@ importers:
         specifier: workspace:*
         version: link:../../repository/gitlab
       inversify:
-        specifier: ^8.2.4
-        version: 8.2.4(reflect-metadata@0.2.2)
+        specifier: ^8.3.0
+        version: 8.3.0(reflect-metadata@0.2.2)
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
@@ -182,11 +182,11 @@ importers:
   packages/cli:
     dependencies:
       commander:
-        specifier: ^15.0.0
-        version: 15.0.0
+        specifier: ^15.1.0
+        version: 15.1.0
       inversify:
-        specifier: ^8.2.4
-        version: 8.2.4(reflect-metadata@0.2.2)
+        specifier: ^8.3.0
+        version: 8.3.0(reflect-metadata@0.2.2)
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -219,8 +219,8 @@ importers:
         specifier: ^3.3.3
         version: 3.3.3
       inversify:
-        specifier: ^8.2.4
-        version: 8.2.4(reflect-metadata@0.2.2)
+        specifier: ^8.3.0
+        version: 8.3.0(reflect-metadata@0.2.2)
       p-limit:
         specifier: ^7.3.3
         version: 7.3.3
@@ -274,8 +274,8 @@ importers:
         specifier: ^16.1.0
         version: 16.1.0
       inversify:
-        specifier: ^8.2.4
-        version: 8.2.4(reflect-metadata@0.2.2)
+        specifier: ^8.3.0
+        version: 8.3.0(reflect-metadata@0.2.2)
       simple-git:
         specifier: ^4.0.2
         version: 4.0.2
@@ -295,8 +295,8 @@ importers:
         specifier: ^9.0.5
         version: 9.0.5
       inversify:
-        specifier: ^8.2.4
-        version: 8.2.4(reflect-metadata@0.2.2)
+        specifier: ^8.3.0
+        version: 8.3.0(reflect-metadata@0.2.2)
 
   packages/repository/gitlab:
     dependencies:
@@ -307,11 +307,11 @@ importers:
         specifier: workspace:*
         version: link:../git
       '@gitbeaker/rest':
-        specifier: ^43.8.0
-        version: 43.8.0
+        specifier: ^44.0.5
+        version: 44.0.5
       inversify:
-        specifier: ^8.2.4
-        version: 8.2.4(reflect-metadata@0.2.2)
+        specifier: ^8.3.0
+        version: 8.3.0(reflect-metadata@0.2.2)
 
 packages:
 
@@ -982,6 +982,10 @@ packages:
     resolution: {integrity: sha512-v+oN26xP4YIlQsbQ/CbTH1WG5m/l/DjKKZNy/Kp3f/AFvbgt7Em/D0FeMM3O2hX0YzeN2M16W8lOpyhIkfCBcQ==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/runtime@7.29.14':
+    resolution: {integrity: sha512-Y5tqevQaUAZhhj82BpYMNC1ssvLQTVAfwKdm8iy8qwmhvC2/CpcAu8OC+QEtjM7pMk7knx83u1Qj8gzkicyelw==}
+    engines: {node: '>=6.9.0'}
+
   '@babel/template@7.29.7':
     resolution: {integrity: sha512-puq+Gf35oI24FeN11LkoUQFqv9uwNeWpxXZi/Ji3rRIoKAzKnxRaZ+Gkj0vKS9ZCiTESfng1N9LyOyXvo+m+Gg==}
     engines: {node: '>=6.9.0'}
@@ -1622,17 +1626,17 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@gitbeaker/core@43.8.0':
-    resolution: {integrity: sha512-H+LfKuf4dExBinb79c+CXViRBvTVQNf5BYLNSizm2SiqdED5JruhKX88payefleY0szp7G/mySlFSXPyGRH1dQ==}
-    engines: {node: '>=18.20.0'}
+  '@gitbeaker/core@44.0.5':
+    resolution: {integrity: sha512-gXFLTS0eqF/KfRCDDGdLkH2SJ8T4qHCOpDMGN1sKqchgkEhjaJFDCxEaHreac28CxUurNBj/MYHItxMQDXZ2sA==}
+    engines: {node: '>=v24.16.0'}
 
-  '@gitbeaker/requester-utils@43.8.0':
-    resolution: {integrity: sha512-d/SiJdxijc+aH5ZBQOw83XLxNSXqsBZNm5k3nPu1EHxGxK0fajXmxdMl0/vNXbKRggnIquFCxURkrQSEzfjqxQ==}
-    engines: {node: '>=18.20.0'}
+  '@gitbeaker/requester-utils@44.0.5':
+    resolution: {integrity: sha512-YIiNQHy2OnF4QyZ8UNijoZUEC8FH33SRY0kMjUvg1JZDngQ/IRD9d4k869Obt650PAQcgAV9FSzmc5xytb94JQ==}
+    engines: {node: '>=v24.16.0'}
 
-  '@gitbeaker/rest@43.8.0':
-    resolution: {integrity: sha512-xxqsNsUXaFang9b2e/NTIgqUeuUlifA2Opy1mOVqTDuJZZNIOTgUNyziwBJoleBhMC0XuvY3JNVMWthufcVjRw==}
-    engines: {node: '>=18.20.0'}
+  '@gitbeaker/rest@44.0.5':
+    resolution: {integrity: sha512-3Gfzaucb9i4TSi9HSI5Frf9Eqf512Z820vLGmSVr1eWGC2NFUWQQQMUdbNViPAl/4nCmcad9x9gQdxv0kLZ0WQ==}
+    engines: {node: '>=v24.16.0'}
 
   '@hapi/address@5.1.1':
     resolution: {integrity: sha512-A+po2d/dVoY7cYajycYI43ZbYMXukuopIsqCjh5QzsBCipDtdofHntljDlpccMjIfTy6UOkg+5KPriwYch2bXA==}
@@ -1657,13 +1661,13 @@ packages:
   '@inversifyjs/common@2.0.2':
     resolution: {integrity: sha512-k7bXb6SVHEfUarVwYW6eNVLWXUcCSJKb+ilTpJ4OL5az3eDpLbkEzlrYAEix14PvTdA+k/1RSw5DaBpvRu1GGw==}
 
-  '@inversifyjs/container@3.1.4':
-    resolution: {integrity: sha512-wpapFx60VSRFZx10BgUmyUnFeKx9AXe936S/ZfutMwmpwjLwaqdWonU5/d+uUyIkmsY+vGzSDW51mxinz5mNag==}
+  '@inversifyjs/container@3.2.0':
+    resolution: {integrity: sha512-WZFPUbPxIC7zMNkUrSTXjBr91sYhHJF6Zk3bwZ6f3TDkO4wfmMO76eluXEFgOA+5ixRJn3u2hK7lpgXW6XhinQ==}
     peerDependencies:
       reflect-metadata: ~0.2.2
 
-  '@inversifyjs/core@15.0.2':
-    resolution: {integrity: sha512-IYczXNwGtWGLU0bIIqL+PdmbyjGrL1JvAbE+BjvCsdrkMoXUy4zeLHiJP6bWydgZ4nzpyXK1v8kpOaWj2j97pQ==}
+  '@inversifyjs/core@15.1.0':
+    resolution: {integrity: sha512-aO3piH+DGqS2rUveiseTJWzsHlK++Tf9RaGbtEEM/XCGNmvxjFcCRG5gcxsBUEoGGec5xlu+oouD/ExpvoRhIQ==}
 
   '@inversifyjs/plugin@0.3.2':
     resolution: {integrity: sha512-1s3Jdnv/rtrTjN1WlfwLlNRUf5OJIaxvThIi05EkYhlxqZTsH1cfpR3INzEZyFyNTEf58eYdIvDh9J9iXiTtIg==}
@@ -3462,8 +3466,8 @@ packages:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
 
-  commander@15.0.0:
-    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+  commander@15.1.0:
+    resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
 
   commander@2.20.3:
@@ -4506,8 +4510,8 @@ packages:
   invariant@2.2.4:
     resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
 
-  inversify@8.2.4:
-    resolution: {integrity: sha512-kEIzWRoL4IyvZzo/p7c2T1Y0pxE4X7jfI+znkh44PQ6WCh3k+6HYYAMAiR2vKTzxei53qLSVo0D101fUHjR+HQ==}
+  inversify@8.3.0:
+    resolution: {integrity: sha512-ow0zbGCAjfklUjarM3vY6FE2UAwTj1fKGXo5a5HMBJ/9aKK0fZqxCu69ne2UzABfaCl/X+9F5kvV+K+jcM8UOA==}
 
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
@@ -5502,10 +5506,6 @@ packages:
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
-  picomatch-browser@2.2.6:
-    resolution: {integrity: sha512-0ypsOQt9D4e3hziV8O4elD9uN0z/jtUEfxVRtNaAAtXIyUx9m/SzlO020i8YNL2aL/E6blOvvHQcin6HZlFy/w==}
-    engines: {node: '>=8.6'}
-
   picomatch@2.3.2:
     resolution: {integrity: sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==}
     engines: {node: '>=8.6'}
@@ -5513,6 +5513,9 @@ packages:
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
+
+  picoquery@2.5.0:
+    resolution: {integrity: sha512-j1kgOFxtaCyoFCkpoYG2Oj3OdGakadO7HZ7o5CqyRazlmBekKhbDoUnNnXASE07xSY4nDImWZkrZv7toSxMi/g==}
 
   pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
@@ -5977,10 +5980,6 @@ packages:
     resolution: {integrity: sha512-KTqnxsgGiQ6ZAzZCVlJH5eOjSnvlyEgx1m8bkRJfOhmGRqfo5KLvmAlACQkrjEtOQ4B7wF9TdSLIs9O90MX9xA==}
     engines: {node: '>=16.0.0'}
 
-  qs@6.15.2:
-    resolution: {integrity: sha512-Rzq0KEyX/w/tEybncDgdkZrJgVUsUMk3xjh3t5bv3S1HTAtg+uOYt72+ZfwiQwKdysThkTBdL/rTi6HDmX9Ddw==}
-    engines: {node: '>=0.6'}
-
   qs@6.16.0:
     resolution: {integrity: sha512-h6fhOIaRrID2CbEY2fqs+7t+UXZo+MLAnU5gRIq85uFtdiUPCdsApMlHhXogKVM4HM2DVbIjGNTTYH2OcmP1vA==}
     engines: {node: '>=0.6'}
@@ -6011,8 +6010,8 @@ packages:
     resolution: {integrity: sha512-hek2mFQpPuI4E1BBKrSto+BU3e3x4xuarsbiwr3+lf7p44juvFMV0XFWQAP3xUyqXA4RrXLIoaSUGbSt056ZMw==}
     engines: {node: '>= 0.6'}
 
-  rate-limiter-flexible@8.3.0:
-    resolution: {integrity: sha512-mzwlfipDLlRinPgELqVDJetke6Snq26nL565m8nLWXIcWgosYSeNRgqwh7ZrZ4MfYs8CNfmLvR5SBVz3rISQsQ==}
+  rate-limiter-flexible@11.4.1:
+    resolution: {integrity: sha512-rT3HoDh6M+xhmmFKoqwMfIVO+Qw5GpoMZbvt9tgVLAj2H2NsHiEAtEIdZ72rKMXutQ/TntxrYc/BkzjizdrcGw==}
 
   raw-body@2.5.3:
     resolution: {integrity: sha512-s4VSOf6yN0rvbRZGxs8Om5CWj6seneMwK3oDb4lWDH0UPhWcxwOWw5+qk24bxq87szX1ydrwylIOp2uG1ojUpA==}
@@ -8099,6 +8098,8 @@ snapshots:
 
   '@babel/runtime@7.29.13': {}
 
+  '@babel/runtime@7.29.14': {}
+
   '@babel/template@7.29.7':
     dependencies:
       '@babel/code-frame': 7.29.7
@@ -9590,23 +9591,23 @@ snapshots:
 
   '@exodus/bytes@1.16.0': {}
 
-  '@gitbeaker/core@43.8.0':
+  '@gitbeaker/core@44.0.5':
     dependencies:
-      '@gitbeaker/requester-utils': 43.8.0
-      qs: 6.15.2
+      '@gitbeaker/requester-utils': 44.0.5
+      picoquery: 2.5.0
       xcase: 2.0.1
 
-  '@gitbeaker/requester-utils@43.8.0':
+  '@gitbeaker/requester-utils@44.0.5':
     dependencies:
-      picomatch-browser: 2.2.6
-      qs: 6.15.2
-      rate-limiter-flexible: 8.3.0
+      picomatch: 4.0.7
+      picoquery: 2.5.0
+      rate-limiter-flexible: 11.4.1
       xcase: 2.0.1
 
-  '@gitbeaker/rest@43.8.0':
+  '@gitbeaker/rest@44.0.5':
     dependencies:
-      '@gitbeaker/core': 43.8.0
-      '@gitbeaker/requester-utils': 43.8.0
+      '@gitbeaker/core': 44.0.5
+      '@gitbeaker/requester-utils': 44.0.5
 
   '@hapi/address@5.1.1':
     dependencies:
@@ -9626,15 +9627,15 @@ snapshots:
 
   '@inversifyjs/common@2.0.2': {}
 
-  '@inversifyjs/container@3.1.4(reflect-metadata@0.2.2)':
+  '@inversifyjs/container@3.2.0(reflect-metadata@0.2.2)':
     dependencies:
       '@inversifyjs/common': 2.0.2
-      '@inversifyjs/core': 15.0.2(reflect-metadata@0.2.2)
+      '@inversifyjs/core': 15.1.0(reflect-metadata@0.2.2)
       '@inversifyjs/plugin': 0.3.2
       '@inversifyjs/reflect-metadata-utils': 1.5.1(reflect-metadata@0.2.2)
       reflect-metadata: 0.2.2
 
-  '@inversifyjs/core@15.0.2(reflect-metadata@0.2.2)':
+  '@inversifyjs/core@15.1.0(reflect-metadata@0.2.2)':
     dependencies:
       '@inversifyjs/common': 2.0.2
       '@inversifyjs/prototype-utils': 0.2.2
@@ -10377,7 +10378,7 @@ snapshots:
 
   '@slorber/react-helmet-async@1.3.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@babel/runtime': 7.29.13
+      '@babel/runtime': 7.29.14
       invariant: 2.2.4
       prop-types: 15.8.1
       react: 19.3.1
@@ -11485,7 +11486,7 @@ snapshots:
 
   commander@11.1.0: {}
 
-  commander@15.0.0: {}
+  commander@15.1.0: {}
 
   commander@2.20.3: {}
 
@@ -12436,7 +12437,7 @@ snapshots:
 
   history@4.10.1:
     dependencies:
-      '@babel/runtime': 7.29.13
+      '@babel/runtime': 7.29.14
       loose-envify: 1.4.0
       resolve-pathname: 3.0.0
       tiny-invariant: 1.3.3
@@ -12631,11 +12632,11 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
 
-  inversify@8.2.4(reflect-metadata@0.2.2):
+  inversify@8.3.0(reflect-metadata@0.2.2):
     dependencies:
       '@inversifyjs/common': 2.0.2
-      '@inversifyjs/container': 3.1.4(reflect-metadata@0.2.2)
-      '@inversifyjs/core': 15.0.2(reflect-metadata@0.2.2)
+      '@inversifyjs/container': 3.2.0(reflect-metadata@0.2.2)
+      '@inversifyjs/core': 15.1.0(reflect-metadata@0.2.2)
     transitivePeerDependencies:
       - reflect-metadata
 
@@ -13967,11 +13968,11 @@ snapshots:
 
   picocolors@1.1.1: {}
 
-  picomatch-browser@2.2.6: {}
-
   picomatch@2.3.2: {}
 
   picomatch@4.0.7: {}
+
+  picoquery@2.5.0: {}
 
   pirates@4.0.7: {}
 
@@ -14494,10 +14495,6 @@ snapshots:
 
   pvutils@1.1.5: {}
 
-  qs@6.15.2:
-    dependencies:
-      side-channel: 1.1.1
-
   qs@6.16.0:
     dependencies:
       es-define-property: 1.0.1
@@ -14520,7 +14517,7 @@ snapshots:
 
   range-parser@1.3.0: {}
 
-  rate-limiter-flexible@8.3.0: {}
+  rate-limiter-flexible@11.4.1: {}
 
   raw-body@2.5.3:
     dependencies:

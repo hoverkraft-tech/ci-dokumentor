@@ -42,8 +42,8 @@
     }
   },
   "dependencies": {
-    "commander": "^15.0.0",
-    "inversify": "^8.2.4",
+    "commander": "^15.1.0",
+    "inversify": "^8.3.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
