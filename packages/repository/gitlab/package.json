@@ -18,7 +18,7 @@
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
     "@ci-dokumentor/repository-git": "workspace:*",
-    "@gitbeaker/rest": "^43.8.0",
-    "inversify": "^8.2.4"
+    "@gitbeaker/rest": "^44.0.5",
+    "inversify": "^8.3.0"
   }
 }

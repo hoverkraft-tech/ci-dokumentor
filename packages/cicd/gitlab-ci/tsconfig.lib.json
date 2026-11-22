@@ -6,6 +6,7 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": true,
     "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],
