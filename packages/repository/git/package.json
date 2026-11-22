@@ -18,7 +18,7 @@
   "dependencies": {
     "@ci-dokumentor/core": "workspace:*",
     "git-url-parse": "^16.1.0",
-    "inversify": "^8.2.4",
+    "inversify": "^8.3.0",
     "simple-git": "^4.0.2"
   }
 }
