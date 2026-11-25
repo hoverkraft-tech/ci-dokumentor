@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   prepare:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/prepare-package-release.yml@98d91b1cc347efc64cd5fb20bc0ebc076acad114 # 3.1.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/prepare-package-release.yml@191d7230d57982bfc11d57f68b005f386a6d7fbf # 3.1.1
     permissions:
       actions: write
       contents: write
@@ -70,7 +70,7 @@ jobs:
 
   release:
     needs: [prepare, validate, promote]
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@98d91b1cc347efc64cd5fb20bc0ebc076acad114 # 3.1.0
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/release.yml@191d7230d57982bfc11d57f68b005f386a6d7fbf # 3.1.1
     permissions:
       actions: read
       contents: write
