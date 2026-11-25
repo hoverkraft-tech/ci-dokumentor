@@ -165,6 +165,11 @@ changes skips publication. Main CI does not publish npm packages.
 The internal [release workflow](https://github.com/hoverkraft-tech/ci-dokumentor/blob/main/.github/workflows/release.yml)
 uses the original shared CI job results to verify candidate image promotion.
 
+Release summaries use the organization's `CHANGELOG_SUMMARY` secret, which
+contains the complete provider configuration and credential as JSON. The workflow
+passes this secret directly to the reusable release workflow's `changelog-summary`
+secret.
+
 ## Documentation Deployment
 
 ### Auto-Generated Documentation
