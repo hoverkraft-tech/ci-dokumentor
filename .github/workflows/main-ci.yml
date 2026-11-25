@@ -124,6 +124,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@ecbe8c0907c86baa1d20036eca019a780bf20123 # fix/artifact-discovery (pending release)
+        uses: hoverkraft-tech/ci-github-publish/actions/deploy/github-pages@482833700bdec1d0c072ca18372b34f33a0ebfd4 # fix/artifact-discovery (pending release)
         with:
           build-path: packages/docs/build
