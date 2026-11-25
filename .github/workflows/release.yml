@@ -80,4 +80,4 @@ jobs:
       packages: ${{ needs.prepare.outputs.packages }}
       package-tarball-artifact-id: ${{ needs.validate.outputs.package-tarball-artifact-id }}
     secrets:
-      changelog-summary: ${{ format('{{"llmAuth":{0},"llmProvider":"openai"}}', toJSON(secrets.OPENAI_API_KEY)) }}
+      changelog-summary: ${{ secrets.CHANGELOG_SUMMARY }}
