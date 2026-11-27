@@ -55,7 +55,7 @@ jobs:
 
   promote:
     needs: validate
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-promote-images.yml@988ccc2b85dec5822e801d7bc0622cad7cc94870 # 4.1.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-promote-images.yml@b055d6ce0f3a5e223615ad494d88d92e17af11e5 # 4.2.0
     permissions:
       actions: read
       attestations: read
