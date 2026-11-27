@@ -60,7 +60,7 @@ jobs:
 
   docker:
     needs: [linter, nodejs]
-    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@988ccc2b85dec5822e801d7bc0622cad7cc94870 # 4.1.0
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/docker-build-images.yml@a5dc1ea7c1f4c2dffc3267c5be7304d01284f2ec # 4.2.1
     permissions:
       attestations: write
       contents: read
