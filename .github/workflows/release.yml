@@ -48,6 +48,7 @@ jobs:
       id-token: write
       statuses: write
       issues: write
+      code-quality: write
 
     with:
       sign-images: true

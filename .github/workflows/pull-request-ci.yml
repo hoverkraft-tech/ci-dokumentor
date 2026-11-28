@@ -25,5 +25,6 @@ jobs:
       pull-requests: write
       security-events: write
       statuses: write
+      code-quality: write
     with:
       sign-images: false

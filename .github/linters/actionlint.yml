@@ -1,0 +1,16 @@
+# FIXME: Remove this scoped exception when Actionlint supports code-quality.
+# https://github.com/rhysd/actionlint/pull/674
+
+paths:
+  .github/workflows/__shared-ci.yml:
+    ignore:
+      - ^unknown permission scope "code-quality"\.
+  .github/workflows/main-ci.yml:
+    ignore:
+      - ^unknown permission scope "code-quality"\.
+  .github/workflows/pull-request-ci.yml:
+    ignore:
+      - ^unknown permission scope "code-quality"\.
+  .github/workflows/release.yml:
+    ignore:
+      - ^unknown permission scope "code-quality"\.
