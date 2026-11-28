@@ -38,6 +38,7 @@ jobs:
       pull-requests: write
       security-events: write
       statuses: write
+      code-quality: write
     with:
       sign-images: true
 
@@ -62,7 +63,7 @@ jobs:
           path: /
 
       - id: generate-readme
-        uses: $/
+        uses: $/.
         with:
           ci-dokumentor-version: ${{ needs.ci.outputs.image-tag }}
           source: action.yml
@@ -94,7 +95,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - id: generate-docs
-        uses: $/
+        uses: $/.
         with:
           ci-dokumentor-version: ${{ needs.ci.outputs.image-tag }}
           source: action.yml

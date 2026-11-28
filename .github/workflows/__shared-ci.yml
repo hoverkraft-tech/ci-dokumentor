@@ -29,7 +29,7 @@ permissions: {}
 
 jobs:
   linter:
-    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@af0bdd6313bd49aaf4a8a7f0de005fb0db856b03 # 4.3.3
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@57ec4a8bf0ab9ea52beea725b5e59895ed39f4f2 # PR #683 (unreleased)
     permissions:
       actions: read
       contents: read
@@ -40,23 +40,20 @@ jobs:
       statuses: write
 
   nodejs:
-    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@191d7230d57982bfc11d57f68b005f386a6d7fbf # 3.1.1
+    uses: hoverkraft-tech/ci-github-nodejs/.github/workflows/continuous-integration.yml@277d184953d7a515fe4271eb0532eebc53d6e214 # PR #624 (unreleased)
     permissions:
       contents: read
       id-token: write
       packages: read
       pull-requests: write
       security-events: write
+      actions: read
     with:
       package: >-
         {"tests": "test \"$(ci-dokumentor --version)\" = \"$PACKAGE_VERSION\"\nci-dokumentor --help\ncd \"$GITHUB_WORKSPACE\"\nci-dokumentor generate --source
         action.yml --destination \"$RUNNER_TEMP/action.md\" --repository git --cicd github-actions --dry-run\n"}
-      build: |
-        {
-          "commands": ["build"],
-          "artifact": ["packages/docs/build", "packages/cli/dist"]
-        }
-      test: '{ "coverage": "codecov" }'
+      build: |-
+        {"commands":["build"],"artifact":["packages/docs/build","packages/**/dist"]}
 
   docker:
     needs: [linter, nodejs]
@@ -95,3 +92,24 @@ jobs:
       packages: read
     with:
       built-images: ${{ needs.docker.outputs.built-images }}
+
+  reports:
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/ci-reports.yml@57ec4a8bf0ab9ea52beea725b5e59895ed39f4f2 # PR #683 (unreleased)
+    if: ${{ !cancelled() }}
+    needs:
+      - linter
+      - nodejs
+      - docker
+      - test-docker
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+      code-quality: write
+      id-token: write
+      security-events: write
+    with:
+      job-results: ${{ toJSON(needs) }}
+      test-coverage-reporters: |
+        auto
+        codecov

@@ -74,7 +74,22 @@ graph TD
 - **Build** - nx build all packages
 - **Test** - Comprehensive test suite with coverage
 - **Security** - Dependency vulnerability scanning
-- **Coverage Report** - Codecov integration
+- **Native reports** - One JUnit report and one LCOV dataset across all Vitest workspace projects
+
+#### Consolidated CI Reports
+
+The terminal `reports` job waits for repository lint, Node.js checks, the image
+build, and image tests. It publishes one summary and one updated pull request
+comment, with expandable details. Lint and test findings use GitHub annotations.
+Coverage uses GitHub Code Quality when available, otherwise the comment, and is
+also submitted to Codecov.
+
+`pnpm test:ci` runs the root Vitest projects configuration so workspace coverage
+is merged by Vitest. Compiled output and type declarations are excluded. It
+writes JUnit and LCOV into `CI_REPORTS_DIR`, supplied by the test action, or
+`.reports/` locally. `CI_TEST_COVERAGE=false` disables instrumentation while
+retaining detailed test results. `pnpm lint:ci` writes Biome SARIF into the same
+fresh report directory. The actions validate these outputs before collection.
 
 #### Package Testing Stage
 
